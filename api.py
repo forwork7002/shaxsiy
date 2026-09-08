@@ -489,7 +489,15 @@ def ai():
 
 @app.get("/")
 def index():
-    r = send_from_directory(STATIC_DIR, "index.html")
+    """index.html serverdan berilganda DASH_SERVER bayrog'i qo'shiladi — shunda ilova
+    localStorage bilan cheklanmay, serverga sinxronlaydi. GitHub Pages xuddi shu faylni
+    o'zgartirmasdan beradi, ya'ni u yerda ilova avvalgidek faqat lokal ishlaydi."""
+    try:
+        html = (STATIC_DIR / "index.html").read_text(encoding="utf-8")
+        html = html.replace("</head>", "<script>window.DASH_SERVER=true;</script>\n</head>", 1)
+        r = Response(html, mimetype="text/html")
+    except OSError:
+        r = send_from_directory(STATIC_DIR, "index.html")
     r.headers["Cache-Control"] = "no-cache"
     return r
 
