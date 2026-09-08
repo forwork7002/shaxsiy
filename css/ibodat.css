@@ -132,3 +132,111 @@
   font-size: 12.5px; color: var(--text2); }
 .ib-per-note .ic { color: var(--warning); flex: none; }
 .ib-per-note strong { color: var(--text); font-weight: 700; }
+
+/* ===================================================================== */
+/* QAZO — debt ledger                                                     */
+/* ===================================================================== */
+
+/* reminder strip: the debt follows you across every Ibodat tab */
+.ib-qz-remind { display: flex; align-items: center; gap: 10px; width: 100%; margin-bottom: 12px; padding: 11px 12px;
+  border-radius: 16px; border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent); text-align: left;
+  background: linear-gradient(120deg, color-mix(in srgb, var(--warning) 15%, transparent), color-mix(in srgb, var(--warning) 5%, transparent)), var(--card-bg);
+  backdrop-filter: blur(18px) saturate(1.2); -webkit-backdrop-filter: blur(18px) saturate(1.2);
+  color: var(--text); transition: border-color .2s, transform .1s; }
+.ib-qz-remind:active { transform: scale(.99); }
+.ib-qz-remind.met { border-color: color-mix(in srgb, var(--success) 30%, transparent);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--success) 14%, transparent), color-mix(in srgb, var(--success) 4%, transparent)), var(--card-bg); }
+.ib-qz-rdot { display: grid; place-items: center; width: 30px; height: 30px; flex: none; border-radius: 10px;
+  background: color-mix(in srgb, var(--warning) 20%, transparent); color: var(--warning); }
+.ib-qz-remind.met .ib-qz-rdot { background: color-mix(in srgb, var(--success) 20%, transparent); color: var(--success); }
+.ib-qz-rtext { flex: 1; min-width: 0; font-size: 12.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.ib-qz-rgo { display: inline-flex; align-items: center; gap: 2px; flex: none; font-size: 11px; font-weight: 700; color: var(--text3); }
+
+/* hero */
+.ib-qz-hero { text-align: left; }
+.ib-qz-top { display: flex; align-items: center; gap: 14px; }
+.ib-qz-main { flex: 1; min-width: 0; }
+.ib-qz-num { font-size: 46px; font-weight: 800; line-height: .95; letter-spacing: -.045em; color: var(--text);
+  font-variant-numeric: tabular-nums; margin-top: 4px; }
+.ib-qz-unit { font-size: 12px; font-weight: 600; color: var(--text3); margin-top: 4px; }
+.ib-qz-sub { font-size: 12px; font-weight: 700; color: var(--warning); margin-top: 8px; }
+.ib-qz-dn { font-size: 20px; font-weight: 800; letter-spacing: -.03em; color: var(--text); line-height: 1; }
+.ib-qz-dl { display: block; font-size: 9.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); margin-top: 3px; }
+
+.ib-qz-legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 4px 10px; margin-top: 14px;
+  padding-top: 12px; border-top: 1px solid var(--line); }
+.ib-qz-lg { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text3); font-weight: 600; }
+.ib-qz-lg i { width: 7px; height: 7px; border-radius: 2px; flex: none; }
+.ib-qz-lg b { margin-left: auto; color: var(--text); font-size: 12px; font-variant-numeric: tabular-nums; }
+
+.ib-qz-today { margin-top: 14px; padding: 11px 12px; border-radius: 14px; background: var(--glass); border: 1px solid var(--line); }
+.ib-qz-today.met { border-color: color-mix(in srgb, var(--success) 28%, transparent); }
+.ib-qz-tn { font-size: 14px; font-weight: 800; color: var(--text); }
+.ib-qz-today .bar-fill { background: linear-gradient(90deg, var(--warning), var(--success)); }
+.ib-qz-today.met .bar-fill { background: var(--success); }
+
+/* debt-free state */
+.ib-qz-hero.zero { text-align: center; padding-top: 26px; padding-bottom: 26px; }
+.ib-qz-free { display: grid; place-items: center; width: 62px; height: 62px; margin: 0 auto 12px; border-radius: 50%;
+  background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--success) 6%, transparent); }
+.ib-qz-free-t { font-family: var(--font-display); font-size: 19px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.ib-qz-freestat { margin-top: 14px; font-size: 22px; font-weight: 800; color: var(--success); }
+.ib-qz-freestat span { font-size: 11px; font-weight: 600; color: var(--text3); letter-spacing: .06em; text-transform: uppercase; }
+
+/* repayment rows */
+.ib-qz-row { display: flex; align-items: center; gap: 9px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.ib-qz-row:last-of-type { border-bottom: 0; }
+.ib-qz-row.clear { opacity: .45; }
+.ib-qz-name { width: 68px; flex: none; font-size: 12.5px; font-weight: 700; color: var(--text); }
+.ib-qz-bar { flex: 1; min-width: 24px; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.ib-qz-bar i { display: block; height: 100%; border-radius: inherit; transition: width .5s var(--ease-out); }
+.ib-qz-owed { width: 46px; flex: none; text-align: right; font-size: 12.5px; font-weight: 700; color: var(--text2); font-variant-numeric: tabular-nums; }
+.ib-qz-step { display: flex; align-items: center; gap: 2px; flex: none; }
+.ib-qz-step b { min-width: 20px; text-align: center; font-size: 13px; font-weight: 800; color: var(--text3); font-variant-numeric: tabular-nums; }
+.ib-qz-step b.on { color: var(--success); }
+.ib-qz-b { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 9px; border: 1px solid var(--line2);
+  background: var(--glass); color: var(--text3); transition: all .15s; }
+.ib-qz-b.add { border-color: color-mix(in srgb, var(--success) 32%, transparent); color: var(--success);
+  background: color-mix(in srgb, var(--success) 10%, transparent); }
+.ib-qz-b:active { transform: scale(.92); }
+.ib-qz-b:disabled { opacity: .3; }
+
+/* projection */
+.ib-qz-eta { margin-top: 12px; padding: 10px 12px; border-radius: 13px; border: 1px dashed var(--line3); background: var(--glass); }
+
+/* per-prayer precision */
+.ib-qz-per { padding: 9px 0; border-bottom: 1px solid var(--line); }
+.ib-qz-per:last-child { border-bottom: 0; }
+.ib-qz-pn { font-size: 12.5px; font-weight: 700; color: var(--text); }
+.ib-qz-per .bar { margin: 6px 0 5px; }
+.ib-qz-pmeta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 10.5px; font-variant-numeric: tabular-nums; }
+
+/* backlog setup */
+.ib-qz-ins { display: grid; grid-template-columns: repeat(auto-fit, minmax(94px, 1fr)); gap: 8px; }
+.ib-qz-in { display: flex; flex-direction: column; gap: 4px; }
+.ib-qz-in span { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); }
+.ib-qz-in input { text-align: center; }
+.ib-qz-target { display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+.ib-qz-target input { width: 74px; flex: none; text-align: center; }
+
+/* ===================================================================== */
+/* prayer matrix — 5 waqts × 8 weeks                                      */
+/* ===================================================================== */
+.ib-mx { display: flex; flex-direction: column; gap: 3px; }
+.ib-mx-row { display: flex; align-items: center; gap: 8px; }
+.ib-mx-name { width: 62px; flex: none; font-size: 10.5px; font-weight: 700; color: var(--text3);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ib-mx-cells { display: grid; grid-template-columns: repeat(56, 1fr); gap: 1.5px; flex: 1; min-width: 0; }
+.ib-mx-cells i { height: 14px; border-radius: 2px; background: var(--line); }
+.ib-mx-cells i.s-jamaat { background: var(--success); box-shadow: 0 0 3px color-mix(in srgb, var(--success) 55%, transparent); }
+.ib-mx-cells i.s-alone  { background: var(--info); }
+.ib-mx-cells i.s-qaza   { background: var(--warning); }
+.ib-mx-cells i.s-missed { background: var(--danger-text); }
+.ib-mx-axis { display: flex; justify-content: space-between; margin: 6px 0 0 68px; font-size: 10px; color: var(--text3); font-weight: 600; }
+.ib-mx-lg.s-jamaat { background: var(--success); }
+.ib-mx-lg.s-alone  { background: var(--info); }
+.ib-mx-lg.s-qaza   { background: var(--warning); }
+.ib-mx-lg.s-missed { background: var(--danger-text); }
+.ib-qz-free.fresh { background: color-mix(in srgb, var(--warning) 15%, transparent); color: var(--warning);
+  box-shadow: 0 0 0 8px color-mix(in srgb, var(--warning) 6%, transparent); }

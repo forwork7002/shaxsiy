@@ -18,10 +18,8 @@
       'ib.per.none': "Hali yetarli qayd yo'q", 'ib.per.ontime': "o'z vaqtida",
       'ib.st.jamaat': 'Jamoat', 'ib.st.alone': 'Yakka', 'ib.st.qaza': 'Qazo', 'ib.st.missed': "O'tkazib",
       'ib.qazaHint': 'qazo?',
-      'ib.qazaLedger': 'Qazo daftari', 'ib.debt': 'qarz', 'ib.missed': "O'tkazilgan", 'ib.late': 'Kech (qazo)', 'ib.paid': "O'qilgan qazo",
-      'ib.payQaza': "+1 qazo o'qidim", 'ib.noDebt': "Qazo qarzi yo'q — alhamdulillah", 'ib.paidToast': 'Qazo qayd etildi', 'ib.unpaidToast': 'Qazo qaydi olib tashlandi',
       'ib.last30': "So'nggi 30 kun", 'ib.heatJamaat': 'Jamoat ulushi (kunlik)', 'ib.streak5': '5 vaqt seriyasi', 'ib.jamaat': 'Jamoat', 'ib.ontime': "O'z vaqtida",
-      'ib.tasbih': 'Tasbeh', 'ib.rounds': '{n} davra', 'ib.unpay': '−1 qazo', 'ib.prevDay': 'Oldingi kun', 'ib.nextDay': 'Keyingi kun', 'ib.tapHint': 'Sanash uchun bosing', 'ib.custom': 'Boshqa…', 'ib.customPh': 'Zikr nomi',
+      'ib.tasbih': 'Tasbeh', 'ib.rounds': '{n} davra', 'ib.prevDay': 'Oldingi kun', 'ib.nextDay': 'Keyingi kun', 'ib.tapHint': 'Sanash uchun bosing', 'ib.custom': 'Boshqa…', 'ib.customPh': 'Zikr nomi',
       'ib.saved': 'Saqlandi: {n}', 'ib.completed': '{name} — {n} tugallandi', 'ib.reset': 'Nol', 'ib.nothingToSave': 'Avval sanang',
       'ib.todayTotal': 'Bugun', 'ib.week7': '7 kun', 'ib.dhikrStreak': 'Seriya', 'ib.sessions': 'Bugungi seanslar', 'ib.noSessions': "Bugun hali saqlangan zikr yo'q", 'ib.sessionDeleted': "Seans o'chirildi",
       'ib.d.subhanallah': 'Subhanalloh', 'ib.d.alhamdulillah': 'Alhamdulillah', 'ib.d.allahuakbar': 'Allohu akbar', 'ib.d.istighfar': "Istig'for", 'ib.d.salavot': 'Salavot',
@@ -49,10 +47,8 @@
       'ib.per.none': 'Ҳали етарли қайд йўқ', 'ib.per.ontime': 'ўз вақтида',
       'ib.st.jamaat': 'Жамоат', 'ib.st.alone': 'Якка', 'ib.st.qaza': 'Қазо', 'ib.st.missed': 'Ўтказиб',
       'ib.qazaHint': 'қазо?',
-      'ib.qazaLedger': 'Қазо дафтари', 'ib.debt': 'қарз', 'ib.missed': 'Ўтказилган', 'ib.late': 'Кеч (қазо)', 'ib.paid': 'Ўқилган қазо',
-      'ib.payQaza': '+1 қазо ўқидим', 'ib.noDebt': 'Қазо қарзи йўқ — алҳамдулиллаҳ', 'ib.paidToast': 'Қазо қайд этилди', 'ib.unpaidToast': 'Қазо қайди олиб ташланди',
       'ib.last30': 'Сўнгги 30 кун', 'ib.heatJamaat': 'Жамоат улуши (кунлик)', 'ib.streak5': '5 вақт серияси', 'ib.jamaat': 'Жамоат', 'ib.ontime': 'Ўз вақтида',
-      'ib.tasbih': 'Тасбеҳ', 'ib.rounds': '{n} давра', 'ib.unpay': '−1 қазо', 'ib.prevDay': 'Олдинги кун', 'ib.nextDay': 'Кейинги кун', 'ib.tapHint': 'Санаш учун босинг', 'ib.custom': 'Бошқа…', 'ib.customPh': 'Зикр номи',
+      'ib.tasbih': 'Тасбеҳ', 'ib.rounds': '{n} давра', 'ib.prevDay': 'Олдинги кун', 'ib.nextDay': 'Кейинги кун', 'ib.tapHint': 'Санаш учун босинг', 'ib.custom': 'Бошқа…', 'ib.customPh': 'Зикр номи',
       'ib.saved': 'Сақланди: {n}', 'ib.completed': '{name} — {n} тугалланди', 'ib.reset': 'Нол', 'ib.nothingToSave': 'Аввал сананг',
       'ib.todayTotal': 'Бугун', 'ib.week7': '7 кун', 'ib.dhikrStreak': 'Серия', 'ib.sessions': 'Бугунги сеанслар', 'ib.noSessions': 'Бугун ҳали сақланган зикр йўқ', 'ib.sessionDeleted': 'Сеанс ўчирилди',
       'ib.d.subhanallah': 'Субҳаналлоҳ', 'ib.d.alhamdulillah': 'Алҳамдулиллаҳ', 'ib.d.allahuakbar': 'Аллоҳу акбар', 'ib.d.istighfar': 'Истиғфор', 'ib.d.salavot': 'Салавот',
@@ -80,10 +76,8 @@
       'ib.per.none': 'Пока недостаточно записей', 'ib.per.ontime': 'вовремя',
       'ib.st.jamaat': 'Джамаат', 'ib.st.alone': 'Один', 'ib.st.qaza': 'Каза', 'ib.st.missed': 'Пропущен',
       'ib.qazaHint': 'каза?',
-      'ib.qazaLedger': 'Учёт каза', 'ib.debt': 'долг', 'ib.missed': 'Пропущено', 'ib.late': 'С опозданием', 'ib.paid': 'Восполнено',
-      'ib.payQaza': '+1 каза восполнено', 'ib.noDebt': 'Долга нет — альхамдулиллях', 'ib.paidToast': 'Каза записана', 'ib.unpaidToast': 'Запись каза убрана',
       'ib.last30': 'Последние 30 дней', 'ib.heatJamaat': 'Доля джамаата (по дням)', 'ib.streak5': 'Серия 5/5', 'ib.jamaat': 'Джамаат', 'ib.ontime': 'Вовремя',
-      'ib.tasbih': 'Тасбих', 'ib.rounds': 'круг ×{n}', 'ib.unpay': '−1 каза', 'ib.prevDay': 'Предыдущий день', 'ib.nextDay': 'Следующий день', 'ib.tapHint': 'Нажмите, чтобы считать', 'ib.custom': 'Другой…', 'ib.customPh': 'Название зикра',
+      'ib.tasbih': 'Тасбих', 'ib.rounds': 'круг ×{n}', 'ib.prevDay': 'Предыдущий день', 'ib.nextDay': 'Следующий день', 'ib.tapHint': 'Нажмите, чтобы считать', 'ib.custom': 'Другой…', 'ib.customPh': 'Название зикра',
       'ib.saved': 'Сохранено: {n}', 'ib.completed': '{name} — {n} выполнено', 'ib.reset': 'Сброс', 'ib.nothingToSave': 'Сначала посчитайте',
       'ib.todayTotal': 'Сегодня', 'ib.week7': '7 дней', 'ib.dhikrStreak': 'Серия', 'ib.sessions': 'Сегодняшние сеансы', 'ib.noSessions': 'Сегодня зикр ещё не сохранён', 'ib.sessionDeleted': 'Сеанс удалён',
       'ib.d.subhanallah': 'Субханаллах', 'ib.d.alhamdulillah': 'Альхамдулиллях', 'ib.d.allahuakbar': 'Аллаху акбар', 'ib.d.istighfar': 'Истигфар', 'ib.d.salavot': 'Салават',
@@ -102,13 +96,101 @@
     },
   });
 
+  /* Qazo — a full per-prayer debt ledger with its own tab. */
+  D.i18n.add({
+    uz: {
+      'ib.sub.qaza': 'Qazo',
+      'qz.title': 'Qazo daftari', 'qz.debt': 'namoz qarzi', 'qz.debtShort': 'Qazo qarzi',
+      'qz.daysWorth': '≈ {n} kunlik namoz', 'qz.free': "Qazo qarzi yo'q", 'qz.freeSub': 'Alhamdulillah — daftar toza',
+      'qz.todayDone': 'Bugun o‘qildi', 'qz.ofTarget': '{n} / {t}', 'qz.targetMet': 'Bugungi reja bajarildi',
+      'qz.pay': 'Qazo o‘qish', 'qz.paySub': 'O‘qigan qazoyingizni shu yerda belgilang',
+      'qz.owedN': '{n} ta qarz', 'qz.noneOwed': 'qarz yo‘q', 'qz.oneDay': 'Bir kunlik (5 vaqt)',
+      'qz.added': '{p} qazosi qayd etildi', 'qz.removed': 'Qayd olib tashlandi', 'qz.nothingOwed': 'Bu namozda qarz yo‘q',
+      'qz.dayAdded': 'Bir kunlik qazo qayd etildi',
+      'qz.trend': 'Qarz kamayishi', 'qz.trendSub': 'so‘nggi {n} kun', 'qz.was': '{n} kun oldin', 'qz.now': 'Hozir', 'qz.change': 'O‘zgarish',
+      'qz.trendDown': 'Qarz kamayyapti — davom eting', 'qz.trendUp': 'Qarz o‘syapti', 'qz.trendFlat': 'Qarz o‘zgarmadi',
+      'qz.pace': 'To‘lov sur‘ati', 'qz.paceSub': 'kunlik qazo, so‘nggi 30 kun',
+      'qz.p7': '7 kun', 'qz.p30': '30 kun', 'qz.avg': 'Kuniga', 'qz.streak': 'Seriya',
+      'qz.eta': 'Tugash muddati', 'qz.etaAt': '{d} ga tugaydi', 'qz.etaIn': '{n} kun qoldi', 'qz.etaYears': '~{n} yil',
+      'qz.etaNone': 'Hali sur‘at yo‘q — bugundan boshlang', 'qz.etaTarget': 'Kuniga {t} tadan — {d}',
+      'qz.per': 'Namozlar kesimida', 'qz.perSub': 'to‘langan / jami', 'qz.owed': 'Qarz', 'qz.paidAll': 'To‘langan', 'qz.totalAll': 'Jami',
+      'qz.setup': 'Boshlang‘ich qarz', 'qz.setupSub': 'Kuzatuvdan oldingi qazolaringiz sonini kiriting',
+      'qz.byYears': 'Yillar bo‘yicha hisoblash', 'qz.yearsQ': 'Necha yil namoz qazo bo‘lgan?', 'qz.yearsPh': 'masalan: 3',
+      'qz.yearsSet': '{y} yil = har bir namozdan {n} ta', 'qz.target': 'Kunlik reja', 'qz.targetHint': 'Kuniga nechta qazo o‘qiysiz',
+      'qz.reset': 'Daftarni tozalash', 'qz.resetQ': 'Butun qazo daftari o‘chiriladi. Davom etamizmi?', 'qz.resetDone': 'Qazo daftari tozalandi',
+      'qz.logged': 'Qaydlardan', 'qz.baseLabel': 'Boshlang‘ich',
+      'qz.remind': 'Qazo: {n} ta · bugun {d}/{t}', 'qz.remindGo': 'Ochish', 'qz.remindDone': 'Qazo: {n} · bugungi reja bajarildi',
+      'qz.calendar': 'To‘lov kalendari', 'qz.calSub': 'so‘nggi 12 hafta · kuniga o‘qilgan qazo',
+      'qz.matrix': 'Namoz matritsasi', 'qz.matrixSub': 'so‘nggi 8 hafta · har bir vaqt alohida',
+      'qz.mxNone': 'Hali qayd yo‘q — «Qayd» bo‘limidan boshlang',
+      'qz.q1': 'Bugun', 'qz.hist': 'Tarix',
+      'qz.start': 'Qazo daftari bo‘sh', 'qz.startSub': 'Quyida boshlang‘ich qarzingizni kiriting — keyin har kuni belgilab borasiz',
+    },
+    uzk: {
+      'ib.sub.qaza': 'Қазо',
+      'qz.title': 'Қазо дафтари', 'qz.debt': 'намоз қарзи', 'qz.debtShort': 'Қазо қарзи',
+      'qz.daysWorth': '≈ {n} кунлик намоз', 'qz.free': 'Қазо қарзи йўқ', 'qz.freeSub': 'Алҳамдулиллаҳ — дафтар тоза',
+      'qz.todayDone': 'Бугун ўқилди', 'qz.ofTarget': '{n} / {t}', 'qz.targetMet': 'Бугунги режа бажарилди',
+      'qz.pay': 'Қазо ўқиш', 'qz.paySub': 'Ўқиган қазойингизни шу ерда белгиланг',
+      'qz.owedN': '{n} та қарз', 'qz.noneOwed': 'қарз йўқ', 'qz.oneDay': 'Бир кунлик (5 вақт)',
+      'qz.added': '{p} қазоси қайд этилди', 'qz.removed': 'Қайд олиб ташланди', 'qz.nothingOwed': 'Бу намозда қарз йўқ',
+      'qz.dayAdded': 'Бир кунлик қазо қайд этилди',
+      'qz.trend': 'Қарз камайиши', 'qz.trendSub': 'сўнгги {n} кун', 'qz.was': '{n} кун олдин', 'qz.now': 'Ҳозир', 'qz.change': 'Ўзгариш',
+      'qz.trendDown': 'Қарз камаяпти — давом этинг', 'qz.trendUp': 'Қарз ўсяпти', 'qz.trendFlat': 'Қарз ўзгармади',
+      'qz.pace': 'Тўлов суръати', 'qz.paceSub': 'кунлик қазо, сўнгги 30 кун',
+      'qz.p7': '7 кун', 'qz.p30': '30 кун', 'qz.avg': 'Кунига', 'qz.streak': 'Серия',
+      'qz.eta': 'Тугаш муддати', 'qz.etaAt': '{d} га тугайди', 'qz.etaIn': '{n} кун қолди', 'qz.etaYears': '~{n} йил',
+      'qz.etaNone': 'Ҳали суръат йўқ — бугундан бошланг', 'qz.etaTarget': 'Кунига {t} тадан — {d}',
+      'qz.per': 'Намозлар кесимида', 'qz.perSub': 'тўланган / жами', 'qz.owed': 'Қарз', 'qz.paidAll': 'Тўланган', 'qz.totalAll': 'Жами',
+      'qz.setup': 'Бошланғич қарз', 'qz.setupSub': 'Кузатувдан олдинги қазоларингиз сонини киритинг',
+      'qz.byYears': 'Йиллар бўйича ҳисоблаш', 'qz.yearsQ': 'Неча йил намоз қазо бўлган?', 'qz.yearsPh': 'масалан: 3',
+      'qz.yearsSet': '{y} йил = ҳар бир намоздан {n} та', 'qz.target': 'Кунлик режа', 'qz.targetHint': 'Кунига нечта қазо ўқийсиз',
+      'qz.reset': 'Дафтарни тозалаш', 'qz.resetQ': 'Бутун қазо дафтари ўчирилади. Давом этамизми?', 'qz.resetDone': 'Қазо дафтари тозаланди',
+      'qz.logged': 'Қайдлардан', 'qz.baseLabel': 'Бошланғич',
+      'qz.remind': 'Қазо: {n} та · бугун {d}/{t}', 'qz.remindGo': 'Очиш', 'qz.remindDone': 'Қазо: {n} · бугунги режа бажарилди',
+      'qz.calendar': 'Тўлов календари', 'qz.calSub': 'сўнгги 12 ҳафта · кунига ўқилган қазо',
+      'qz.matrix': 'Намоз матрицаси', 'qz.matrixSub': 'сўнгги 8 ҳафта · ҳар бир вақт алоҳида',
+      'qz.mxNone': 'Ҳали қайд йўқ — «Қайд» бўлимидан бошланг',
+      'qz.q1': 'Бугун', 'qz.hist': 'Тарих',
+      'qz.start': 'Қазо дафтари бўш', 'qz.startSub': 'Қуйида бошланғич қарзингизни киритинг — кейин ҳар куни белгилаб борасиз',
+    },
+    ru: {
+      'ib.sub.qaza': 'Каза',
+      'qz.title': 'Учёт каза', 'qz.debt': 'намазов долга', 'qz.debtShort': 'Долг каза',
+      'qz.daysWorth': '≈ {n} дней намазов', 'qz.free': 'Долга каза нет', 'qz.freeSub': 'Альхамдулиллях — учёт чист',
+      'qz.todayDone': 'Восполнено сегодня', 'qz.ofTarget': '{n} / {t}', 'qz.targetMet': 'План на сегодня выполнен',
+      'qz.pay': 'Восполнение каза', 'qz.paySub': 'Отмечайте здесь восполненные намазы',
+      'qz.owedN': 'долг {n}', 'qz.noneOwed': 'долга нет', 'qz.oneDay': 'Целый день (5 намазов)',
+      'qz.added': '{p} — каза записана', 'qz.removed': 'Запись убрана', 'qz.nothingOwed': 'По этому намазу долга нет',
+      'qz.dayAdded': 'Записан день каза',
+      'qz.trend': 'Снижение долга', 'qz.trendSub': 'последние {n} дн.', 'qz.was': '{n} дн. назад', 'qz.now': 'Сейчас', 'qz.change': 'Изменение',
+      'qz.trendDown': 'Долг снижается — продолжайте', 'qz.trendUp': 'Долг растёт', 'qz.trendFlat': 'Долг без изменений',
+      'qz.pace': 'Темп восполнения', 'qz.paceSub': 'каза в день, последние 30 дн.',
+      'qz.p7': '7 дней', 'qz.p30': '30 дней', 'qz.avg': 'В день', 'qz.streak': 'Серия',
+      'qz.eta': 'Срок завершения', 'qz.etaAt': 'завершение {d}', 'qz.etaIn': 'осталось {n} дн.', 'qz.etaYears': '~{n} лет',
+      'qz.etaNone': 'Темпа пока нет — начните сегодня', 'qz.etaTarget': 'По {t} в день — {d}',
+      'qz.per': 'По намазам', 'qz.perSub': 'восполнено / всего', 'qz.owed': 'Долг', 'qz.paidAll': 'Восполнено', 'qz.totalAll': 'Всего',
+      'qz.setup': 'Начальный долг', 'qz.setupSub': 'Укажите число каза до начала учёта',
+      'qz.byYears': 'Расчёт по годам', 'qz.yearsQ': 'Сколько лет намазы были пропущены?', 'qz.yearsPh': 'например: 3',
+      'qz.yearsSet': '{y} г. = по {n} на каждый намаз', 'qz.target': 'Дневной план', 'qz.targetHint': 'Сколько каза в день вы читаете',
+      'qz.reset': 'Очистить учёт', 'qz.resetQ': 'Весь учёт каза будет удалён. Продолжить?', 'qz.resetDone': 'Учёт каза очищен',
+      'qz.logged': 'Из журнала', 'qz.baseLabel': 'Начальный',
+      'qz.remind': 'Каза: {n} · сегодня {d}/{t}', 'qz.remindGo': 'Открыть', 'qz.remindDone': 'Каза: {n} · план на сегодня выполнен',
+      'qz.calendar': 'Календарь восполнения', 'qz.calSub': 'последние 12 недель · каза в день',
+      'qz.matrix': 'Матрица намазов', 'qz.matrixSub': 'последние 8 недель · каждый намаз отдельно',
+      'qz.mxNone': 'Записей пока нет — начните в разделе «Журнал»',
+      'qz.q1': 'Сегодня', 'qz.hist': 'История',
+      'qz.start': 'Учёт каза пуст', 'qz.startSub': 'Укажите ниже начальный долг — дальше отмечайте каждый день',
+    },
+  });
+
   /* ------------------------------------------------------------------ */
   /* constants + helpers                                                 */
   /* ------------------------------------------------------------------ */
   const esc = D.esc, t = D.t;
   const PR = D.PRAYERS;
   const STATES = ['jamaat', 'alone', 'qaza', 'missed'];
-  const SUBS = ['times', 'log', 'tasbih', 'fasting', 'qibla'];
+  const SUBS = ['times', 'log', 'qaza', 'tasbih', 'fasting', 'qibla'];
   const DHIKR = ['subhanallah', 'alhamdulillah', 'allahuakbar', 'istighfar', 'salavot'];
   const PRESETS = [33, 100, 1000, 0]; // 0 = ∞
   const FTYPES = ['ramadan', 'sunnah', 'qaza', 'nafl'];
@@ -188,8 +270,354 @@
       return out;
     });
   }
-  const qazaPaid = () => { const q = D.S.prayers._qaza; return q && typeof q === 'object' ? Math.max(0, +q.paid || 0) : 0; };
-  const qazaDebt = () => Math.max(0, prayerTotals().missed - qazaPaid());
+  /* ==================================================================== */
+  /* QAZO ENGINE                                                          */
+  /*   owed(p) = base(p) + every 'missed' in the journal − every repayment */
+  /*   Repayments are dated, so pace, trend and a finish date fall out of  */
+  /*   the same ledger instead of being guessed.                          */
+  /* ==================================================================== */
+  const ZERO = () => ({ bomdod: 0, peshin: 0, asr: 0, shom: 0, xufton: 0 });
+  const int = (v) => Math.max(0, Math.floor(+v || 0));
+  const HIJRI_YEAR = 354; // a lunar year — the unit qaza is normally counted in
+  let qzMigrated = false;
+  // eta dates land years out, so they must carry the year
+  const qzDate = (k) => { const { y, m, d } = D.parseKey(k); const sep = D.t('date.sep') === 'date.sep' ? '-' : D.t('date.sep'); return `${d}${sep}${D.t('months')[m - 1]} ${y}`; };
+
+  function QZ() {
+    let q = D.S.prayers._qaza;
+    if (!q || typeof q !== 'object') q = D.S.prayers._qaza = {};
+    if (!q.base || typeof q.base !== 'object') q.base = ZERO();
+    if (!q.pay || typeof q.pay !== 'object') q.pay = {};
+    // Legacy shape { paid: n } was an untyped counter. Spread it evenly over the
+    // five prayers on today's date so the total survives and the ledger gains a date.
+    const legacy = int(q.paid);
+    if (legacy) {
+      const k = D.today();
+      const day = q.pay[k] && typeof q.pay[k] === 'object' ? q.pay[k] : (q.pay[k] = {});
+      const per = Math.floor(legacy / 5), rem = legacy % 5;
+      PR.forEach((p, i) => { day[p] = int(day[p]) + per + (i < rem ? 1 : 0); });
+      delete q.paid;
+      // bump the signature in this same tick, or the memoised scan below would
+      // still be answering with the pre-migration numbers
+      if (!qzMigrated) { qzMigrated = true; D.S.meta.updatedAt = Math.max(Date.now(), (D.S.meta.updatedAt || 0) + 1); setTimeout(() => D.save(), 0); }
+    }
+    return q;
+  }
+
+  // One pass over the journal and the ledger; everything below reads this.
+  function qzScan() {
+    return memo('qzScan', stateSig(), () => {
+      const missed = ZERO(), paid = ZERO(), missedDay = {}, payDay = {};
+      for (const k of Object.keys(D.S.prayers)) {
+        if (!isDay(k)) continue;
+        const o = D.S.prayers[k]; if (!o || typeof o !== 'object') continue;
+        let n = 0;
+        for (const p of PR) if (o[p] === 'missed') { missed[p]++; n++; }
+        if (n) missedDay[k] = n;
+      }
+      const pay = QZ().pay;
+      for (const k of Object.keys(pay)) {
+        if (!isDay(k)) continue;
+        const d = pay[k]; if (!d || typeof d !== 'object') continue;
+        let n = 0;
+        for (const p of PR) { const v = int(d[p]); if (v) { paid[p] += v; n += v; } }
+        if (n) payDay[k] = n;
+      }
+      return { missed, paid, missedDay, payDay };
+    });
+  }
+  function qzOwed() {
+    const s = qzScan(), b = QZ().base;
+    const o = ZERO(); let total = 0, base = 0, all = 0;
+    for (const p of PR) {
+      const bp = int(b[p]);
+      o[p] = Math.max(0, bp + s.missed[p] - s.paid[p]);
+      base += bp; total += o[p]; all += bp + s.missed[p];
+    }
+    return { per: o, total, base, all, paid: PR.reduce((a, p) => a + s.paid[p], 0) };
+  }
+  const qzPaidOn = (k) => { const d = QZ().pay[k]; if (!d || typeof d !== 'object') return 0; let n = 0; for (const p of PR) n += int(d[p]); return n; };
+  const qzTarget = () => { const v = int(QZ().target); return v > 0 ? Math.min(v, 200) : 5; };
+
+  // Debt as it stood on each of the last n days — walked forward once.
+  function qzSeries(n) {
+    const days = D.lastDays(n), s = qzScan(), o = qzOwed();
+    let run = o.base;
+    for (const k in s.missedDay) if (k < days[0]) run += s.missedDay[k];
+    for (const k in s.payDay) if (k < days[0]) run -= s.payDay[k];
+    return days.map((k) => { run += (s.missedDay[k] || 0) - (s.payDay[k] || 0); return Math.max(0, run); });
+  }
+  function qzPace() {
+    const sum = (arr) => arr.reduce((a, k) => a + qzPaidOn(k), 0);
+    const p7 = sum(D.lastDays(7)), p30 = sum(D.lastDays(30));
+    return { p7, p30, rate: p30 ? p30 / 30 : p7 ? p7 / 7 : 0 };
+  }
+  const qzStreak = () => memo('qzStreak', stateSig(), () => {
+    const set = new Set();
+    for (const k of Object.keys(QZ().pay)) if (isDay(k) && qzPaidOn(k) > 0) set.add(k);
+    return D.streak(set);
+  });
+  // Finish date at a given per-day rate; null when the rate is zero or the horizon is absurd.
+  function qzEta(rate) {
+    const owed = qzOwed().total;
+    if (!owed || !(rate > 0)) return null;
+    const days = Math.ceil(owed / rate);
+    if (days > 365 * 60) return { days, years: Math.round(days / 365), far: true };
+    return { days, years: Math.round((days / 365) * 10) / 10, date: D.addDays(D.today(), days), far: false };
+  }
+
+  /* Shared with today.js — the reminder needs the same numbers, not its own copy. */
+  D.qaza = {
+    owed: () => qzOwed(),
+    paidToday: () => qzPaidOn(D.today()),
+    target: qzTarget,
+    pace: qzPace,
+    streak: qzStreak,
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* qaza — cards                                                        */
+  /* ------------------------------------------------------------------ */
+  const PCOLOR = { bomdod: 'var(--info)', peshin: 'var(--success)', asr: 'var(--warning)', shom: 'var(--violet)', xufton: 'var(--danger-text)' };
+
+  function qzHero() {
+    const o = qzOwed(), td = qzTarget(), done = qzPaidOn(D.today());
+    if (!o.total) {
+      const fresh = !o.all && !o.paid;   // nothing declared, nothing logged, nothing repaid
+      return `<div class="hero ib-qz-hero zero">
+        <div class="ib-qz-free ${fresh ? 'fresh' : ''}">${D.ic(fresh ? 'flag' : 'check', 30)}</div>
+        <div class="ib-qz-free-t">${esc(t(fresh ? 'qz.start' : 'qz.free'))}</div>
+        <div class="small muted">${esc(t(fresh ? 'qz.startSub' : 'qz.freeSub'))}</div>
+        ${o.paid ? `<div class="ib-qz-freestat num">${D.fmtNum(o.paid)} <span>${esc(t('qz.paidAll'))}</span></div>` : ''}
+      </div>`;
+    }
+    const parts = PR.filter((p) => o.per[p] > 0).map((p) => ({ v: o.per[p], color: PCOLOR[p], label: `${t('prayer.' + p)}: ${o.per[p]}` }));
+    const cleared = o.all ? Math.round((o.paid / o.all) * 100) : 0;
+    const donut = D.chart.donut({ parts, size: 108, stroke: 13, center: `<span class="ib-qz-dn">${cleared}%</span><span class="ib-qz-dl">${esc(t('qz.paidAll'))}</span>` });
+    const pct = D.clamp((done / td) * 100, 0, 100);
+    const legend = PR.map((p) => `<span class="ib-qz-lg"><i style="background:${PCOLOR[p]}"></i>${esc(t('prayer.' + p))}<b class="num">${D.fmtNum(o.per[p])}</b></span>`).join('');
+    return `<div class="hero ib-qz-hero">
+      <div class="ib-qz-top">
+        <div class="ib-qz-main">
+          <div class="eyebrow">${esc(t('qz.debtShort'))}</div>
+          <div class="ib-qz-num num">${D.fmtNum(o.total)}</div>
+          <div class="ib-qz-unit">${esc(t('qz.debt'))}</div>
+          <div class="ib-qz-sub num">${esc(t('qz.daysWorth', { n: D.fmtNum(Math.ceil(o.total / 5)) }))}</div>
+        </div>
+        ${donut}
+      </div>
+      <div class="ib-qz-legend">${legend}</div>
+      <div class="ib-qz-today ${done >= td ? 'met' : ''}">
+        <div class="row between"><span class="eyebrow">${esc(t('qz.todayDone'))}</span><span class="num ib-qz-tn">${esc(t('qz.ofTarget', { n: done, t: td }))}</span></div>
+        <span class="bar thick mt-s"><i class="bar-fill" style="width:${pct.toFixed(1)}%"></i></span>
+        ${done >= td ? `<div class="small good mt-s">${D.ic('check', 13)} ${esc(t('qz.targetMet'))}</div>` : ''}
+      </div>
+    </div>`;
+  }
+
+  function qzPayCard() {
+    const o = qzOwed(), k = D.today();
+    const day = QZ().pay[k] || {};
+    const mx = Math.max(1, ...PR.map((p) => o.per[p]));
+    const rows = PR.map((p) => {
+      const owed = o.per[p], n = int(day[p]);
+      return `<div class="ib-qz-row ${owed ? '' : 'clear'}">
+        <span class="ib-qz-name">${esc(t('prayer.' + p))}</span>
+        <span class="ib-qz-bar"><i style="width:${((owed / mx) * 100).toFixed(1)}%;background:${PCOLOR[p]}"></i></span>
+        <span class="ib-qz-owed num">${owed ? D.fmtNum(owed) : '—'}</span>
+        <span class="ib-qz-step">
+          <button class="ib-qz-b" data-act="ibQzUnpay" data-id="${p}" ${n ? '' : 'disabled'} aria-label="−1">${D.ic('minus', 14)}</button>
+          <b class="num ${n ? 'on' : ''}">${n}</b>
+          <button class="ib-qz-b add" data-act="ibQzPay" data-id="${p}" ${owed ? '' : 'disabled'} aria-label="+1">${D.ic('plus', 14)}</button>
+        </span>
+      </div>`;
+    }).join('');
+    const canDay = PR.every((p) => o.per[p] > 0);
+    return `<div class="card">
+      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.pay'))}</div><div class="title">${esc(D.fmtDate(k, 'weekday'))}</div></div>
+        <span class="pill">${D.ic('clock', 12)} ${esc(t('qz.q1'))}</span></div>
+      <div class="small muted mb-s">${esc(t('qz.paySub'))}</div>
+      ${rows}
+      <button class="btn block mt" data-act="ibQzDay" ${canDay ? '' : 'disabled'}>${D.ic('layers', 15)} ${esc(t('qz.oneDay'))}</button>
+    </div>`;
+  }
+
+  function qzTrendCard() {
+    const N = 90, vals = qzSeries(N);
+    const now = vals[N - 1], was = vals[0], diff = now - was;
+    const color = diff < 0 ? 'var(--success)' : diff > 0 ? 'var(--danger-text)' : 'var(--text3)';
+    const note = diff < 0 ? t('qz.trendDown') : diff > 0 ? t('qz.trendUp') : t('qz.trendFlat');
+    return `<div class="card">
+      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.trend'))}</div><div class="title">${esc(t('qz.trendSub', { n: N }))}</div></div>
+        <span class="pill ${diff < 0 ? 'good' : diff > 0 ? 'bad' : ''}">${D.ic(diff <= 0 ? 'trendDown' : 'trend', 12)} ${diff > 0 ? '+' : ''}${D.fmtNum(diff)}</span></div>
+      ${D.chart.spark({ values: vals, color, height: 76 })}
+      <div class="stat-grid mt">
+        <div class="stat"><div class="stat-num num">${D.fmtNum(was)}</div><div class="stat-label">${esc(t('qz.was', { n: N }))}</div></div>
+        <div class="stat"><div class="stat-num num">${D.fmtNum(now)}</div><div class="stat-label">${esc(t('qz.now'))}</div></div>
+        <div class="stat"><i class="zone ${diff < 0 ? 'z-good' : diff > 0 ? 'z-bad' : ''}"></i><div class="stat-num num">${diff > 0 ? '+' : ''}${D.fmtNum(diff)}</div><div class="stat-label">${esc(t('qz.change'))}</div></div>
+      </div>
+      <div class="small muted mt-s">${esc(note)}</div>
+    </div>`;
+  }
+
+  function qzPaceCard() {
+    const days = D.lastDays(30), vals = days.map(qzPaidOn), p = qzPace(), td = qzTarget();
+    const labels = days.map((k, i) => (i % 7 === 0 ? D.fmtDate(k, 'dm') : ''));
+    const eta = qzEta(p.rate), etaT = qzEta(td);
+    const etaLine = eta
+      ? (eta.far ? esc(t('qz.etaYears', { n: D.fmtNum(eta.years) })) : `${esc(t('qz.etaAt', { d: qzDate(eta.date) }))} · ${esc(t('qz.etaIn', { n: D.fmtNum(eta.days) }))}`)
+      : esc(t('qz.etaNone'));
+    const target = etaT && !etaT.far ? `<div class="small muted mt-s">${D.ic('target', 13)} ${esc(t('qz.etaTarget', { t: td, d: qzDate(etaT.date) }))}</div>` : '';
+    return `<div class="card">
+      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.pace'))}</div><div class="title">${esc(t('qz.paceSub'))}</div></div></div>
+      ${D.chart.bars({ values: vals, labels, color: 'var(--success)', height: 66, target: td })}
+      <div class="stat-grid mt">
+        <div class="stat"><div class="stat-num num">${D.fmtNum(p.p7)}</div><div class="stat-label">${esc(t('qz.p7'))}</div></div>
+        <div class="stat"><div class="stat-num num">${D.fmtNum(p.p30)}</div><div class="stat-label">${esc(t('qz.p30'))}</div></div>
+        <div class="stat"><div class="stat-num num">${D.round(p.rate, 1)}</div><div class="stat-label">${esc(t('qz.avg'))}</div></div>
+        <div class="stat"><div class="stat-num num">${D.ic('fire', 15)} ${D.fmtNum(qzStreak())}</div><div class="stat-label">${esc(t('qz.streak'))}</div></div>
+      </div>
+      <div class="ib-qz-eta"><div class="eyebrow">${esc(t('qz.eta'))}</div><div class="small">${etaLine}</div>${target}</div>
+    </div>`;
+  }
+
+  function qzCalendarCard() {
+    const days = D.lastDays(84), td = qzTarget();
+    const heat = D.chart.heat({
+      days,
+      valueFn: (k) => { const n = qzPaidOn(k); if (!n) return 0; return D.clamp(Math.ceil((n / td) * 4), 1, 4); },
+    });
+    return `<div class="card">
+      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.calendar'))}</div><div class="title">${esc(t('qz.calSub'))}</div></div></div>
+      ${heat}
+    </div>`;
+  }
+
+  function qzPerCard() {
+    const o = qzOwed(), s = qzScan(), b = QZ().base;
+    const rows = PR.map((p) => {
+      const all = int(b[p]) + s.missed[p], paid = s.paid[p], owed = o.per[p];
+      const pct = all ? D.clamp((paid / all) * 100, 0, 100) : 0;
+      return `<div class="ib-qz-per">
+        <div class="row between"><span class="ib-qz-pn">${esc(t('prayer.' + p))}</span>
+          <span class="num small"><b>${D.fmtNum(owed)}</b> <span class="muted">/ ${D.fmtNum(all)}</span></span></div>
+        <span class="bar"><i class="bar-fill" style="width:${pct.toFixed(1)}%;background:${PCOLOR[p]}"></i></span>
+        <div class="ib-qz-pmeta small muted"><span>${esc(t('qz.baseLabel'))} ${D.fmtNum(int(b[p]))}</span><span>${esc(t('qz.logged'))} ${D.fmtNum(s.missed[p])}</span><span class="good">${esc(t('qz.paidAll'))} ${D.fmtNum(paid)}</span></div>
+      </div>`;
+    }).join('');
+    return `<div class="card">
+      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.per'))}</div><div class="title">${esc(t('qz.perSub'))}</div></div>
+        <span class="pill">${D.fmtNum(o.paid)} / ${D.fmtNum(o.all)}</span></div>
+      ${rows}
+    </div>`;
+  }
+
+  function qzSetupCard() {
+    const b = QZ().base, o = qzOwed();
+    const inputs = PR.map((p) => `<label class="ib-qz-in"><span>${esc(t('prayer.' + p))}</span>
+      <input class="inp sm num" type="number" min="0" max="99999" inputmode="numeric" value="${int(b[p])}" data-change="ibQzBase" data-id="${p}" aria-label="${esc(t('prayer.' + p))}"></label>`).join('');
+    return `<div class="card">
+      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.setup'))}</div><div class="title">${esc(t('qz.setupSub'))}</div></div></div>
+      <div class="ib-qz-ins">${inputs}</div>
+      <button class="btn ghost block mt" data-act="ibQzYears">${D.ic('calendar', 14)} ${esc(t('qz.byYears'))}</button>
+      <div class="ib-qz-target mt">
+        <div class="grow"><div class="eyebrow">${esc(t('qz.target'))}</div><div class="small muted">${esc(t('qz.targetHint'))}</div></div>
+        <input class="inp sm num" type="number" min="1" max="200" inputmode="numeric" value="${qzTarget()}" data-change="ibQzTarget" aria-label="${esc(t('qz.target'))}">
+      </div>
+      ${o.total || o.all || o.paid ? `<button class="btn ghost danger block mt" data-act="ibQzReset">${D.ic('trash', 14)} ${esc(t('qz.reset'))}</button>` : ''}
+    </div>`;
+  }
+
+  function renderQaza() {
+    const o = qzOwed();
+    // nothing owed and nothing ever repaid → the charts would all be flat zeroes.
+    // Lead straight to the one card that matters: declaring the backlog.
+    if (!o.total && !o.all && !o.paid) return qzHero() + qzSetupCard();
+    return qzHero() + (o.total ? qzPayCard() : '') + qzTrendCard() + qzPaceCard() + qzCalendarCard() + qzPerCard() + qzSetupCard();
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* qaza — actions                                                      */
+  /* ------------------------------------------------------------------ */
+  function qzAdd(p, n) {
+    const q = QZ(), k = D.today();
+    const day = q.pay[k] && typeof q.pay[k] === 'object' ? q.pay[k] : (q.pay[k] = {});
+    const v = int(day[p]) + n;
+    if (v > 0) day[p] = v; else delete day[p];
+    if (!PR.some((x) => int(day[x]))) delete q.pay[k];
+  }
+  D.act.ibQzPay = (el) => {
+    const p = el.dataset.id; if (!PR.includes(p)) return;
+    if (qzOwed().per[p] <= 0) { D.toast(t('qz.nothingOwed')); return; }
+    qzAdd(p, 1);
+    haptic('success'); D.save(); D.rerender(); D.toast(t('qz.added', { p: t('prayer.' + p) }));
+  };
+  D.act.ibQzUnpay = (el) => {
+    const p = el.dataset.id; if (!PR.includes(p)) return;
+    if (!int((QZ().pay[D.today()] || {})[p])) return;
+    qzAdd(p, -1);
+    haptic(); D.save(); D.rerender(); D.toast(t('qz.removed'));
+  };
+  D.act.ibQzDay = () => {
+    const o = qzOwed();
+    if (!PR.every((p) => o.per[p] > 0)) return;
+    for (const p of PR) qzAdd(p, 1);
+    haptic('success'); D.save(); D.rerender(); D.toast(t('qz.dayAdded'));
+  };
+  D.act.ibQzBase = (el) => {
+    const p = el.dataset.id; if (!PR.includes(p)) return;
+    QZ().base[p] = D.clamp(int(el.value), 0, 99999);
+    D.save(); D.rerender();
+  };
+  D.act.ibQzTarget = (el) => { QZ().target = D.clamp(int(el.value) || 5, 1, 200); D.save(); D.rerender(); };
+  D.act.ibQzYears = async () => {
+    const v = await D.prompt({ title: t('qz.yearsQ'), placeholder: t('qz.yearsPh'), value: '' });
+    if (v === null) return;
+    const y = Math.max(0, Math.min(80, Math.round((parseFloat(String(v).replace(',', '.')) || 0) * 10) / 10));
+    if (!y) return;
+    const n = Math.round(y * HIJRI_YEAR);
+    const b = QZ().base;
+    for (const p of PR) b[p] = D.clamp(n, 0, 99999);
+    haptic('success'); D.save(); D.rerender(); D.toast(t('qz.yearsSet', { y, n: D.fmtNum(n) }));
+  };
+  D.act.ibQzReset = async () => {
+    if (!(await D.confirm({ text: t('qz.resetQ'), danger: true }))) return;
+    delete D.S.prayers._qaza;
+    D.save(); D.rerender(); D.toast(t('qz.resetDone'));
+  };
+
+  /* Reminder strip — sits above every Ibodat tab while a debt is open. */
+  function qzBanner() {
+    const o = qzOwed(); if (!o.total) return '';
+    const done = qzPaidOn(D.today()), td = qzTarget(), met = done >= td;
+    return `<button class="ib-qz-remind ${met ? 'met' : ''}" data-act="sub" data-view="prayer" data-sub="qaza">
+      <i class="ib-qz-rdot">${D.ic(met ? 'check' : 'alert', 15)}</i>
+      <span class="ib-qz-rtext">${esc(met ? t('qz.remindDone', { n: D.fmtNum(o.total) }) : t('qz.remind', { n: D.fmtNum(o.total), d: done, t: td }))}</span>
+      <span class="ib-qz-rgo">${esc(t('qz.remindGo'))} ${D.ic('chevR', 13)}</span>
+    </button>`;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* prayer matrix — every waqt of the last 8 weeks, one cell each        */
+  /* ------------------------------------------------------------------ */
+  function matrixCard() {
+    const days = D.lastDays(56), td = D.today();
+    let any = false;
+    const rows = PR.map((p) => {
+      const cells = days.map((k) => {
+        const s = stateOf(k, p);
+        if (s) any = true;
+        return `<i class="${s ? 's-' + s : ''}" title="${k} · ${esc(t('prayer.' + p))}${s ? ' · ' + esc(t('ib.st.' + s)) : ''}"></i>`;
+      }).join('');
+      return `<div class="ib-mx-row"><span class="ib-mx-name">${esc(t('prayer.' + p))}</span><span class="ib-mx-cells">${cells}</span></div>`;
+    }).join('');
+    const legend = STATES.map((s) => `<span><i class="ib-leg ib-mx-lg s-${s}"></i>${esc(t('ib.st.' + s))}</span>`).join('');
+    const axis = `<div class="ib-mx-axis"><span>${esc(D.fmtDate(days[0], 'dm'))}</span><span>${esc(D.fmtDate(td, 'dm'))}</span></div>`;
+    return `<div class="card">
+      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.matrix'))}</div><div class="title">${esc(t('qz.matrixSub'))}</div></div></div>
+      ${any ? `<div class="ib-mx">${rows}</div>${axis}<div class="legend">${legend}</div>` : `<div class="empty">${esc(t('qz.mxNone'))}</div>`}
+    </div>`;
+  }
 
   /* date steppers (device-only) */
   function timesKey() { const k = F().ibTimesDate; return isDay(k) ? k : D.today(); }
@@ -323,20 +751,6 @@
       ${rows}
     </div>`;
   }
-  function ledgerCard() {
-    const tot = prayerTotals(), paid = qazaPaid(), debt = qazaDebt();
-    return `<div class="card ib-ledger ${debt ? '' : 'zero'}">
-      <div class="card-head"><div class="title">${D.ic('flag', 16)} ${esc(t('ib.qazaLedger'))}</div></div>
-      <div class="kpi ib-debt"><span class="kpi-num">${D.fmtNum(debt)}</span><span class="kpi-label">${esc(t('ib.debt'))}</span></div>
-      ${debt ? '' : `<div class="small good mt-s">${esc(t('ib.noDebt'))}</div>`}
-      <div class="stat-grid mt">
-        <div class="stat"><i class="zone ${tot.missed ? 'z-bad' : 'z-good'}"></i><div class="stat-num num">${D.fmtNum(tot.missed)}</div><div class="stat-label">${esc(t('ib.missed'))}</div></div>
-        <div class="stat"><i class="zone ${tot.qaza ? 'z-warn' : ''}"></i><div class="stat-num num">${D.fmtNum(tot.qaza)}</div><div class="stat-label">${esc(t('ib.late'))}</div></div>
-        <div class="stat"><i class="zone ${paid ? 'z-good' : ''}"></i><div class="stat-num num">${D.fmtNum(paid)}</div><div class="stat-label">${esc(t('ib.paid'))}</div></div>
-      </div>
-      <div class="row mt"><button class="btn grow" data-act="ibPay">${D.ic('plus', 14)} ${esc(t('ib.payQaza'))}</button><button class="btn ghost sq" data-act="ibUnpay" ${paid ? '' : 'disabled'} aria-label="${esc(t('ib.unpay'))}" title="${esc(t('ib.unpay'))}">${D.ic('minus', 16)}</button></div>
-    </div>`;
-  }
   function last30Card() {
     const days = D.lastDays(30);
     let jam = 0, ontime = 0, logged = 0;
@@ -394,7 +808,7 @@
 
   function renderLog() {
     const k = logKey();
-    return dateNav(k, 'log', { backfill: true }) + logCard(k) + ledgerCard() + last30Card() + perPrayerCard();
+    return dateNav(k, 'log', { backfill: true }) + logCard(k) + last30Card() + matrixCard() + perPrayerCard();
   }
   D.act.ibSet = (el) => {
     const k = el.dataset.key, id = el.dataset.id, s = el.dataset.s;
@@ -408,16 +822,6 @@
     for (const id of PR) if (!stateOf(k, id)) setPrayer(k, id, 'jamaat');
     haptic('success'); D.save(); D.rerender();
   };
-  D.act.ibPay = () => {
-    const q = D.S.prayers._qaza && typeof D.S.prayers._qaza === 'object' ? D.S.prayers._qaza : { paid: 0 };
-    q.paid = Math.max(0, +q.paid || 0) + 1; D.S.prayers._qaza = q;
-    haptic('success'); D.save(); D.rerender(); D.toast(t('ib.paidToast'));
-  };
-  D.act.ibUnpay = () => {
-    const q = D.S.prayers._qaza; if (!q || !(+q.paid > 0)) return;
-    q.paid = +q.paid - 1; haptic(); D.save(); D.rerender(); D.toast(t('ib.unpaidToast'));
-  };
-
   /* ------------------------------------------------------------------ */
   /* 3. TASBIH                                                           */
   /* ------------------------------------------------------------------ */
@@ -739,9 +1143,12 @@
 
   function render() {
     const s = sub();
-    const body = s === 'log' ? safe(renderLog) : s === 'tasbih' ? safe(renderTasbih) : s === 'fasting' ? safe(renderFasting) : s === 'qibla' ? safe(renderQibla) : safe(renderTimes);
-    const ai = D.ai && (s === 'times' || s === 'log' || s === 'fasting') ? safe(() => D.ai.card('prayer')) : '';
-    return `<div class="ib">${segHtml()}${body}${ai}</div>`;
+    const body = s === 'log' ? safe(renderLog) : s === 'qaza' ? safe(renderQaza) : s === 'tasbih' ? safe(renderTasbih)
+      : s === 'fasting' ? safe(renderFasting) : s === 'qibla' ? safe(renderQibla) : safe(renderTimes);
+    // the qaza debt is the one thing that must never be out of sight
+    const remind = s === 'qaza' ? '' : safe(qzBanner);
+    const ai = D.ai && (s === 'times' || s === 'log' || s === 'qaza' || s === 'fasting') ? safe(() => D.ai.card('prayer')) : '';
+    return `<div class="ib">${segHtml()}${remind}${body}${ai}</div>`;
   }
 
   D.view({

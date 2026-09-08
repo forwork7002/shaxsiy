@@ -343,6 +343,22 @@
           <span class="td-pr-sub num">${s ? esc(t('today.pr.' + s)) : times ? D.prayer.fmt(times[id]) : '—'}</span></button>`;
       }).join('')}</div>`;
   }
+  // Qaza debt is invisible by nature — one line under the day hero keeps it in front of you.
+  function qazaHtml(k) {
+    if (k !== D.today() || !D.qaza) return '';
+    let o, done, tg;
+    try { o = D.qaza.owed(); done = D.qaza.paidToday(); tg = D.qaza.target(); } catch (e) { return ''; }
+    if (!o.total) return '';
+    const met = done >= tg, pct = D.clamp((done / tg) * 100, 0, 100);
+    return `<button class="td-qz ${met ? 'met' : ''}" data-act="go" data-view="prayer" data-sub="qaza">
+      <i class="td-qz-ic">${D.ic('mosque', 16)}</i>
+      <span class="td-qz-body">
+        <span class="td-qz-top"><span class="td-qz-label">${esc(t('qz.debtShort'))}</span><span class="td-qz-n num">${D.fmtNum(o.total)}</span></span>
+        <span class="bar thin"><i class="bar-fill" style="width:${pct.toFixed(1)}%"></i></span>
+      </span>
+      <span class="td-qz-side num">${esc(t('qz.ofTarget', { n: done, t: tg }))}${D.ic('chevR', 13)}</span>
+    </button>`;
+  }
   // WHOOP readiness — only for today, and only once the watch has actually reported a recovery score.
   function readyHtml(k) {
     if (k !== D.today() || !D.whoop || !D.whoop.readiness) return '';
@@ -779,7 +795,7 @@
       const ai = today && D.ai ? safe(() => D.ai.card('today')) : '';
       // Order follows the question "what do I do now?": time → what's left → today's tasks →
       // a compact body row → AI → the end-of-day wrap-up.
-      return safe(() => dateNav(k, today)) + safe(() => ticker(k)) + safe(() => dayCard(k)) + safe(() => habitsCard(k)) +
+      return safe(() => dateNav(k, today)) + safe(() => ticker(k)) + safe(() => dayCard(k)) + safe(() => qazaHtml(k)) + safe(() => habitsCard(k)) +
         safe(() => tasksCard(k)) + safe(() => quickStrip(k)) + ai +
         `<div class="section-title">${esc(t('today.wrap'))}</div>` + safe(() => noteCard(k)) + safe(() => gratCard(k));
     },
