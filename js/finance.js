@@ -12,6 +12,11 @@
     uz: {
       'fin.tab.month': 'Oy', 'fin.tab.accounts': 'Hisoblar', 'fin.tab.subs': 'Obunalar', 'fin.tab.budget': 'Byudjet', 'fin.tab.wishlist': 'Xohishlar',
       'fin.net': 'Sof natija', 'fin.income': 'Kirim', 'fin.expense': 'Chiqim', 'fin.savings': "Jamg'arma", 'fin.savingsHint': 'sof ÷ kirim',
+      'fin.fc': 'Prognoz', 'fin.fc.pace': 'Kunlik tezlik', 'fin.fc.end': 'Oy oxirida', 'fin.fc.left': '{n} kun qoldi',
+      'fin.fc.budget': 'Kunlik me’yor', 'fin.fc.vsPrev': "O'tgan oyga nisbatan", 'fin.fc.same': "o'tgan oy bilan bir xil",
+      'fin.fc.up': '{p}% ko‘p', 'fin.fc.down': '{p}% kam', 'fin.fc.noPrev': "o'tgan oy ma'lumoti yo'q",
+      'fin.mv': "O'zgarishlar", 'fin.mv.sub': "o'tgan oy bilan solishtirganda", 'fin.mv.new': 'yangi', 'fin.mv.gone': 'to‘xtadi',
+      'fin.mv.none': "Solishtirish uchun ma'lumot yetarli emas", 'fin.fc.hint': 'Shu tezlikda davom etsangiz',
       'fin.daily': 'Kunlik xarajat', 'fin.byCat': "Kategoriyalar bo'yicha", 'fin.noExpense': "Bu oyda chiqim yo'q",
       'fin.add': 'Yangi yozuv', 'fin.out': 'Chiqim', 'fin.in': 'Kirim', 'fin.amount': 'Summa', 'fin.amountPh': '1 250 000 · 250k · 1.5m',
       'fin.cat': 'Kategoriya', 'fin.notePh': 'Izoh (ixtiyoriy)', 'fin.account': 'Hisob', 'fin.noAccount': 'Hisobsiz',
@@ -41,6 +46,11 @@
     uzk: {
       'fin.tab.month': 'Ой', 'fin.tab.accounts': 'Ҳисоб', 'fin.tab.subs': 'Обуна', 'fin.tab.budget': 'Бюджет', 'fin.tab.wishlist': 'Хоҳиш',
       'fin.net': 'Соф натижа', 'fin.income': 'Кирим', 'fin.expense': 'Чиқим', 'fin.savings': 'Жамғарма', 'fin.savingsHint': 'соф ÷ кирим',
+      'fin.fc': 'Прогноз', 'fin.fc.pace': 'Кунлик тезлик', 'fin.fc.end': 'Ой охирида', 'fin.fc.left': '{n} кун қолди',
+      'fin.fc.budget': 'Кунлик меъёр', 'fin.fc.vsPrev': 'Ўтган ойга нисбатан', 'fin.fc.same': 'ўтган ой билан бир хил',
+      'fin.fc.up': '{p}% кўп', 'fin.fc.down': '{p}% кам', 'fin.fc.noPrev': 'ўтган ой маълумоти йўқ',
+      'fin.mv': 'Ўзгаришлар', 'fin.mv.sub': 'ўтган ой билан солиштирганда', 'fin.mv.new': 'янги', 'fin.mv.gone': 'тўхтади',
+      'fin.mv.none': 'Солиштириш учун маълумот етарли эмас', 'fin.fc.hint': 'Шу тезликда давом этсангиз',
       'fin.daily': 'Кунлик харажат', 'fin.byCat': 'Категориялар бўйича', 'fin.noExpense': 'Бу ойда чиқим йўқ',
       'fin.add': 'Янги ёзув', 'fin.out': 'Чиқим', 'fin.in': 'Кирим', 'fin.amount': 'Сумма', 'fin.amountPh': '1 250 000 · 250k · 1.5m',
       'fin.cat': 'Категория', 'fin.notePh': 'Изоҳ (ихтиёрий)', 'fin.account': 'Ҳисоб', 'fin.noAccount': 'Ҳисобсиз',
@@ -70,6 +80,11 @@
     ru: {
       'fin.tab.month': 'Месяц', 'fin.tab.accounts': 'Счета', 'fin.tab.subs': 'Подписки', 'fin.tab.budget': 'Бюджет', 'fin.tab.wishlist': 'Желания',
       'fin.net': 'Чистый итог', 'fin.income': 'Доход', 'fin.expense': 'Расход', 'fin.savings': 'Сбережения', 'fin.savingsHint': 'итог ÷ доход',
+      'fin.fc': 'Прогноз', 'fin.fc.pace': 'Темп в день', 'fin.fc.end': 'К концу месяца', 'fin.fc.left': 'осталось {n} дн.',
+      'fin.fc.budget': 'Норма в день', 'fin.fc.vsPrev': 'К прошлому месяцу', 'fin.fc.same': 'как в прошлом месяце',
+      'fin.fc.up': 'на {p}% больше', 'fin.fc.down': 'на {p}% меньше', 'fin.fc.noPrev': 'нет данных за прошлый месяц',
+      'fin.mv': 'Изменения', 'fin.mv.sub': 'по сравнению с прошлым месяцем', 'fin.mv.new': 'новое', 'fin.mv.gone': 'прекратилось',
+      'fin.mv.none': 'Недостаточно данных для сравнения', 'fin.fc.hint': 'Если темп сохранится',
       'fin.daily': 'Расходы по дням', 'fin.byCat': 'По категориям', 'fin.noExpense': 'В этом месяце нет расходов',
       'fin.add': 'Новая запись', 'fin.out': 'Расход', 'fin.in': 'Доход', 'fin.amount': 'Сумма', 'fin.amountPh': '1 250 000 · 250k · 1.5m',
       'fin.cat': 'Категория', 'fin.notePh': 'Заметка', 'fin.account': 'Счёт', 'fin.noAccount': 'Без счёта',
@@ -327,6 +342,9 @@
     else h += cats.map(([id, v], i) => D.chart.hbar({ label: catLabel(id), value: v, max: maxCat, color: CAT_PALETTE[i % CAT_PALETTE.length], right: `${esc(money(v))} <span class="muted">${D.fmtPct(A.out ? (v / A.out) * 100 : 0)}</span>` })).join('');
     h += `<div class="fin-hint"><button class="fin-link" data-act="go" data-view="settings">${D.ic('gear', 13)} ${esc(t('fin.catsHint'))}</button></div></div>`;
 
+    h += forecastCard(mk, A);
+    h += moversCard(mk, A);
+
     // AI reads the whole month (categories, budgets, forecast) — keep it above the long transaction list.
     if (D.ai) h += D.ai.card('finance');
 
@@ -352,6 +370,65 @@
       <div id="finTxList">${renderTxList(A)}</div>`;
     return h;
   }
+
+  /* ------------------------------------------------------------------ */
+  /* forecast + month-over-month movers                                  */
+  /* ------------------------------------------------------------------ */
+  function forecastCard(mk, A) {
+    const days = D.daysInMonth(mk);
+    const cur = D.monthKey();
+    // For a past month the whole month is known; for the current one only the days so far count.
+    const elapsed = mk === cur ? Math.min(days, +D.today().slice(8) || 1) : mk < cur ? days : 0;
+    if (!elapsed || A.out <= 0) return '';
+    const pace = A.out / elapsed;
+    const projected = Math.round(pace * days);
+    const left = Math.max(0, days - elapsed);
+    const prev = monthAgg(addMonths(mk, -1));
+    const cmp = prev.out > 0 ? Math.round(((projected - prev.out) / prev.out) * 100) : null;
+    const cmpTxt = cmp === null ? t('fin.fc.noPrev') : cmp === 0 ? t('fin.fc.same') : cmp > 0 ? t('fin.fc.up', { p: cmp }) : t('fin.fc.down', { p: -cmp });
+    const cmpCls = cmp === null ? 'muted' : cmp > 5 ? 'bad' : cmp < -5 ? 'good' : 'muted';
+    // How much per remaining day would keep the month at last month's level?
+    const room = prev.out > 0 && left > 0 ? Math.max(0, Math.round((prev.out - A.out) / left)) : null;
+    return `<div class="card fin-fc">
+      <div class="card-head"><div class="title">${D.ic('trend', 16)} ${esc(t('fin.fc'))}</div>
+        ${left ? `<span class="pill">${esc(t('fin.fc.left', { n: left }))}</span>` : ''}</div>
+      <div class="fin-fc-main">
+        <div class="fin-fc-num"><span class="eyebrow">${esc(t('fin.fc.end'))}</span><span class="num">${esc(money(projected))}</span>
+          <span class="tiny ${cmpCls}">${esc(t('fin.fc.hint'))} · ${esc(cmpTxt)}</span></div>
+      </div>
+      <div class="stat-grid mt">
+        <div class="stat"><div class="stat-num num">${esc(money(Math.round(pace)))}</div><div class="stat-label">${esc(t('fin.fc.pace'))}</div></div>
+        ${room !== null ? `<div class="stat"><div class="stat-num num">${esc(money(room))}</div><div class="stat-label">${esc(t('fin.fc.budget'))}</div><div class="stat-sub">${esc(t('fin.fc.vsPrev'))}</div></div>` : ''}
+        ${prev.out > 0 ? `<div class="stat"><div class="stat-num num">${esc(money(prev.out))}</div><div class="stat-label">${esc(D.fmtDate(addMonths(mk, -1) + '-01', 'month'))}</div></div>` : ''}
+      </div></div>`;
+  }
+
+  function moversCard(mk, A) {
+    const prev = monthAgg(addMonths(mk, -1));
+    const ids = new Set([...Object.keys(A.byCat), ...Object.keys(prev.byCat)]);
+    if (!ids.size || (!prev.out && !A.out)) return '';
+    const rows = [];
+    for (const id of ids) {
+      const now = A.byCat[id] || 0, was = prev.byCat[id] || 0, d = now - was;
+      if (!d) continue;
+      rows.push({ id, now, was, d, pct: was > 0 ? Math.round((d / was) * 100) : null });
+    }
+    if (!rows.length) return `<div class="card"><div class="card-head"><div class="title">${D.ic('layers', 16)} ${esc(t('fin.mv'))}</div></div><div class="empty">${esc(t('fin.mv.none'))}</div></div>`;
+    rows.sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
+    const max = Math.max(...rows.map((r) => Math.abs(r.d))) || 1;
+    const body = rows.slice(0, 6).map((r) => {
+      const up = r.d > 0;
+      const tag = r.was === 0 ? t('fin.mv.new') : r.now === 0 ? t('fin.mv.gone') : (up ? '+' : '−') + Math.abs(r.pct) + '%';
+      return `<div class="fin-mv-row">
+        <span class="fin-mv-name">${esc(catLabel(r.id))}</span>
+        <span class="fin-mv-bar"><i class="${up ? 'up' : 'down'}" style="width:${((Math.abs(r.d) / max) * 100).toFixed(1)}%"></i></span>
+        <span class="fin-mv-val num ${up ? 'bad' : 'good'}">${up ? '+' : '−'}${esc(money(Math.abs(r.d)))}</span>
+        <span class="fin-mv-tag ${up ? 'bad' : 'good'}">${esc(tag)}</span></div>`;
+    }).join('');
+    return `<div class="card fin-mv"><div class="card-head"><div class="title">${D.ic('layers', 16)} ${esc(t('fin.mv'))}</div>
+      <span class="small muted">${esc(t('fin.mv.sub'))}</span></div>${body}</div>`;
+  }
+
   function renderTxList(A) {
     const nq = D.translit.norm(searchQ);
     const list = nq ? A.list.filter((x) => D.translit.norm((x.note || '') + ' ' + cat(x.cat).name).includes(nq)) : A.list;

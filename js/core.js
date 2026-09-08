@@ -399,7 +399,8 @@
     const sign = v < 0 ? '−' : '';
     const s = Math.abs(v).toLocaleString('ru-RU');
     const sym = { UZS: "so'm", USD: '$', EUR: '€', RUB: '₽', KZT: '₸' }[cur] || cur;
-    return sym.length === 1 ? `${sign}${sym}${s}` : `${sign}${s} ${sym}`;
+    // non-breaking space so an amount never wraps away from its currency
+    return sym.length === 1 ? `${sign}${sym}${s}` : `${sign}${s}\u00A0${sym}`;
   };
   D.fmtPct = (x, d = 0) => (Math.round((+x || 0) * 10 ** d) / 10 ** d) + '%';
   D.fmtKg = (kg) => { if (kg == null || kg === '') return '—'; const u = D.S.settings.weightUnit; return u === 'lb' ? D.round(kg * 2.20462, 1) + ' lb' : D.round(+kg, 1) + ' kg'; };

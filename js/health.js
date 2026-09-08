@@ -192,6 +192,22 @@
     'hl.wh.trendLegend': ['EWMA, α=0.1', 'EWMA, α=0.1', 'EWMA, α=0.1'],
     'hl.search.sup': ["Qo'shimcha → Stack", 'Қўшимча → Стек', 'Добавка → Стек'],
     'hl.search.drink': ['Ichimlik → Kofein', 'Ичимлик → Кофеин', 'Напиток → Кофеин'],
+    'hl.ins': ['Uyqu va tiklanish', 'Уйқу ва тикланиш', 'Сон и восстановление'],
+    'hl.ins.debt': ['Uyqu qarzi', 'Уйқу қарзи', 'Долг сна'],
+    'hl.ins.debtSub': ['14 kunda, me’yor {n} soat', '14 кунда, меъёр {n} соат', 'за 14 дн., норма {n} ч'],
+    'hl.ins.cons': ['Barqarorlik', 'Барқарорлик', 'Стабильность'],
+    'hl.ins.consSub': ['yotish vaqti bir xilligi', 'ётиш вақти бир хиллиги', 'постоянство отхода ко сну'],
+    'hl.ins.avg': ["O'rtacha uyqu", 'Ўртача уйқу', 'Средний сон'],
+    'hl.ins.link': ["Bog'liqliklar", 'Боғлиқликлар', 'Связи'],
+    'hl.ins.needMore': ["Bog'liqlik uchun kamida {n} kunlik yozuv kerak", 'Боғлиқлик учун камида {n} кунлик ёзув керак', 'Для анализа связей нужно минимум {n} дн. записей'],
+    'hl.ins.sleepMoodUp': ['Yaxshi uxlagan kunlardan keyin kayfiyat **{d}** ball yuqori', 'Яхши ухлаган кунлардан кейин кайфият **{d}** балл юқори', 'После хорошего сна настроение выше на **{d}** балла'],
+    'hl.ins.sleepMoodDown': ['Yaxshi uxlagan kunlardan keyin kayfiyat **{d}** ball past', 'Яхши ухлаган кунлардан кейин кайфият **{d}** балл паст', 'После хорошего сна настроение ниже на **{d}** балла'],
+    'hl.ins.sleepHabitUp': ['Yaxshi uxlagan kunlarda odatlar **{d}%** ko‘p bajarilgan', 'Яхши ухлаган кунларда одатлар **{d}%** кўп бажарилган', 'В дни хорошего сна привычек выполнено на **{d}%** больше'],
+    'hl.ins.sleepHabitDown': ['Yaxshi uxlagan kunlarda odatlar **{d}%** kam bajarilgan', 'Яхши ухлаган кунларда одатлар **{d}%** кам бажарилган', 'В дни хорошего сна привычек выполнено на **{d}%** меньше'],
+    'hl.ins.cafSleepUp': ['Kofein ko‘p bo‘lgan kunlari uyqu **{d} soat** ko‘p', 'Кофеин кўп бўлган кунлари уйқу **{d} соат** кўп', 'В дни с большим кофеином сон длиннее на **{d} ч**'],
+    'hl.ins.cafSleepDown': ['Kofein ko‘p bo‘lgan kunlari uyqu **{d} soat** kam', 'Кофеин кўп бўлган кунлари уйқу **{d} соат** кам', 'В дни с большим кофеином сон короче на **{d} ч**'],
+    'hl.ins.ok': ['Sezilarli bog‘liqlik topilmadi', 'Сезиларли боғлиқлик топилмади', 'Заметных связей не найдено'],
+    'hl.ins.assoc': ['bog‘liqlik, sabab emas · {n} kun', 'боғлиқлик, сабаб эмас · {n} кун', 'связь, не причина · {n} дн.'],
   };
   const TABLES = { uz: {}, uzk: {}, ru: {} };
   for (const k of Object.keys(T)) { TABLES.uz[k] = T[k][0]; TABLES.uzk[k] = T[k][1]; TABLES.ru[k] = T[k][2]; }
@@ -417,7 +433,7 @@
       <textarea class="ta" rows="3" maxlength="2000" placeholder="${esc(D.t('hl.day.notePh'))}" data-input="hlNote" data-key="${esc(k)}" aria-label="${esc(D.t('common.note'))}">${esc(h.note || '')}</textarea></div>`;
 
     return `${nav}${tiles}<div class="card hl-daycard"><div class="card-head"><div class="title">${D.ic('heart')} ${esc(D.t('hl.day.log'))}</div></div>
-      <div class="hl-form">${weightBlock}${sleepBlock}${waterBlock}${moodBlock}${noteBlock}</div></div>`;
+      <div class="hl-form">${weightBlock}${sleepBlock}${waterBlock}${moodBlock}${noteBlock}</div></div>${sleepInsight()}`;
   }
 
   D.act.hlDate = (el) => { const k = D.addDays(viewKey(), +el.dataset.n || 0); D.ui.viewDate = k >= D.today() ? null : k; D.saveUi(); D.rerender(); };
@@ -692,6 +708,84 @@
     D.save(); D.rerender();
     const nn = D.$('#hlSupName'); if (nn) nn.focus();
   };
+
+  /* ------------------------------------------------------------------ */
+  /* sleep & recovery insight                                            */
+  /* ------------------------------------------------------------------ */
+  const SLEEP_TARGET = 7.5;
+  const MIN_PAIRS = 10;
+  const mean = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0);
+  const stdev = (a) => { if (a.length < 2) return 0; const m = mean(a); return Math.sqrt(a.reduce((s, x) => s + (x - m) ** 2, 0) / a.length); };
+  // Bedtimes after noon belong to the evening before, so 23:40 and 00:20 sit next to each other.
+  const bedMin = (v) => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(v || '')); if (!m) return null; let t = +m[1] * 60 + +m[2]; if (t < 12 * 60) t += 24 * 60; return t; };
+
+  function sleepInsight() {
+    const sl = [], beds = [];
+    for (const k of D.lastDays(14)) {
+      const r = D.S.health[k]; if (!r) continue;
+      const v = num(r.sleep); if (v !== null) sl.push(v);
+      const b = bedMin(r.bed); if (b !== null) beds.push(b);
+    }
+    if (sl.length < 3) return '';
+    const debt = D.round(sl.reduce((s, x) => s + Math.max(0, SLEEP_TARGET - x), 0), 1);
+    const avg = D.round(mean(sl), 1);
+    const cons = beds.length >= 3 ? Math.max(0, Math.min(100, Math.round(100 - (stdev(beds) / 120) * 100))) : null;
+    const zDebt = debt <= 3 ? 'z-good' : debt <= 10 ? 'z-warn' : 'z-bad';
+    const zAvg = avg >= 7 ? 'z-good' : avg >= 6 ? 'z-warn' : 'z-bad';
+    const zCons = cons === null ? '' : cons >= 75 ? 'z-good' : cons >= 50 ? 'z-warn' : 'z-bad';
+    const tiles = `<div class="stat-grid">
+      <div class="stat"><span class="zone ${zDebt}"></span><div class="stat-num num">${debt}<small>${esc(D.t('unit.h'))}</small></div><div class="stat-label">${esc(D.t('hl.ins.debt'))}</div><div class="stat-sub">${esc(D.t('hl.ins.debtSub', { n: SLEEP_TARGET }))}</div></div>
+      <div class="stat"><span class="zone ${zAvg}"></span><div class="stat-num num">${avg}<small>${esc(D.t('unit.h'))}</small></div><div class="stat-label">${esc(D.t('hl.ins.avg'))}</div></div>
+      ${cons !== null ? `<div class="stat"><span class="zone ${zCons}"></span><div class="stat-num num">${cons}<small>%</small></div><div class="stat-label">${esc(D.t('hl.ins.cons'))}</div><div class="stat-sub">${esc(D.t('hl.ins.consSub'))}</div></div>` : ''}
+    </div>`;
+    return `<div class="card"><div class="card-head"><div class="title">${D.ic('moon', 16)} ${esc(D.t('hl.ins'))}</div></div>${tiles}${linksHtml()}</div>`;
+  }
+
+  // Split-mean comparisons over 60 days. Association only, and only above a floor of paired days.
+  function linksHtml() {
+    const days = D.lastDays(60);
+    const sleepOf = (k) => { const r = D.S.health[k]; return r ? num(r.sleep) : null; };
+    const moodOf = (k) => { const r = D.S.health[k]; return r ? num(r.mood) : null; };
+    const cafByDay = (() => { const m = {}; for (const x of D.S.caffeine.logs || []) { if (!x || !x.ts) continue; const k = D.dayKey(new Date(x.ts)); m[k] = (m[k] || 0) + (+x.mg || 0); } return m; })();
+    const habitOf = (k) => { const due = D.dueHabits(k); if (!due.length) return null; return (due.filter((h) => D.habitDone(h, k)).length / due.length) * 100; };
+    const split = (pairs) => {
+      if (pairs.length < MIN_PAIRS) return null;
+      const sorted = pairs.map((p) => p[0]).slice().sort((a, b) => a - b);
+      const med = sorted[Math.floor(sorted.length / 2)];
+      const hi = pairs.filter((p) => p[0] >= med).map((p) => p[1]);
+      const lo = pairs.filter((p) => p[0] < med).map((p) => p[1]);
+      if (hi.length < 3 || lo.length < 3) return null;
+      return { d: mean(hi) - mean(lo), n: pairs.length };
+    };
+    const rows = [];
+    const pSM = [], pSH = [], pCS = [];
+    for (const k of days) {
+      const s = sleepOf(k);
+      const mNext = moodOf(D.addDays(k, 1));
+      if (s !== null && mNext !== null) pSM.push([s, mNext]);
+      const h = habitOf(k);
+      if (s !== null && h !== null) pSH.push([s, h]);
+      const c = cafByDay[k] || 0, sNext = sleepOf(D.addDays(k, 1));
+      if (c > 0 && sNext !== null) pCS.push([c, sNext]);
+    }
+    // Each sentence has an up/down form so a negative delta never reads as "higher".
+    const sm = split(pSM);
+    if (sm && Math.abs(sm.d) >= 0.3) rows.push({ txt: D.t(sm.d > 0 ? 'hl.ins.sleepMoodUp' : 'hl.ins.sleepMoodDown', { d: D.round(Math.abs(sm.d), 1) }), n: sm.n, good: sm.d > 0 });
+    const sh = split(pSH);
+    if (sh && Math.abs(sh.d) >= 5) rows.push({ txt: D.t(sh.d > 0 ? 'hl.ins.sleepHabitUp' : 'hl.ins.sleepHabitDown', { d: Math.round(Math.abs(sh.d)) }), n: sh.n, good: sh.d > 0 });
+    const cs = split(pCS);
+    if (cs && Math.abs(cs.d) >= 0.3) rows.push({ txt: D.t(cs.d > 0 ? 'hl.ins.cafSleepUp' : 'hl.ins.cafSleepDown', { d: D.round(Math.abs(cs.d), 1) }), n: cs.n, good: cs.d > 0 });
+
+    const head = `<div class="hl-links"><div class="eyebrow mb-s">${esc(D.t('hl.ins.link'))}</div>`;
+    if (!rows.length) {
+      const maxN = Math.max(pSM.length, pSH.length, pCS.length);
+      return head + `<div class="empty">${esc(maxN < MIN_PAIRS ? D.t('hl.ins.needMore', { n: MIN_PAIRS }) : D.t('hl.ins.ok'))}</div></div>`;
+    }
+    const strip = (h) => h.replace(/^<p>/, '').replace(/<\/p>$/, '');
+    return head + rows.map((r) => `<div class="hl-corr ${r.good ? 'good' : 'warn'}">${D.ic(r.good ? 'trend' : 'trendDown', 15)}
+      <span class="grow">${D.ai ? strip(D.ai.md(r.txt)) : esc(r.txt)}</span>
+      <span class="tiny muted">${esc(D.t('hl.ins.assoc', { n: r.n }))}</span></div>`).join('') + '</div>';
+  }
 
   /* ------------------------------------------------------------------ */
   /* WHOOP                                                               */

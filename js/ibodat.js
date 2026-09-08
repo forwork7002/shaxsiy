@@ -14,6 +14,8 @@
       'ib.ramadan': 'Ramazon muborak!', 'ib.ramadanDay': 'Ramazon, {d}-kun',
       'ib.method': 'Hisoblash usuli', 'ib.methodNote': 'Bomdod {f}° · Xufton {i}° · Asr: {asr}', 'ib.asr.hanafi': 'Hanafiy', 'ib.asr.shafi': "Shofe'iy", 'ib.openSettings': 'Sozlash',
       'ib.logTitle': 'Namoz qaydi', 'ib.loggedN': '{n}/5 qayd', 'ib.allJamaat': 'Hammasi jamoat',
+      'ib.per': 'Namozlar kesimida', 'ib.per.sub': "so'nggi 30 kun", 'ib.per.weak': 'Eng zaif: **{n}**',
+      'ib.per.none': "Hali yetarli qayd yo'q", 'ib.per.ontime': "o'z vaqtida",
       'ib.st.jamaat': 'Jamoat', 'ib.st.alone': 'Yakka', 'ib.st.qaza': 'Qazo', 'ib.st.missed': "O'tkazib",
       'ib.qazaHint': 'qazo?',
       'ib.qazaLedger': 'Qazo daftari', 'ib.debt': 'qarz', 'ib.missed': "O'tkazilgan", 'ib.late': 'Kech (qazo)', 'ib.paid': "O'qilgan qazo",
@@ -43,6 +45,8 @@
       'ib.ramadan': 'Рамазон муборак!', 'ib.ramadanDay': 'Рамазон, {d}-кун',
       'ib.method': 'Ҳисоблаш усули', 'ib.methodNote': 'Бомдод {f}° · Хуфтон {i}° · Аср: {asr}', 'ib.asr.hanafi': 'Ҳанафий', 'ib.asr.shafi': 'Шофеъий', 'ib.openSettings': 'Созлаш',
       'ib.logTitle': 'Намоз қайди', 'ib.loggedN': '{n}/5 қайд', 'ib.allJamaat': 'Ҳаммаси жамоат',
+      'ib.per': 'Намозлар кесимида', 'ib.per.sub': 'сўнгги 30 кун', 'ib.per.weak': 'Энг заиф: **{n}**',
+      'ib.per.none': 'Ҳали етарли қайд йўқ', 'ib.per.ontime': 'ўз вақтида',
       'ib.st.jamaat': 'Жамоат', 'ib.st.alone': 'Якка', 'ib.st.qaza': 'Қазо', 'ib.st.missed': 'Ўтказиб',
       'ib.qazaHint': 'қазо?',
       'ib.qazaLedger': 'Қазо дафтари', 'ib.debt': 'қарз', 'ib.missed': 'Ўтказилган', 'ib.late': 'Кеч (қазо)', 'ib.paid': 'Ўқилган қазо',
@@ -72,6 +76,8 @@
       'ib.ramadan': 'Рамадан мубарак!', 'ib.ramadanDay': 'Рамадан, день {d}',
       'ib.method': 'Метод расчёта', 'ib.methodNote': 'Фаджр {f}° · Иша {i}° · Аср: {asr}', 'ib.asr.hanafi': 'Ханафи', 'ib.asr.shafi': 'Шафии', 'ib.openSettings': 'Настройки',
       'ib.logTitle': 'Журнал намазов', 'ib.loggedN': '{n}/5 отмечено', 'ib.allJamaat': 'Все в джамаате',
+      'ib.per': 'По намазам', 'ib.per.sub': 'последние 30 дн.', 'ib.per.weak': 'Слабее всего: **{n}**',
+      'ib.per.none': 'Пока недостаточно записей', 'ib.per.ontime': 'вовремя',
       'ib.st.jamaat': 'Джамаат', 'ib.st.alone': 'Один', 'ib.st.qaza': 'Каза', 'ib.st.missed': 'Пропущен',
       'ib.qazaHint': 'каза?',
       'ib.qazaLedger': 'Учёт каза', 'ib.debt': 'долг', 'ib.missed': 'Пропущено', 'ib.late': 'С опозданием', 'ib.paid': 'Восполнено',
@@ -348,9 +354,47 @@
       <div class="eyebrow mt">${esc(t('ib.heatJamaat'))}</div>${heat}
     </div>`;
   }
+  // Which prayer slips most? 30 days, per prayer, with the four states.
+  function perPrayerCard() {
+    const days = D.lastDays(30);
+    const per = {};
+    let any = 0;
+    for (const k of days) {
+      const d = D.S.prayers[k]; if (!d) continue;
+      for (const id of D.PRAYERS) {
+        const v = d[id]; if (!v) continue;
+        any++;
+        const p = (per[id] = per[id] || { j: 0, a: 0, q: 0, m: 0, n: 0 });
+        p.n++;
+        if (v === 'jamaat') p.j++; else if (v === 'alone') p.a++; else if (v === 'qaza') p.q++; else if (v === 'missed') p.m++;
+      }
+    }
+    const head = `<div class="card"><div class="card-head"><div class="title">${D.ic('list', 16)} ${esc(t('ib.per'))}</div>`;
+    if (!any) return head + `</div><div class="empty">${esc(t('ib.per.none'))}</div></div>`;
+    const NAME = { j: 'jamaat', a: 'alone', q: 'qaza', m: 'missed' };
+    const rows = D.PRAYERS.map((id) => {
+      const p = per[id] || { j: 0, a: 0, q: 0, m: 0, n: 0 };
+      return { id, name: t('prayer.' + id), j: p.j, a: p.a, q: p.q, m: p.m, n: p.n, onTime: p.n ? Math.round(((p.j + p.a) / p.n) * 100) : null };
+    });
+    const scored = rows.filter((r) => r.n >= 3);
+    const weak = scored.length ? scored.slice().sort((a, b) => a.onTime - b.onTime)[0] : null;
+    const seg = [['j', 'var(--success)'], ['a', 'var(--info)'], ['q', 'var(--warning)'], ['m', 'var(--danger-text)']];
+    const body = rows.map((r) => {
+      const bars = r.n ? seg.map(([f, c]) => (r[f] ? `<i style="width:${((r[f] / r.n) * 100).toFixed(1)}%;background:${c}" title="${esc(t('ib.st.' + NAME[f]))}: ${r[f]}"></i>` : '')).join('') : '';
+      return `<div class="ib-per-row ${weak && weak.id === r.id ? 'weak' : ''}">
+        <span class="ib-per-name">${esc(r.name)}</span>
+        <span class="ib-per-bar">${bars}</span>
+        <span class="ib-per-val num">${r.onTime === null ? '—' : r.onTime + '%'}</span></div>`;
+    }).join('');
+    const strip = (h) => h.replace(/^<p>/, '').replace(/<\/p>$/, '');
+    const note = weak ? `<div class="ib-per-note">${D.ic('info', 14)}<span>${D.ai ? strip(D.ai.md(t('ib.per.weak', { n: weak.name }))) : esc(t('ib.per.weak', { n: weak.name }))}</span></div>` : '';
+    const legend = `<div class="legend">${seg.map(([f, c]) => `<span><i class="ib-leg" style="background:${c}"></i>${esc(t('ib.st.' + NAME[f]))}</span>`).join('')}</div>`;
+    return head + `<span class="small muted">${esc(t('ib.per.sub'))} · ${esc(t('ib.per.ontime'))}</span></div>${body}${legend}${note}</div>`;
+  }
+
   function renderLog() {
     const k = logKey();
-    return dateNav(k, 'log', { backfill: true }) + logCard(k) + ledgerCard() + last30Card();
+    return dateNav(k, 'log', { backfill: true }) + logCard(k) + ledgerCard() + last30Card() + perPrayerCard();
   }
   D.act.ibSet = (el) => {
     const k = el.dataset.key, id = el.dataset.id, s = el.dataset.s;
