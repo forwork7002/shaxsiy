@@ -1,0 +1,117 @@
+/* =====================================================================
+   Bo'lim shaxsiyati — har bir bo'lim o'z rangi, o'z hero bloki, o'z ritmi.
+   `#view[data-view]` orqali --sec-* tokenlari almashadi; qolgan hamma narsa
+   shu tokenlarga tayanadi, shuning uchun yangi bo'lim qo'shish = 4 qator.
+   ===================================================================== */
+
+/* ---------- per-section accents ----------
+   Declared on <html data-section> (not on #view) so the fixed nav and header can use them too.
+   core.js stamps both data-section on <html> and data-view on #view. */
+:root { --sec: var(--success); --sec2: var(--info); --sec-soft: rgba(107,227,164,.10); }
+[data-section="today"] { --sec: #F2A65A; --sec2: #E0654E; --sec-soft: rgba(242,166,90,.11); }
+[data-section="health"] { --sec: #5FD6B4; --sec2: #7DD3FC; --sec-soft: rgba(95,214,180,.11); }
+[data-section="finance"] { --sec: #E8C468; --sec2: #A9D96B; --sec-soft: rgba(232,196,104,.11); }
+[data-section="prayer"] { --sec: #6BE3A4; --sec2: #9BE7C4; --sec-soft: rgba(107,227,164,.11); }
+[data-section="gym"] { --sec: #FF8A6B; --sec2: #F2C063; --sec-soft: rgba(255,138,107,.11); }
+[data-section="tasks"] { --sec: #9BB7F5; --sec2: #A78BFA; --sec-soft: rgba(155,183,245,.11); }
+[data-section="learn"] { --sec: #C3A6F5; --sec2: #7DD3FC; --sec-soft: rgba(195,166,245,.11); }
+[data-section="stats"] { --sec: #7DD3FC; --sec2: #6BE3A4; --sec-soft: rgba(125,211,252,.11); }
+[data-theme="light"][data-section="today"] { --sec: #C86B2E; --sec2: #B4472F; --sec-soft: rgba(200,107,46,.10); }
+[data-theme="light"][data-section="health"] { --sec: #24947A; --sec2: #2C7FA8; --sec-soft: rgba(36,148,122,.10); }
+[data-theme="light"][data-section="finance"] { --sec: #9A7A1E; --sec2: #5E8A2A; --sec-soft: rgba(154,122,30,.10); }
+[data-theme="light"][data-section="prayer"] { --sec: #2C8B5A; --sec2: #3F9E72; --sec-soft: rgba(44,139,90,.10); }
+[data-theme="light"][data-section="gym"] { --sec: #C2542F; --sec2: #B07C1E; --sec-soft: rgba(194,84,47,.10); }
+[data-theme="light"][data-section="tasks"] { --sec: #3C63B8; --sec2: #6B4FC0; --sec-soft: rgba(60,99,184,.10); }
+[data-theme="light"][data-section="learn"] { --sec: #6B4FC0; --sec2: #2C7FA8; --sec-soft: rgba(107,79,192,.10); }
+[data-theme="light"][data-section="stats"] { --sec: #2C7FA8; --sec2: #24947A; --sec-soft: rgba(44,127,168,.10); }
+
+/* the ambient page wash picks up the section colour too */
+[data-section="today"]   { --wash1: rgba(242,166,90,.17); }
+[data-section="health"]  { --wash1: rgba(95,214,180,.13); }
+[data-section="finance"] { --wash1: rgba(232,196,104,.13); }
+[data-section="prayer"]  { --wash1: rgba(107,227,164,.13); }
+[data-section="gym"]     { --wash1: rgba(255,138,107,.14); }
+[data-section="tasks"]   { --wash1: rgba(155,183,245,.12); }
+[data-section="learn"]   { --wash1: rgba(195,166,245,.12); }
+[data-section="stats"]   { --wash1: rgba(125,211,252,.12); }
+body::before { transition: background 1.2s ease; }
+
+/* section colour flows into the shared kit without touching each module */
+#view .seg button.on { background: var(--sec); color: #08110D; }
+[data-theme="light"] #view .seg button.on { color: #fff; }
+#view .tabs button.on { background: var(--sec); border-color: var(--sec); color: #08110D; }
+[data-theme="light"] #view .tabs button.on { color: #fff; }
+#view .section-title::before { background: var(--sec); opacity: .9; }
+#view .card-head > .title > .ic { color: var(--sec); }
+#view .btn:not(.ghost):not(.danger):not(.icon) { background: linear-gradient(180deg, var(--sec), color-mix(in srgb, var(--sec) 82%, #000)); color: #08110D; }
+[data-theme="light"] #view .btn:not(.ghost):not(.danger):not(.icon) { color: #fff; }
+.nav-tab.on { color: var(--sec); }
+.nav-tab.on svg { color: var(--sec); }
+.nav-tab.on { transition: color .25s ease; }
+
+/* ---------- hero: one big block that says what this section is about ---------- */
+/* the hero is one of the few surfaces that earns a blur — it sits over the drifting wash */
+.hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 18px; margin-bottom: 14px;
+  backdrop-filter: blur(18px) saturate(1.15); -webkit-backdrop-filter: blur(18px) saturate(1.15);
+  background: linear-gradient(150deg, color-mix(in srgb, var(--sec) 15%, transparent), transparent 62%), var(--glass);
+  border: 1px solid color-mix(in srgb, var(--sec) 22%, transparent);
+  box-shadow: 0 14px 44px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.05); }
+[data-theme="light"] .hero { box-shadow: 0 10px 30px rgba(46,42,36,.09); background: linear-gradient(150deg, color-mix(in srgb, var(--sec) 13%, transparent), transparent 62%), #fff; }
+.hero::after { content: ''; position: absolute; width: 220px; height: 220px; right: -70px; top: -110px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, color-mix(in srgb, var(--sec) 26%, transparent), transparent 70%); filter: blur(26px); }
+.hero > * { position: relative; }
+.hero-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: color-mix(in srgb, var(--sec) 78%, var(--text3)); }
+.hero-main { display: flex; align-items: center; gap: 16px; margin-top: 8px; }
+.hero-num { font-family: var(--mono); font-size: 42px; font-weight: 800; letter-spacing: -.045em; line-height: 1; color: var(--text); }
+.hero-num small { font-size: 15px; font-weight: 700; letter-spacing: 0; margin-left: 2px; color: var(--text3); }
+.hero-body { flex: 1; min-width: 0; }
+.hero-title { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -.01em; line-height: 1.25; }
+.hero-sub { font-size: 12.5px; color: var(--text3); margin-top: 3px; line-height: 1.4; }
+.hero-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.hero-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: var(--r-pill); font-size: 11.5px; font-weight: 700;
+  background: color-mix(in srgb, var(--sec) 13%, transparent); border: 1px solid color-mix(in srgb, var(--sec) 26%, transparent); color: var(--sec); white-space: nowrap; }
+.hero-chip.mute { background: var(--inset); border-color: var(--line); color: var(--text3); }
+@media (max-width: 400px) { .hero { padding: 15px; } .hero-num { font-size: 36px; } }
+
+/* ---------- bento: big block + small blocks, instead of a stack of equals ---------- */
+.bento { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
+.bento .b-wide { grid-column: span 2; }
+.bento-tile { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 3px; min-height: 74px; padding: 12px 13px;
+  border-radius: var(--r-sm); background: var(--inset); border: 1px solid var(--line); text-align: left; color: inherit;
+  transition: border-color .18s ease, background .18s ease, transform .12s ease; }
+button.bento-tile { cursor: pointer; }
+button.bento-tile:hover { border-color: color-mix(in srgb, var(--sec) 34%, transparent); background: var(--hover); }
+button.bento-tile:active { transform: scale(.985); }
+.bento-tile .lab { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); display: flex; align-items: center; gap: 5px; }
+.bento-tile .lab .ic { color: var(--sec); opacity: .9; }
+.bento-tile .val { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -.03em; color: var(--text); line-height: 1.05; }
+.bento-tile .val small { font-size: 11px; color: var(--text3); font-weight: 600; margin-left: 1px; }
+.bento-tile .sub { font-size: 11px; color: var(--text3); }
+.bento-tile .mini { position: absolute; right: 10px; bottom: 8px; width: 46px; opacity: .55; }
+.bento-tile.on { border-color: color-mix(in srgb, var(--sec) 40%, transparent); background: var(--sec-soft); }
+.bento-tile.on .val { color: var(--sec); }
+@media (max-width: 340px) { .bento { grid-template-columns: 1fr; } .bento .b-wide { grid-column: span 1; } }
+
+/* ---------- section-specific character ---------- */
+/* Moliya reads like a ledger: mono numbers, tighter rows */
+#view[data-view="finance"] .card { border-radius: 14px; }
+#view[data-view="finance"] .hero-num { letter-spacing: -.05em; }
+/* Ibodat breathes: more space, softer edges */
+#view[data-view="prayer"] .card { border-radius: 20px; }
+#view[data-view="prayer"] .hero { padding: 22px 20px; }
+/* Bugun is warm and immediate */
+#view[data-view="today"] .hero { border-radius: 22px; }
+
+/* ---------- motion: short, cheap, and only on transform/opacity/colour ---------- */
+/* Only when the section actually changes (core adds .view-enter for ~450ms).
+   Never on a rerender: otherwise every habit tick would re-animate the page. */
+#view.view-enter > * { animation: secIn .3s var(--ease-out) backwards; }
+#view.view-enter > *:nth-child(2) { animation-delay: .03s; }
+#view.view-enter > *:nth-child(3) { animation-delay: .06s; }
+#view.view-enter > *:nth-child(4) { animation-delay: .09s; }
+#view.view-enter > *:nth-child(n+5) { animation-delay: .11s; }
+@keyframes secIn { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: none; } }
+.card, .bento-tile, .hero { will-change: auto; }
+.li, .pill, .btn, .seg button, .tabs button { transition: background .16s ease, color .16s ease, border-color .16s ease, transform .1s ease; }
+.li:active, .bento-tile:active { transform: scale(.995); }
+@media (prefers-reduced-motion: reduce) { #view.view-enter > * { animation: none !important; } }

@@ -126,3 +126,11 @@
 .hl-corr strong { color: var(--text); font-weight: 700; }
 .hl-corr .tiny { flex: none; white-space: nowrap; align-self: center; }
 @media (max-width: 430px) { .hl-corr { flex-wrap: wrap; } .hl-corr .tiny { width: 100%; padding-left: 24px; } }
+
+/* Kun bo'limi bento — .stat markup ichida ham to'g'ri ko'rinishi uchun */
+.hl-tiles.bento .stat { background: transparent; border: 0; padding: 0; }
+.hl-tiles.bento .bento-tile { justify-content: center; }
+.hl-tiles.bento .stat-num { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -.03em; line-height: 1.05; }
+.hl-tiles.bento .b-wide .stat-num { font-size: 28px; }
+.hl-tiles.bento .stat-label { margin-top: 5px; font-size: 10px; letter-spacing: .12em; }
+.hl-tiles.bento .zone { top: 10px; right: 10px; }

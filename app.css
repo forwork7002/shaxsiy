@@ -14,6 +14,7 @@
   --danger: #FF6B6B; --danger-text: #FF8A8A;
   --info: #7DD3FC; --accent: #E07658; --violet: #A78BFA;
   --glass: rgba(255,255,255,.04); --inset: rgba(255,255,255,.035); --recess: rgba(255,255,255,.025);
+  --card-bg: #101013;
   --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.10); --line3: rgba(255,255,255,.18);
   --hover: rgba(255,255,255,.07); --focus: rgba(255,255,255,.28);
   --f-input: rgba(0,0,0,.28); --f-input-focus: rgba(0,0,0,.36);
@@ -41,6 +42,7 @@
   --danger: #d65c5c; --danger-text: #c74b4b;
   --info: #3f8fc4; --accent: #d96a49; --violet: #7c5cd6;
   --glass: rgba(255,255,255,.72); --inset: rgba(46,42,36,.04); --recess: rgba(46,42,36,.03);
+  --card-bg: #ffffff;
   --line: rgba(46,42,36,.09); --line2: rgba(46,42,36,.14); --line3: rgba(46,42,36,.22);
   --hover: rgba(46,42,36,.06); --focus: rgba(79,168,105,.6);
   --f-input: rgba(46,42,36,.04); --f-input-focus: #ffffff;
@@ -120,10 +122,15 @@ p { margin: 0 0 8px; }
 .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- card ---------- */
-.card { position: relative; background: var(--glass); border-radius: var(--r); padding: 16px; margin-bottom: 12px; box-shadow: var(--sh);
-  backdrop-filter: blur(24px) saturate(1.2); -webkit-backdrop-filter: blur(24px) saturate(1.2); overflow: hidden; transition: background .4s; }
+/* backdrop-filter is the single most expensive thing on a scrolling page: every blurred
+   surface forces the compositor to re-sample what is behind it. A long list of cards used to
+   pay that cost per card. Cards are now a flat translucent surface (visually identical over
+   the app's own background) and the real glass is kept for the few surfaces that actually sit
+   over moving content: the sticky header, the bottom nav, the hero and modals. */
+.card { position: relative; background: var(--card-bg); border-radius: var(--r); padding: 16px; margin-bottom: 12px; box-shadow: var(--sh);
+  overflow: hidden; transition: background .3s ease, border-color .3s ease; }
 [data-theme="light"] .card { border: 1px solid var(--line); }
-@supports not (backdrop-filter: blur(1px)) { .card { background: rgba(255,255,255,.07); } [data-theme="light"] .card { background: #fff; } }
+
 .card.flat { box-shadow: none; backdrop-filter: none; background: var(--inset); border: 1px solid var(--line); }
 .card.all-done::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 0%, rgba(107,227,164,.10), transparent 60%); }
 .card.all-done .kpi-num, .card.all-done .kpi-label { color: var(--success); }

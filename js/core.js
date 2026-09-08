@@ -735,7 +735,20 @@
     if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
     D.renderNav();
     D.rerender();
-    if (changed) { window.scrollTo(0, 0); D.emit('view:changed', id); }
+    if (changed) {
+      window.scrollTo(0, 0);
+      // Play the section-enter animation once per navigation — never on an ordinary
+      // rerender, otherwise ticking a habit would re-animate the whole page.
+      const root = D.$('#view');
+      if (root) {
+        root.classList.remove('view-enter');
+        void root.offsetWidth;            // restart the animation
+        root.classList.add('view-enter');
+        clearTimeout(D._enterT);
+        D._enterT = setTimeout(() => root.classList.remove('view-enter'), 460);
+      }
+      D.emit('view:changed', id);
+    }
     D.closeMore();
   };
   D.current = () => current;
@@ -764,6 +777,9 @@
       D.logError(e);
       html = `<div class="card error-card"><div class="title">${D.ic('alert')} ${D.t('error.view')}</div><pre class="small muted">${D.esc(e && e.stack || e)}</pre></div>`;
     }
+    // Stamp the section on the page and on <html> so CSS can swap the accent per view.
+    root.setAttribute('data-view', current);
+    document.documentElement.setAttribute('data-section', current);
     root.innerHTML = html;
     if (v.mount) { try { v.mount(root); } catch (e) { console.error('mount', current, e); D.logError(e); } }
     window.scrollTo(0, y);

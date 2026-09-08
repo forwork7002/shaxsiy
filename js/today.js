@@ -8,6 +8,9 @@
 
   D.i18n.add({
     uz: {
+      'today.left.n': 'Qolgan {n} ta', 'today.showAll': 'Barchasini ko‘rsatish', 'today.showLess': 'Yig‘ish',
+      'today.doneN': 'Bajarilgan {n}', 'today.allDoneShort': 'Bugungi odatlar tugadi',
+      'today.wrap': 'Kun yakuni', 'today.nothingLeft': 'Hozircha hammasi joyida',
       'today.ticker': 'VAZIFA',
       'today.ticker.empty': "Bugunga vazifa yo'q — pastda qo'shing",
       'today.ticker.allDone': "✓ Hammasi bajarildi — zo'r kun",
@@ -43,6 +46,9 @@
       'today.marked': 'Belgilandi: {name}', 'today.unmarked': 'Bekor qilindi: {name}',
     },
     uzk: {
+      'today.left.n': 'Қолган {n} та', 'today.showAll': 'Барчасини кўрсатиш', 'today.showLess': 'Йиғиш',
+      'today.doneN': 'Бажарилган {n}', 'today.allDoneShort': 'Бугунги одатлар тугади',
+      'today.wrap': 'Кун якуни', 'today.nothingLeft': 'Ҳозирча ҳаммаси жойида',
       'today.ticker': 'ВАЗИФА',
       'today.ticker.empty': 'Бугунга вазифа йўқ — пастда қўшинг',
       'today.ticker.allDone': '✓ Ҳаммаси бажарилди — зўр кун',
@@ -78,6 +84,9 @@
       'today.marked': 'Белгиланди: {name}', 'today.unmarked': 'Бекор қилинди: {name}',
     },
     ru: {
+      'today.left.n': 'Осталось {n}', 'today.showAll': 'Показать все', 'today.showLess': 'Свернуть',
+      'today.doneN': 'Выполнено {n}', 'today.allDoneShort': 'Привычки на сегодня закрыты',
+      'today.wrap': 'Итог дня', 'today.nothingLeft': 'Пока всё в порядке',
       'today.ticker': 'ЗАДАЧИ',
       'today.ticker.empty': 'На сегодня задач нет — добавьте ниже',
       'today.ticker.allDone': '✓ Всё выполнено — отличный день',
@@ -348,10 +357,10 @@
       ${side.length ? `<span class="wh-ready-side">${side.join('')}</span>` : ''}</button>`;
   }
   function dayCard(k) {
-    return `${readyHtml(k)}<div class="card td-day"><div class="td-day-grid">
+    return `<div class="hero td-hero"><div class="td-day-grid">
       <div class="td-dayring" id="tdDayRing">${ringHtml()}</div>
       <div class="td-day-right"><div id="tdNext">${nextHtml()}</div>${prayersHtml(k)}</div>
-    </div></div>`;
+    </div></div>${readyHtml(k)}`;
   }
   D.act.tdPrayer = (el) => {
     const k = key(), id = el.dataset.id;
@@ -415,16 +424,27 @@
       else balance = 0;
     }
 
+    // Research on habit apps is blunt: a wall of 28 rows is why people stop opening the app.
+    // Show what is still LEFT (capped), keep the finished ones and the overflow one tap away.
+    const CAP = 6;
+    const left = due.filter((h) => !isDone(h));
+    const finished = due.filter((h) => isDone(h));
+    const showAll = !!D.ui.collapsed.tdHabitsAll;
+    const showDone = !!D.ui.collapsed.tdHabitsDone;
+    const shown = showAll ? left : left.slice(0, CAP);
+    const hidden = left.length - shown.length;
+
     let rows = '';
     if (!due.length) rows = `<div class="empty">${esc(t('today.noHabits'))}</div>`;
-    else if (due.length > 8) {
-      for (const id of D.SPHERE_IDS) {
-        const hs = due.filter((h) => sphereOf(h) === id);
-        if (!hs.length) continue;
-        rows += `<div class="td-sph-head" style="--c:var(--${id})"><i class="dot"></i>${esc(t('sphere.' + id))}<span class="num">${sph[id].d}/${sph[id].t}</span></div>`;
-        rows += hs.map((h) => habitRow(h, isDone(h), counts)).join('');
-      }
-    } else rows = due.map((h) => habitRow(h, isDone(h), counts)).join('');
+    else if (!left.length) rows = `<div class="td-alldone">${D.ic('check', 18)}<span>${esc(t('today.allDoneShort'))}</span></div>`;
+    else rows = shown.map((h) => habitRow(h, false, counts)).join('');
+
+    if (hidden > 0) rows += `<button class="td-more" data-act="tdHabitsAll">${D.ic('chevD', 15)} ${esc(t('today.left.n', { n: hidden }))}</button>`;
+    else if (showAll && left.length > CAP) rows += `<button class="td-more" data-act="tdHabitsAll">${D.ic('chevD', 15)} ${esc(t('today.showLess'))}</button>`;
+    if (finished.length) {
+      rows += `<button class="td-more done ${showDone ? 'open' : ''}" data-act="tdHabitsDone">${D.ic('chevD', 15)} ${esc(t('today.doneN', { n: finished.length }))}</button>`;
+      if (showDone) rows += finished.map((h) => habitRow(h, true, counts)).join('');
+    }
     const notDue = active.length - due.length;
 
     return `<div class="card td-habits ${all ? 'all-done' : ''}">
@@ -441,6 +461,8 @@
       ${notDue > 0 ? `<div class="td-notdue">${esc(t('today.notDue', { n: notDue }))}</div>` : ''}
     </div>`;
   }
+  D.act.tdHabitsAll = () => { D.ui.collapsed.tdHabitsAll = !D.ui.collapsed.tdHabitsAll; D.saveUi(); D.rerender(); };
+  D.act.tdHabitsDone = () => { D.ui.collapsed.tdHabitsDone = !D.ui.collapsed.tdHabitsDone; D.saveUi(); D.rerender(); };
   D.act.tdHabit = (el) => {
     const k = key(), id = el.dataset.id, h = findHabit(id);
     if (!h) return;
@@ -483,7 +505,11 @@
     const expanded = !!D.ui.collapsed.tdTasksOpen;
     const visible = total > FOLD && !expanded ? list.slice(0, FOLD) : list;
     const label = !total ? t('today.tasksNone') : all ? t('today.tasksAllDone') : t('common.done');
-    const segs = list.map((x) => `<i class="${x.done ? 'on' : ''}"></i>`).join('');
+    // One segment per task reads as noise past a dozen; beyond that show a plain bar.
+    const SEG_MAX = 12;
+    const segs = total && total <= SEG_MAX
+      ? list.map((x) => `<i class="${x.done ? 'on' : ''}"></i>`).join('')
+      : total ? `<i class="on" style="flex:${done || 0.001}"></i><i style="flex:${Math.max(total - done, 0.001)}"></i>` : '';
     const pending = total - done;
 
     const tk = D.addDays(k, 1);
@@ -611,24 +637,24 @@
     const items = (D.S.stack && D.S.stack.items) || [], taken = (D.S.stack && D.S.stack.taken && D.S.stack.taken[k]) || {};
     const tk = items.filter((i) => taken[i.id]).length;
     const sz = items.length ? (tk >= items.length ? 'z-good' : tk ? 'z-warn' : '') : '';
-    return `<div class="grid3 td-quick">
-      <div class="stat td-tile td-tile-water" data-act="go" data-view="health" data-sub="water" role="button" tabindex="0">
-        <div class="stat-num num"><span id="tdWaterNum">${w.water}</span><span class="td-tile-of">/${w.serv}</span></div>
-        <div class="stat-label">${D.ic('droplet', 12)} ${esc(t('today.water'))}</div>
+    return `<div class="bento td-quick">
+      <div class="bento-tile td-tile td-tile-water b-wide" data-act="go" data-view="health" data-sub="water" role="button" tabindex="0">
+        <div class="val"><span id="tdWaterNum">${w.water}</span><span class="td-tile-of">/${w.serv}</span></div>
+        <div class="lab">${D.ic('droplet', 12)} ${esc(t('today.water'))}</div>
         <span class="bar thin td-tile-bar" id="tdWaterBar">${waterBar(w)}</span>
         <button class="td-plus" data-act="tdWater" aria-label="+1 ${esc(t('unit.glass'))}">${D.ic('plus', 16)}</button>
       </div>
-      <div class="stat td-tile" data-act="go" data-view="health" data-sub="caffeine" role="button" tabindex="0">
+      <div class="bento-tile td-tile" data-act="go" data-view="health" data-sub="caffeine" role="button" tabindex="0">
         <i class="zone ${cz}"></i>
-        <div class="stat-num num ${mg > limit ? 'bad' : ''}">${D.fmtNum(mg)}<span class="td-tile-of"> mg</span></div>
-        <div class="stat-label">${D.ic('coffee', 12)} ${esc(t('today.caffeine'))}</div>
-        <div class="stat-sub num">/ ${D.fmtNum(limit)}</div>
+        <div class="val ${mg > limit ? 'bad' : ''}">${D.fmtNum(mg)}<span class="td-tile-of"> mg</span></div>
+        <div class="lab">${D.ic('coffee', 12)} ${esc(t('today.caffeine'))}</div>
+        <div class="sub num">/ ${D.fmtNum(limit)}</div>
       </div>
-      <div class="stat td-tile" data-act="go" data-view="health" data-sub="stack" role="button" tabindex="0">
+      <div class="bento-tile td-tile" data-act="go" data-view="health" data-sub="stack" role="button" tabindex="0">
         <i class="zone ${sz}"></i>
-        <div class="stat-num num">${tk}<span class="td-tile-of">/${items.length}</span></div>
-        <div class="stat-label">${D.ic('pill', 12)} ${esc(t('today.stack'))}</div>
-        <div class="stat-sub">${esc(t('common.today'))}</div>
+        <div class="val">${tk}<span class="td-tile-of">/${items.length}</span></div>
+        <div class="lab">${D.ic('pill', 12)} ${esc(t('today.stack'))}</div>
+        <div class="sub">${esc(t('common.today'))}</div>
       </div>
     </div>`;
   }
@@ -751,8 +777,11 @@
       const k = key(), today = k === td;
       // AI advice sits under the day/habits summary — high enough to be read, below the things you act on first.
       const ai = today && D.ai ? safe(() => D.ai.card('today')) : '';
+      // Order follows the question "what do I do now?": time → what's left → today's tasks →
+      // a compact body row → AI → the end-of-day wrap-up.
       return safe(() => dateNav(k, today)) + safe(() => ticker(k)) + safe(() => dayCard(k)) + safe(() => habitsCard(k)) +
-        safe(() => tasksCard(k)) + safe(() => quickStrip(k)) + ai + safe(() => noteCard(k)) + safe(() => gratCard(k));
+        safe(() => tasksCard(k)) + safe(() => quickStrip(k)) + ai +
+        `<div class="section-title">${esc(t('today.wrap'))}</div>` + safe(() => noteCard(k)) + safe(() => gratCard(k));
     },
     mount() { startTicker(); },
     unmount() { stopTicker(); },

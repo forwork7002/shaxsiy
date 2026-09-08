@@ -395,11 +395,12 @@
     for (const d of last7) { const r = hGet(d); if (r) { if (num(r.sleep) !== null) sl.push(+r.sleep); if (num(r.mood) !== null) md.push(+r.mood); } }
     const avgSleep = sl.length ? D.round(D.avg(sl), 1) : null, avgMood = md.length ? D.avg(md) : null;
     const wt = waterTarget(), serv = Math.max(1, Math.ceil(wt.total / servingMl()));
-    const tiles = `<div class="stat-grid hl-tiles">
-      <div class="stat" id="hlTileWeight">${weightTileHtml()}</div>
-      ${stat(avgSleep !== null ? `${avgSleep}<small>${D.t('unit.h')}</small>` : '—', D.t('hl.tile.avgSleep'), { zone: avgSleep === null ? '' : avgSleep >= 7 ? 'good' : avgSleep >= 6 ? 'warn' : 'bad' })}
-      ${stat(avgMood !== null ? `${MOODS[D.clamp(Math.round(avgMood), 0, 4)]} <small>${D.round(avgMood, 1)}</small>` : '—', D.t('hl.tile.avgMood'))}
-      <div class="stat" id="hlTileWater">${waterTileHtml()}</div>
+    // bento rather than four equal boxes: weight is the day's headline, the rest sit beside it
+    const tiles = `<div class="bento hl-tiles">
+      <div class="bento-tile b-wide" id="hlTileWeight">${weightTileHtml()}</div>
+      <div class="bento-tile">${stat(avgSleep !== null ? `${avgSleep}<small>${D.t('unit.h')}</small>` : '—', D.t('hl.tile.avgSleep'), { zone: avgSleep === null ? '' : avgSleep >= 7 ? 'good' : avgSleep >= 6 ? 'warn' : 'bad' })}</div>
+      <div class="bento-tile">${stat(avgMood !== null ? `${MOODS[D.clamp(Math.round(avgMood), 0, 4)]} <small>${D.round(avgMood, 1)}</small>` : '—', D.t('hl.tile.avgMood'))}</div>
+      <div class="bento-tile b-wide" id="hlTileWater">${waterTileHtml()}</div>
     </div>`;
 
     // weight

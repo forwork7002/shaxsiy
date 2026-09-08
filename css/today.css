@@ -96,3 +96,28 @@
 .td-insp-text { font-size: 13.5px; color: var(--text2); margin-top: 4px; line-height: 1.45; overflow-wrap: anywhere; }
 .td-grat .li { align-items: flex-start; }
 .td-grat-ic { color: var(--qalb); display: inline-flex; margin-top: 3px; flex: none; }
+
+/* ---- Bugun: fokus ro'yxati (28 ta odat devori o'rniga) ---- */
+.td-more { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 42px; margin-top: 6px;
+  border: 1px dashed var(--line2); border-radius: var(--r-sm); background: transparent; color: var(--text3);
+  font-size: 12px; font-weight: 700; letter-spacing: .04em; transition: color .18s, border-color .18s, background .18s; }
+.td-more:hover { color: var(--text); border-color: var(--line3); background: var(--glass); border-style: solid; }
+.td-more .ic { transition: transform .22s var(--ease-out); }
+.td-more.open .ic { transform: rotate(180deg); }
+.td-more.done { border-style: solid; border-color: var(--line); color: var(--text3); }
+.td-more.done:hover { color: var(--text2); }
+.td-alldone { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 20px 10px; color: var(--success); font-size: 13.5px; font-weight: 700; }
+.td-alldone .ic { color: var(--success); }
+
+/* hero uses the section accent, so the old flat card look goes away */
+.td-hero .td-ring { --c: var(--sec); }
+.td-hero .td-day-grid { gap: 14px; }
+.td-quick { margin-top: 2px; }
+.td-tile .td-tile-of { font-size: 11px; color: var(--text3); font-weight: 600; }
+.td-tile .td-plus { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--sec) 30%, transparent); background: color-mix(in srgb, var(--sec) 12%, transparent); color: var(--sec);
+  display: inline-flex; align-items: center; justify-content: center; transition: background .15s, transform .1s; }
+.td-tile .td-plus:hover { background: color-mix(in srgb, var(--sec) 22%, transparent); }
+.td-tile .td-plus:active { transform: translateY(-50%) scale(.92); }
+.td-tile-water .val { padding-right: 46px; }
+.td-tile-bar { margin-top: 6px; }
