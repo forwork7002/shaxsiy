@@ -22,6 +22,7 @@ Env (start.sh):
 """
 import hashlib
 import hmac
+import html
 import json
 import logging
 import os
@@ -360,7 +361,7 @@ def whoop_login():
 @app.get("/api/whoop/callback")
 def whoop_callback():
     if request.args.get("error"):
-        return f"WHOOP xato: {request.args.get('error')}", 400
+        return f"WHOOP xato: {html.escape(request.args.get('error', '')[:200])}", 400
     code, state = request.args.get("code", ""), request.args.get("state", "")
     try:
         uid, nonce, sig = state.split(".")
@@ -375,11 +376,13 @@ def whoop_callback():
     })
     if status != 200 or "access_token" not in tok:
         log.error("WHOOP token xato %s: %s", status, tok)
+        # WHOOP javobi — tashqi manba. Sahifaga qo'yishdan oldin ekranlanadi, aks holda
+        # o'sha javobdagi HTML bizning domenimizda ishga tushadi (sessiya cookie'si shu yerda).
         detail = tok.get("error_description") or tok.get("detail") or tok.get("error") or str(tok)[:300]
         return (
             "<meta charset='utf-8'><body style='font:15px/1.6 system-ui;max-width:34em;margin:12vh auto;padding:0 20px'>"
             "<h2>WHOOP ulanmadi</h2>"
-            f"<p style='color:#a33'>{str(detail)[:400]}</p>"
+            f"<p style='color:#a33'>{html.escape(str(detail)[:400])}</p>"
             "<p><a href='/#health'>Ilovaga qaytish</a></p></body>", 502
         )
     tok["expires_at"] = time.time() + int(tok.get("expires_in", 3600)) - 60
