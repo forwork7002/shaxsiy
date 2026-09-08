@@ -742,10 +742,19 @@
   D.act.go = (el) => D.go(el.dataset.view, el.dataset.sub);
   D.act.sub = (el) => D.setSub(el.dataset.view || current, el.dataset.sub);
 
+  // First load on a new device: local storage is empty and the server still owes us the data.
+  // Show a skeleton instead of a briefly-empty app.
+  D.loading = false;
+  const skeleton = () => `<div class="card skel-card"><div class="skel skel-eyebrow"></div><div class="skel skel-kpi"></div>
+      <div class="skel-rows">${'<div class="skel skel-row"></div>'.repeat(3)}</div></div>
+    <div class="card skel-card">${'<div class="skel skel-row"></div>'.repeat(5)}</div>
+    <div class="skel-note">${D.esc(D.t('loading'))}</div>`;
+
   D.rerender = () => {
     const v = D.views[current];
     const root = D.$('#view');
     if (!v || !root) return;
+    if (D.loading) { root.innerHTML = skeleton(); return; }
     const y = window.scrollY;
     let html;
     try { html = v.render(); } catch (e) {
@@ -900,10 +909,12 @@
     D.theme.apply();
     if (D.tg) { try { D.tg.ready(); D.tg.expand(); if (D.tg.disableVerticalSwipes) D.tg.disableVerticalSwipes(); } catch (e) {} }
     const hash = location.hash.replace('#', '');
+    const empty = !Object.keys(D.S.logs).length && !D.S.habits.length && !D.S.tasks.length && !D.S.finance.tx.length;
+    D.loading = empty && D.serverEnabled();
     D.go(D.views[hash] ? hash : D.ui.view);
     D.setSync(D.serverEnabled() ? 'wait' : 'local');
     if (D._corrupt) D.toast(D.t('data.corrupt'), { ms: 6000 });
-    D.pull();
+    D.pull().finally(() => { if (D.loading) { D.loading = false; D.rerender(); } });
     // header clock / day rollover
     let lastDay = D.today();
     setInterval(() => {

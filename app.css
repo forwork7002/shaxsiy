@@ -375,6 +375,18 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .fab { position: fixed; right: 16px; bottom: calc(var(--nav-h) + 16px + env(safe-area-inset-bottom)); z-index: 38; width: 52px; height: 52px; border-radius: 50%; border: 0; background: var(--btn-grad); color: var(--ink-on-light); box-shadow: var(--sh-btn), 0 10px 30px rgba(0,0,0,.4); display: flex; align-items: center; justify-content: center; }
 @media (min-width: 960px) { .fab { bottom: 24px; right: 24px; } }
 
+/* ---------- loading skeleton ---------- */
+.skel-card { pointer-events: none; }
+.skel { background: linear-gradient(90deg, var(--inset) 25%, var(--hover) 37%, var(--inset) 63%);
+  background-size: 400% 100%; border-radius: 8px; animation: skel 1.4s ease-in-out infinite; }
+@keyframes skel { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+.skel-eyebrow { width: 96px; height: 11px; margin-bottom: 14px; }
+.skel-kpi { width: 148px; height: 34px; margin-bottom: 18px; border-radius: 10px; }
+.skel-rows { display: grid; gap: 8px; }
+.skel-row { height: 44px; border-radius: var(--r-sm); }
+.skel-card + .skel-card .skel-row + .skel-row { margin-top: 8px; }
+.skel-note { text-align: center; font-size: 12px; color: var(--text3); padding: 6px 0 18px; }
+
 /* ==== today ==== */
 /* ==== tasks ==== */
 /* ==== health ==== */
