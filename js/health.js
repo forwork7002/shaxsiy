@@ -433,7 +433,9 @@
     const noteBlock = `<div class="hl-field"><div class="hl-lab"><span class="eyebrow">${esc(D.t('common.note'))}</span></div>
       <textarea class="ta" rows="3" maxlength="2000" placeholder="${esc(D.t('hl.day.notePh'))}" data-input="hlNote" data-key="${esc(k)}" aria-label="${esc(D.t('common.note'))}">${esc(h.note || '')}</textarea></div>`;
 
-    return `${nav}${tiles}<div class="card hl-daycard"><div class="card-head"><div class="title">${D.ic('heart')} ${esc(D.t('hl.day.log'))}</div></div>
+    // The watch measures the day better than a form can — when it is connected its card leads.
+    const wh = D.whoop && D.whoop.dayCard ? D.whoop.dayCard(k) : '';
+    return `${nav}${wh}${tiles}<div class="card hl-daycard"><div class="card-head"><div class="title">${D.ic('heart')} ${esc(D.t('hl.day.log'))}</div></div>
       <div class="hl-form">${weightBlock}${sleepBlock}${waterBlock}${moodBlock}${noteBlock}</div></div>${sleepInsight()}`;
   }
 
@@ -792,7 +794,12 @@
   /* WHOOP                                                               */
   /* ------------------------------------------------------------------ */
   function renderWhoop() {
-    const W = D.S.whoop, c = W.cache || {};
+    const W = D.S.whoop;
+    // js/whoop.js keeps the per-day history; `cache` is only the legacy latest-snapshot.
+    // Prefer today's (or yesterday's) real day record so the tab reflects the same data as everywhere else.
+    const today = D.today();
+    const day = (D.whoop && D.whoop.day) ? (D.whoop.day(today) || D.whoop.day(D.addDays(today, -1))) : null;
+    const c = Object.assign({}, W.cache || {}, day || {});
     if (!W.connected) {
       return `<div class="card hl-wh-intro"><div class="hl-wh-logo">${D.ic('bolt', 28)}</div><div class="title">WHOOP</div><p class="help">${esc(D.t('hl.wh.intro'))}</p>
         ${D.serverEnabled() ? '' : `<div class="banner">${D.ic('info', 16)}<span>${esc(D.t('hl.wh.needServer'))}</span></div>`}

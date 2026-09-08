@@ -37,3 +37,17 @@
 @media (max-width: 400px) { .wh-ready-side { display: none; } }
 
 .wh-auto { font-size: 11px; color: var(--info); display: inline-flex; align-items: center; gap: 4px; }
+
+/* WHOOP kun kartasi — Sog'liq bo'limining boshida */
+.wh-day .hero-main { align-items: center; }
+.wh-day-grid { margin-top: 16px; margin-bottom: 0; }
+.wh-day-grid .bento-tile { min-height: 70px; }
+.wh-notes { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
+.wh-note { display: flex; align-items: flex-start; gap: 8px; padding: 8px 11px; border-radius: 11px; font-size: 12.5px; line-height: 1.45;
+  background: var(--row-bg); border: 1px solid var(--row-line); color: var(--text2); }
+.wh-note .ic { flex: none; margin-top: 1px; }
+.wh-note.good { border-color: color-mix(in srgb, var(--success) 24%, transparent); }
+.wh-note.good .ic { color: var(--success); }
+.wh-note.warn { border-color: color-mix(in srgb, var(--warning) 26%, transparent); }
+.wh-note.warn .ic { color: var(--warning); }
+.wh-note strong { color: var(--text); font-weight: 700; }

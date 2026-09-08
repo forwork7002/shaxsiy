@@ -22,6 +22,17 @@
       'wh.autoSleep': 'Uyqu WHOOP’dan olindi', 'wh.syncing': 'Yangilanmoqda…', 'wh.deep': "To'liq tarix",
       'wh.range': 'Davr', 'wh.kcal': 'kkal', 'wh.hrAvg': "o'rt. puls", 'wh.dur': 'davomiylik',
       'wh.body': 'Tana', 'wh.height': "Bo'y", 'wh.weight': 'Vazn', 'wh.maxHr': 'Maks. puls',
+      'wh.i.need': 'kerak {h} soat', 'wh.i.target': 'me’yor {m}', 'wh.i.base': 'odatda {b}',
+      'wh.i.vsBase': '30 kunlik odatingiz **{b}%** edi — bugun **{n}**',
+      'wh.i.sleepOk': 'Uyqu yetarli — kerakli **{need} soat**ni qopladingiz',
+      'wh.i.sleepShort': 'Uyqu **{h} soat** kam — kerak edi {need} soat',
+      'wh.i.hrvUp': 'HRV odatdagidan **{p}%** yuqori (odatda {b} ms) — tana tetik',
+      'wh.i.hrvDown': 'HRV odatdagidan **{p}%** past (odatda {b} ms) — yuklamani kamaytiring',
+      'wh.i.rhrUp': 'Tinch puls **{n} bpm** yuqori (odatda {b}) — charchoq yoki kasallik belgisi',
+      'wh.i.rhrDown': 'Tinch puls **{n} bpm** past (odatda {b}) — yaxshi tiklanish',
+      'wh.i.over': 'Zo‘riqish **{s}** — bugungi me’yor {m} edi, ortiqcha yuk',
+      'wh.i.room': 'Yuk uchun joy bor — bugun **{m}** gacha ko‘tarsangiz bo‘ladi',
+      'wh.i.kcal': 'Sarflandi **{k} kkal** (taxminiy me’yor {t})',
       'wh.pulled': '{n} kunlik ma’lumot olindi', 'wh.sport': 'Mashq',
     },
     uzk: {
@@ -32,6 +43,17 @@
       'wh.autoSleep': 'Уйқу WHOOP’дан олинди', 'wh.syncing': 'Янгиланмоқда…', 'wh.deep': 'Тўлиқ тарих',
       'wh.range': 'Давр', 'wh.kcal': 'ккал', 'wh.hrAvg': 'ўрт. пулс', 'wh.dur': 'давомийлик',
       'wh.body': 'Тана', 'wh.height': 'Бўй', 'wh.weight': 'Вазн', 'wh.maxHr': 'Макс. пулс',
+      'wh.i.need': 'керак {h} соат', 'wh.i.target': 'меъёр {m}', 'wh.i.base': 'одатда {b}',
+      'wh.i.vsBase': '30 кунлик одатингиз **{b}%** эди — бугун **{n}**',
+      'wh.i.sleepOk': 'Уйқу етарли — керакли **{need} соат**ни қопладингиз',
+      'wh.i.sleepShort': 'Уйқу **{h} соат** кам — керак эди {need} соат',
+      'wh.i.hrvUp': 'HRV одатдагидан **{p}%** юқори (одатда {b} мс) — тана тетик',
+      'wh.i.hrvDown': 'HRV одатдагидан **{p}%** паст (одатда {b} мс) — юкламани камайтиринг',
+      'wh.i.rhrUp': 'Тинч пулс **{n} bpm** юқори (одатда {b}) — чарчоқ ёки касаллик белгиси',
+      'wh.i.rhrDown': 'Тинч пулс **{n} bpm** паст (одатда {b}) — яхши тикланиш',
+      'wh.i.over': 'Зўриқиш **{s}** — бугунги меъёр {m} эди, ортиқча юк',
+      'wh.i.room': 'Юк учун жой бор — бугун **{m}** гача кўтарсангиз бўлади',
+      'wh.i.kcal': 'Сарфланди **{k} ккал** (тахминий меъёр {t})',
       'wh.pulled': '{n} кунлик маълумот олинди', 'wh.sport': 'Машқ',
     },
     ru: {
@@ -42,6 +64,17 @@
       'wh.autoSleep': 'Сон взят из WHOOP', 'wh.syncing': 'Обновление…', 'wh.deep': 'Полная история',
       'wh.range': 'Период', 'wh.kcal': 'ккал', 'wh.hrAvg': 'ср. пульс', 'wh.dur': 'длительность',
       'wh.body': 'Тело', 'wh.height': 'Рост', 'wh.weight': 'Вес', 'wh.maxHr': 'Макс. пульс',
+      'wh.i.need': 'нужно {h} ч', 'wh.i.target': 'норма {m}', 'wh.i.base': 'обычно {b}',
+      'wh.i.vsBase': 'ваша норма за 30 дн. — **{b}%**, сегодня **{n}**',
+      'wh.i.sleepOk': 'Сна достаточно — вы закрыли норму **{need} ч**',
+      'wh.i.sleepShort': 'Сна меньше на **{h} ч** — нужно было {need} ч',
+      'wh.i.hrvUp': 'HRV выше обычного на **{p}%** (обычно {b} мс) — тело свежее',
+      'wh.i.hrvDown': 'HRV ниже обычного на **{p}%** (обычно {b} мс) — снизьте нагрузку',
+      'wh.i.rhrUp': 'Пульс покоя выше на **{n} bpm** (обычно {b}) — усталость или болезнь',
+      'wh.i.rhrDown': 'Пульс покоя ниже на **{n} bpm** (обычно {b}) — хорошее восстановление',
+      'wh.i.over': 'Нагрузка **{s}** — норма на сегодня была {m}, это перебор',
+      'wh.i.room': 'Есть запас — сегодня можно до **{m}**',
+      'wh.i.kcal': 'Потрачено **{k} ккал** (примерная норма {t})',
       'wh.pulled': 'Получены данные за {n} дн.', 'wh.sport': 'Тренировка',
     },
   });
@@ -88,6 +121,11 @@
       o.stages = { rem, deep, light, awake };
       o.sleepH = D.round((inBed ? inBed - awake : rem + deep + light) / 3.6e6, 1);
     }
+    // WHOOP's own sleep-need model beats a flat 7.5h target: baseline + debt + strain + naps
+    const need = s.sleep_needed || {};
+    const needMs = (+need.baseline_milli || 0) + (+need.need_from_sleep_debt_milli || 0) + (+need.need_from_recent_strain_milli || 0) - (+need.need_from_recent_nap_milli || 0);
+    if (needMs > 0) o.sleepNeedH = D.round(needMs / 3.6e6, 1);
+    if (+need.need_from_sleep_debt_milli) o.debtH = D.round(+need.need_from_sleep_debt_milli / 3.6e6, 1);
     if (num(s.sleep_performance_percentage) !== null) o.sleepPerf = Math.round(+s.sleep_performance_percentage);
     if (num(s.sleep_efficiency_percentage) !== null) o.sleepEff = Math.round(+s.sleep_efficiency_percentage);
     if (num(s.sleep_consistency_percentage) !== null) o.sleepCons = Math.round(+s.sleep_consistency_percentage);
@@ -257,6 +295,115 @@
     const zone = rec >= 67 ? 'good' : rec >= 34 ? 'warn' : 'bad';
     return { pct: rec, zone, sleepH: num(d.sleepH), strain: num(d.strain), hrv: num(d.hrv), rhr: num(d.rhr),
       label: t(zone === 'good' ? 'wh.ready.high' : zone === 'warn' ? 'wh.ready.mid' : 'wh.ready.low') };
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* derived metrics — what the numbers mean, not just what they are     */
+  /* ------------------------------------------------------------------ */
+  /** Mean of a field over the n days BEFORE `key` (the personal baseline to compare today against). */
+  D.whoop.baseline = (field, key, n) => {
+    const days = W().days;
+    const vs = [];
+    let k = D.addDays(key || D.today(), -1);
+    for (let i = 0; i < (n || 30); i++) { const v = num(days[k] && days[k][field]); if (v !== null) vs.push(v); k = D.addDays(k, -1); }
+    return vs.length >= 3 ? D.avg(vs) : null;
+  };
+  /** Mifflin–St Jeor BMR × activity, used only when WHOOP has no calorie figure. */
+  function tdeeEstimate() {
+    const p = D.S.profile || {};
+    const kg = num(p.weightKg) ?? num((W().body || {}).weightKg);
+    const cm = num(p.heightCm) ?? num((W().body || {}).heightCm);
+    const age = num(p.age);
+    if (kg === null || cm === null || age === null) return null;
+    const bmr = 10 * kg + 6.25 * cm - 5 * age + (p.sex === 'f' ? -161 : 5);
+    const f = [1.2, 1.3, 1.375, 1.46, 1.55, 1.725][D.clamp(Math.round(+p.activity || 3), 0, 5)];
+    return Math.round(bmr * f);
+  }
+  D.whoop.tdee = tdeeEstimate;
+
+  D.whoop.dayInsight = (key) => {
+    key = key || D.today();
+    const d = W().days[key];
+    if (!d) return null;
+    const o = { key };
+    const sleepH = num(d.sleepH), need = num(d.sleepNeedH);
+    o.sleepH = sleepH; o.needH = need;
+    if (sleepH !== null && need !== null) { o.gapH = D.round(sleepH - need, 1); o.metPct = Math.round((sleepH / need) * 100); }
+    o.perf = num(d.sleepPerf); o.eff = num(d.sleepEff); o.cons = num(d.sleepCons); o.debtH = num(d.debtH);
+    o.recovery = num(d.recovery); o.strain = num(d.strain); o.kcal = num(d.kcal);
+    o.hrv = num(d.hrv); o.rhr = num(d.rhr); o.resp = num(d.resp); o.spo2 = num(d.spo2); o.skin = num(d.skin);
+    // deviation from the user's own 30-day baseline — far more meaningful than a population range
+    const bHrv = D.whoop.baseline('hrv', key, 30), bRhr = D.whoop.baseline('rhr', key, 30), bRec = D.whoop.baseline('recovery', key, 30);
+    if (o.hrv !== null && bHrv) { o.hrvBase = Math.round(bHrv); o.hrvPct = Math.round(((o.hrv - bHrv) / bHrv) * 100); }
+    if (o.rhr !== null && bRhr) { o.rhrBase = Math.round(bRhr); o.rhrDelta = Math.round(o.rhr - bRhr); }
+    if (o.recovery !== null && bRec) { o.recBase = Math.round(bRec); o.recDelta = Math.round(o.recovery - bRec); }
+    // strain the body was ready for: WHOOP's own rule of thumb is that recovery sets the ceiling
+    if (o.recovery !== null) {
+      o.strainTarget = D.round(4 + (o.recovery / 100) * 14, 1);   // 4 at 0% recovery → 18 at 100%
+      if (o.strain !== null) {
+        o.strainGap = D.round(o.strain - o.strainTarget, 1);
+        o.load = o.strainGap > 3 ? 'over' : o.strainGap < -4 ? 'under' : 'ok';
+      }
+    }
+    // energy: WHOOP burn vs an estimated maintenance
+    const tdee = tdeeEstimate();
+    if (o.kcal !== null) { o.tdee = tdee; if (tdee) o.kcalDelta = o.kcal - tdee; }
+    return o;
+  };
+
+  /* 7-day rolled-up sleep debt straight from WHOOP's need model */
+  D.whoop.sleepDebt = (n) => {
+    const days = W().days;
+    let debt = 0, seen = 0;
+    for (const k of D.lastDays(n || 7)) {
+      const d = days[k]; if (!d) continue;
+      const sh = num(d.sleepH), need = num(d.sleepNeedH);
+      if (sh === null || need === null) continue;
+      seen++; debt += Math.max(0, need - sh);
+    }
+    return seen ? { h: D.round(debt, 1), days: seen } : null;
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* the WHOOP day card rendered inside Sog'liq                          */
+  /* ------------------------------------------------------------------ */
+  D.whoop.dayCard = (key) => {
+    const w = W();
+    if (!w.connected) return '';
+    const i = D.whoop.dayInsight(key);
+    if (!i) return '';
+    const zRec = i.recovery >= 67 ? 'good' : i.recovery >= 34 ? 'warn' : 'bad';
+    const ringColor = zRec === 'good' ? 'var(--success)' : zRec === 'warn' ? 'var(--warning)' : 'var(--danger-text)';
+    const rows = [];
+    if (i.gapH !== null && i.gapH !== undefined) {
+      const good = i.gapH >= -0.5;
+      rows.push({ good, txt: t(good ? 'wh.i.sleepOk' : 'wh.i.sleepShort', { h: Math.abs(i.gapH), need: i.needH }) });
+    }
+    if (i.hrvPct !== undefined && Math.abs(i.hrvPct) >= 8) rows.push({ good: i.hrvPct > 0, txt: t(i.hrvPct > 0 ? 'wh.i.hrvUp' : 'wh.i.hrvDown', { p: Math.abs(i.hrvPct), b: i.hrvBase }) });
+    if (i.rhrDelta !== undefined && Math.abs(i.rhrDelta) >= 3) rows.push({ good: i.rhrDelta < 0, txt: t(i.rhrDelta > 0 ? 'wh.i.rhrUp' : 'wh.i.rhrDown', { n: Math.abs(i.rhrDelta), b: i.rhrBase }) });
+    if (i.load === 'over') rows.push({ good: false, txt: t('wh.i.over', { s: i.strain, m: i.strainTarget }) });
+    else if (i.load === 'under') rows.push({ good: true, txt: t('wh.i.room', { m: i.strainTarget }) });
+    if (i.kcalDelta !== undefined && i.tdee) rows.push({ good: true, txt: t('wh.i.kcal', { k: D.fmtNum(i.kcal), t: D.fmtNum(i.tdee) }) });
+
+    const strip = (h) => h.replace(/^<p>/, '').replace(/<\/p>$/, '');
+    const tile = (v, l, zone, sub) => `<div class="bento-tile">${zone ? `<i class="zone z-${zone}"></i>` : ''}<div class="val">${v}</div><div class="lab">${esc(l)}</div>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}</div>`;
+    return `<div class="hero wh-day">
+        <div class="hero-eyebrow">${D.ic('bolt', 12)} WHOOP · ${esc(D.fmtDate(i.key))}</div>
+        <div class="hero-main">
+          ${D.chart.ring({ pct: i.recovery || 0, size: 104, stroke: 9, color: ringColor, label: i.recovery != null ? i.recovery + '%' : '—', sub: t('wh.recovery') })}
+          <div class="hero-body">
+            <div class="hero-title">${esc(i.recovery == null ? t('hl.wh.noData') : t(zRec === 'good' ? 'wh.ready.high' : zRec === 'warn' ? 'wh.ready.mid' : 'wh.ready.low'))}</div>
+            ${i.recDelta !== undefined ? `<div class="hero-sub">${strip(D.ai ? D.ai.md(t('wh.i.vsBase', { n: (i.recDelta > 0 ? '+' : '') + i.recDelta, b: i.recBase })) : esc(t('wh.i.vsBase', { n: (i.recDelta > 0 ? '+' : '') + i.recDelta, b: i.recBase })))}</div>` : ''}
+          </div>
+        </div>
+        <div class="bento wh-day-grid">
+          ${tile(i.sleepH != null ? `${i.sleepH}<small>${t('unit.h')}</small>` : '—', t('wh.sleepH'), i.metPct == null ? '' : i.metPct >= 90 ? 'good' : i.metPct >= 75 ? 'warn' : 'bad', i.needH ? t('wh.i.need', { h: i.needH }) : '')}
+          ${tile(i.strain != null ? i.strain : '—', t('wh.strain'), i.load === 'over' ? 'bad' : i.load === 'ok' ? 'good' : '', i.strainTarget ? t('wh.i.target', { m: i.strainTarget }) : '')}
+          ${tile(i.hrv != null ? `${i.hrv}<small>ms</small>` : '—', t('wh.hrv'), i.hrvPct === undefined ? '' : i.hrvPct >= -5 ? 'good' : i.hrvPct >= -15 ? 'warn' : 'bad', i.hrvBase ? t('wh.i.base', { b: i.hrvBase }) : '')}
+          ${tile(i.rhr != null ? `${i.rhr}<small>bpm</small>` : '—', t('wh.rhr'), i.rhrDelta === undefined ? '' : i.rhrDelta <= 1 ? 'good' : i.rhrDelta <= 4 ? 'warn' : 'bad', i.rhrBase ? t('wh.i.base', { b: i.rhrBase }) : '')}
+        </div>
+        ${rows.length ? `<div class="wh-notes">${rows.map((r) => `<div class="wh-note ${r.good ? 'good' : 'warn'}">${D.ic(r.good ? 'check' : 'alert', 14)}<span>${strip(D.ai ? D.ai.md(r.txt) : esc(r.txt))}</span></div>`).join('')}</div>` : ''}
+      </div>`;
   };
 
   /* ------------------------------------------------------------------ */
