@@ -239,7 +239,12 @@ WHOOP_AUTH = "https://api.prod.whoop.com/oauth/oauth2/auth"
 WHOOP_TOKEN = "https://api.prod.whoop.com/oauth/oauth2/token"
 WHOOP_API_V2 = "https://api.prod.whoop.com/developer/v2"
 WHOOP_API_V1 = "https://api.prod.whoop.com/developer/v1"
-WHOOP_SCOPES = "read:recovery read:sleep read:cycles read:workout read:profile read:body_measurement offline"
+# `offline` beradi refresh-token'ni; agar WHOOP ilovasida u yoqilmagan bo'lsa
+# WHOOP_SCOPES orqali ro'yxatni qisqartirish mumkin (u holda token ~1 soat yashaydi).
+WHOOP_SCOPES = os.environ.get(
+    "WHOOP_SCOPES",
+    "read:recovery read:sleep read:cycles read:workout read:profile read:body_measurement offline",
+)
 
 
 def base_url():
