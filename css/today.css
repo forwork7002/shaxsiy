@@ -93,6 +93,6 @@
 /* gratitude */
 .td-insp { padding: 10px 12px; margin-bottom: 10px; border-radius: var(--r-sm); border: 1px dashed var(--line2); background: linear-gradient(135deg, color-mix(in srgb, var(--qalb) 10%, transparent), transparent 70%); }
 .td-insp .eyebrow { display: flex; align-items: center; gap: 4px; }
-.td-insp-text { font-size: 13.5px; color: var(--text2); font-style: italic; margin-top: 4px; line-height: 1.45; overflow-wrap: anywhere; }
+.td-insp-text { font-size: 13.5px; color: var(--text2); margin-top: 4px; line-height: 1.45; overflow-wrap: anywhere; }
 .td-grat .li { align-items: flex-start; }
 .td-grat-ic { color: var(--qalb); display: inline-flex; margin-top: 3px; flex: none; }

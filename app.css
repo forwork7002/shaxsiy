@@ -23,6 +23,8 @@
   --ruh: #7FBEEA; --aql: #7BDFB4; --qalb: #F09CBE; --tana: #F0A25C; --boshqa: #B5AFA3; --aralash: #A78BFA;
   --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Inter has no italic face; <em> falls back to a stack that does */
+  --font-em: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "DejaVu Sans", sans-serif;
   --r: 16px; --r-sm: 12px; --r-xs: 8px; --r-lg: 18px; --r-pill: 999px;
   --sh: 0 12px 40px rgba(0,0,0,.45); --sh-modal: 0 24px 70px rgba(0,0,0,.6);
   --sh-btn: inset 0 1px 0 rgba(255,255,255,.9), 0 2px 8px rgba(0,0,0,.35), 0 8px 22px rgba(0,0,0,.25);
@@ -162,7 +164,7 @@ p { margin: 0 0 8px; }
 .li-del, .btn.icon { border: 0; background: transparent; color: var(--text3); padding: 6px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; transition: color .2s, background .2s; flex: none; }
 .li-del:hover { color: var(--danger-text); background: var(--hover); }
 .btn.icon:hover { color: var(--text); background: var(--hover); }
-.empty { text-align: center; font-size: 12.5px; color: var(--text3); padding: 18px 8px; font-style: italic; }
+.empty { text-align: center; font-size: 12.5px; color: var(--text3); padding: 18px 8px; }
 .chk { appearance: none; -webkit-appearance: none; width: 24px; height: 24px; flex: none; margin: 0; position: relative; cursor: pointer;
   border: 1.5px solid var(--line3); background: var(--f-input); border-radius: 8px; transition: background .2s, border-color .2s, box-shadow .25s; display: inline-block; }
 .chk:checked, .chk.on { background: var(--success); border-color: var(--success); box-shadow: 0 0 12px var(--success-glow); }

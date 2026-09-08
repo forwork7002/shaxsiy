@@ -14,7 +14,7 @@
 .ai-body p { margin: 0 0 8px; }
 .ai-body p:last-child { margin-bottom: 0; }
 .ai-body strong { font-weight: 700; color: var(--text); background: color-mix(in srgb, var(--violet) 14%, transparent); padding: 0 5px; border-radius: 6px; }
-.ai-body em { font-style: italic; color: var(--text2); }
+.ai-body em { font-style: italic; font-family: var(--font-em); color: var(--text2); }
 .ai-body code { font-family: var(--mono); font-size: 12.5px; padding: 1px 6px; border-radius: 6px; background: var(--f-input); border: 1px solid var(--line2); color: var(--info); }
 .ai-body .ai-h { font-weight: 700; color: var(--text); margin: 10px 0 4px; font-size: 13.5px; }
 .ai-body .ai-ul, .ai-body .ai-ol { margin: 6px 0 10px; padding-left: 20px; display: grid; gap: 5px; }

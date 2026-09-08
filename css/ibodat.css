@@ -46,7 +46,7 @@
 .ib-log-row:last-child { border-bottom: 0; padding-bottom: 0; }
 .ib-log-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 8px; }
 .ib-log-name { flex: 1; min-width: 0; font-weight: 700; color: var(--text); font-size: 14px; }
-.ib-hint { font-size: 11px; color: var(--warning); font-style: italic; opacity: .85; }
+.ib-hint { font-size: 11px; color: var(--warning); opacity: .85; }
 .ib-states { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 /* NB: do not set --c here — .ib-c-* has the same specificity and comes earlier,
    so a --c declared on .ib-st would win and grey out every selected state. */
