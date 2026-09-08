@@ -26,7 +26,9 @@
 .td-day-right { min-width: 0; }
 .td-next { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 12px; border-radius: var(--r-sm); background: var(--inset); border: 1px solid var(--line); }
 .td-next-ic { width: 34px; height: 34px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--success) 12%, transparent); color: var(--success); flex: none; }
-.td-next-body { flex: 1; min-width: 0; }
+.td-next-body { flex: 1 1 150px; min-width: 0; }
+.td-next { flex-wrap: wrap; }
+.td-next > .pill { flex: 0 0 auto; margin-left: auto; }
 .td-next-name { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .td-pr-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .td-prayers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
@@ -76,7 +78,8 @@
 .td-tasks .dashed { margin: 2px 0 4px; }
 
 /* quick strip */
-.td-quick { grid-template-columns: repeat(3, 1fr); margin-bottom: 12px; } /* same rhythm as .card */
+.td-quick { grid-template-columns: repeat(2, 1fr); margin-bottom: 12px; } /* same rhythm as .card */
+@media (min-width: 700px) { .td-quick { grid-template-columns: repeat(3, 1fr); } .td-quick .b-wide { grid-column: span 1; } }
 .td-tile { cursor: pointer; transition: background .2s, border-color .2s; }
 .td-tile:hover { background: var(--hover); border-color: var(--line2); }
 .td-tile .stat-label { display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -114,7 +117,7 @@
 .td-hero .td-day-grid { gap: 14px; }
 .td-quick { margin-top: 2px; }
 .td-tile .td-tile-of { font-size: 11px; color: var(--text3); font-weight: 600; }
-.td-tile .td-plus { position: absolute; right: 9px; top: 50%; transform: translateY(-50%); width: 34px; height: 34px; border-radius: 10px;
+.td-tile .td-plus { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--sec) 30%, transparent); background: color-mix(in srgb, var(--sec) 12%, transparent); color: var(--sec);
   display: inline-flex; align-items: center; justify-content: center; transition: background .15s, transform .1s; }
 .td-tile .td-plus:hover { background: color-mix(in srgb, var(--sec) 22%, transparent); }

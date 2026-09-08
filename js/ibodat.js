@@ -462,7 +462,7 @@
 
   function qzPaceCard() {
     const days = D.lastDays(30), vals = days.map(qzPaidOn), p = qzPace(), td = qzTarget();
-    const labels = days.map((k, i) => (i % 7 === 0 ? D.fmtDate(k, 'dm') : ''));
+    const axis = `<div class="ib-mx-axis ib-qz-axis"><span>${esc(D.fmtDate(days[0], 'dm'))}</span><span>${esc(D.fmtDate(days[14], 'dm'))}</span><span>${esc(D.fmtDate(days[29], 'dm'))}</span></div>`;
     const eta = qzEta(p.rate), etaT = qzEta(td);
     const etaLine = eta
       ? (eta.far ? esc(t('qz.etaYears', { n: D.fmtNum(eta.years) })) : `${esc(t('qz.etaAt', { d: qzDate(eta.date) }))} · ${esc(t('qz.etaIn', { n: D.fmtNum(eta.days) }))}`)
@@ -470,7 +470,7 @@
     const target = etaT && !etaT.far ? `<div class="small muted mt-s">${D.ic('target', 13)} ${esc(t('qz.etaTarget', { t: td, d: qzDate(etaT.date) }))}</div>` : '';
     return `<div class="card">
       <div class="card-head"><div><div class="eyebrow">${esc(t('qz.pace'))}</div><div class="title">${esc(t('qz.paceSub'))}</div></div></div>
-      ${D.chart.bars({ values: vals, labels, color: 'var(--success)', height: 66, target: td })}
+      ${D.chart.bars({ values: vals, color: 'var(--success)', height: 66, target: td })}${axis}
       <div class="stat-grid mt">
         <div class="stat"><div class="stat-num num">${D.fmtNum(p.p7)}</div><div class="stat-label">${esc(t('qz.p7'))}</div></div>
         <div class="stat"><div class="stat-num num">${D.fmtNum(p.p30)}</div><div class="stat-label">${esc(t('qz.p30'))}</div></div>

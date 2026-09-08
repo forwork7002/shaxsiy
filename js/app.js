@@ -52,7 +52,7 @@
     else if (ev.key === 'Enter') { ev.preventDefault(); (items[i] || items[0]).click(); }
   });
 
-  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+  if ('serviceWorker' in navigator && location.protocol !== 'file:' && !window.DASH_NO_SW) {
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
   }
 

@@ -713,7 +713,7 @@
       s += `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${stroke}"/>`;
       for (const p of parts) {
         const len = (p.v / total) * C;
-        s += `<circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${p.color}" stroke-width="${stroke}" stroke-dasharray="${len.toFixed(2)} ${(C - len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 ${size / 2} ${size / 2})"><title>${D.esc(p.label || '')}</title></circle>`;
+        s += `<circle class="donut-seg" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${p.color}" stroke-width="${stroke}" stroke-dasharray="${len.toFixed(2)} ${(C - len).toFixed(2)}" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 ${size / 2} ${size / 2})"><title>${D.esc(p.label || '')}</title></circle>`;
         off += len;
       }
       s += `</svg><div class="ring-val"><div class="ring-pct num">${center}</div></div></div>`;
@@ -774,12 +774,65 @@
     <div class="card skel-card">${'<div class="skel skel-row"></div>'.repeat(5)}</div>
     <div class="skel-note">${D.esc(D.t('loading'))}</div>`;
 
+  /* ------------------------------------------------------------------ */
+  /* DOM morphing                                                        */
+  /* Views re-render as a whole HTML string on every tap. Assigning that  */
+  /* to innerHTML throws away the live tree, which costs far more than    */
+  /* building the string: every CSS transition restarts, focus is lost,   */
+  /* and every blurred card re-composites. Morphing keeps the nodes that  */
+  /* did not change, so a tap only touches the numbers it actually moved  */
+  /* — and bars animate to their new width instead of jumping.           */
+  /* ------------------------------------------------------------------ */
+  const keyOf = (el) => el.getAttribute('data-k') || el.id || null;
+  const sameNode = (a, b) =>
+    a.nodeType === b.nodeType && (a.nodeType !== 1 || (a.tagName === b.tagName && keyOf(a) === keyOf(b)));
+
+  function patchAttrs(a, b) {
+    const an = a.attributes;
+    for (let i = an.length - 1; i >= 0; i--) { const n = an[i].name; if (!b.hasAttribute(n)) a.removeAttribute(n); }
+    const bn = b.attributes;
+    for (let i = 0; i < bn.length; i++) { const at = bn[i]; if (a.getAttribute(at.name) !== at.value) a.setAttribute(at.name, at.value); }
+  }
+
+  function patchNode(a, b) {
+    if (a.nodeType !== 1) { if (a.nodeValue !== b.nodeValue) a.nodeValue = b.nodeValue; return; }
+    const tag = a.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') {
+      patchAttrs(a, b);
+      // never overwrite the field the user is typing into
+      if (a !== document.activeElement) {
+        const v = tag === 'TEXTAREA' ? b.textContent : b.getAttribute('value');
+        if (v !== null && a.value !== v) a.value = v;
+        if (tag === 'SELECT') a.value = b.value;
+      }
+      if (tag === 'INPUT') a.checked = b.hasAttribute('checked') ? true : a.type === 'checkbox' || a.type === 'radio' ? b.checked : a.checked;
+      return;
+    }
+    if (a.isEqualNode(b)) return;      // identical subtree — nothing to do
+    patchAttrs(a, b);
+    patchChildren(a, b);
+  }
+
+  function patchChildren(a, b) {
+    let ac = a.firstChild, bc = b.firstChild;
+    while (bc) {
+      const bNext = bc.nextSibling;
+      if (!ac) { a.appendChild(bc); bc = bNext; continue; }
+      const aNext = ac.nextSibling;
+      if (sameNode(ac, bc)) patchNode(ac, bc);
+      else a.replaceChild(bc, ac);
+      ac = aNext; bc = bNext;
+    }
+    while (ac) { const n = ac.nextSibling; a.removeChild(ac); ac = n; }
+  }
+
+  const scratch = () => (D._scratch || (D._scratch = document.createElement('div')));
+
   D.rerender = () => {
     const v = D.views[current];
     const root = D.$('#view');
     if (!v || !root) return;
     if (D.loading) { root.innerHTML = skeleton(); return; }
-    const y = window.scrollY;
     let html;
     try { html = v.render(); } catch (e) {
       console.error('render', current, e);
@@ -789,9 +842,13 @@
     // Stamp the section on the page and on <html> so CSS can swap the accent per view.
     root.setAttribute('data-view', current);
     document.documentElement.setAttribute('data-section', current);
-    root.innerHTML = html;
+    const next = scratch();
+    next.innerHTML = html;
+    try { patchChildren(root, next); } catch (e) { console.error('morph', e); root.innerHTML = html; }
+    next.textContent = '';
     if (v.mount) { try { v.mount(root); } catch (e) { console.error('mount', current, e); D.logError(e); } }
-    window.scrollTo(0, y);
+    // No scrollTo here: morphing leaves the tree standing, so the position never
+    // moved, and calling scrollTo mid-momentum is itself a source of jank.
     D.emit('view:rendered', current);
   };
   D.patch = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
