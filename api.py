@@ -303,9 +303,14 @@ def base_url():
     return f"{proto}://{host}"
 
 
+# WHOOP sits behind Cloudflare, which blocks library user-agents outright
+# (error 1010, "browser_signature_banned"). Introduce ourselves properly.
+USER_AGENT = os.environ.get("MA_USER_AGENT", "ShaxsiyDashboard/1.0 (+https://github.com/forwork7002/shaxsiy)")
+
+
 def http_json(url, data=None, headers=None, method=None):
     body = None
-    h = {"Accept": "application/json"}
+    h = {"Accept": "application/json", "User-Agent": USER_AGENT, "Accept-Language": "en-US,en;q=0.9"}
     if data is not None:
         if isinstance(data, dict):
             body = urllib.parse.urlencode(data).encode()
@@ -369,7 +374,14 @@ def whoop_callback():
         "client_id": WHOOP_ID, "client_secret": WHOOP_SECRET,
     })
     if status != 200 or "access_token" not in tok:
-        return f"WHOOP token xato: {tok}", 500
+        log.error("WHOOP token xato %s: %s", status, tok)
+        detail = tok.get("error_description") or tok.get("detail") or tok.get("error") or str(tok)[:300]
+        return (
+            "<meta charset='utf-8'><body style='font:15px/1.6 system-ui;max-width:34em;margin:12vh auto;padding:0 20px'>"
+            "<h2>WHOOP ulanmadi</h2>"
+            f"<p style='color:#a33'>{str(detail)[:400]}</p>"
+            "<p><a href='/#health'>Ilovaga qaytish</a></p></body>", 502
+        )
     tok["expires_at"] = time.time() + int(tok.get("expires_in", 3600)) - 60
     whoop_file(uid).write_text(json.dumps(tok), encoding="utf-8")
     return redirect("/#health")
