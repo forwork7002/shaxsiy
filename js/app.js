@@ -15,17 +15,28 @@
     if (t1) t1.textContent = title;
     if (t2) t2.textContent = title;
     const d = D.$('#hDate'), sd = D.$('#sideDate');
-    if (d) d.textContent = D.fmtDate(k, 'long');
+    // the year is dead weight in a header you read every day
+    if (d) d.textContent = D.fmtDate(k, 'weekday');
     if (sd) sd.textContent = D.fmtDate(k, 'weekday');
     const hj = D.$('#hHijri');
     if (hj && D.hijri) {
       const h = D.hijri.fromKey(k);
-      hj.textContent = h ? `${h.d} ${D.t('hijri.months')[h.m - 1]} ${h.y}` : '';
+      hj.textContent = h ? `${h.d} ${D.t('hijri.months')[h.m - 1]}` : '';
     }
+    // the next prayer is the most glanced-at line in the app — give it its own
+    // row, and let tapping it open the times
     const hp = D.$('#hPrayer');
     if (hp && D.prayer) {
-      const nx = D.prayer.next();
-      hp.textContent = nx ? `${D.t('prayer.' + nx.id)} ${nx.time} · ${D.fmtMins(nx.minsLeft)}` : '';
+      let nx = null;
+      try { nx = D.prayer.next(); } catch (e) { nx = null; }
+      // inside Ibodat the section has its own countdown; two would be one too many
+      hp.hidden = !nx || D.current() === 'prayer';
+      if (nx) {
+        hp.innerHTML = `<span class="hp-ic">${D.ic('mosque', 13)}</span>
+          <span class="hp-name">${D.esc(D.t('prayer.' + nx.id))}</span>
+          <span class="hp-time num">${D.esc(nx.time)}</span>
+          <span class="hp-left num">${D.esc(D.fmtMins(nx.minsLeft))}</span>`;
+      }
     }
     const tb = D.$('#themeBtn');
     if (tb) tb.innerHTML = D.ic(document.documentElement.getAttribute('data-theme') === 'dark' ? 'sun' : 'moon', 20);

@@ -180,11 +180,23 @@
   };
 
   let syncState = 'ok';
+  // The sync chip used to sit in the header permanently, and with no text yet it
+  // read as an empty capsule. Now it speaks only when it has something to say:
+  // amber while saving, red on failure, a bare grey dot when this device is the
+  // only copy, and a green confirmation that fades out on its own.
+  let syncHideT = null;
   D.setSync = (s, msg) => {
     syncState = s;
-    const dot = D.$('#syncDot'), txt = D.$('#syncTxt');
-    if (dot) dot.className = 'sync-dot ' + s;
-    if (txt) txt.textContent = msg || D.t('sync.' + s);
+    const box = D.$('#sync'), dot = D.$('#syncDot'), txt = D.$('#syncTxt');
+    if (!box || !dot || !txt) return;
+    clearTimeout(syncHideT);
+    dot.className = 'sync-dot ' + s;
+    box.className = 'sync s-' + s;
+    txt.textContent = s === 'local' ? '' : msg || D.t('sync.' + s);
+    // 'local' means no server is configured at all — a permanent grey dot for
+    // the normal state is just noise
+    box.hidden = s === 'local';
+    if (s === 'ok') syncHideT = setTimeout(() => { const b = D.$('#sync'); if (b && D.syncState() === 'ok') { b.classList.add('fade'); syncHideT = setTimeout(() => { b.hidden = true; b.classList.remove('fade'); }, 400); } }, 1400);
   };
   D.syncState = () => syncState;
 
