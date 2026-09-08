@@ -452,6 +452,25 @@ def headers(resp):
     return resp
 
 
+def _ssl_context():
+    """Self-signed cert for https://localhost — WHOOP refuses plain http redirect URIs.
+    Generated once into certs/ with openssl; returns None when TLS is not requested."""
+    if os.environ.get("MA_HTTPS", "") not in ("1", "true", "yes"):
+        return None
+    import subprocess
+    d = Path(os.environ.get("MA_CERT_DIR", HERE / "certs"))
+    d.mkdir(parents=True, exist_ok=True)
+    crt, key = d / "localhost.crt", d / "localhost.key"
+    if not (crt.exists() and key.exists()):
+        log.info("Self-signed sertifikat yaratilmoqda: %s", d)
+        subprocess.run([
+            "openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-days", "825",
+            "-keyout", str(key), "-out", str(crt), "-subj", "/CN=localhost",
+            "-addext", "subjectAltName=DNS:localhost,IP:127.0.0.1",
+        ], check=True, capture_output=True)
+    return (str(crt), str(key))
+
+
 if __name__ == "__main__":
     if DEV:
         log.warning("⚠️  MA_DEV=1 — autentifikatsiya O'CHIQ (faqat lokal test)")
@@ -459,4 +478,8 @@ if __name__ == "__main__":
         log.warning("⚠️  MA_BOT_TOKEN yo'q — hech kim kira olmaydi")
     if not ALLOWED_IDS and not DEV:
         log.warning("⚠️  MA_ALLOWED_IDS yo'q — har qanday Telegram foydalanuvchi kira oladi")
-    app.run(host=os.environ.get("HOST", "127.0.0.1"), port=int(os.environ.get("PORT", "8081")), debug=False)
+    ctx = _ssl_context()
+    port = int(os.environ.get("PORT", "8081"))
+    if ctx:
+        log.info("HTTPS: https://localhost:%s/  (o'z-o'zini imzolagan sertifikat — brauzer ogohlantiradi, davom eting)", port)
+    app.run(host=os.environ.get("HOST", "127.0.0.1"), port=port, debug=False, ssl_context=ctx)
