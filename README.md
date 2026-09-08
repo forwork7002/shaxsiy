@@ -1,10 +1,16 @@
 # Shaxsiy — yagona shaxsiy dashboard
 
+**🟢 Jonli: https://forwork7002.github.io/shaxsiy/**
+
+Telefonda oching → brauzer menyusidan «Ekranga qo'shish» (Add to Home Screen) → ilova kabi ishlaydi, internetsiz ham.
+Ma'lumot faqat sizning qurilmangizda saqlanadi (`localStorage`) — hech qayerga yuborilmaydi.
+Zaxira uchun: **Sozlash → Ma'lumot → JSON eksport**. Eski `shaxsiy_*.json` faylni **Import** qilsangiz avtomatik ko'chadi.
+
 Eski «Шахсий» Telegram mini-ilova + «Personal Dashboard» dizayni → **bitta ilova**.
 Vanilla HTML/CSS/JS (build yo'q), Flask backend, Telegram Mini App, PWA (offline), qorong'i/yorug' tema, uz-lotin / uz-kirill / ru.
 
 ```
-app/
+shaxsiy/  (bu repoda fayllar ildizda)
   index.html  app.css  css/*.css     — interfeys
   js/core.js                         — yadro: saqlash, sanalar, i18n, router, UI kit, sync, migratsiya
   js/i18n.js  js/prayer.js           — matnlar; namoz vaqtlari + hijriy
