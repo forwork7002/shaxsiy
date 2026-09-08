@@ -399,7 +399,7 @@
   }
   function unmount() { hlTimers.forEach(clearTimeout); hlTimers = []; hlId = null; }
 
-  D.view({ id: VIEW, icon: 'checkSq', order: 20, nav: true, primary: true, render, mount, unmount });
+  D.view({ id: VIEW, icon: 'checkSq', order: 50, nav: true, primary: false, render, mount, unmount });
 
   /* ------------------------------------------------------------------ */
   /* actions — tasks                                                     */

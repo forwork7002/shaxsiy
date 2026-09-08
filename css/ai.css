@@ -1,0 +1,52 @@
+/* ==== ai — bo'limlar ichidagi tahlil kartasi ==== */
+.ai-card { position: relative; overflow: hidden; }
+.ai-card::before { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
+  background: radial-gradient(circle at 6% 0%, color-mix(in srgb, var(--violet) 16%, transparent), transparent 55%); opacity: .7; }
+.ai-card > * { position: relative; }
+.ai-head { margin-bottom: 10px; }
+.ai-head .title { color: var(--text); }
+.ai-head .ic { color: var(--violet); }
+.ai-head-right { gap: 6px; flex: none; }
+.ai-age { white-space: nowrap; }
+.ai-copy { min-width: 36px; min-height: 36px; }
+
+.ai-body { font-size: 14px; line-height: 1.6; color: var(--text2); }
+.ai-body p { margin: 0 0 8px; }
+.ai-body p:last-child { margin-bottom: 0; }
+.ai-body strong { font-weight: 700; color: var(--text); background: color-mix(in srgb, var(--violet) 14%, transparent); padding: 0 5px; border-radius: 6px; }
+.ai-body em { font-style: italic; color: var(--text2); }
+.ai-body code { font-family: var(--mono); font-size: 12.5px; padding: 1px 6px; border-radius: 6px; background: var(--f-input); border: 1px solid var(--line2); color: var(--info); }
+.ai-body .ai-h { font-weight: 700; color: var(--text); margin: 10px 0 4px; font-size: 13.5px; }
+.ai-body .ai-ul, .ai-body .ai-ol { margin: 6px 0 10px; padding-left: 20px; display: grid; gap: 5px; }
+.ai-body .ai-ul:last-child, .ai-body .ai-ol:last-child { margin-bottom: 0; }
+.ai-body li { color: var(--text2); }
+.ai-body li::marker { color: var(--violet); }
+/* the model always closes with "Bugun qil:" — make that last line pop */
+.ai-body p:last-child strong:first-child { background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success); }
+
+.ai-empty .help { margin: 0 0 10px; }
+.ai-empty .banner { margin-bottom: 0; flex-wrap: wrap; }
+.ai-empty .banner .btn { min-height: 36px; }
+.ai-empty .empty { padding: 10px 0 2px; }
+
+.ai-busy { display: flex; align-items: center; gap: 10px; padding: 14px 2px; color: var(--text3); font-size: 13.5px; }
+.ai-busy .ic { color: var(--violet); animation: aiPulse 1.4s ease-in-out infinite; }
+@keyframes aiPulse { 0%, 100% { opacity: .5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.12); } }
+.ai-dots { display: inline-flex; gap: 5px; align-items: center; }
+.ai-dots i { width: 5px; height: 5px; border-radius: 50%; background: var(--violet); opacity: .4; animation: aiDot 1.2s ease-in-out infinite; }
+.ai-dots i:nth-child(2) { animation-delay: .2s; } .ai-dots i:nth-child(3) { animation-delay: .4s; }
+@keyframes aiDot { 0%, 100% { opacity: .35; transform: scale(1); } 50% { opacity: 1; transform: scale(1.5); } }
+.ai-card.is-busy { border-color: color-mix(in srgb, var(--violet) 30%, transparent); }
+
+.ai-err { margin: 0; flex-wrap: wrap; }
+.ai-err .btn { min-height: 36px; }
+.ai-err .btn.icon { min-width: 36px; min-height: 36px; color: inherit; }
+
+.ai-foot { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.ai-run { min-height: 42px; }
+.ai-run:not(.ghost) { background: linear-gradient(135deg, var(--violet), var(--info)); color: #fff; box-shadow: 0 2px 10px color-mix(in srgb, var(--violet) 35%, transparent); }
+.ai-run:not(.ghost) .ic { color: #fff; }
+.ai-run:disabled { filter: grayscale(.6); }
+.ai-disclaim { flex: 1; min-width: 140px; line-height: 1.35; }
+.ai-compact .ai-body { font-size: 13.5px; }
+@media (max-width: 400px) { .ai-disclaim { display: none; } .ai-run { width: 100%; } }

@@ -645,5 +645,5 @@
     go: () => { UI().gymEx = ex.id; if (ex.gymId !== 'both') UI().gymGym = ex.gymId; UI().gymDay = ex.dayId; D.saveUi(); D.go('gym', 'log'); },
   })));
 
-  D.view({ id: 'gym', icon: 'dumbbell', order: 40, nav: true, primary: false, render });
+  D.view({ id: 'gym', icon: 'dumbbell', order: 55, nav: true, primary: false, render });
 })();

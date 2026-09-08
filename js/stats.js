@@ -678,5 +678,5 @@
     return out;
   });
 
-  D.view({ id: 'stats', icon: 'chart', order: 60, nav: true, primary: false, render, mount });
+  D.view({ id: 'stats', icon: 'chart', order: 65, nav: true, primary: false, render, mount });
 })();

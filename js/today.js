@@ -334,8 +334,21 @@
           <span class="td-pr-sub num">${s ? esc(t('today.pr.' + s)) : times ? D.prayer.fmt(times[id]) : '—'}</span></button>`;
       }).join('')}</div>`;
   }
+  // WHOOP readiness — only for today, and only once the watch has actually reported a recovery score.
+  function readyHtml(k) {
+    if (k !== D.today() || !D.whoop || !D.whoop.readiness) return '';
+    const r = D.whoop.readiness();
+    if (!r) return '';
+    const side = [];
+    if (r.sleepH != null) side.push(`<span>${esc(t('wh.sleepH'))}<b>${r.sleepH}${esc(t('unit.h'))}</b></span>`);
+    if (r.strain != null) side.push(`<span>${esc(t('wh.strain'))}<b>${r.strain}</b></span>`);
+    return `<button class="wh-ready ${r.zone}" data-act="go" data-view="health" data-sub="whoop">
+      <span class="wh-ready-num">${r.pct}<small>%</small></span>
+      <span class="wh-ready-body"><span class="wh-ready-label">${esc(t('wh.ready'))} · WHOOP</span><span class="wh-ready-text">${esc(r.label)}</span></span>
+      ${side.length ? `<span class="wh-ready-side">${side.join('')}</span>` : ''}</button>`;
+  }
   function dayCard(k) {
-    return `<div class="card td-day"><div class="td-day-grid">
+    return `${readyHtml(k)}<div class="card td-day"><div class="td-day-grid">
       <div class="td-dayring" id="tdDayRing">${ringHtml()}</div>
       <div class="td-day-right"><div id="tdNext">${nextHtml()}</div>${prayersHtml(k)}</div>
     </div></div>`;
@@ -736,8 +749,10 @@
       const td = D.today();
       if (D.ui.viewDate && D.ui.viewDate >= td) { D.ui.viewDate = null; D.saveUi(); }
       const k = key(), today = k === td;
+      // AI advice sits under the day/habits summary — high enough to be read, below the things you act on first.
+      const ai = today && D.ai ? safe(() => D.ai.card('today')) : '';
       return safe(() => dateNav(k, today)) + safe(() => ticker(k)) + safe(() => dayCard(k)) + safe(() => habitsCard(k)) +
-        safe(() => tasksCard(k)) + safe(() => quickStrip(k)) + safe(() => noteCard(k)) + safe(() => gratCard(k));
+        safe(() => tasksCard(k)) + safe(() => quickStrip(k)) + ai + safe(() => noteCard(k)) + safe(() => gratCard(k));
     },
     mount() { startTicker(); },
     unmount() { stopTicker(); },

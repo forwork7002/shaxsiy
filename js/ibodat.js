@@ -696,11 +696,12 @@
   function render() {
     const s = sub();
     const body = s === 'log' ? safe(renderLog) : s === 'tasbih' ? safe(renderTasbih) : s === 'fasting' ? safe(renderFasting) : s === 'qibla' ? safe(renderQibla) : safe(renderTimes);
-    return `<div class="ib">${segHtml()}${body}</div>`;
+    const ai = D.ai && (s === 'times' || s === 'log' || s === 'fasting') ? safe(() => D.ai.card('prayer')) : '';
+    return `<div class="ib">${segHtml()}${body}${ai}</div>`;
   }
 
   D.view({
-    id: 'prayer', icon: 'mosque', order: 45, nav: true, primary: false,
+    id: 'prayer', icon: 'mosque', order: 40, nav: true, primary: true,
     render,
     mount() {
       stopTimer();

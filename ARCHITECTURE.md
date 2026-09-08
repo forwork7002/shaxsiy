@@ -16,14 +16,17 @@ app/
   js/finance.js     Молия
   js/learn.js       Таълим
   js/stats.js       Стат + insights
-  js/nova.js        AI mentor (server proxy)
+  js/ai.js          shared AI analysis engine — D.ai.card(section) insight cards
+  js/whoop.js       WHOOP history sync, per-day store, trends, readiness
+  js/nova.js        AI mentor chat (uses D.ai.ask)
   js/settings.js    Созлаш + data import/export
   js/app.js         boot
   sw.js manifest.json
   api.py            Flask: Telegram auth, /api/data, WHOOP OAuth+proxy, /api/ai proxy
 ```
 
-Script order in index.html: core.js → i18n.js → prayer.js → modules (any order) → app.js.
+Script order in index.html: core.js → i18n.js → prayer.js → ai.js → whoop.js → view modules (any order) → app.js.
+`ai.js` and `whoop.js` are libraries, not views: they register no `D.view` and must load before the views that call them.
 
 ## Conventions (every module follows these)
 
@@ -84,7 +87,35 @@ D.api(path, opts)           // fetch with Telegram initData header, JSON
 D.emit(name, data) D.on(name, fn)   // simple event bus ('state:changed', 'view:changed', 'day:changed')
 D.theme.set('dark'|'light'|'auto')
 D.search.register(fn)       // fn(query) → [{label, sub, go:()=>{}}] for Ctrl+K palette
+D.merge(remote, local)      // union merge used by the server pull / stale-push path
 ```
+
+## AI (js/ai.js)
+
+```js
+D.ai.card(section, {compact})  // full insight card: state, button, cached answer, errors
+D.ai.advise(section)           // run the analysis, cache into S.ai.cards[section]
+D.ai.ask(messages, system, {maxTokens})  // the one transport: /api/ai, BYOK fallback
+D.ai.snapshot()                // memoised, whole-app context object
+D.ai.systemFor(section)        // section prompt built from the snapshot
+D.ai.mode()                    // 'server' | 'key' | 'none'
+D.ai.enoughData(section)  D.ai.isFresh(section)  D.ai.md(text)
+```
+Sections: `today`, `health`, `finance`, `prayer`. Add one by extending `SECTIONS`, `QUESTION`,
+the `lines()` builder and the three `ai.hint.<section>` strings.
+
+## WHOOP (js/whoop.js)
+
+```js
+D.whoop.sync({deep})     // recovery/sleep/cycle/workout(+body when deep) → S.whoop.days
+D.whoop.autoSync()       // throttled to 30 min; runs on boot and when Health opens
+D.whoop.day(key)  D.whoop.trend(field, n)  D.whoop.stats(field, n)
+D.whoop.readiness()      // {pct, zone, sleepH, strain, label} for the Today strip
+D.whoop.fillSleep()      // writes health[date].sleep when the user left it empty
+D.whoop.trendCard()  D.whoop.workoutsCard()  D.whoop.bodyCard()
+```
+Day mapping: recovery → `created_at`, sleep → `end` (the morning you woke), cycle/workout → `start`.
+Naps are skipped. `health[k].sleepFromWhoop` marks an auto-filled value; a manual edit clears it.
 
 ## Kit classes (app.css)
 
@@ -122,7 +153,7 @@ Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --
  prayers:{ 'YYYY-MM-DD':{ bomdod:null|'jamaat'|'alone'|'qaza'|'missed', peshin, asr, shom, xufton } },
  dhikr:{ 'YYYY-MM-DD':{ total:n, sessions:[{name,n,ts}] } },
  fasting:{ 'YYYY-MM-DD':{ type:'ramadan'|'sunnah'|'qaza'|'nafl', done } },
- health:{ 'YYYY-MM-DD':{ weight, sleep, bed:'HH:MM', wake:'HH:MM', water:n, mood:0..4, tags:[], note } },
+ health:{ 'YYYY-MM-DD':{ weight, sleep, sleepFromWhoop?:true, bed:'HH:MM', wake:'HH:MM', water:n, mood:0..4, tags:[], note } },
  caffeine:{ logs:[{id,name,mg,ts}], custom:[{id,name,mg}] },
  stack:{ items:[{id,name,dose,window:'morning'|'noon'|'evening'|'any',low:false,order}], taken:{ 'YYYY-MM-DD':{itemId:ts} } },
  gym:{ gyms:[{id,name}], days:[{id,name}], exercises:[{id,name,gymId,dayId,repMin,repMax,step,bw,order}],
@@ -133,7 +164,8 @@ Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --
  learn:[ {id,type:'kitob'|'sura'|'kurs'|'audio',name,author,status:'jarayonda'|'tugadi',progress,total,createdAt} ],
  reviews:[ {id,week,wins,lessons,focus,createdAt} ],
  nova:{ threads:[{id,ts,messages:[{role,content,ts}]}] },
- whoop:{ connected:false, lastSync, cache:{} }
+ whoop:{ connected:false, lastSync, cache:{}, days:{ 'YYYY-MM-DD':{recovery,hrv,rhr,spo2,skin,sleepH,sleepPerf,sleepEff,sleepCons,resp,stages,bedTs,wakeTs,strain,kcal,hrAvg,hrMax} }, workouts:[{id,k,start,end,sport,strain,kcal,hrAvg,hrMax,meters,mins}], body:{heightCm,weightKg,maxHr} },
+ ai:{ cards:{ '<section>':{day,text,ts} }, log:[{section,day,text,ts}] }
 }
 ```
 

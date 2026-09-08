@@ -338,29 +338,6 @@
   }
 
   /* ---- whoop ---- */
-  const first = (x) => { if (!x) return null; if (Array.isArray(x.records)) return x.records[0] || null; if (Array.isArray(x)) return x[0] || null; if (x.score) return x; return null; };
-  function parseWhoop(rec, sleep, cycle) {
-    const c = {};
-    const r = first(rec), s = first(sleep), cy = first(cycle);
-    if (r && r.score) {
-      const sc = r.score;
-      if (sc.recovery_score != null) c.recovery = Math.round(+sc.recovery_score);
-      if (sc.hrv_rmssd_milli != null) c.hrv = Math.round(+sc.hrv_rmssd_milli);
-      if (sc.resting_heart_rate != null) c.rhr = Math.round(+sc.resting_heart_rate);
-      if (sc.skin_temp_celsius != null) c.skin = +sc.skin_temp_celsius;
-      if (sc.spo2_percentage != null) c.spo2 = +sc.spo2_percentage;
-    }
-    if (s && s.score) {
-      const sc = s.score, st = sc.stage_summary || {};
-      c.stages = { rem: +st.total_rem_sleep_time_milli || 0, deep: +st.total_slow_wave_sleep_time_milli || 0, light: +st.total_light_sleep_time_milli || 0, awake: +st.total_awake_time_milli || 0 };
-      const inBed = +st.total_in_bed_time_milli || 0;
-      c.sleepH = inBed ? D.round((inBed - c.stages.awake) / 3.6e6, 1) : D.round((c.stages.rem + c.stages.deep + c.stages.light) / 3.6e6, 1);
-      if (sc.sleep_performance_percentage != null) c.sleepPerf = Math.round(+sc.sleep_performance_percentage);
-      if (sc.respiratory_rate != null) c.resp = +sc.respiratory_rate;
-    }
-    if (cy && cy.score) { if (cy.score.strain != null) c.strain = D.round(+cy.score.strain, 1); if (cy.score.kilojoule) c.kcal = Math.round(+cy.score.kilojoule / 4.184); }
-    return c;
-  }
   const zRec = (v) => (v >= 67 ? 'good' : v >= 34 ? 'warn' : 'bad');
   const zSleep = (p) => (p >= 85 ? 'good' : p >= 70 ? '' : 'warn');
   const zStrain = (s) => (s < 6 ? '' : s < 14 ? 'good' : s < 18 ? 'warn' : 'bad');
@@ -378,7 +355,9 @@
     const sub = SUBS.includes(D.sub('health', 'day')) ? D.sub('health', 'day') : 'day';
     const seg = `<div class="seg hl-seg">${SUBS.map((s) => `<button class="${sub === s ? 'on' : ''}" data-act="sub" data-view="health" data-sub="${s}">${esc(D.t('hl.sub.' + s))}</button>`).join('')}</div>`;
     const body = { day: renderDay, weight: renderWeight, water: renderWater, caffeine: renderCaffeine, stack: renderStack, whoop: renderWhoop }[sub]();
-    return `<div class="hl">${seg}${body}</div>`;
+    // AI reads sleep, recovery, weight, water, caffeine and the stack together — only worth showing on the overview tabs.
+    const ai = D.ai && (sub === 'day' || sub === 'whoop') ? D.ai.card('health') : '';
+    return `<div class="hl">${seg}${body}${ai}</div>`;
   }
 
   /* ------------------------------------------------------------------ */
@@ -415,7 +394,8 @@
     // sleep
     const sleep = num(h.sleep), bedM = hmToMin(h.bed), wakeM = hmToMin(h.wake);
     const calc = bedM !== null && wakeM !== null ? Math.round((((wakeM - bedM + 1440) % 1440) / 60) * 2) / 2 : null;
-    const sleepBlock = `<div class="hl-field"><div class="hl-lab"><span class="eyebrow">${esc(D.t('hl.day.sleep'))}</span><span class="num hl-val" id="hlSleepVal">${sleep === null ? '—' : sleep + ' ' + D.t('unit.h')}</span></div>
+    const fromWhoop = !!(h && h.sleepFromWhoop);
+    const sleepBlock = `<div class="hl-field"><div class="hl-lab"><span class="eyebrow">${esc(D.t('hl.day.sleep'))}${fromWhoop ? ` <span class="wh-auto">${D.ic('bolt', 11)} ${esc(D.t('wh.autoSleep'))}</span>` : ''}</span><span class="num hl-val" id="hlSleepVal">${sleep === null ? '—' : sleep + ' ' + D.t('unit.h')}</span></div>
       <input class="slider" id="hlSleepRange" type="range" min="0" max="12" step="0.5" value="${sleep === null ? 0 : sleep}" data-input="hlSleep" data-key="${k}" aria-label="${esc(D.t('hl.day.sleep'))}">
       <div class="grid2 hl-times">
         <label class="hl-time"><span class="tiny muted">${esc(D.t('hl.day.bed'))}</span><input class="inp sm" type="time" value="${esc(h.bed || '')}" data-change="hlBed" data-key="${k}"></label>
@@ -450,7 +430,7 @@
     D.patch('hlWDelta', deltaLine(k, rec.weight));
     D.patch('hlTileWeight', weightTileHtml());
   };
-  D.act.hlSleep = (el) => { const rec = hEnsure(el.dataset.key || viewKey()); rec.sleep = D.clamp(+el.value || 0, 0, 12); saveSoon(); D.patch('hlSleepVal', rec.sleep + ' ' + D.t('unit.h')); };
+  D.act.hlSleep = (el) => { const rec = hEnsure(el.dataset.key || viewKey()); rec.sleep = D.clamp(+el.value || 0, 0, 12); delete rec.sleepFromWhoop; saveSoon(); D.patch('hlSleepVal', rec.sleep + ' ' + D.t('unit.h')); };
   function setBedWake(el, field) {
     const rec = hEnsure(el.dataset.key || viewKey());
     rec[field] = el.value || null;
@@ -751,8 +731,9 @@
           <div class="legend">${seg.map(([k, col]) => `<span><i class="hl-leg" style="background:${col}"></i>${esc(D.t('hl.wh.' + k))} <b class="num">${fmtMs(st[k])}</b></span>`).join('')}</div></div>`;
       }
     }
+    const extra = D.whoop ? (D.whoop.trendCard() + D.whoop.workoutsCard() + D.whoop.bodyCard()) : '';
     const legend = `<div class="legend hl-zones"><span><i class="zone z-good hl-zone-i"></i>${esc(D.t('hl.wh.zoneGood'))}</span><span><i class="zone z-warn hl-zone-i"></i>${esc(D.t('hl.wh.zoneWarn'))}</span><span><i class="zone z-bad hl-zone-i"></i>${esc(D.t('hl.wh.zoneBad'))}</span></div>`;
-    return `${hero}${tiles}${bio}${legend}${stages}`;
+    return `${hero}${tiles}${bio}${legend}${stages}${extra}`;
   }
   D.act.hlWhoopConnect = () => {
     if (!D.serverEnabled()) { D.toast(D.t('hl.wh.needServer'), { ms: 3500 }); return; }
@@ -790,17 +771,10 @@
     syncing = true;
     const btn = D.$('#hlWhRefresh'); if (btn) btn.disabled = true;
     try {
-      const q = (p) => D.api('/api/whoop/data?path=' + encodeURIComponent(p) + '&limit=1').then((r) => (r && typeof r === 'object' ? r : null)).catch((e) => ({ __err: e }));
-      const [rec, sleep, cycle] = await Promise.all([q('/recovery'), q('/activity/sleep'), q('/cycle')]);
-      const isErr = (x) => !!(x && x.__err);
-      const errs = [rec, sleep, cycle].filter(isErr);
-      if (errs.length === 3) throw errs[0].__err;
-      const parsed = parseWhoop(isErr(rec) ? null : rec, isErr(sleep) ? null : sleep, isErr(cycle) ? null : cycle);
-      D.S.whoop.cache = Object.assign({}, D.S.whoop.cache || {}, parsed);
-      D.S.whoop.connected = true;
-      D.S.whoop.lastSync = Date.now();
-      D.save(); D.rerender();
-      D.toast(Object.keys(parsed).length ? D.t('hl.wh.synced') : D.t('hl.wh.noData'), { ms: 3000 });
+      // js/whoop.js pulls recovery / sleep / cycle / workout history and fills the daily records
+      const r = await D.whoop.sync({ deep: true });
+      D.rerender();
+      D.toast(r && r.days ? D.t('wh.pulled', { n: r.days }) : D.t('hl.wh.noData'), { ms: 3000 });
     } catch (e) {
       D.toast(whoopErr(e), { ms: 4000 });
     } finally { syncing = false; const b = D.$('#hlWhRefresh'); if (b) b.disabled = false; }
@@ -822,7 +796,7 @@
   /* ------------------------------------------------------------------ */
   let timer = null;
   D.view({
-    id: 'health', icon: 'heart', order: 30, nav: true, primary: true,
+    id: 'health', icon: 'heart', order: 20, nav: true, primary: true,
     render,
     mount() {
       clearInterval(timer);

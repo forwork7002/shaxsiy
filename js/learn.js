@@ -483,5 +483,5 @@
   });
   D.learn = { SURAS, TOTAL_AYAHS, suraNum, memorized: () => { const i = suraIndex(); return { ayahs: i.memo, suras: i.done, pct: (i.memo / TOTAL_AYAHS) * 100 }; } };
 
-  D.view({ id: 'learn', icon: 'book', order: 50, primary: false, render });
+  D.view({ id: 'learn', icon: 'book', order: 60, primary: false, render });
 })();

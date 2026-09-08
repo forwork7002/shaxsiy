@@ -327,6 +327,9 @@
     else h += cats.map(([id, v], i) => D.chart.hbar({ label: catLabel(id), value: v, max: maxCat, color: CAT_PALETTE[i % CAT_PALETTE.length], right: `${esc(money(v))} <span class="muted">${D.fmtPct(A.out ? (v / A.out) * 100 : 0)}</span>` })).join('');
     h += `<div class="fin-hint"><button class="fin-link" data-act="go" data-view="settings">${D.ic('gear', 13)} ${esc(t('fin.catsHint'))}</button></div></div>`;
 
+    // AI reads the whole month (categories, budgets, forecast) — keep it above the long transaction list.
+    if (D.ai) h += D.ai.card('finance');
+
     // add form
     const hasAcc = F().accounts.length > 0;
     h += `<div class="card fin-form">
@@ -532,12 +535,13 @@
   /* view                                                                */
   /* ------------------------------------------------------------------ */
   D.view({
-    id: 'finance', icon: 'wallet', order: 35, primary: true,
+    id: 'finance', icon: 'wallet', order: 30, primary: true,
     render() {
       let sub = D.sub('finance', 'month');
       if (!TABS.includes(sub)) sub = 'month';
       const body = sub === 'accounts' ? renderAccounts() : sub === 'subs' ? renderSubs() : sub === 'budget' ? renderBudget() : sub === 'wishlist' ? renderWishlist() : renderMonth();
-      return `<div class="fin">${topBar(sub)}${body}</div>`;
+      const ai = D.ai && sub === 'budget' ? D.ai.card('finance') : '';
+      return `<div class="fin">${topBar(sub)}${body}${ai}</div>`;
     },
     mount() {
       clearTimeout(mountTimer);

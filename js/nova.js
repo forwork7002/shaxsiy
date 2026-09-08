@@ -232,6 +232,8 @@
     return text;
   }
   async function ask(messages, system) {
+    // One transport for the whole app (see js/ai.js): server proxy first, BYOK fallback.
+    if (D.ai && D.ai.ask) return D.ai.ask(messages, system, { maxTokens: 2048 });
     try {
       const r = await D.api('/api/ai', { method: 'POST', body: JSON.stringify({ messages, system }) });
       const text = r && typeof r.text === 'string' ? r.text.trim() : '';

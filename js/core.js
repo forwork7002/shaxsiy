@@ -70,7 +70,8 @@
       finance: { tx: [], cats: [], budgets: {}, accounts: [], subs: [], snapshots: [], wishlist: [] },
       learn: [], reviews: [],
       nova: { threads: [] },
-      whoop: { connected: false, lastSync: null, cache: {} },
+      ai: { cards: {}, log: [] },
+      whoop: { connected: false, lastSync: null, cache: {}, days: {}, workouts: [], body: {} },
     };
   }
   D.defaultState = defaultState;
