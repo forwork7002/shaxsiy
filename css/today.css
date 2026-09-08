@@ -1,0 +1,98 @@
+/* ==== today ==== */
+/* date stepper */
+.td-nav .btn.sq { width: 42px; height: 42px; }
+.td-nav .label .sub { margin-top: 1px; }
+.td-return { display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; min-height: 40px; padding: 0 12px; border: 0; border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--success) 12%, transparent); color: var(--success); font-size: 11px; font-weight: 700; }
+
+/* day card: ring + prayers */
+.td-day-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 640px) { .td-day-grid { grid-template-columns: auto 1fr; align-items: center; gap: 24px; } }
+.td-dayring { display: flex; align-items: center; gap: 18px; min-width: 0; }
+.td-ring { position: relative; width: 136px; height: 136px; flex: none; --c: var(--text4); }
+.td-ring svg { width: 100%; height: 100%; display: block; transform: rotate(-90deg); overflow: visible; }
+.td-ring-track { fill: none; stroke: var(--line); stroke-width: 8; }
+.td-ring-fill { fill: none; stroke: var(--c); stroke-width: 8; stroke-linecap: round; filter: drop-shadow(0 0 6px var(--c));
+  transition: stroke-dashoffset .7s var(--ease-out), stroke .7s var(--ease-out); }
+.td-ring-val { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; pointer-events: none; }
+.td-ring-pct { font-size: 30px; font-weight: 800; letter-spacing: -.04em; color: var(--text); line-height: 1; }
+.td-ring-phase { font-family: var(--mono); font-size: 9px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); margin-top: 5px; max-width: 90px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-ring-clock { font-size: 10.5px; color: var(--text3); margin-top: 2px; }
+.td-ring-side { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.td-ring-status { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.td-ring-remain { font-size: 12px; color: var(--text2); }
+.td-ring-hours { font-size: 11px; color: var(--text3); }
+@media (max-width: 480px) { .td-ring { width: 120px; height: 120px; } .td-ring-pct { font-size: 26px; } .td-ring-status { font-size: 13px; } }
+.td-day-right { min-width: 0; }
+.td-next { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 12px; border-radius: var(--r-sm); background: var(--inset); border: 1px solid var(--line); }
+.td-next-ic { width: 34px; height: 34px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--success) 12%, transparent); color: var(--success); flex: none; }
+.td-next-body { flex: 1; min-width: 0; }
+.td-next-name { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-pr-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.td-prayers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.td-pr { --c: var(--text3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 50px; padding: 7px 3px; min-width: 0;
+  border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--inset); color: var(--text2); transition: background .2s, border-color .2s, color .2s, transform .1s; }
+.td-pr:active { transform: scale(.96); }
+.td-pr-name { font-size: 11px; font-weight: 700; letter-spacing: .02em; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-pr-sub { font-size: 10px; color: var(--c); max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-pr.s-jamaat { --c: var(--success); } .td-pr.s-alone { --c: var(--info); } .td-pr.s-qaza { --c: var(--warning); } .td-pr.s-missed { --c: var(--danger-text); }
+.td-pr.on { background: color-mix(in srgb, var(--c) 12%, transparent); border-color: color-mix(in srgb, var(--c) 38%, transparent); color: var(--text); }
+.td-pr.on.s-jamaat { box-shadow: 0 0 10px var(--success-glow); }
+
+/* habits */
+.td-ring-row { margin-bottom: 14px; }
+.td-ring-row .sph .nm { width: 76px; } /* fits "Смешанное" / "Aralash" without ellipsis */
+.td-balance { gap: 5px; }
+.td-balance b { font-weight: 800; }
+.td-hab.done { opacity: .62; }
+.td-hab .li-text { font-weight: 600; }
+.td-hab .li-meta .tag { margin-right: 4px; }
+.td-sph-head { display: flex; align-items: center; gap: 6px; margin: 10px 2px 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--c); }
+.td-sph-head .num { margin-left: auto; color: var(--text3); font-size: 11px; letter-spacing: 0; }
+.td-step { display: flex; align-items: center; gap: 2px; flex: none; }
+.td-step-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line2); background: var(--glass); color: var(--text); display: inline-flex; align-items: center; justify-content: center; transition: background .15s; }
+.td-step-btn:hover { background: var(--hover); }
+.td-step-val { min-width: 42px; text-align: center; font-weight: 700; color: var(--text); font-size: 13px; }
+.td-step-val small { color: var(--text3); font-weight: 600; font-size: 11px; }
+.td-notdue { font-size: 11.5px; color: var(--text3); text-align: center; margin-top: 8px; }
+
+/* tasks */
+.td-tasks .segbar { margin: 4px 0 12px; }
+.td-tasks .btn.sm { align-self: center; }
+.td-edit { cursor: text; border-radius: 4px; padding: 1px 3px; margin: -1px -3px; transition: background .15s; }
+.td-edit[contenteditable="true"] { outline: 1px solid var(--line3); background: var(--f-input); text-decoration: none; }
+.td-task .chk:disabled { opacity: .55; cursor: not-allowed; }
+.td-tasks .li-del, .td-grat .li-del { width: 40px; height: 40px; padding: 0; margin: -6px 0; } /* 40px touch targets without growing the row */
+.td-add { margin-top: 10px; }
+.td-add .btn.sq { width: 44px; height: 44px; }
+.td-tomorrow { margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--line); }
+.td-tomorrow-head { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 44px; padding: 6px 0; border: 0; background: transparent; color: var(--text3); text-align: left; }
+.td-tomorrow-title { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.td-tomorrow-title .eyebrow, .td-tomorrow-date { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-tomorrow-date { font-size: 11.5px; font-weight: 600; color: var(--text3); text-transform: none; letter-spacing: 0; }
+.td-tomorrow-head svg { transition: transform .2s; }
+.td-tomorrow-head.open svg { transform: rotate(180deg); }
+.td-tomorrow-sub { font-size: 12px; color: var(--text3); margin: 0 0 8px; }
+.td-tasks .dashed { margin: 2px 0 4px; }
+
+/* quick strip */
+.td-quick { grid-template-columns: repeat(3, 1fr); margin-bottom: 12px; } /* same rhythm as .card */
+.td-tile { cursor: pointer; transition: background .2s, border-color .2s; }
+.td-tile:hover { background: var(--hover); border-color: var(--line2); }
+.td-tile .stat-label { display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-tile-of { font-size: 13px; color: var(--text3); font-weight: 600; letter-spacing: 0; }
+.td-tile-bar { margin-top: 8px; }
+.td-plus { position: absolute; top: 4px; right: 4px; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line2); background: var(--glass); color: var(--info); display: inline-flex; align-items: center; justify-content: center; transition: background .15s; }
+.td-plus:hover { background: var(--hover); }
+.td-tile-water .stat-num { padding-right: 42px; } /* keep the count clear of the absolutely-positioned + button */
+@media (max-width: 480px) { .td-quick { gap: 8px; } .td-tile { padding: 10px 8px; } .td-tile .stat-num { font-size: 20px; } .td-tile .stat-label { font-size: 9px; letter-spacing: .01em; gap: 3px; } .td-tile .stat-label svg { width: 11px; height: 11px; } }
+
+/* note */
+.td-note .ta { min-height: 96px; }
+
+/* gratitude */
+.td-insp { padding: 10px 12px; margin-bottom: 10px; border-radius: var(--r-sm); border: 1px dashed var(--line2); background: linear-gradient(135deg, color-mix(in srgb, var(--qalb) 10%, transparent), transparent 70%); }
+.td-insp .eyebrow { display: flex; align-items: center; gap: 4px; }
+.td-insp-text { font-size: 13.5px; color: var(--text2); font-style: italic; margin-top: 4px; line-height: 1.45; overflow-wrap: anywhere; }
+.td-grat .li { align-items: flex-start; }
+.td-grat-ic { color: var(--qalb); display: inline-flex; margin-top: 3px; flex: none; }

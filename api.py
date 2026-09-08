@@ -1,0 +1,462 @@
+# -*- coding: utf-8 -*-
+"""
+Shaxsiy Dashboard — backend API (Flask).
+
+Nima qiladi:
+  • Telegram Mini App autentifikatsiyasi (initData imzosi tekshiriladi, faqat ruxsat etilgan ID lar)
+  • Har bir foydalanuvchi uchun data/<id>.json  (+ kunlik zaxira nusxalar data/backups/)
+  • WHOOP OAuth — tokenlar SERVERDA saqlanadi, brauzerga chiqmaydi; /api/whoop/data proksi
+  • AI (Nova) — Anthropic API ga proksi, kalit faqat serverda
+  • Statik fayllarni (index.html, app.css, js/, css/) tarqatadi
+
+Env (start.sh):
+  MA_BOT_TOKEN       Telegram bot tokeni (initData tekshiruvi uchun) — MAJBURIY (MA_DEV=1 bo'lmasa)
+  MA_ALLOWED_IDS     ruxsat etilgan Telegram ID lar, vergul bilan (bo'sh = hamma)
+  MA_DATA_DIR        ma'lumot papkasi (default: ./data)
+  MA_STATIC_DIR      statik papka (default: shu fayl joylashgan papka)
+  MA_DEV             "1" bo'lsa auth o'chadi va bitta 'dev' foydalanuvchi ishlatiladi (faqat lokal test!)
+  WHOOP_CLIENT_ID / WHOOP_CLIENT_SECRET   WHOOP ilovasi (developer.whoop.com), redirect: https://<domen>/api/whoop/callback
+  AI_API_KEY         Anthropic API kaliti (yoki ANTHROPIC_API_KEY)
+  AI_MODEL           default: claude-opus-5
+  PORT               default 8081
+"""
+import hashlib
+import hmac
+import json
+import logging
+import os
+import secrets
+import threading
+import time
+import urllib.error
+import urllib.parse
+import urllib.request
+from datetime import datetime, timezone, timedelta
+from pathlib import Path
+
+from flask import Flask, request, jsonify, send_from_directory, redirect, Response
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
+log = logging.getLogger("api")
+
+HERE = Path(__file__).resolve().parent
+TZ = timezone(timedelta(hours=5))  # Toshkent
+
+BOT_TOKEN = os.environ.get("MA_BOT_TOKEN", "")
+ALLOWED_IDS = {x.strip() for x in os.environ.get("MA_ALLOWED_IDS", "").split(",") if x.strip()}
+DATA_DIR = Path(os.environ.get("MA_DATA_DIR", HERE / "data"))
+STATIC_DIR = Path(os.environ.get("MA_STATIC_DIR", HERE))
+DEV = os.environ.get("MA_DEV", "") == "1"
+WHOOP_ID = os.environ.get("WHOOP_CLIENT_ID", "")
+WHOOP_SECRET = os.environ.get("WHOOP_CLIENT_SECRET", "")
+AI_KEY = os.environ.get("AI_API_KEY") or os.environ.get("ANTHROPIC_API_KEY") or ""
+AI_MODEL = os.environ.get("AI_MODEL", "claude-opus-5")
+BACKUP_KEEP = 30
+
+app = Flask(__name__, static_folder=None)
+_lock = threading.Lock()
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+(DATA_DIR / "backups").mkdir(exist_ok=True)
+
+
+# ═══════════════════════ Telegram autentifikatsiya ═══════════════════════
+
+def verify_init_data(init_data: str):
+    """Telegram initData imzosini tekshiradi. Muvaffaqiyatda user dict qaytaradi."""
+    if not init_data or not BOT_TOKEN:
+        return None
+    try:
+        pairs = dict(urllib.parse.parse_qsl(init_data, keep_blank_values=True))
+        received_hash = pairs.pop("hash", "")
+        if not received_hash:
+            return None
+        check_string = "\n".join(f"{k}={pairs[k]}" for k in sorted(pairs))
+        secret = hmac.new(b"WebAppData", BOT_TOKEN.encode(), hashlib.sha256).digest()
+        calc = hmac.new(secret, check_string.encode(), hashlib.sha256).hexdigest()
+        if not hmac.compare_digest(calc, received_hash):
+            return None
+        if time.time() - int(pairs.get("auth_date", "0")) > 86400 * 7:  # 7 kun
+            log.warning("initData eskirgan")
+            return None
+        return json.loads(pairs.get("user", "{}"))
+    except Exception as e:  # noqa: BLE001
+        log.warning("initData xato: %s", e)
+        return None
+
+
+def current_user():
+    """(uid, err_response). DEV rejimida doim 'dev'."""
+    if DEV:
+        return "dev", None
+    user = verify_init_data(request.headers.get("X-Telegram-Init-Data", ""))
+    if not user:
+        return None, (jsonify({"error": "auth_failed"}), 401)
+    uid = str(user.get("id", ""))
+    if ALLOWED_IDS and uid not in ALLOWED_IDS:
+        log.warning("Ruxsatsiz: %s", uid)
+        return None, (jsonify({"error": "forbidden"}), 403)
+    return uid, None
+
+
+def sign(value: str) -> str:
+    key = (BOT_TOKEN or "dev-secret").encode()
+    return hmac.new(key, value.encode(), hashlib.sha256).hexdigest()[:32]
+
+
+# ═══════════════════════ Ma'lumot ═══════════════════════
+
+def user_file(uid: str) -> Path:
+    safe = "".join(c for c in uid if c.isalnum() or c in "-_")[:40] or "user"
+    return DATA_DIR / f"{safe}.json"
+
+
+def load_data(uid: str) -> dict:
+    f = user_file(uid)
+    if not f.exists():
+        # eski bitta-foydalanuvchi data.json bo'lsa — ko'chirib olamiz
+        legacy = DATA_DIR / "data.json"
+        if legacy.exists() and not any(DATA_DIR.glob("*.json.migrated")):
+            try:
+                d = json.loads(legacy.read_text(encoding="utf-8"))
+                legacy.rename(legacy.with_suffix(".json.migrated"))
+                return d
+            except Exception as e:  # noqa: BLE001
+                log.error("legacy data.json o'qilmadi: %s", e)
+        return {}
+    try:
+        return json.loads(f.read_text(encoding="utf-8"))
+    except Exception as e:  # noqa: BLE001
+        # buzilgan faylni ustidan yozmaymiz — nusxasini saqlab bo'sh qaytaramiz
+        bad = f.with_name(f"{f.stem}.corrupt.{int(time.time())}.json")
+        try:
+            f.rename(bad)
+        except OSError:
+            pass
+        log.error("%s buzilgan (%s) → %s", f.name, e, bad.name)
+        return {}
+
+
+def save_data(uid: str, d: dict):
+    f = user_file(uid)
+    tmp = f.with_suffix(".tmp")
+    tmp.write_text(json.dumps(d, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    tmp.replace(f)
+    # kunlik zaxira
+    today = datetime.now(TZ).strftime("%Y-%m-%d")
+    b = DATA_DIR / "backups" / f"{f.stem}-{today}.json"
+    if not b.exists():
+        b.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
+        olds = sorted((DATA_DIR / "backups").glob(f"{f.stem}-*.json"))
+        for old in olds[:-BACKUP_KEEP]:
+            old.unlink(missing_ok=True)
+
+
+def whoop_file(uid: str) -> Path:
+    return user_file(uid).with_name(user_file(uid).stem + ".whoop.json")
+
+
+def whoop_tokens(uid: str):
+    f = whoop_file(uid)
+    if not f.exists():
+        return None
+    try:
+        return json.loads(f.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return None
+
+
+# ═══════════════════════ API: data ═══════════════════════
+
+@app.get("/api/data")
+def get_data():
+    uid, err = current_user()
+    if err:
+        return err
+    with _lock:
+        d = load_data(uid)
+        # WHOOP holati server tomonidan belgilanadi
+        if isinstance(d, dict) and "whoop" in d and isinstance(d["whoop"], dict):
+            d["whoop"]["connected"] = whoop_tokens(uid) is not None
+        return jsonify(d)
+
+
+@app.post("/api/data")
+def post_data():
+    """To'liq holatni saqlaydi (frontend butun state yuboradi). Oxirgi yozuv g'olib."""
+    uid, err = current_user()
+    if err:
+        return err
+    incoming = request.get_json(silent=True)
+    if not isinstance(incoming, dict) or "meta" not in incoming:
+        return jsonify({"error": "bad_payload"}), 400
+    if request.content_length and request.content_length > 25 * 1024 * 1024:
+        return jsonify({"error": "too_large"}), 413
+    with _lock:
+        stored = load_data(uid)
+        s_up = int((stored.get("meta") or {}).get("updatedAt") or 0)
+        i_up = int((incoming.get("meta") or {}).get("updatedAt") or 0)
+        if s_up > i_up + 5000:
+            # serverda yangiroq nusxa bor — mijoz uni oladi va qayta yuboradi
+            return jsonify({"ok": False, "error": "stale", "updated": s_up, "data": stored}), 409
+        incoming.setdefault("meta", {})["serverUpdated"] = datetime.now(TZ).isoformat()
+        save_data(uid, incoming)
+    return jsonify({"ok": True, "updated": incoming["meta"]["serverUpdated"]})
+
+
+@app.get("/api/health")
+def health():
+    return jsonify({"ok": True, "time": datetime.now(TZ).isoformat(), "dev": DEV,
+                    "whoop": bool(WHOOP_ID and WHOOP_SECRET), "ai": bool(AI_KEY)})
+
+
+@app.get("/api/backups")
+def list_backups():
+    uid, err = current_user()
+    if err:
+        return err
+    stem = user_file(uid).stem
+    files = sorted((DATA_DIR / "backups").glob(f"{stem}-*.json"))
+    return jsonify([{"name": f.name, "date": f.stem.split("-", 1)[1] if "-" in f.stem else f.stem, "size": f.stat().st_size} for f in files])
+
+
+@app.get("/api/backups/<name>")
+def get_backup(name):
+    uid, err = current_user()
+    if err:
+        return err
+    stem = user_file(uid).stem
+    if not name.startswith(stem + "-") or "/" in name or ".." in name:
+        return jsonify({"error": "forbidden"}), 403
+    f = DATA_DIR / "backups" / name
+    if not f.exists():
+        return jsonify({"error": "not_found"}), 404
+    return Response(f.read_text(encoding="utf-8"), mimetype="application/json")
+
+
+# ═══════════════════════ WHOOP ═══════════════════════
+
+WHOOP_AUTH = "https://api.prod.whoop.com/oauth/oauth2/auth"
+WHOOP_TOKEN = "https://api.prod.whoop.com/oauth/oauth2/token"
+WHOOP_API_V2 = "https://api.prod.whoop.com/developer/v2"
+WHOOP_API_V1 = "https://api.prod.whoop.com/developer/v1"
+WHOOP_SCOPES = "read:recovery read:sleep read:cycles read:workout read:profile read:body_measurement offline"
+
+
+def base_url():
+    proto = request.headers.get("X-Forwarded-Proto", request.scheme).split(",")[0]
+    host = request.headers.get("X-Forwarded-Host", request.host)
+    return f"{proto}://{host}"
+
+
+def http_json(url, data=None, headers=None, method=None):
+    body = None
+    h = {"Accept": "application/json"}
+    if data is not None:
+        if isinstance(data, dict):
+            body = urllib.parse.urlencode(data).encode()
+            h["Content-Type"] = "application/x-www-form-urlencoded"
+        else:
+            body = data
+    h.update(headers or {})
+    req = urllib.request.Request(url, data=body, headers=h, method=method or ("POST" if body else "GET"))
+    try:
+        with urllib.request.urlopen(req, timeout=20) as r:
+            text = r.read().decode("utf-8", "replace")
+            return r.status, (json.loads(text) if text else {})
+    except urllib.error.HTTPError as e:
+        text = e.read().decode("utf-8", "replace")
+        try:
+            return e.code, json.loads(text)
+        except Exception:  # noqa: BLE001
+            return e.code, {"error": text[:500]}
+
+
+@app.get("/api/whoop/login")
+def whoop_login():
+    uid, err = current_user()
+    if err and not DEV:
+        # Brauzer navigatsiyasida Telegram header yo'q — initData query orqali ham qabul qilamiz
+        user = verify_init_data(request.args.get("initData", ""))
+        if not user:
+            return "Telegram orqali oching (auth_failed)", 401
+        uid = str(user.get("id"))
+        if ALLOWED_IDS and uid not in ALLOWED_IDS:
+            return "forbidden", 403
+    if not (WHOOP_ID and WHOOP_SECRET):
+        return "WHOOP sozlanmagan (WHOOP_CLIENT_ID / WHOOP_CLIENT_SECRET)", 500
+    nonce = secrets.token_hex(8)
+    state = f"{uid}.{nonce}.{sign(uid + nonce)}"
+    q = urllib.parse.urlencode({
+        "client_id": WHOOP_ID, "redirect_uri": base_url() + "/api/whoop/callback",
+        "response_type": "code", "scope": WHOOP_SCOPES, "state": state,
+    })
+    return redirect(f"{WHOOP_AUTH}?{q}")
+
+
+@app.get("/api/whoop/callback")
+def whoop_callback():
+    if request.args.get("error"):
+        return f"WHOOP xato: {request.args.get('error')}", 400
+    code, state = request.args.get("code", ""), request.args.get("state", "")
+    try:
+        uid, nonce, sig = state.split(".")
+    except ValueError:
+        return "state noto'g'ri", 400
+    if not hmac.compare_digest(sig, sign(uid + nonce)):
+        return "state imzosi noto'g'ri", 400
+    status, tok = http_json(WHOOP_TOKEN, {
+        "grant_type": "authorization_code", "code": code,
+        "redirect_uri": base_url() + "/api/whoop/callback",
+        "client_id": WHOOP_ID, "client_secret": WHOOP_SECRET,
+    })
+    if status != 200 or "access_token" not in tok:
+        return f"WHOOP token xato: {tok}", 500
+    tok["expires_at"] = time.time() + int(tok.get("expires_in", 3600)) - 60
+    whoop_file(uid).write_text(json.dumps(tok), encoding="utf-8")
+    return redirect("/#health")
+
+
+def whoop_access(uid: str):
+    tok = whoop_tokens(uid)
+    if not tok:
+        return None
+    if time.time() >= float(tok.get("expires_at", 0)) and tok.get("refresh_token"):
+        status, new = http_json(WHOOP_TOKEN, {
+            "grant_type": "refresh_token", "refresh_token": tok["refresh_token"],
+            "client_id": WHOOP_ID, "client_secret": WHOOP_SECRET, "scope": "offline",
+        })
+        if status == 200 and "access_token" in new:
+            new["expires_at"] = time.time() + int(new.get("expires_in", 3600)) - 60
+            tok = new
+            whoop_file(uid).write_text(json.dumps(tok), encoding="utf-8")
+        else:
+            log.warning("WHOOP refresh xato: %s", new)
+            return None
+    return tok.get("access_token")
+
+
+@app.get("/api/whoop/status")
+def whoop_status():
+    uid, err = current_user()
+    if err:
+        return err
+    return jsonify({"connected": whoop_tokens(uid) is not None, "configured": bool(WHOOP_ID and WHOOP_SECRET)})
+
+
+@app.post("/api/whoop/disconnect")
+def whoop_disconnect():
+    uid, err = current_user()
+    if err:
+        return err
+    whoop_file(uid).unlink(missing_ok=True)
+    return jsonify({"ok": True})
+
+
+@app.get("/api/whoop/data")
+def whoop_data():
+    uid, err = current_user()
+    if err:
+        return err
+    path = request.args.get("path", "")
+    if not path.startswith("/") or ".." in path:
+        return jsonify({"error": "path required"}), 400
+    token = whoop_access(uid)
+    if not token:
+        return jsonify({"error": "not_connected"}), 401
+    fwd = {k: v for k, v in request.args.items() if k != "path"}
+    base = WHOOP_API_V1 if path.startswith("/cycle") else WHOOP_API_V2
+    url = base + path + ("?" + urllib.parse.urlencode(fwd) if fwd else "")
+    status, body = http_json(url, headers={"Authorization": f"Bearer {token}"})
+    return jsonify(body), status
+
+
+# ═══════════════════════ AI (Nova) ═══════════════════════
+
+_ai_client = None
+
+
+def ai_client():
+    global _ai_client
+    if _ai_client is None:
+        import anthropic  # lazily — kutubxona bo'lmasa server baribir ishlaydi
+        _ai_client = anthropic.Anthropic(api_key=AI_KEY, timeout=90.0)
+    return _ai_client
+
+
+@app.post("/api/ai")
+def ai():
+    uid, err = current_user()
+    if err:
+        return err
+    if not AI_KEY:
+        return jsonify({"error": "ai_not_configured"}), 501
+    body = request.get_json(silent=True) or {}
+    msgs = body.get("messages")
+    system = str(body.get("system") or "")[:8000]
+    if not isinstance(msgs, list) or not msgs:
+        return jsonify({"error": "messages required"}), 400
+    clean = []
+    for m in msgs[-24:]:
+        role = m.get("role") if isinstance(m, dict) else None
+        content = m.get("content") if isinstance(m, dict) else None
+        if role in ("user", "assistant") and isinstance(content, str) and content.strip():
+            clean.append({"role": role, "content": content[:12000]})
+    if not clean or clean[0]["role"] != "user":
+        return jsonify({"error": "first message must be user"}), 400
+    try:
+        import anthropic
+        resp = ai_client().messages.create(
+            model=AI_MODEL, max_tokens=int(body.get("max_tokens") or 2048),
+            system=system or None, messages=clean,
+        )
+        text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+        return jsonify({"text": text, "model": resp.model, "stop": resp.stop_reason,
+                        "usage": {"in": resp.usage.input_tokens, "out": resp.usage.output_tokens}})
+    except ImportError:
+        return jsonify({"error": "pip install anthropic"}), 501
+    except Exception as e:  # noqa: BLE001
+        import anthropic
+        if isinstance(e, anthropic.RateLimitError):
+            return jsonify({"error": "rate_limited"}), 429
+        if isinstance(e, anthropic.APIStatusError):
+            return jsonify({"error": f"api_{e.status_code}: {getattr(e, 'message', '')[:200]}"}), 502
+        if isinstance(e, anthropic.APIConnectionError):
+            return jsonify({"error": "ai_connection"}), 502
+        log.exception("AI xato")
+        return jsonify({"error": "ai_failed"}), 500
+
+
+# ═══════════════════════ Statik fayllar ═══════════════════════
+
+@app.get("/")
+def index():
+    r = send_from_directory(STATIC_DIR, "index.html")
+    r.headers["Cache-Control"] = "no-cache"
+    return r
+
+
+@app.get("/<path:fname>")
+def static_file(fname):
+    if fname.startswith("data/") or fname.startswith("api"):
+        return jsonify({"error": "not_found"}), 404
+    r = send_from_directory(STATIC_DIR, fname)
+    if fname.endswith((".js", ".css", ".html", "sw.js", "manifest.json")):
+        r.headers["Cache-Control"] = "no-cache"
+    return r
+
+
+@app.after_request
+def headers(resp):
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("Referrer-Policy", "no-referrer")
+    return resp
+
+
+if __name__ == "__main__":
+    if DEV:
+        log.warning("⚠️  MA_DEV=1 — autentifikatsiya O'CHIQ (faqat lokal test)")
+    elif not BOT_TOKEN:
+        log.warning("⚠️  MA_BOT_TOKEN yo'q — hech kim kira olmaydi")
+    if not ALLOWED_IDS and not DEV:
+        log.warning("⚠️  MA_ALLOWED_IDS yo'q — har qanday Telegram foydalanuvchi kira oladi")
+    app.run(host=os.environ.get("HOST", "127.0.0.1"), port=int(os.environ.get("PORT", "8081")), debug=False)

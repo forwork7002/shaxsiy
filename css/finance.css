@@ -1,0 +1,80 @@
+/* ==== finance ==== */
+.fin-top { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.fin-top .seg { flex: 1; margin: 0; min-width: 0; }
+.fin-top .seg button { padding: 8px 6px; font-size: 12px; min-height: 40px; }
+@media (max-width: 420px) { .fin-top .seg button { padding: 8px 5px; font-size: 11.5px; letter-spacing: -.01em; } .fin-eye { width: 40px; height: 40px; } }
+.fin-eye { width: 42px; height: 42px; flex: none; border: 1px solid var(--line2); background: var(--glass); color: var(--text2); border-radius: 11px; }
+.fin-eye.off { color: var(--warning); border-color: color-mix(in srgb, var(--warning) 35%, transparent); }
+
+.fin-nav .label { display: flex; flex-direction: column; align-items: center; gap: 2px; text-transform: capitalize; }
+.fin-nav-lbl { font-size: 15px; }
+.fin-nav-today { border: 0; background: transparent; color: var(--success); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; min-height: 32px; border-radius: 8px; }
+.fin-nav-today:hover { background: var(--hover); }
+
+.fin-kpi .kpi-num { font-size: clamp(22px, 7.4vw, 36px); }
+.fin-kpi .kpi-num.good { color: var(--success); text-shadow: 0 0 22px var(--success-glow); }
+.fin-kpi .kpi-num.bad { color: var(--danger-text); }
+.fin-kpi .kpi-num.warn { color: var(--warning); }
+.fin-kpi .stat-num { font-size: clamp(14px, 4vw, 20px); }
+.fin-spark { padding-top: 10px; border-top: 1px solid var(--line); }
+.fin-nosnap { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; font-size: 12px; color: var(--text3); text-align: center; }
+
+.fin-hint { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
+.fin-link { display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent; color: var(--text3); font-size: 11.5px; font-weight: 600; padding: 6px 0; min-height: 40px; text-align: left; }
+.fin-link:hover { color: var(--info); }
+
+.fin-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.fin-form-grid .inp, .fin-form-grid .sel { min-height: 44px; }
+.fin-form-grid .btn { grid-column: 1 / -1; min-height: 44px; }
+.fin-form-grid.two { grid-template-columns: 1.4fr 1fr; }
+.fin-form-grid #finAmount { grid-column: 1 / -1; font-size: 18px; font-weight: 700; }
+@media (min-width: 560px) {
+  .fin-form-grid { grid-template-columns: 1.2fr 1fr 1fr; }
+  .fin-form-grid #finAmount { grid-column: auto; }
+}
+
+.fin-search { position: relative; margin-bottom: 10px; }
+.fin-search .inp { padding-left: 38px; min-height: 44px; }
+.fin-search-ic { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text3); display: inline-flex; pointer-events: none; }
+
+.fin-day { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 12px 2px 6px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); }
+.fin-day .num { letter-spacing: 0; text-transform: none; color: var(--text2); font-size: 11.5px; }
+.fin-ico { width: 34px; height: 34px; flex: none; display: inline-flex; align-items: center; justify-content: center; font-size: 17px; border-radius: 10px; background: var(--recess); border: 1px solid var(--line); }
+.fin-amt { font-weight: 700; font-size: 13.5px; white-space: nowrap; color: var(--text); }
+.fin-amt.in { color: var(--success); }
+.fin-amt.out { color: var(--text); }
+.li.tap .li-del { margin-left: -4px; }
+
+.fin-typehead { --c: var(--boshqa); display: flex; align-items: center; gap: 8px; margin: 12px 2px 6px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); }
+.fin-typehead .num { margin-left: auto; letter-spacing: 0; text-transform: none; color: var(--text2); }
+.fin-acc-ic { --c: var(--boshqa); width: 36px; height: 36px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 11px; color: var(--c);
+  background: color-mix(in srgb, var(--c) 12%, transparent); border: 1px solid color-mix(in srgb, var(--c) 30%, transparent); }
+.fin-acc-body { cursor: pointer; border-radius: 8px; }
+.fin-bal { flex: none; border: 1px solid transparent; background: transparent; color: var(--text); font-weight: 700; font-size: 14px; padding: 8px 10px; min-height: 40px; border-radius: 10px; white-space: nowrap; transition: background .15s, border-color .15s; }
+.fin-bal:hover { background: var(--hover); border-color: var(--line2); }
+.fin-bal.bad { color: var(--danger-text); }
+.fin-bal-edit { display: flex; flex-direction: column; gap: 6px; }
+.fin-bal-edit .inp { width: 100%; min-height: 40px; font-weight: 700; }
+.fin-bal-ok { color: var(--success); }
+.li .btn.icon { min-width: 40px; min-height: 40px; }
+.li .li-del { min-width: 40px; min-height: 40px; }
+
+.fin-sub, .fin-wish { align-items: flex-start; flex-wrap: wrap; row-gap: 6px; }
+.fin-sub .li-body, .fin-wish .li-body { flex: 1 1 200px; }
+.fin-sub .li-body { cursor: pointer; border-radius: 8px; }
+.fin-sub.due { box-shadow: inset 3px 0 0 0 var(--danger-text); background: color-mix(in srgb, var(--danger) 6%, transparent); }
+.fin-side { display: flex; align-items: center; gap: 6px; flex: none; margin-left: auto; }
+.fin-side .btn.sm { min-height: 40px; }
+.fin-check { gap: 10px; cursor: pointer; color: var(--text); font-size: 14px; padding: 6px 0; user-select: none; }
+
+.fin-bud { padding: 10px 0; border-top: 1px solid var(--line); }
+.fin-bud:first-of-type { border-top: 0; }
+.fin-bud-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.fin-bud-name { flex: 1; min-width: 0; font-weight: 600; color: var(--text); font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fin-bud-inp { width: 128px; flex: none; text-align: right; min-height: 40px; }
+.fin-bud .bar { display: block; margin: 6px 0 4px; }
+.fin-bud-meta { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; font-size: 11.5px; color: var(--text3); }
+.fin-bud-meta .num { font-size: 11.5px; }
+
+.fin-wish-hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 85% 0%, color-mix(in srgb, var(--violet) 16%, transparent), transparent 60%); }
+.fin-wish .bar { display: block; }

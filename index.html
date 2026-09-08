@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="uz" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#050506">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Shaxsiy · Dashboard</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="app.css">
+<link rel="stylesheet" href="css/today.css">
+<link rel="stylesheet" href="css/tasks.css">
+<link rel="stylesheet" href="css/health.css">
+<link rel="stylesheet" href="css/gym.css">
+<link rel="stylesheet" href="css/finance.css">
+<link rel="stylesheet" href="css/learn.css">
+<link rel="stylesheet" href="css/stats.css">
+<link rel="stylesheet" href="css/ibodat.css">
+<link rel="stylesheet" href="css/nova.css">
+<link rel="stylesheet" href="css/settings.css">
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+<div class="app">
+  <aside class="side" id="sideWrap">
+    <div class="side-brand"><h1 class="dash-title" id="sideTitle">Shaxsiy</h1><div class="small muted" id="sideDate"></div></div>
+    <nav id="side" aria-label="Sections"></nav>
+  </aside>
+  <div class="main">
+    <header class="header" id="header">
+      <div class="h-left">
+        <h1 class="dash-title" id="hTitle">Shaxsiy</h1>
+        <div class="h-date"><span id="hDate"></span><span class="h-hijri" id="hHijri"></span><span class="h-prayer" id="hPrayer"></span></div>
+      </div>
+      <div class="h-actions">
+        <button class="btn icon" data-act="openSearch" aria-label="Search" title="Ctrl+K"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
+        <button class="btn icon" data-act="toggleTheme" aria-label="Theme" id="themeBtn"><svg class="ic" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg></button>
+        <div class="sync" title="sync"><span class="sync-dot" id="syncDot"></span><span id="syncTxt"></span></div>
+      </div>
+    </header>
+    <main class="page" id="view" aria-live="polite"></main>
+  </div>
+</div>
+
+<div class="more" id="more"></div>
+<nav class="nav" id="nav" aria-label="Main tabs"></nav>
+
+<div class="modal-bg" id="modalBg"></div>
+<div class="toast" id="toast" role="status"></div>
+<div class="palette" id="palette">
+  <div class="pal">
+    <input class="inp" id="paletteInp" data-input="palInput" placeholder="Qidirish… (Ctrl+K)" autocomplete="off">
+    <div class="pal-res" id="paletteRes"></div>
+  </div>
+</div>
+
+<script src="js/core.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/prayer.js"></script>
+<script src="js/today.js"></script>
+<script src="js/tasks.js"></script>
+<script src="js/health.js"></script>
+<script src="js/gym.js"></script>
+<script src="js/finance.js"></script>
+<script src="js/learn.js"></script>
+<script src="js/stats.js"></script>
+<script src="js/ibodat.js"></script>
+<script src="js/nova.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
