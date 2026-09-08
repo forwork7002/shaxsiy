@@ -6,7 +6,7 @@
 
 /* ---------- tokens ---------- */
 :root {
-  --bg: #050506; --bg2: #0a0a0b; --bg3: #0e0e10;
+  --bg: #07070B; --bg2: #0b0b10; --bg3: #101016;
   --text: #FAFAFA; --text2: #B8B6B0; --text3: #8B8880; --text4: #55534E;
   --ink-on-light: #0A0A0B;
   --success: #6BE3A4; --success-glow: rgba(107,227,164,.40);
@@ -14,15 +14,19 @@
   --danger: #FF6B6B; --danger-text: #FF8A8A;
   --info: #7DD3FC; --accent: #E07658; --violet: #A78BFA;
   --glass: rgba(255,255,255,.04); --inset: rgba(255,255,255,.035); --recess: rgba(255,255,255,.025);
-  --card-bg: #101013;
+  --card-bg: rgba(255,255,255,.055); --card-solid: #101013; --card-line: rgba(255,255,255,.085); --sheen: rgba(255,255,255,.30);
+  --row-bg: rgba(255,255,255,.045); --row-line: rgba(255,255,255,.07);
   --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.10); --line3: rgba(255,255,255,.18);
   --hover: rgba(255,255,255,.07); --focus: rgba(255,255,255,.28);
   --f-input: rgba(0,0,0,.28); --f-input-focus: rgba(0,0,0,.36);
   --btn-grad: linear-gradient(180deg,#FFFFFF 0%,#E8E5DD 100%);
   --title-grad: linear-gradient(180deg,#FFFFFF 0%,#C7C4BC 120%);
-  --wash1: rgba(224,118,88,.16); --wash2: rgba(180,180,200,.06); --grain: rgba(255,255,255,.014);
+  --wash1: rgba(224,118,88,.40); --wash2: rgba(104,140,205,.26); --wash3: rgba(165,120,225,.22); --grain: rgba(255,255,255,.016);
   --ruh: #7FBEEA; --aql: #7BDFB4; --qalb: #F09CBE; --tana: #F0A25C; --boshqa: #B5AFA3; --aralash: #A78BFA;
-  --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  /* Nunito for reading, Quicksand for anything that should feel like a headline —
+     the pairing the user's own Шахсий app used. Mono stays only where columns must line up. */
+  --font: "Nunito", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-display: "Quicksand", "Nunito", -apple-system, BlinkMacSystemFont, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   /* Inter has no italic face; <em> falls back to a stack that does */
   --font-em: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "DejaVu Sans", sans-serif;
@@ -42,13 +46,14 @@
   --danger: #d65c5c; --danger-text: #c74b4b;
   --info: #3f8fc4; --accent: #d96a49; --violet: #7c5cd6;
   --glass: rgba(255,255,255,.72); --inset: rgba(46,42,36,.04); --recess: rgba(46,42,36,.03);
-  --card-bg: #ffffff;
+  --card-bg: rgba(255,255,255,.66); --card-solid: #ffffff; --card-line: rgba(46,42,36,.09); --sheen: rgba(255,255,255,.95);
+  --row-bg: rgba(255,255,255,.55); --row-line: rgba(46,42,36,.07);
   --line: rgba(46,42,36,.09); --line2: rgba(46,42,36,.14); --line3: rgba(46,42,36,.22);
   --hover: rgba(46,42,36,.06); --focus: rgba(79,168,105,.6);
   --f-input: rgba(46,42,36,.04); --f-input-focus: #ffffff;
   --btn-grad: linear-gradient(180deg,#5cb877 0%,#4fa869 100%);
   --title-grad: linear-gradient(180deg,#2e2a24 0%,#5a554c 120%);
-  --wash1: rgba(224,118,88,.12); --wash2: rgba(111,176,126,.10); --grain: rgba(0,0,0,.012);
+  --wash1: rgba(224,118,88,.30); --wash2: rgba(111,176,126,.24); --wash3: rgba(150,130,220,.16); --grain: rgba(0,0,0,.014);
   --ruh: #4f8fc0; --aql: #4fa869; --qalb: #c9668a; --tana: #d18a3a; --boshqa: #8f877a; --aralash: #7c5cd6;
   --sh: 0 8px 28px rgba(46,42,36,.08); --sh-modal: 0 24px 70px rgba(46,42,36,.25);
   --sh-btn: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 8px rgba(79,168,105,.25);
@@ -57,16 +62,25 @@
 
 /* ---------- chassis ---------- */
 *, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text2); font-family: var(--font);
+/* Only <html> paints the base colour. A background on <body> would sit on top of body::before
+   (the colour field lives at z-index -2, i.e. behind its parent's background) and hide it. */
+html { background: var(--bg); }
+html, body { margin: 0; padding: 0; color: var(--text2); font-family: var(--font);
   -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; -webkit-text-size-adjust: 100%; }
 body { min-height: 100vh; position: relative; overflow-x: hidden; line-height: 1.5; font-size: 14px;
   padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom)); }
-body::before { content: ''; position: fixed; inset: 0; z-index: -2; pointer-events: none;
-  background: radial-gradient(circle at 82% 14%, var(--wash1), transparent 45%), radial-gradient(circle at 18% 90%, var(--wash2), transparent 50%);
-  filter: blur(40px); animation: drift 36s ease-in-out infinite alternate; }
+/* Glass only reads as glass when there is something behind it. Three slow-drifting colour
+   fields — two tinted by the active section — give every translucent surface something to
+   pick up, and the whole thing is one fixed layer, so it costs one paint, not one per card. */
+body::before { content: ''; position: fixed; inset: -10%; z-index: -2; pointer-events: none;
+  background:
+    radial-gradient(38% 30% at 78% 8%, var(--wash1), transparent 70%),
+    radial-gradient(46% 36% at 12% 82%, var(--wash2), transparent 72%),
+    radial-gradient(34% 26% at 92% 68%, var(--wash3), transparent 70%);
+  filter: blur(46px); animation: drift 44s ease-in-out infinite alternate; }
 body::after { content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
   background-image: radial-gradient(var(--grain) 1px, transparent 1px); background-size: 3px 3px; }
-@keyframes drift { 0% { transform: translate3d(0,0,0); } 100% { transform: translate3d(-22px,14px,0); } }
+@keyframes drift { 0% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(-26px,18px,0) scale(1.04); } 100% { transform: translate3d(14px,-12px,0) scale(1); } }
 ::selection { background: rgba(224,118,88,.3); color: var(--text); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
 button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
@@ -115,20 +129,25 @@ h2 { font-size: 16px; } h3 { font-size: 14px; }
 .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
 .muted { color: var(--text3); } .small { font-size: 12px; } .tiny { font-size: 11px; }
 .good { color: var(--success); } .bad { color: var(--danger-text); } .warn { color: var(--warning); } .info { color: var(--info); }
-.dash-title { margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.025em; background: var(--title-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; line-height: 1.15; }
+.dash-title { font-family: var(--font-display); margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -.025em; background: var(--title-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; line-height: 1.15; }
 .eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); }
 .help { font-size: 12px; color: var(--text3); line-height: 1.45; }
 p { margin: 0 0 8px; }
 .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- card ---------- */
-/* backdrop-filter is the single most expensive thing on a scrolling page: every blurred
-   surface forces the compositor to re-sample what is behind it. A long list of cards used to
-   pay that cost per card. Cards are now a flat translucent surface (visually identical over
-   the app's own background) and the real glass is kept for the few surfaces that actually sit
-   over moving content: the sticky header, the bottom nav, the hero and modals. */
-.card { position: relative; background: var(--card-bg); border-radius: var(--r); padding: 16px; margin-bottom: 12px; box-shadow: var(--sh);
-  overflow: hidden; transition: background .3s ease, border-color .3s ease; }
+/* Glass, done properly: a translucent pane over the drifting wash, a hairline of light along
+   the top edge, and a whisper of the section accent. The blur is real but kept cheap — one
+   radius, no stacked filters, and translateZ(0) so each card composites on its own layer
+   instead of re-blurring its neighbours on every scroll frame. */
+.card { position: relative; background: var(--card-bg); border: 1px solid var(--card-line); border-radius: var(--r); padding: 16px; margin-bottom: 12px;
+  box-shadow: var(--sh); overflow: hidden; transform: translateZ(0);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  transition: background .3s ease, border-color .3s ease; }
+/* the sheen: a 1px gradient hairline along the top edge, fading out at the sides */
+.card::before, .hero::before { content: ''; position: absolute; top: 0; left: 12%; right: 12%; height: 1px; pointer-events: none; z-index: 1;
+  background: linear-gradient(90deg, transparent, var(--sheen), transparent); }
+@supports not (backdrop-filter: blur(1px)) { .card { background: var(--card-solid); } }
 [data-theme="light"] .card { border: 1px solid var(--line); }
 
 .card.flat { box-shadow: none; backdrop-filter: none; background: var(--inset); border: 1px solid var(--line); }
@@ -158,7 +177,9 @@ p { margin: 0 0 8px; }
 
 /* ---------- list rows ---------- */
 .list { list-style: none; margin: 0; padding: 0; }
-.li { position: relative; display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 6px; background: var(--inset); border: 1px solid var(--line); border-radius: var(--r-sm); transition: background .2s, opacity .3s; min-height: 46px; }
+.li { position: relative; display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 6px;
+  background: var(--row-bg); border: 1px solid var(--row-line); border-radius: 13px;
+  transition: background .2s, border-color .2s, opacity .3s; min-height: 46px; }
 .li:hover { background: var(--hover); }
 .li.done { opacity: .5; background: rgba(107,227,164,.04); }
 .li.done .li-text { text-decoration: line-through; text-decoration-color: var(--text3); }
@@ -406,3 +427,14 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 /* ==== prayer ==== */
 /* ==== nova ==== */
 /* ==== settings ==== */
+
+/* ---------- display face: Quicksand carries every headline and number ---------- */
+h1, h2, h3, .title, .dash-title, .kpi-num, .stat-num, .hero-num, .hero-title, .ring-pct,
+.bento-tile .val, .modal-title, .nav-tab span, .side-tab span {
+  font-family: var(--font-display);
+}
+.kpi-num, .stat-num, .hero-num, .ring-pct, .bento-tile .val { font-weight: 700; font-variant-numeric: tabular-nums; }
+.eyebrow, .stat-label, .section-title, .hero-eyebrow, .bento-tile .lab, .li-meta { font-family: var(--font); }
+body { font-weight: 500; }
+.li-text, .help, p, .hero-sub { font-weight: 500; }
+.title, h1, h2, h3 { font-weight: 700; letter-spacing: -.005em; }
