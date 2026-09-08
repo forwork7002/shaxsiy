@@ -3,6 +3,7 @@ D.i18n.add({
   uz: {
     'app.title': 'Shaxsiy',
     'loading': 'Yuklanmoqda…',
+    'auth.title': 'Kirish', 'auth.sub': "Ma'lumotlaringiz himoyalangan. Parolni kiriting.", 'auth.ph': 'Parol', 'auth.go': 'Kirish', 'auth.bad': "Parol noto'g'ri", 'auth.err': 'Server bilan aloqa yo‘q', 'auth.logout': 'Chiqish',
     months: ['yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun', 'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'],
     weekdays: ['Yakshanba', 'Dushanba', 'Seshanba', 'Chorshanba', 'Payshanba', 'Juma', 'Shanba'],
     weekdaysShort: ['Ya', 'Du', 'Se', 'Ch', 'Pa', 'Ju', 'Sh'],
@@ -28,6 +29,7 @@ D.i18n.add({
   uzk: {
     'app.title': 'Шахсий',
     'loading': 'Юкланмоқда…',
+    'auth.title': 'Кириш', 'auth.sub': 'Маълумотларингиз ҳимояланган. Паролни киритинг.', 'auth.ph': 'Парол', 'auth.go': 'Кириш', 'auth.bad': 'Парол нотўғри', 'auth.err': 'Сервер билан алоқа йўқ', 'auth.logout': 'Чиқиш',
     months: ['январ', 'феврал', 'март', 'апрел', 'май', 'июн', 'июл', 'август', 'сентябр', 'октябр', 'ноябр', 'декабр'],
     weekdays: ['Якшанба', 'Душанба', 'Сешанба', 'Чоршанба', 'Пайшанба', 'Жума', 'Шанба'],
     weekdaysShort: ['Як', 'Ду', 'Се', 'Чо', 'Па', 'Жу', 'Ша'],
@@ -53,6 +55,7 @@ D.i18n.add({
   ru: {
     'app.title': 'Личное',
     'loading': 'Загрузка…',
+    'auth.title': 'Вход', 'auth.sub': 'Ваши данные защищены. Введите пароль.', 'auth.ph': 'Пароль', 'auth.go': 'Войти', 'auth.bad': 'Неверный пароль', 'auth.err': 'Нет связи с сервером', 'auth.logout': 'Выйти',
     months: ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'],
     weekdays: ['Воскресенье', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота'],
     weekdaysShort: ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'],

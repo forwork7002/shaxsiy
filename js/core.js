@@ -266,7 +266,16 @@
   D.api = async (path, opts = {}) => {
     const h = { 'Content-Type': 'application/json' };
     if (D.tg && D.tg.initData) h['X-Telegram-Init-Data'] = D.tg.initData;
-    const r = await fetch(path, { ...opts, headers: { ...h, ...(opts.headers || {}) } });
+    // credentials: the passcode session lives in an HttpOnly cookie
+    const r = await fetch(path, { credentials: 'same-origin', ...opts, headers: { ...h, ...(opts.headers || {}) } });
+    if (r.status === 401 && !opts._retry) {
+      let j = null;
+      try { j = await r.clone().json(); } catch (e) {}
+      if (j && j.passcode) {
+        const ok = await D.auth.ask();
+        if (ok) return D.api(path, { ...opts, _retry: true });
+      }
+    }
     if (!r.ok) {
       let msg = 'HTTP ' + r.status, data = null;
       try { const j = await r.json(); if (j && j.error) msg = j.error; if (j && j.data) data = j.data; } catch (e) {}
@@ -880,6 +889,56 @@
       // subsequence
       let i = 0; for (const c of nl) if (c === nq[i]) i++;
       return i === nq.length ? 15 : 0;
+    },
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* passcode gate (server bilan, Telegramdan tashqarida)                */
+  /* ------------------------------------------------------------------ */
+  let authPending = null;
+  D.auth = {
+    /** Bir vaqtda bitta oyna; hamma kutayotgan so'rovlar bitta javobni oladi. */
+    ask() {
+      if (authPending) return authPending;
+      authPending = new Promise((resolve) => {
+        const box = document.createElement('div');
+        box.className = 'auth-gate';
+        box.innerHTML = `<form class="auth-card" autocomplete="on">
+            <div class="auth-ic">${D.ic('key', 26)}</div>
+            <div class="auth-title">${D.esc(D.t('auth.title'))}</div>
+            <p class="auth-sub">${D.esc(D.t('auth.sub'))}</p>
+            <input class="inp auth-inp" type="password" name="password" autocomplete="current-password"
+                   placeholder="${D.esc(D.t('auth.ph'))}" aria-label="${D.esc(D.t('auth.title'))}">
+            <div class="auth-err" hidden></div>
+            <button class="btn auth-btn" type="submit">${D.esc(D.t('auth.go'))}</button>
+          </form>`;
+        document.body.appendChild(box);
+        const form = box.querySelector('form');
+        const inp = box.querySelector('.auth-inp');
+        const err = box.querySelector('.auth-err');
+        const btn = box.querySelector('.auth-btn');
+        setTimeout(() => inp.focus(), 60);
+        form.addEventListener('submit', async (ev) => {
+          ev.preventDefault();
+          const v = inp.value;
+          if (!v) return;
+          btn.disabled = true; err.hidden = true;
+          try {
+            const r = await fetch('/api/login', {
+              method: 'POST', credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pass: v }),
+            });
+            if (r.ok) { box.remove(); authPending = null; resolve(true); return; }
+            err.textContent = D.t(r.status === 401 ? 'auth.bad' : 'auth.err');
+          } catch (e) { err.textContent = D.t('auth.err'); }
+          err.hidden = false; btn.disabled = false; inp.select();
+        });
+      });
+      return authPending;
+    },
+    async logout() {
+      try { await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }); } catch (e) {}
+      location.reload();
     },
   };
 

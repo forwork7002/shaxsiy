@@ -47,6 +47,10 @@ ALLOWED_IDS = {x.strip() for x in os.environ.get("MA_ALLOWED_IDS", "").split(","
 DATA_DIR = Path(os.environ.get("MA_DATA_DIR", HERE / "data"))
 STATIC_DIR = Path(os.environ.get("MA_STATIC_DIR", HERE))
 DEV = os.environ.get("MA_DEV", "") == "1"
+# Telegramsiz kirish uchun parol (ochiq serverda MAJBURIY, MA_DEV=1 bo'lmasa).
+PASSCODE = os.environ.get("MA_PASSCODE", "")
+SESSION_DAYS = int(os.environ.get("MA_SESSION_DAYS", "30"))
+COOKIE = "dash_s"
 WHOOP_ID = os.environ.get("WHOOP_CLIENT_ID", "")
 WHOOP_SECRET = os.environ.get("WHOOP_CLIENT_SECRET", "")
 AI_KEY = os.environ.get("AI_API_KEY") or os.environ.get("ANTHROPIC_API_KEY") or ""
@@ -84,13 +88,59 @@ def verify_init_data(init_data: str):
         return None
 
 
+def make_session(uid: str) -> str:
+    """uid|muddat|imzo — server kalitiga bog'langan, soxtalashtirib bo'lmaydi."""
+    exp = int(time.time()) + SESSION_DAYS * 86400
+    raw = f"{uid}|{exp}"
+    return f"{raw}|{sign('sess:' + raw)}"
+
+
+def read_session(tok: str):
+    try:
+        uid, exp, sig = (tok or "").rsplit("|", 2)
+    except ValueError:
+        return None
+    if not hmac.compare_digest(sig, sign(f"sess:{uid}|{exp}")):
+        return None
+    if int(exp) < time.time():
+        return None
+    return uid
+
+
+@app.post("/api/login")
+def login():
+    """Parol bilan kirish. Telegram ichida kerak emas — u yerda initData ishlaydi."""
+    if not PASSCODE:
+        return jsonify({"error": "no_passcode"}), 501
+    body = request.get_json(silent=True) or {}
+    time.sleep(0.4)  # parolni terib topishga qarshi sekinlashtirish
+    if not hmac.compare_digest(str(body.get("pass") or ""), PASSCODE):
+        log.warning("Noto'g'ri parol: %s", request.headers.get("X-Forwarded-For", request.remote_addr))
+        return jsonify({"error": "bad_pass"}), 401
+    r = jsonify({"ok": True})
+    r.set_cookie(COOKIE, make_session("me"), max_age=SESSION_DAYS * 86400, httponly=True,
+                 samesite="Lax", secure=request.headers.get("X-Forwarded-Proto", "") == "https")
+    return r
+
+
+@app.post("/api/logout")
+def logout():
+    r = jsonify({"ok": True})
+    r.delete_cookie(COOKIE)
+    return r
+
+
 def current_user():
     """(uid, err_response). DEV rejimida doim 'dev'."""
     if DEV:
         return "dev", None
     user = verify_init_data(request.headers.get("X-Telegram-Init-Data", ""))
     if not user:
-        return None, (jsonify({"error": "auth_failed"}), 401)
+        # Telegramdan tashqarida: parol bilan olingan cookie
+        uid = read_session(request.cookies.get(COOKIE, ""))
+        if uid:
+            return uid, None
+        return None, (jsonify({"error": "auth_failed", "passcode": bool(PASSCODE)}), 401)
     uid = str(user.get("id", ""))
     if ALLOWED_IDS and uid not in ALLOWED_IDS:
         log.warning("Ruxsatsiz: %s", uid)
@@ -280,13 +330,17 @@ def http_json(url, data=None, headers=None, method=None):
 def whoop_login():
     uid, err = current_user()
     if err and not DEV:
-        # Brauzer navigatsiyasida Telegram header yo'q — initData query orqali ham qabul qilamiz
-        user = verify_init_data(request.args.get("initData", ""))
-        if not user:
-            return "Telegram orqali oching (auth_failed)", 401
-        uid = str(user.get("id"))
-        if ALLOWED_IDS and uid not in ALLOWED_IDS:
-            return "forbidden", 403
+        # Brauzer navigatsiyasida Telegram header yo'q — parol cookie'si yoki initData query
+        cookie_uid = read_session(request.cookies.get(COOKIE, ""))
+        if cookie_uid:
+            uid = cookie_uid
+        else:
+            user = verify_init_data(request.args.get("initData", ""))
+            if not user:
+                return "Avval ilovaga kiring (parol yoki Telegram)", 401
+            uid = str(user.get("id"))
+            if ALLOWED_IDS and uid not in ALLOWED_IDS:
+                return "forbidden", 403
     if not (WHOOP_ID and WHOOP_SECRET):
         return "WHOOP sozlanmagan (WHOOP_CLIENT_ID / WHOOP_CLIENT_SECRET)", 500
     nonce = secrets.token_hex(8)
@@ -483,6 +537,8 @@ if __name__ == "__main__":
         log.warning("⚠️  MA_BOT_TOKEN yo'q — hech kim kira olmaydi")
     if not ALLOWED_IDS and not DEV:
         log.warning("⚠️  MA_ALLOWED_IDS yo'q — har qanday Telegram foydalanuvchi kira oladi")
+    if not DEV and not PASSCODE and not BOT_TOKEN:
+        log.error("⚠️  Na MA_PASSCODE, na MA_BOT_TOKEN yo'q — hech kim kira olmaydi")
     ctx = _ssl_context()
     port = int(os.environ.get("PORT", "8081"))
     if ctx:
