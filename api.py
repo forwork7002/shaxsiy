@@ -58,10 +58,12 @@ def _parse_users(raw: str):
     for part in (raw or "").split(","):
         if ":" not in part:
             continue
-        name, pw = part.split(":", 1)
-        name, pw = name.strip(), pw.strip()
+        bits = part.split(":", 2)
+        name, pw = bits[0].strip(), bits[1].strip()
+        uid = bits[2].strip() if len(bits) > 2 and bits[2].strip() else ""
+        uid = "".join(c for c in uid if c.isalnum() or c in "-_")[:40] or ("u_" + "".join(c for c in name.lower() if c.isalnum())[:24])
         if name and pw:
-            out.append({"name": name[:40], "pass": pw, "uid": "u_" + "".join(c for c in name.lower() if c.isalnum())[:24]})
+            out.append({"name": name[:40], "pass": pw, "uid": uid})
     return out
 USERS = _parse_users(os.environ.get("MA_USERS", ""))
 GOOGLE_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
@@ -139,7 +141,7 @@ def _set_session(resp, uid: str):
 @app.get("/api/auth/config")
 def auth_config():
     """Kirish oynasi nimani ko'rsatishini biladi: ismlar ro'yxati, umumiy parol bormi, Google bormi."""
-    return jsonify({"users": [u["name"] for u in USERS], "passcode": bool(PASSCODE), "google": GOOGLE_ON})
+    return jsonify({"users": [u["name"] for u in USERS], "passcode": bool(PASSCODE) and not USERS, "google": GOOGLE_ON})
 
 
 @app.post("/api/login")
@@ -157,8 +159,8 @@ def login():
             if u["name"].lower() == name.lower() and hmac.compare_digest(pw, u["pass"]):
                 uid = u["uid"]
                 break
-    elif not name and PASSCODE and hmac.compare_digest(pw, PASSCODE):
-        uid = "me"
+    elif not name and not USERS and PASSCODE and hmac.compare_digest(pw, PASSCODE):
+        uid = "me"   # eski bir kishilik rejim — ismlar yozilgach bu eshik yopiladi
     if not uid:
         log.warning("Noto'g'ri parol (%s): %s", name or "-", request.headers.get("X-Forwarded-For", request.remote_addr))
         return jsonify({"error": "bad_pass"}), 401
@@ -189,7 +191,12 @@ def google_login():
         "client_id": GOOGLE_ID, "redirect_uri": base_url() + "/api/auth/google/callback",
         "response_type": "code", "scope": "openid email profile", "state": state, "prompt": "select_account",
     })
-    return redirect(f"{GOOGLE_AUTH}?{q}")
+    r = redirect(f"{GOOGLE_AUTH}?{q}")
+    # the same browser must finish the flow it started — otherwise a state+code pair from an
+    # attacker's own account could be handed to a victim and log them into the attacker's profile
+    r.set_cookie("g_st", nonce, max_age=600, httponly=True, samesite="Lax",
+                 secure=request.headers.get("X-Forwarded-Proto", "") == "https")
+    return r
 
 
 @app.get("/api/auth/google/callback")
@@ -205,6 +212,8 @@ def google_callback():
         return "state noto'g'ri", 400
     if not hmac.compare_digest(sig, sign("g:" + nonce)):
         return "state imzosi noto'g'ri", 400
+    if not hmac.compare_digest(request.cookies.get("g_st", ""), nonce):
+        return "kirish shu brauzerda boshlanmagan — qaytadan urinib ko'ring", 400
     status, tok = http_json(GOOGLE_TOKEN, {
         "grant_type": "authorization_code", "code": code, "redirect_uri": base_url() + "/api/auth/google/callback",
         "client_id": GOOGLE_ID, "client_secret": GOOGLE_SECRET,
@@ -224,7 +233,9 @@ def google_callback():
         who_file(uid).write_text(json.dumps({"name": info.get("name") or email.split("@")[0], "email": email}), encoding="utf-8")
     except OSError:
         pass
-    return _set_session(redirect("/#today"), uid)
+    r = _set_session(redirect("/#today"), uid)
+    r.delete_cookie("g_st")
+    return r
 
 
 @app.post("/api/logout")

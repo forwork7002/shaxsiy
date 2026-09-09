@@ -17,7 +17,9 @@ while true; do
   read -rs PW; echo
   PW="$(printf '%s' "$PW" | tr -d ',:[:space:]')"
   [ -z "$PW" ] && { echo "Parol bo'sh — o'tkazib yuborildi"; continue; }
-  LIST="${LIST:+$LIST,}$NAME:$PW"
+  printf 'Bu odam hozirgi (eski parol bilan kirilgan) ma'"'"'lumotning egasimi? [y/N]: '
+  read -r OWN
+  case "$OWN" in y|Y|ha|Ha) LIST="${LIST:+$LIST,}$NAME:$PW:me";; *) LIST="${LIST:+$LIST,}$NAME:$PW";; esac
 done
 [ -z "$LIST" ] && { echo "Hech kim qo'shilmadi."; exit 1; }
 echo "→ $(printf '%s' "$LIST" | tr ',' '\n' | cut -d: -f1 | tr '\n' ' ')"
@@ -38,4 +40,4 @@ PY
 chmod 600 "$F"
 systemctl restart shaxsiy && sleep 2 && systemctl is-active shaxsiy
 REMOTE
-echo "✓ foydalanuvchilar yozildi. Ilovada har kim o'z ismini tanlab, o'z paroli bilan kiradi."
+echo "✓ foydalanuvchilar yozildi. Endi faqat ismli kirish ishlaydi — eski umumiy parol yopildi."
