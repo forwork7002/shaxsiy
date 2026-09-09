@@ -321,12 +321,48 @@ def auth_config():
                     "googleSeen": bool(request.cookies.get("g_seen"))})              # bu brauzer Google bilan kirgan
 
 
+# ── Terib topishga qarshi: manzil bo'yicha muvaffaqiyatsiz urinishlar ──
+_fails: dict = {}          # (nima, ip) → [vaqtlar]
+_fails_lock = threading.Lock()
+FAIL_MAX = 4000            # xotira o'smasin — shundan oshsa eskilari tashlanadi
+
+
+def client_ip() -> str:
+    """So'rovchining haqiqiy manzili. nginx X-Forwarded-For OXIRIGA qo'shadi ($proxy_add_x_forwarded_for),
+    shuning uchun oxirgisi olinadi — birinchisini so'rovchining o'zi yozib yuborishi va shu bilan
+    manzil bo'yicha cheklovni aylanib o'tishi mumkin."""
+    parts = [p.strip() for p in request.headers.get("X-Forwarded-For", "").split(",") if p.strip()]
+    return parts[-1] if parts else (request.remote_addr or "?")
+
+
+def note_fail(what: str, ip: str = None):
+    """Muvaffaqiyatsiz urinishni qayd etadi (noto'g'ri parol, noto'g'ri taklif kodi)."""
+    now = time.time()
+    with _fails_lock:
+        if len(_fails) > FAIL_MAX:
+            for k, v in list(_fails.items()):
+                if not v or now - v[-1] > 3600:
+                    _fails.pop(k, None)
+        _fails.setdefault((what, ip or client_ip()), []).append(now)
+
+
+def too_many(what: str, limit: int, window: int = 900, ip: str = None) -> bool:
+    """Shu manzil oyna ichida limitdan oshdimi. Urinishni qayd etmaydi — faqat qaraydi."""
+    now = time.time()
+    with _fails_lock:
+        hits = [t for t in _fails.get((what, ip or client_ip()), []) if now - t < window]
+    return len(hits) >= limit
+
+
 @app.post("/api/login")
 def login():
     """Ism + parol (MA_USERS yoki data/users.json) yoki ismsiz — egasining umumiy paroli (MA_PASSCODE).
     Telegram ichida kerak emas."""
     if not (USERS or PASSCODE or REGISTER_ON or USERS_FILE.exists()):
         return jsonify({"error": "no_passcode"}), 501
+    # 0.4 s kechikishning o'zi kamlik qildi: so'rovlarni yonma-yon yuborib bo'lardi
+    if too_many("login", 12, 900):
+        return jsonify({"error": "too_many"}), 429
     body = request.get_json(silent=True) or {}
     time.sleep(0.4)  # parolni terib topishga qarshi sekinlashtirish
     pw = str(body.get("pass") or "")[:200]
@@ -342,14 +378,12 @@ def login():
     elif not USERS and PASSCODE and hmac.compare_digest(pw, PASSCODE):
         uid = "me"   # eski bir kishilik rejim — MA_USERS yozilgach bu eshik yopiladi
     if not uid:
-        log.warning("Noto'g'ri parol (%s): %s", name or "-", request.headers.get("X-Forwarded-For", request.remote_addr))
+        note_fail("login")
+        log.warning("Noto'g'ri parol (%s): %s", name or "-", client_ip())
         return jsonify({"error": "bad_pass"}), 401
     who_touch(uid, lastLogin=datetime.now(TZ).isoformat())
     _archive(db.touch_user, uid, display_name(uid), None, "password", what="arxiv user")
     return _set_session(jsonify({"ok": True, "uid": uid, "name": display_name(uid)}), uid)
-
-
-_reg_recent: dict = {}   # ip → [vaqtlar] — bitta manzildan soatiga ko'pi bilan 5 ta hisob
 
 
 @app.post("/api/register")
@@ -357,9 +391,14 @@ def register():
     """Yangi hisob: ism + parol (+ taklif kodi, MA_INVITE bo'lsa). Darhol kiritib qo'yadi."""
     if not REGISTER_ON:
         return jsonify({"error": "closed"}), 403
+    # Cheklov taklif kodi tekshiruvidan OLDIN: ilgari teskari edi va kodni cheksiz terib
+    # ko'rish mumkin edi (429 faqat kod to'g'ri kelgandan keyin ishlardi).
+    if too_many("invite", 10, 3600) or too_many("reg", 5, 3600):
+        return jsonify({"error": "too_many"}), 429
     body = request.get_json(silent=True) or {}
     time.sleep(0.4)
     if INVITE and not hmac.compare_digest(str(body.get("invite") or "").strip(), INVITE):
+        note_fail("invite")
         return jsonify({"error": "bad_invite"}), 403
     name = _clean_name(body.get("user"))
     if not name:
@@ -369,11 +408,6 @@ def register():
         return jsonify({"error": "weak_pass"}), 400
     if "pass2" in body and pw != pw2:
         return jsonify({"error": "mismatch"}), 400
-    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "?").split(",")[0].strip()
-    now = time.time()
-    hits = [t for t in _reg_recent.get(ip, []) if now - t < 3600]
-    if len(hits) >= 5:
-        return jsonify({"error": "too_many"}), 429
     with _lock:
         if _name_taken(name):
             return jsonify({"error": "name_taken"}), 409
@@ -386,7 +420,7 @@ def register():
                                 "iter": PW_ITER, "createdAt": ts}
         _reg_save(reg)
         who_touch(uid, name=name, provider="password", createdAt=ts, lastLogin=ts)
-    _reg_recent[ip] = hits + [now]
+    note_fail("reg")   # muvaffaqiyatli hisob ham sanaladi: bir manzildan soatiga 5 ta
     log.info("Yangi hisob: %s (%s)", name, uid)
     _archive(db.touch_user, uid, name, None, "register", what="arxiv user")
     return _set_session(jsonify({"ok": True, "uid": uid, "name": name}), uid)
@@ -476,6 +510,43 @@ GOOGLE_TOKEN = "https://oauth2.googleapis.com/token"
 GOOGLE_INFO = "https://oauth2.googleapis.com/tokeninfo"
 
 
+@app.post("/api/me/adopt")
+def me_adopt():
+    """Egasining eski nusxasini (data/me.json) shu hisobga oladi — faqat egasining paroli bilan.
+    Ma'lumot mijozga qaytadi: u o'zidagi bilan birlashtirib qayta yuboradi (hech narsa ustidan yozilmaydi).
+    Eski fayl <uid> nomi bilan belgilanadi, ya'ni ikkinchi marta olib bo'lmaydi."""
+    uid, err = current_user()
+    if err:
+        return err
+    if not PASSCODE or uid == "me":
+        return jsonify({"error": "nothing"}), 400
+    if too_many("adopt", 8, 900):
+        return jsonify({"error": "too_many"}), 429
+    body = request.get_json(silent=True) or {}
+    if not hmac.compare_digest(str(body.get("passcode") or ""), PASSCODE):
+        time.sleep(0.4)
+        return jsonify({"error": "bad_pass"}), 401
+    with _lock:
+        old = user_file("me")
+        if not old.is_file():
+            return jsonify({"error": "nothing"}), 404
+        try:
+            data = json.loads(old.read_text(encoding="utf-8"))
+        except Exception as e:  # noqa: BLE001
+            log.error("me.json o'qilmadi: %s", e)
+            return jsonify({"error": "unreadable"}), 500
+        # WHOOP ulanishi ham o'tadi — yangi hisobda tokenlar bo'lmasa (bo'lsa tegmaymiz)
+        src_w, dst_w = whoop_file("me"), whoop_file(uid)
+        if src_w.is_file() and not dst_w.is_file():
+            try:
+                src_w.replace(dst_w)
+            except Exception as e:  # noqa: BLE001
+                log.warning("WHOOP tokenlari ko'chmadi: %s", e)
+        old.replace(old.with_name(old.name + ".adopted-" + uid))
+    log.info("Eski nusxa (me.json) %s hisobiga o'tdi", uid)
+    return jsonify({"ok": True, "data": data})
+
+
 @app.get("/api/auth/google")
 def google_login():
     if not GOOGLE_ON:
@@ -485,7 +556,10 @@ def google_login():
     # callback'da yangi profil ochilmaydi (bayroq 0).
     need_code = GOOGLE_INVITE and bool(INVITE) and not ALLOWED_EMAILS
     code_in = str(request.args.get("invite") or "").strip()
+    if need_code and too_many("invite", 10, 3600):
+        return "Juda ko'p urinish — bir soatdan keyin qayta urinib ko'ring", 429
     if need_code and code_in and not hmac.compare_digest(code_in, INVITE):
+        note_fail("invite")   # bu eshikdan ham kodni terib topib bo'lmasin
         return "Taklif kodi noto'g'ri", 403
     if need_code and not code_in and not request.cookies.get("g_seen"):
         return "Yangi hisob uchun taklif kodi kerak", 403
@@ -713,7 +787,8 @@ def me_json(uid: str) -> dict:
     return {"uid": uid, "name": display_name(uid), "email": who.get("email") or None,
             "provider": who.get("provider") or _provider_guess(uid),
             "avatar": int(f.stat().st_mtime) if f.is_file() else None,
-            "since": who.get("createdAt") or (_reg_rec(uid) or {}).get("createdAt") or None}
+            "since": who.get("createdAt") or (_reg_rec(uid) or {}).get("createdAt") or None,
+            "claim": _claimable(uid)}
 
 
 # ── Profil surati: data/<uid>.avatar — yo'l hech qachon so'rovdan kelmaydi ──
@@ -780,6 +855,34 @@ def google_picture_fetch(uid: str, url: str) -> bool:
 def user_file(uid: str) -> Path:
     safe = "".join(c for c in uid if c.isalnum() or c in "-_")[:40] or "user"
     return DATA_DIR / f"{safe}.json"
+
+
+def _has_content(d) -> bool:
+    """Ichida odamning yozuvlari bormi. Bo'sh nusxa to'liq nusxa ustidan yozilmasligi shunga qarab hal bo'ladi."""
+    if not isinstance(d, dict):
+        return False
+    if d.get("logs") or d.get("habits") or d.get("tasks") or d.get("goals") or d.get("notes"):
+        return True
+    for key, sub in (("finance", "tx"), ("food", "logs"), ("nova", "threads"), ("caffeine", "logs")):
+        box = d.get(key)
+        if isinstance(box, dict) and box.get(sub):
+            return True
+    return False
+
+
+def _claimable(uid: str) -> bool:
+    """Egasining eski nusxasi (data/me.json) hali turibdimi va joriy hisob bo'shmi — /api/me shuni aytadi.
+    Egasi paroli bilan kirgan odam «me» uid olgan; keyin ism-parol yoki Google eshigi ochilsa, o'sha odam
+    boshqa uid bilan kiradi va eski nusxa yetim qoladi. Uni faqat egasining paroli bilan olib bo'ladi."""
+    if uid == "me" or not PASSCODE or not user_file("me").is_file():
+        return False
+    f = user_file(uid)
+    if not f.is_file():
+        return True
+    try:
+        return not _has_content(json.loads(f.read_text(encoding="utf-8")))
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def load_data(uid: str) -> dict:
@@ -882,6 +985,12 @@ def post_data():
         if s_up > i_up + 5000:
             # serverda yangiroq nusxa bor — mijoz uni oladi va qayta yuboradi
             return jsonify({"ok": False, "error": "stale", "updated": s_up, "data": stored}), 409
+        # Bo'sh holat to'liq nusxa ustidan yozilmaydi: ilova ochilganda mijozda bo'sh holat turadi va
+        # kirish oynasidan keyin o'sha bo'sh nusxa yuborilib qolishi mumkin edi. ?replace=1 — ataylab
+        # tozalash yoki import qilish (mijoz D.saveReplace bilan yuboradi).
+        if _has_content(stored) and not _has_content(incoming) and request.args.get("replace") != "1":
+            log.warning("bo'sh holat rad etildi (%s) — serverdagi nusxa saqlanib qoldi", uid)
+            return jsonify({"ok": False, "error": "empty_overwrite", "updated": s_up, "data": stored}), 409
         incoming.setdefault("meta", {})["serverUpdated"] = datetime.now(TZ).isoformat()
         save_data(uid, incoming)
     # arxiv: kunlik faktlar + blob versiyasi (xato bo'lsa saqlash baribir muvaffaqiyatli)
