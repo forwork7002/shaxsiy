@@ -665,6 +665,23 @@
   /* ------------------------------------------------------------------ */
   /* DATA                                                                */
   /* ------------------------------------------------------------------ */
+  // Arxiv qatori: /api/history/range shu tab ochilganda so'raladi; natija hisobga (uid) bog'liq va 2 daqiqadan
+  // keyin qayta so'raladi (import, kunning ilk saqlashi, boshqa hisob bilan kirish — reloadsiz ko'rinsin).
+  let arch = null;
+  const ARCH_MS = 120000;
+  function archiveLine() {
+    if (!D.serverEnabled()) return `<span class="zone"></span>${esc(t('set.d.archive'))}: ${esc(t('set.d.archiveOff'))}`;
+    const uid = (D.device && D.device.uid) || '';
+    if (!arch || arch.uid !== uid || (arch.state !== 'loading' && Date.now() - arch.ts > ARCH_MS)) {
+      const prev = arch && arch.uid === uid && arch.state === 'ok' ? arch.r : null;   // yangilanayotganda eski raqam turadi
+      arch = { state: 'loading', uid, ts: Date.now(), r: prev };
+      D.api('/api/history/range').then((r) => { arch = { state: 'ok', uid, ts: Date.now(), r: r || {} }; }).catch(() => { arch = { state: 'err', uid, ts: Date.now() }; }).then(() => D.patch('setArchive', archiveLine()));
+    }
+    if (arch.state === 'loading' && !arch.r) return `<span class="zone z-warn"></span>${esc(t('set.d.archive'))}: …`;
+    if (arch.state === 'err') return `<span class="zone z-bad"></span>${esc(t('set.d.archive'))}: ${esc(t('set.d.archiveOff'))}`;
+    const r = arch.r, line = t('set.d.archiveLine', { days: D.fmtNum(+r.days || 0), first: r.first ? D.fmtDate(String(r.first), 'short') + ' ' + String(r.first).slice(0, 4) : '—', threads: D.fmtNum(+r.threads || 0) });
+    return `<span class="zone z-good"></span><span>${esc(t('set.d.archive'))}: ${esc(line)}</span><button class="btn ghost sm" data-act="go" data-view="history">${D.ic('clock', 14)} ${esc(t('nav.history'))}</button>`;
+  }
   function renderData() {
     const server = D.serverEnabled(), st = D.syncState();
     const tgUser = D.tg && D.tg.initDataUnsafe && D.tg.initDataUnsafe.user;
@@ -689,6 +706,7 @@
       </div>
       <input type="file" class="set-vh" id="setImportInp" accept=".json,application/json" data-change="setImportFile" tabindex="-1" aria-hidden="true">
       <div class="help mt">${esc(t('set.d.importHint'))}</div>
+      <div class="set-ok mt" id="setArchive">${archiveLine()}</div>
     </div>
 
     <div class="card">
@@ -709,6 +727,9 @@
     if (!(await D.confirm({ text: t('set.logoutQ'), ok: t('set.logout') }))) return;
     D.auth.logout();
   };
+  D.i18n.add({ uz: { 'set.d.archive': 'Arxiv', 'set.d.archiveLine': '{days} kun · {first} dan · {threads} suhbat', 'set.d.archiveOff': 'mavjud emas' },
+    uzk: { 'set.d.archive': 'Архив', 'set.d.archiveLine': '{days} кун · {first} дан · {threads} суҳбат', 'set.d.archiveOff': 'мавжуд эмас' },
+    ru: { 'set.d.archive': 'Архив', 'set.d.archiveLine': '{days} дн. · с {first} · бесед: {threads}', 'set.d.archiveOff': 'недоступен' } });
   D.i18n.add({ uz: { 'set.account': 'Hisob', 'set.logout': 'Chiqish', 'set.logoutQ': 'Chiqilsinmi? Bu qurilmadagi nusxa o‘chiriladi, serverdagi ma’lumot saqlanadi.' },
     uzk: { 'set.account': 'Ҳисоб', 'set.logout': 'Чиқиш', 'set.logoutQ': 'Чиқилсинми? Бу қурилмадаги нусха ўчирилади, сервердаги маълумот сақланади.' },
     ru: { 'set.account': 'Аккаунт', 'set.logout': 'Выйти', 'set.logoutQ': 'Выйти? Копия на этом устройстве будет удалена, данные на сервере сохранятся.' } });

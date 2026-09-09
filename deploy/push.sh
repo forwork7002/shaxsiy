@@ -20,11 +20,17 @@ if [ -z "$HOST" ]; then
 fi
 cd "$(dirname "$0")/.."
 
+# Ixtiyoriy fayllar: bo'lsa yuboriladi, bo'lmasa tar yiqilmaydi (legacy.py — bir martalik import)
+EXTRA=()
+for f in db.py legacy.py; do
+  [ -f "$f" ] && EXTRA+=("$f")
+done
+
 echo "▸ Yuborilmoqda → $HOST:$APP_DIR"
 tar czf - \
   --exclude='.venv' --exclude='data' --exclude='certs' --exclude='__pycache__' \
   --exclude='.env' --exclude='*.pyc' \
-  index.html app.css css js icons manifest.json sw.js api.py requirements.txt deploy \
+  index.html app.css css js icons manifest.json sw.js api.py requirements.txt deploy "${EXTRA[@]}" \
   | ssh "$HOST" "mkdir -p $APP_DIR && tar xzf - -C $APP_DIR"
 
 if [ "$MODE" = "--setup" ]; then

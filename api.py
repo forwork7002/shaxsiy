@@ -47,6 +47,8 @@ from pathlib import Path
 
 from flask import Flask, request, jsonify, send_from_directory, redirect, Response
 
+import db   # SQLite arxiv: kunlik faktlar, WHOOP yozuvlari, chatlar — hech qachon qirqilmaydi
+
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 log = logging.getLogger("api")
 
@@ -192,6 +194,19 @@ app = Flask(__name__, static_folder=None)
 _lock = threading.Lock()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 (DATA_DIR / "backups").mkdir(exist_ok=True)
+try:
+    db.init(DATA_DIR)
+except Exception as e:  # noqa: BLE001 — arxivsiz ham ilova ishlayveradi
+    log.exception("Arxiv (dash.db) ochilmadi: %s", e)
+
+
+def _archive(fn, *a, what="arxiv"):
+    """Arxivga yozish hech qachon asosiy ishni buzmasin: xato — log, davom."""
+    try:
+        return fn(*a)
+    except Exception as e:  # noqa: BLE001
+        log.exception("%s: %s", what, e)
+        return None
 
 
 # ═══════════════════════ Telegram autentifikatsiya ═══════════════════════
@@ -278,6 +293,7 @@ def login():
     if not uid:
         log.warning("Noto'g'ri parol (%s): %s", name or "-", request.headers.get("X-Forwarded-For", request.remote_addr))
         return jsonify({"error": "bad_pass"}), 401
+    _archive(db.touch_user, uid, display_name(uid), None, "password", what="arxiv user")
     return _set_session(jsonify({"ok": True, "uid": uid, "name": display_name(uid)}), uid)
 
 
@@ -323,6 +339,7 @@ def register():
             pass
     _reg_recent[ip] = hits + [now]
     log.info("Yangi hisob: %s (%s)", name, uid)
+    _archive(db.touch_user, uid, name, None, "register", what="arxiv user")
     return _set_session(jsonify({"ok": True, "uid": uid, "name": name}), uid)
 
 
@@ -410,6 +427,7 @@ def google_callback():
         who_file(uid).write_text(json.dumps({"name": info.get("name") or email.split("@")[0], "email": email}), encoding="utf-8")
     except OSError:
         pass
+    _archive(db.touch_user, uid, info.get("name") or email.split("@")[0], email, "google", what="arxiv user")
     r = _set_session(redirect("/#today"), uid)
     r.delete_cookie("g_st")
     # bu brauzer Google bilan kirgan: keyingi safar taklif kodi so'ralmaydi (yangi profil baribir ochilmaydi)
@@ -593,6 +611,9 @@ def post_data():
             return jsonify({"ok": False, "error": "stale", "updated": s_up, "data": stored}), 409
         incoming.setdefault("meta", {})["serverUpdated"] = datetime.now(TZ).isoformat()
         save_data(uid, incoming)
+    # arxiv: kunlik faktlar + blob versiyasi (xato bo'lsa saqlash baribir muvaffaqiyatli)
+    _archive(db.archive_state, uid, incoming, what="arxiv faktlar")
+    _archive(db.record_state_version, uid, incoming, what="arxiv versiya")
     return jsonify({"ok": True, "updated": incoming["meta"]["serverUpdated"]})
 
 
@@ -619,12 +640,164 @@ def get_backup(name):
     if err:
         return err
     stem = user_file(uid).stem
-    if not name.startswith(stem + "-") or "/" in name or ".." in name:
+    # faqat shu foydalanuvchining JSON zaxirasi — dash-YYYY-MM-DD.db (butun baza) shu papkada turadi
+    if not name.startswith(stem + "-") or not name.endswith(".json") or "/" in name or ".." in name:
         return jsonify({"error": "forbidden"}), 403
     f = DATA_DIR / "backups" / name
     if not f.exists():
         return jsonify({"error": "not_found"}), 404
     return Response(f.read_text(encoding="utf-8"), mimetype="application/json")
+
+
+# ═══════════════════════ API: tarix (arxivdan o'qish) ═══════════════════════
+#
+# Tarix (History) bo'limi faqat shu yerdan o'qiydi — blob emas, dash.db. Hammasi joriy
+# foydalanuvchi bo'yicha; oraliq 400 kundan uzun bo'lsa qirqiladi; from/to bo'lmasa — oxirgi 31 kun.
+
+def _hist_range(default_days: int = 31):
+    """(frm, to, err) — so'rovdagi from/to. Noto'g'ri sana (2026-02-30, 0001-01-05 ham) → 400.
+    400 kundan uzun oraliqni db._clamp_range qirqadi (bitta qoida, bitta joyda)."""
+    to = (request.args.get("to") or "").strip() or datetime.now(TZ).strftime("%Y-%m-%d")
+    frm = (request.args.get("from") or "").strip()
+    try:
+        if not db.DAY_RE.match(to):
+            raise ValueError(to)
+        b = datetime.strptime(to, "%Y-%m-%d")
+        if not frm:
+            frm = (b - timedelta(days=default_days - 1)).strftime("%Y-%m-%d")
+        if not db.DAY_RE.match(frm):
+            raise ValueError(frm)
+        a = datetime.strptime(frm, "%Y-%m-%d")
+        if a > b:
+            raise ValueError("from > to")
+    except (ValueError, OverflowError):
+        return None, None, (jsonify({"error": "bad_range"}), 400)
+    frm, to = db._clamp_range(frm, to)
+    return frm, to, None
+
+
+@app.get("/api/history/range")
+def history_range():
+    uid, err = current_user()
+    if err:
+        return err
+    return jsonify(db.range(uid))
+
+
+@app.get("/api/history/days")
+def history_days():
+    uid, err = current_user()
+    if err:
+        return err
+    frm, to, bad = _hist_range()
+    if bad:
+        return bad
+    return jsonify({"from": frm, "to": to, "days": db.days(uid, frm, to)})
+
+
+@app.get("/api/history/whoop")
+def history_whoop():
+    uid, err = current_user()
+    if err:
+        return err
+    frm, to, bad = _hist_range()
+    if bad:
+        return bad
+    out = db.whoop(uid, frm, to)
+    out.update({"from": frm, "to": to})
+    return jsonify(out)
+
+
+@app.get("/api/history/months")
+def history_months():
+    uid, err = current_user()
+    if err:
+        return err
+    y = (request.args.get("year") or "").strip() or datetime.now(TZ).strftime("%Y")
+    if not (y.isdigit() and 1970 <= int(y) <= 2100):
+        return jsonify({"error": "bad_year"}), 400
+    return jsonify({"year": int(y), "months": db.months(uid, int(y))})
+
+
+@app.get("/api/history/chats")
+def history_chats():
+    uid, err = current_user()
+    if err:
+        return err
+    q = (request.args.get("q") or "").strip()[:200]
+    return jsonify({"threads": db.chats(uid, q, request.args.get("limit") or 50, request.args.get("before") or None)})
+
+
+@app.get("/api/history/chats/<thread_id>")
+def history_chat(thread_id):
+    uid, err = current_user()
+    if err:
+        return err
+    t = db.chat(uid, thread_id[:80])
+    if not t:
+        return jsonify({"error": "not_found"}), 404
+    return jsonify(t)
+
+
+@app.get("/api/history/cards")
+def history_cards():
+    uid, err = current_user()
+    if err:
+        return err
+    frm, to, bad = _hist_range()
+    if bad:
+        return bad
+    section = (request.args.get("section") or "").strip()[:40]
+    return jsonify({"from": frm, "to": to, "cards": db.cards(uid, section, frm, to, request.args.get("limit"))})
+
+
+@app.get("/api/history/versions")
+def history_versions():
+    uid, err = current_user()
+    if err:
+        return err
+    return jsonify({"versions": db.versions(uid)})
+
+
+@app.get("/api/history/versions/<int:vid>")
+def history_version(vid):
+    uid, err = current_user()
+    if err:
+        return err
+    d = db.version(uid, vid)
+    if d is None:
+        return jsonify({"error": "not_found"}), 404
+    return jsonify(d)
+
+
+@app.post("/api/history/restore-thread")
+def history_restore_thread():
+    """Arxivdagi chatni blobning nova.threads ro'yxatiga qaytaradi (bo'lmasa qo'shadi)."""
+    uid, err = current_user()
+    if err:
+        return err
+    body = request.get_json(silent=True) or {}
+    tid = str(body.get("id") or "").strip()[:80]
+    if not tid:
+        return jsonify({"error": "id required"}), 400
+    th = db.restore_thread(uid, tid)
+    if not th:
+        return jsonify({"error": "not_found"}), 404
+    with _lock:
+        d = load_data(uid)
+        if not isinstance(d, dict):
+            d = {}
+        nova = d.get("nova") if isinstance(d.get("nova"), dict) else {}
+        threads = nova.get("threads") if isinstance(nova.get("threads"), list) else []
+        if not any(isinstance(x, dict) and x.get("id") == tid for x in threads):
+            threads.append(th)
+            nova["threads"] = threads
+            d["nova"] = nova
+            d.setdefault("meta", {})["updatedAt"] = int(time.time() * 1000)   # mijoz keyingi pull'da yangisini oladi
+            d["meta"]["serverUpdated"] = datetime.now(TZ).isoformat()
+            save_data(uid, d)
+            _archive(db.archive_state, uid, d, what="arxiv faktlar")
+    return jsonify({"ok": True, "thread": th})
 
 
 # ═══════════════════════ WHOOP ═══════════════════════
@@ -918,9 +1091,15 @@ def _n_workout(r):
     }
 
 
-def _wh_collect(token: str, path: str, pages: int, limit: int = 25):
-    """(records, status, headers) — next_token bo'ylab `pages` sahifa."""
-    out, tok, status, hdr = [], None, 0, {}
+WH_DEEP_PAGES, WH_DEEP_YEARS, WH_RL_FLOOR = 30, 2, 20   # birinchi to'ldirish: 30 sahifa / 2 yil, limit 20 ga tushsa to'xtaydi
+
+
+def _wh_collect(token: str, path: str, pages: int, limit: int = 25, until: str = "", resume: str = None):
+    """(records, status, headers, resume) — next_token bo'ylab `pages` sahifa (`resume` berilsa o'sha
+    tokendan davom). `until` (ISO) berilsa, sahifadagi eng oldingi yozuv undan qadimiy bo'lganda to'xtaydi
+    (tugadi → resume None); rate-limit qoldig'i WH_RL_FLOOR dan kam bo'lganda to'xtaydi va keyingi
+    tokenni qaytaradi — chaqiruvchi to'ldirishni tugagan deb hisoblamaydi, keyingi safar davom etadi."""
+    out, tok, status, hdr, nxt = [], resume or None, 0, {}, None
     for _ in range(max(1, pages)):
         q = {"limit": limit}
         if tok:
@@ -933,7 +1112,16 @@ def _wh_collect(token: str, path: str, pages: int, limit: int = 25):
         tok = body.get("next_token")
         if not tok or not recs:
             break
-    return out, status, hdr
+        if until:
+            oldest = min((str(r.get("start") or r.get("created_at") or r.get("updated_at") or "") for r in recs if isinstance(r, dict)), default="")
+            if oldest and oldest[:19] < until[:19]:
+                break
+            rem = _wh_rl(hdr).get("remaining")
+            if rem is not None and rem < WH_RL_FLOOR:
+                log.info("WHOOP %s: chuqur to'ldirish to'xtatildi (rate-limit qoldig'i %s) — keyingi safar davom etadi", path, rem)
+                nxt = tok
+                break
+    return out, status, hdr, nxt
 
 
 def _wh_rl(hdr: dict):
@@ -990,12 +1178,21 @@ def _snap_write(uid: str, snap: dict):
     _wh_mem[uid] = (f.stat().st_mtime, snap)
 
 
+WH_KEYS = ("cycle", "recovery", "sleep", "workout")
+
+
 def _wh_tick(uid: str, now: float):
     """Bitta foydalanuvchi uchun navbatdagi tortishlar. Hech qanday so'rovni kutmay xato qaytarmaydi."""
-    st = _wh_state.setdefault(uid, {"t_fast": 0, "t_slow": 0, "t_body": 0, "forced": 0, "backfilled": False})
     snap = _snap_read(uid) or {"recovery": [], "sleep": [], "cycle": [], "workout": [], "body": {}, "profile": {}, "updatedAt": 0}
+    st = _wh_state.get(uid)
+    if st is None:
+        # jarayon boshida snapshotdagi 120 kun arxivga — arxivdan oldin tortilgan yozuvlar qirqilganda yo'qolmasin
+        st = _wh_state[uid] = {"t_fast": 0, "t_slow": 0, "t_body": 0, "forced": 0, "backfilled": False, "deep": {}}
+        for k in WH_KEYS:
+            _archive(db.record_whoop, uid, k, snap.get(k) or [], what="arxiv whoop snapshot")
     if not st["backfilled"]:
-        st["backfilled"] = bool(snap.get("backfilled"))
+        # `archived` — chuqur (2 yillik) to'ldirish arxivga yozilgan; eski snapshotlarda faqat `backfilled` (4 sahifa) bor
+        st["backfilled"] = bool(snap.get("backfilled")) and bool(snap.get("archived"))
     forced = False
     flag = whoop_flag_file(uid)
     if flag.exists() and now - st["forced"] >= WH_FORCE_GAP:
@@ -1006,7 +1203,7 @@ def _wh_tick(uid: str, now: float):
         except OSError:
             pass
     do_fast = forced or now - st["t_fast"] >= WH_FAST
-    do_slow = forced or now - st["t_slow"] >= WH_SLOW or not st["backfilled"]
+    do_slow = forced or now - st["t_slow"] >= WH_SLOW or not st["t_slow"]   # to'ldirish tugamagan bo'lsa ham WH_SLOW qadamida (limitni urmaslik uchun)
     do_body = now - st["t_body"] >= WH_BODY or not snap.get("profile")
     if not (do_fast or do_slow or do_body):
         return
@@ -1018,11 +1215,16 @@ def _wh_tick(uid: str, now: float):
         return
     changed, err, rl = False, None, snap.get("rl")
     first = not st["backfilled"]
-    pages = 4 if first else 1
+    # birinchi marta — arxiv uchun chuqur (2 yilgacha); snapshot baribir WH_KEEP_DAYS bilan qirqiladi.
+    # deep[key]: True — shu to'plam tugadi; str — rate-limit tufayli to'xtagan joyning next_token'i
+    deep = st.setdefault("deep", {})
+    until = (datetime.now(timezone.utc) - timedelta(days=365 * WH_DEEP_YEARS)).isoformat() if first else ""
 
     def pull(path, norm, key, ts_key, keep, cap=0, limit=25):
         nonlocal changed, err, rl
-        recs, status, hdr = _wh_collect(token, path, pages, limit)
+        d = first and deep.get(key) is not True
+        resume = deep.get(key) if d and isinstance(deep.get(key), str) else None
+        recs, status, hdr, nxt = _wh_collect(token, path, WH_DEEP_PAGES if d else 1, 25 if d else limit, until if d else "", resume)
         if hdr:
             rl = _wh_rl(hdr)
         if status == 429:
@@ -1030,8 +1232,14 @@ def _wh_tick(uid: str, now: float):
             return False
         if status != 200:
             err = f"http_{status}"
+            if resume:
+                deep.pop(key, None)   # eskirgan token bo'lishi mumkin — keyingi safar boshidan
             return False
-        lst, ch = _wh_merge(snap.get(key) or [], [norm(r) for r in recs], ts_key, keep, cap)
+        if d:
+            deep[key] = nxt or True
+        normed = [norm(r) for r in recs]
+        _archive(db.record_whoop, uid, key, normed, what="arxiv whoop")   # qirqishdan OLDIN — abadiy nusxa
+        lst, ch = _wh_merge(snap.get(key) or [], normed, ts_key, keep, cap)
         snap[key] = lst
         changed = changed or ch
         return True
@@ -1044,9 +1252,10 @@ def _wh_tick(uid: str, now: float):
         ok = pull("/recovery", _n_recovery, "recovery", "ts", WH_KEEP_DAYS, limit=5 if not first else 25)
         ok = pull("/activity/sleep", _n_sleep, "sleep", "end", WH_KEEP_DAYS, limit=5 if not first else 25) and ok
         ok = pull("/activity/workout", _n_workout, "workout", "start", WH_KEEP_DAYS, WH_KEEP_WORKOUTS, limit=10 if not first else 25) and ok
-        if first and ok:
+        if first and ok and all(deep.get(k) is True for k in WH_KEYS):
+            # hamma to'plam oxirigacha (until/next_token tugadi) — limit tufayli to'xtagani bo'lsa keyingi WH_SLOW da davom
             st["backfilled"] = True
-            snap["backfilled"] = True
+            snap["backfilled"] = snap["archived"] = True
             changed = True
     if do_body and err != "rate_limited":
         st["t_body"] = now
@@ -1095,8 +1304,15 @@ def _wh_loop():
                 time.sleep(30)   # boshqa jarayon tortmoqda; u o'lsa qulf bo'shaydi
                 continue
             log.info("WHOOP fon yangilash boshlandi (pid %s)", os.getpid())
+            maint_day = None
             while True:
                 now = time.time()
+                # kunlik arxiv xizmati — faqat flock egasida, kuniga bir marta
+                today = datetime.now(TZ).strftime("%Y-%m-%d")
+                if today != maint_day:
+                    maint_day = today
+                    _archive(db.compact, what="arxiv compact")
+                    _archive(db.backup_db, DATA_DIR, what="arxiv backup")
                 for uid in _wh_uids():
                     try:
                         _wh_tick(uid, now)
@@ -1250,10 +1466,12 @@ def ai():
             clean.append({"role": role, "content": content[:12000]})
     if not clean or clean[0]["role"] != "user":
         return jsonify({"error": "first message must be user"}), 400
+    kind = str(body.get("kind") or "chat")[:40]   # chat | card:<section> — faqat hisob uchun
     if AI_PROVIDER == "openai":
         out, fail = ai_openai(system, clean, int(body.get("max_tokens") or 2048))
         if fail:
             return jsonify({"error": fail[0]}), fail[1]
+        _archive(db.record_ai_call, uid, kind, out.get("model"), (out.get("usage") or {}).get("in"), (out.get("usage") or {}).get("out"), what="arxiv ai")
         return jsonify(out)
     try:
         import anthropic
@@ -1262,6 +1480,7 @@ def ai():
             system=system or None, messages=clean,
         )
         text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+        _archive(db.record_ai_call, uid, kind, resp.model, resp.usage.input_tokens, resp.usage.output_tokens, what="arxiv ai")
         return jsonify({"text": text, "model": resp.model, "stop": resp.stop_reason,
                         "usage": {"in": resp.usage.input_tokens, "out": resp.usage.output_tokens}})
     except ImportError:

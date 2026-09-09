@@ -588,7 +588,7 @@
   });
   D.act.confirmYes = () => { const r = D._confirmRes; D._confirmRes = null; const bg = D.$('#modalBg'); bg._onClose = null; D.closeModal(); r && r(true); };
   D.act.confirmNo = () => { D.closeModal(); };
-  D.sheet = (html, opts = {}) => D.modal({ title: opts.title || '', body: html, actions: opts.actions || [], onOpen: opts.onOpen, onClose: opts.onClose });
+  D.sheet = (html, opts = {}) => D.modal({ title: opts.title || '', body: html, actions: opts.actions || [], onOpen: opts.onOpen, onClose: opts.onClose, noFocus: opts.noFocus });
   D.prompt = (o = {}) => new Promise((res) => {
     D.modal({
       title: o.title || '', body: `<input class="inp" id="promptInp" value="${D.esc(o.value || '')}" placeholder="${D.esc(o.placeholder || '')}" data-enter="promptOk">`,
@@ -992,7 +992,7 @@
         // what the server offers: named accounts, the owner's passcode, Google, open registration
         let cfg = { named: false, passcode: true, google: false, register: false, invite: false, googleInvite: false, googleSeen: false };
         try { const r = await fetch('/api/auth/config', { credentials: 'same-origin', cache: 'no-store' }); if (r.ok) cfg = Object.assign(cfg, await r.json()); } catch (e) {}
-        const tgId = D.tg && D.tg.initDataUnsafe && D.tg.initDataUnsafe.user && D.tg.initDataUnsafe.user.id;
+        const tgId = D.tg && D.tg.initData && D.tg.initDataUnsafe && D.tg.initDataUnsafe.user && D.tg.initDataUnsafe.user.id;
         const askName = !!(cfg.named || cfg.register);
         const canLogin = !!(cfg.named || cfg.passcode || cfg.register);
         let mode = 'login';
