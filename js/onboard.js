@@ -90,11 +90,12 @@
   const freshDraft = () => {
     const p = D.S.profile || {};
     return {
-      name: p.name || D.device.name || '',
+      // uid ism emas ('me', 'u_…'): bo'sh qoldiramiz; bo'y/vazn WHOOP tana o'lchovidan keladi
+      name: p.name || (D.device.name && D.device.name !== D.device.uid ? D.device.name : '') || '',
       sex: p.sex === 'f' ? 'f' : 'm',
       birthYear: p.birthYear || (p.age ? yearNow() - p.age : null),
-      heightCm: p.heightCm || null,
-      weightKg: p.weightKg || null,
+      heightCm: p.heightCm || ((D.S.whoop || {}).body || {}).heightCm || null,
+      weightKg: p.weightKg || ((D.S.whoop || {}).body || {}).weightKg || null,
       activity: D.clamp(p.activity == null ? 3 : +p.activity, 0, 5),
       goal: ['lose', 'keep', 'gain'].includes(p.goal) ? p.goal : 'keep',
       unit: (D.S.settings && D.S.settings.weightUnit) === 'lb' ? 'lb' : 'kg',
@@ -217,7 +218,7 @@
     if (!draft.name && D.serverEnabled() && !meAsked) {
       meAsked = true;
       fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' }).then((r) => r.ok ? r.json() : null).then((m) => {
-        if (!m || !m.name || !box || draft.name || touched) return;
+        if (!m || !m.name || m.name === m.uid || !box || draft.name || touched) return;
         draft.name = String(m.name).slice(0, 40);
         const inp = box.querySelector('.ob-inp[data-k=name]'); if (inp) { inp.value = draft.name; inp.select(); }
       }).catch(() => {});
