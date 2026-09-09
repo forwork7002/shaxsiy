@@ -262,7 +262,7 @@
     }
     for (const r of snap.sleep || []) {
       const k = dayOfTs(r.end || r.start); if (!k) continue;
-      if (r.nap) { const n = (naps[k] = naps[k] || { n: 0, h: 0 }); n.n++; n.h += +r.sleepH || 0; continue; }
+      if (r.nap) { const n = (naps[k] = naps[k] || { n: 0, h: 0 }); n.n++; n.h = D.round(n.h + (+r.sleepH || 0), 2); continue; }
       // WHOOP bergan aniqlik saqlanadi — yaxlitlash faqat ekranga chiqishda, soat+daqiqa sifatida
       merge(days, k, {
         sleepH: num(r.sleepH), inBedH: num(r.inBedH), awakeH: num(r.awakeH), stages: r.stages, cycles: r.cycles, disturbances: r.disturbances,
@@ -471,7 +471,7 @@
     const o = { key };
     const sleepH = num(d.sleepH), need = num(d.sleepNeedH);
     o.sleepH = sleepH; o.needH = need;
-    if (sleepH !== null && need !== null) { o.gapH = sleepH - need; o.metPct = Math.round((sleepH / need) * 100); }
+    if (sleepH !== null && need !== null) { o.gapH = D.round(sleepH - need, 2); o.metPct = Math.round((sleepH / need) * 100); }
     o.perf = num(d.sleepPerf); o.eff = num(d.sleepEff); o.cons = num(d.sleepCons); o.debtH = num(d.debtH);
     o.recovery = num(d.recovery); o.strain = num(d.strain); o.kcal = num(d.kcal);
     o.hrv = num(d.hrv); o.rhr = num(d.rhr); o.resp = num(d.resp); o.spo2 = num(d.spo2); o.skin = num(d.skin);
@@ -505,7 +505,7 @@
       if (sh === null || need === null) continue;
       seen++; debt += Math.max(0, need - sh);
     }
-    return seen ? { h: debt, days: seen } : null;
+    return seen ? { h: D.round(debt, 2), days: seen } : null;
   };
 
   /* ------------------------------------------------------------------ */
@@ -576,9 +576,10 @@
   const fmtH = (h) => {
     if (h == null || isNaN(+h)) return '—';
     const total = Math.round(+h * 60), hh = Math.floor(total / 60), mm = total % 60;
+    if (hh && !mm) return `${hh}<small>${esc(t('unit.h'))}</small>`;
     return hh ? `${hh}<small>${esc(t('unit.h'))}</small> ${mm}<small>${esc(t('unit.m'))}</small>` : `${mm}<small>${esc(t('unit.m'))}</small>`;
   };
-  const fmtHm = (h) => D.fmtHm(h);
+  const fmtHm = (h, opts) => D.fmtHm(h, opts);
   const fmtMs = (ms) => D.fmtMsH(ms);
   const n1 = (v, d = 1) => (v == null || isNaN(+v) ? '—' : D.fmtNum(+v, d));
   const strip = (h) => h.replace(/^<p>/, '').replace(/<\/p>$/, '');
