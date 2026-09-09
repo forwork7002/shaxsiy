@@ -111,12 +111,11 @@
 .td-qz { display: flex; align-items: center; gap: 11px; width: 100%; margin-bottom: 12px; padding: 10px 12px;
   border-radius: 15px; text-align: left; color: var(--text);
   border: 1px solid color-mix(in srgb, var(--warning) 28%, transparent);
-  background: linear-gradient(120deg, color-mix(in srgb, var(--warning) 13%, transparent), transparent 70%), var(--card-bg);
-  backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  background: linear-gradient(120deg, color-mix(in srgb, var(--warning) 13%, transparent), transparent 70%), var(--card-solid);
   transition: border-color .2s, transform .1s; }
 .td-qz:active { transform: scale(.99); }
 .td-qz.met { border-color: color-mix(in srgb, var(--success) 26%, transparent);
-  background: linear-gradient(120deg, color-mix(in srgb, var(--success) 12%, transparent), transparent 70%), var(--card-bg); }
+  background: linear-gradient(120deg, color-mix(in srgb, var(--success) 12%, transparent), transparent 70%), var(--card-solid); }
 .td-qz-ic { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border-radius: 11px;
   background: color-mix(in srgb, var(--warning) 18%, transparent); color: var(--warning); }
 .td-qz.met .td-qz-ic { background: color-mix(in srgb, var(--success) 18%, transparent); color: var(--success); }

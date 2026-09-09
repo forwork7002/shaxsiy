@@ -46,8 +46,7 @@ body::before { transition: background 1.2s ease; }
 /* ---------- hero: one big block that says what this section is about ---------- */
 /* The hero is the section's face: deeper glass, the accent bled through it, and a lit top edge. */
 .hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 20px; margin-bottom: 14px; transform: translateZ(0);
-  backdrop-filter: blur(18px) saturate(1.2); -webkit-backdrop-filter: blur(18px) saturate(1.2);
-  background: linear-gradient(155deg, color-mix(in srgb, var(--sec) 17%, transparent) 0%, color-mix(in srgb, var(--sec) 5%, transparent) 40%, transparent 72%), var(--card-bg);
+  background: linear-gradient(155deg, color-mix(in srgb, var(--sec) 17%, transparent) 0%, color-mix(in srgb, var(--sec) 5%, transparent) 40%, transparent 72%), var(--card-solid);
   border: 1px solid color-mix(in srgb, var(--sec) 26%, var(--card-line));
   box-shadow: 0 18px 50px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.02) inset,
               0 0 40px -18px color-mix(in srgb, var(--sec) 60%, transparent); }
@@ -72,8 +71,7 @@ body::before { transition: background 1.2s ease; }
 .bento { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
 .bento .b-wide { grid-column: span 2; }
 .bento-tile { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 3px; min-height: 78px; padding: 13px 14px;
-  border-radius: 14px; background: var(--card-bg); border: 1px solid var(--card-line); text-align: left; color: inherit;
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-radius: 14px; background: var(--card-solid); border: 1px solid var(--card-line); text-align: left; color: inherit;
   box-shadow: 0 6px 18px rgba(0,0,0,.22);
   transition: border-color .18s ease, background .18s ease, transform .12s ease, box-shadow .18s ease; }
 [data-theme="light"] .bento-tile { box-shadow: 0 4px 14px rgba(46,42,36,.06); }

@@ -87,6 +87,16 @@ server {
 
     client_max_body_size 26m;
 
+    # Siqish. nginx.conf da `gzip on` bor, lekin `gzip_types` izohda qolgan —
+    # ya'ni sukut bo'yicha faqat text/html siqiladi va JS/CSS xom ketadi
+    # (o'lchandi: 925 KB xom, 273 KB gzip bilan — 71% farq).
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_min_length 512;
+    gzip_types text/css text/javascript application/javascript application/json image/svg+xml application/manifest+json;
+
     # Statik fayllar to'g'ridan-to'g'ri nginx'dan — faqat shu uchta papka. Ilgari qoida
     # kengaytma bo'yicha edi (~* \.(css|js|…)\$) va $APP_DIR ichidagi ISTALGAN .js/.css
     # faylni ilovaning oq ro'yxatini chetlab o'tib berardi (2026-09-09 tekshiruvi).

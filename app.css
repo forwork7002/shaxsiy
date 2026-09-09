@@ -139,9 +139,8 @@ p { margin: 0 0 8px; }
    the top edge, and a whisper of the section accent. The blur is real but kept cheap — one
    radius, no stacked filters, and translateZ(0) so each card composites on its own layer
    instead of re-blurring its neighbours on every scroll frame. */
-.card { position: relative; background: var(--card-bg); border: 1px solid var(--card-line); border-radius: var(--r); padding: 16px; margin-bottom: 14px;
+.card { position: relative; background: var(--card-solid); border: 1px solid var(--card-line); border-radius: var(--r); padding: 16px; margin-bottom: 14px;
   box-shadow: var(--sh); overflow: hidden;
-  backdrop-filter: blur(13px); -webkit-backdrop-filter: blur(13px);
   /* a card below the fold is not painted at all — no layout, no blur, no composite.
      'auto' in the intrinsic size makes the browser remember each card's real height,
      so the scrollbar never jumps as cards enter and leave. */
@@ -150,10 +149,9 @@ p { margin: 0 0 8px; }
 /* the sheen: a 1px gradient hairline along the top edge, fading out at the sides */
 .card::before, .hero::before { content: ''; position: absolute; top: 0; left: 12%; right: 12%; height: 1px; pointer-events: none; z-index: 1;
   background: linear-gradient(90deg, transparent, var(--sheen), transparent); }
-@supports not (backdrop-filter: blur(1px)) { .card { background: var(--card-solid); } }
 [data-theme="light"] .card { border: 1px solid var(--line); }
 
-.card.flat { box-shadow: none; backdrop-filter: none; background: var(--inset); border: 1px solid var(--line); }
+.card.flat { box-shadow: none; background: var(--inset); border: 1px solid var(--line); }
 .card.all-done::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 0%, rgba(107,227,164,.10), transparent 60%); }
 .card.all-done .kpi-num, .card.all-done .kpi-label { color: var(--success); }
 .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -260,7 +258,7 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .seg.compact button { flex: none; padding: 8px 12px; font-size: 12px; min-height: 36px; }
 .tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 10px; scrollbar-width: none; }
 .tabs::-webkit-scrollbar { display: none; }
-.tabs button { flex: none; padding: 9px 14px; min-height: 38px; border-radius: var(--r-pill); border: 1px solid var(--line2); background: var(--glass); color: var(--text3); font-size: 12px; font-weight: 600; white-space: nowrap; transition: all .15s; }
+.tabs button { flex: none; padding: 9px 14px; min-height: 38px; border-radius: var(--r-pill); border: 1px solid var(--line2); background: var(--glass); color: var(--text3); font-size: 12px; font-weight: 600; white-space: nowrap; transition: background .15s, border-color .15s, color .15s; }
 .tabs button.on { background: var(--text); color: var(--bg); border-color: var(--text); }
 [data-theme="light"] .tabs button.on { background: var(--text); color: #fff; }
 .slider { -webkit-appearance: none; appearance: none; width: 100%; height: 36px; background: transparent; outline: none; margin: 0; touch-action: pan-y; }
@@ -271,7 +269,7 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .stepper { display: flex; align-items: center; gap: 8px; }
 .stepper .val { flex: 1; text-align: center; font-family: var(--mono); font-size: 22px; font-weight: 700; color: var(--text); }
 .emoji-row { display: flex; gap: 6px; }
-.emoji-row button { flex: 1; font-size: 22px; padding: 8px 0; border-radius: 12px; border: 1.5px solid var(--line2); background: var(--f-input); transition: all .15s; line-height: 1; }
+.emoji-row button { flex: 1; font-size: 22px; padding: 8px 0; border-radius: 12px; border: 1.5px solid var(--line2); background: var(--f-input); transition: background .15s, border-color .15s; line-height: 1; }
 .emoji-row button.on { border-color: var(--success); background: rgba(107,227,164,.12); transform: scale(1.06); }
 .toggle { position: relative; width: 44px; height: 26px; border-radius: 13px; background: var(--line2); border: 0; padding: 0; flex: none; transition: background .2s; }
 .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--text); transition: transform .2s; }
@@ -334,27 +332,21 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 
 /* ---------- header / nav / side ---------- */
 /* ---------------------------------------------------------------------------
-   Header. Three tiers, in the order you actually read them: who this is,
-   what day it is, and what is next. The accent under the hairline follows
-   whichever section you are in, so the top of the screen belongs to it. */
-.header { position: sticky; top: 0; z-index: 40; display: flex; flex-direction: column; gap: 8px;
-  padding: max(11px, env(safe-area-inset-top)) 16px 10px;
+   Header. One quiet row: nothing on the left, the three round controls on the
+   right. The day, the hijri date and the next prayer all live inside the
+   sections that own them, so the top of the screen stays out of the way.
+   The accent under the hairline follows whichever section you are in. */
+.header { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; justify-content: flex-end; gap: 8px;
+  padding: max(9px, env(safe-area-inset-top)) 16px 9px;
   background: color-mix(in srgb, var(--bg) 86%, transparent);
   backdrop-filter: blur(18px) saturate(1.15); -webkit-backdrop-filter: blur(18px) saturate(1.15); }
 .header::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; pointer-events: none;
   background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--sec, var(--success)) 42%, transparent) 22%,
               color-mix(in srgb, var(--sec, var(--success)) 42%, transparent) 78%, transparent); opacity: .7; }
-.h-top { display: flex; align-items: flex-start; gap: 10px; }
-.h-id { flex: 1; min-width: 0; }
 .dash-title { font-family: var(--font-display); margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -.025em;
   background: var(--title-grad); -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent; line-height: 1.15;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.h-meta { display: flex; align-items: center; gap: 7px; margin-top: 3px; font-size: 11.5px; font-weight: 600;
-  color: var(--text3); white-space: nowrap; overflow: hidden; }
-.h-meta > span { overflow: hidden; text-overflow: ellipsis; }
-.h-sep { flex: none; width: 3px; height: 3px; border-radius: 50%; background: var(--text4); }
-.h-hijri { color: var(--text4); flex: none; }
 
 /* round chips read as buttons at a glance; a bare icon does not */
 .h-actions { display: flex; gap: 7px; align-items: center; flex: none; }
@@ -369,24 +361,8 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .h-avatar-ini { width: 100%; height: 100%; display: grid; place-items: center; border-radius: 50%; background: hsl(var(--h, 200) 58% 38%); color: #fff;
   font-family: var(--font-display); font-size: 14px; font-weight: 700; letter-spacing: .02em; line-height: 1; user-select: none; }
 
-/* the next prayer, as its own tappable row */
-/* second row: the next prayer, and whatever sync has to say, side by side */
-.h-bar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.h-bar:not(:has(> *:not([hidden]))) { display: none; }
-.h-prayer { display: flex; align-items: center; gap: 8px; flex: 1 1 245px; min-width: 0; padding: 8px 12px; border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--sec, var(--success)) 22%, transparent);
-  background: color-mix(in srgb, var(--sec, var(--success)) 9%, transparent);
-  color: var(--text2); font-size: 12.5px; font-weight: 700; text-align: left; min-height: 38px;
-  transition: background .18s ease, border-color .18s ease, transform .1s var(--ease-out); }
-.h-prayer:active { transform: scale(.995); }
-.hp-ic { display: inline-flex; color: var(--sec, var(--success)); flex: none; }
-.hp-name { color: var(--text); flex: none; }
-.hp-time { color: var(--sec, var(--success)); font-variant-numeric: tabular-nums; flex: none; }
-.hp-left { margin-left: auto; color: var(--text3); font-weight: 600; font-size: 11.5px; font-variant-numeric: tabular-nums;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
 /* sync speaks only when it has something to say — see D.setSync */
-.sync { display: inline-flex; align-items: center; gap: 6px; flex: none; margin-left: auto; height: 30px;
+.sync { display: inline-flex; align-items: center; gap: 6px; flex: 0 1 auto; min-width: 0; margin-right: auto; height: 30px;
   padding: 0 10px; border-radius: var(--r-pill); overflow: hidden;
   font-size: 11px; font-weight: 700; color: var(--text3); background: var(--glass); border: 1px solid var(--line);
   transition: opacity .35s ease; }
@@ -412,7 +388,7 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .more-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 .more-tile { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 4px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--inset); color: var(--text3); font-size: 11px; font-weight: 600; }
 .more-tile.on { color: var(--text); border-color: var(--line3); background: var(--hover); }
-.side-tab { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-sm); border: 0; background: transparent; color: var(--text3); font-size: 13.5px; font-weight: 600; text-align: left; transition: all .15s; }
+.side-tab { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-sm); border: 0; background: transparent; color: var(--text3); font-size: 13.5px; font-weight: 600; text-align: left; transition: background .15s, color .15s; }
 .side-tab:hover { background: var(--hover); color: var(--text); }
 .side-tab.on { background: var(--glass); color: var(--text); border: 1px solid var(--line2); }
 .side-brand { padding: 6px 12px 16px; }

@@ -14,7 +14,9 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap"></noscript>
 <link rel="stylesheet" href="app.css">
 <link rel="stylesheet" href="css/sections.css">
 <link rel="stylesheet" href="css/ai.css">
@@ -30,29 +32,21 @@
 <link rel="stylesheet" href="css/settings.css">
 <link rel="stylesheet" href="css/history.css">
 <link rel="stylesheet" href="css/onboard.css">
+<link rel="stylesheet" href="css/yusa.css">
 </head>
 <body>
 <div class="app">
   <aside class="side" id="sideWrap">
-    <div class="side-brand"><h1 class="dash-title" id="sideTitle">Shaxsiy</h1><div class="small muted" id="sideDate"></div></div>
+    <div class="side-brand"><h1 class="dash-title">Shaxsiy</h1></div>
     <nav id="side" aria-label="Sections"></nav>
   </aside>
   <div class="main">
     <header class="header" id="header">
-      <div class="h-top">
-        <div class="h-id">
-          <h1 class="dash-title" id="hTitle">Shaxsiy</h1>
-          <div class="h-meta"><span id="hDate"></span><i class="h-sep"></i><span class="h-hijri" id="hHijri"></span></div>
-        </div>
-        <div class="h-actions">
-          <button class="h-btn" data-act="openSearch" aria-label="Search" title="Ctrl+K"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
-          <button class="h-btn" data-act="toggleTheme" aria-label="Theme" id="themeBtn"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg></button>
-          <button class="h-btn h-avatar" id="hAvatar" data-act="openProfile" aria-label="Profil" hidden></button>
-        </div>
-      </div>
-      <div class="h-bar">
-        <button class="h-prayer" id="hPrayer" data-act="go" data-view="prayer" data-sub="times" hidden></button>
-        <span class="sync" id="sync" hidden><span class="sync-dot" id="syncDot"></span><span class="sync-txt" id="syncTxt"></span></span>
+      <span class="sync" id="sync" hidden><span class="sync-dot" id="syncDot"></span><span class="sync-txt" id="syncTxt"></span></span>
+      <div class="h-actions">
+        <button class="h-btn" data-act="openSearch" aria-label="Search" title="Ctrl+K"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
+        <button class="h-btn" data-act="toggleTheme" aria-label="Theme" id="themeBtn"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg></button>
+        <button class="h-btn h-avatar" id="hAvatar" data-act="openProfile" aria-label="Profil" hidden></button>
       </div>
     </header>
     <main class="page" id="view" aria-live="polite"></main>
@@ -71,22 +65,23 @@
   </div>
 </div>
 
-<script src="js/core.js"></script>
-<script src="js/i18n.js"></script>
-<script src="js/prayer.js"></script>
-<script src="js/ai.js"></script>
-<script src="js/whoop.js"></script>
-<script src="js/profile.js"></script>
-<script src="js/today.js"></script>
-<script src="js/tasks.js"></script>
-<script src="js/health.js"></script>
-<script src="js/finance.js"></script>
-<script src="js/ibodat.js"></script>
-<script src="js/nova.js"></script>
-<script src="js/food.js"></script>
-<script src="js/settings.js"></script>
-<script src="js/history.js"></script>
-<script src="js/onboard.js"></script>
-<script src="js/app.js"></script>
+<script defer src="js/core.js"></script>
+<script defer src="js/i18n.js"></script>
+<script defer src="js/prayer.js"></script>
+<script defer src="js/ai.js"></script>
+<script defer src="js/whoop.js"></script>
+<script defer src="js/profile.js"></script>
+<script defer src="js/today.js"></script>
+<script defer src="js/tasks.js"></script>
+<script defer src="js/health.js"></script>
+<script defer src="js/finance.js"></script>
+<script defer src="js/ibodat.js"></script>
+<script defer src="js/nova.js"></script>
+<script defer src="js/food.js"></script>
+<script defer src="js/settings.js"></script>
+<script defer src="js/history.js"></script>
+<script defer src="js/onboard.js"></script>
+<script defer src="js/yusa.js"></script>
+<script defer src="js/app.js"></script>
 </body>
 </html>

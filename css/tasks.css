@@ -9,10 +9,8 @@
 .tk { --tk-pad: 16px; }
 .tk-row::-webkit-scrollbar { display: none; }
 .tk-card { --tk-cw: 84%; flex: 0 0 var(--tk-cw); max-width: 320px; min-width: 0; scroll-snap-align: start; scroll-margin-left: var(--tk-pad); display: flex; flex-direction: column;
-  background: var(--card-bg); border: 1px solid var(--card-line); border-radius: var(--r); padding: 14px 14px 12px; box-shadow: var(--sh-card);
-  backdrop-filter: blur(13px); -webkit-backdrop-filter: blur(13px); transition: border-color .2s; }
-@supports not (backdrop-filter: blur(1px)) { .tk-card { background: var(--card-solid); } }
-[data-theme="light"] .tk-card { background: var(--card-solid); }
+  background: var(--card-solid); border: 1px solid var(--card-line); border-radius: var(--r); padding: 14px 14px 12px; box-shadow: var(--sh-card);
+  transition: border-color .2s; }
 .tk-card.today { border-color: var(--line3); }
 .tk-card.all { border-color: color-mix(in srgb, var(--success) 45%, var(--card-line)); }
 .tk-ch { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
