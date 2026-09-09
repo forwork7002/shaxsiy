@@ -531,3 +531,5 @@ body { font-weight: 500; }
 .auth-user:active { transform: scale(.97); }
 .auth-or { width: 100%; text-align: center; font-size: 11.5px; color: var(--text4); margin: 4px 0; }
 .auth-google { font-weight: 700; }
+.auth-tg { margin-top: -2px; }
+.auth-tg b { color: var(--text); user-select: all; }

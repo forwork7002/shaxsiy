@@ -10,8 +10,11 @@ Nima qiladi:
   • Statik fayllarni (index.html, app.css, js/, css/) tarqatadi
 
 Env (start.sh):
-  MA_BOT_TOKEN       Telegram bot tokeni (initData tekshiruvi uchun) — MAJBURIY (MA_DEV=1 bo'lmasa)
-  MA_ALLOWED_IDS     ruxsat etilgan Telegram ID lar, vergul bilan (bo'sh = hamma)
+  MA_BOT_TOKEN       Telegram bot tokeni (initData tekshiruvi uchun) — Telegram Mini App uchun kerak
+  MA_USERS           Ism:parol[:uid][:telegram_id],... — har kim o'z hisobi; telegram_id o'sha odamni
+                     Telegram ichida ham shu uid'ga bog'laydi. Yozilgach MA_PASSCODE e'tiborsiz.
+  MA_SECRET          sessiya cookie imzosi kaliti — set-users.sh bir marta yozadi, keyin o'zgartirilmaydi
+  MA_ALLOWED_IDS     eski aniq ro'yxat: bu id'lar o'z raqami bilan uid oladi (bo'sh = faqat MA_USERS dagilar)
   MA_DATA_DIR        ma'lumot papkasi (default: ./data)
   MA_STATIC_DIR      statik papka (default: shu fayl joylashgan papka)
   MA_DEV             "1" bo'lsa auth o'chadi va bitta 'dev' foydalanuvchi ishlatiladi (faqat lokal test!)
@@ -52,20 +55,44 @@ STATIC_DIR = Path(os.environ.get("MA_STATIC_DIR", HERE))
 DEV = os.environ.get("MA_DEV", "") == "1"
 # Telegramsiz kirish uchun parol (ochiq serverda MAJBURIY, MA_DEV=1 bo'lmasa).
 PASSCODE = os.environ.get("MA_PASSCODE", "")
-# Bir nechta odam: MA_USERS="Murod:parol1,Ali:parol2" — har biri o'z uid'i va o'z fayllari bilan.
+# Bir nechta odam: MA_USERS="Murod:parol:me:123456789,Ali:parol2,Vali:parol3::987654321"
+#   Ism:parol[:uid][:telegram_id] — uid bo'sh bo'lsa u_<ism>; telegram_id berilsa o'sha odam
+#   Telegram ichidan ham aynan shu uid'ga tushadi (brauzer va Telegram — bitta hisob).
 def _parse_users(raw: str):
     out = []
     for part in (raw or "").split(","):
         if ":" not in part:
             continue
-        bits = part.split(":", 2)
+        bits = part.split(":", 3)
         name, pw = bits[0].strip(), bits[1].strip()
-        uid = bits[2].strip() if len(bits) > 2 and bits[2].strip() else ""
+        uid = bits[2].strip() if len(bits) > 2 else ""
         uid = "".join(c for c in uid if c.isalnum() or c in "-_")[:40] or ("u_" + "".join(c for c in name.lower() if c.isalnum())[:24])
+        tg = "".join(c for c in bits[3] if c.isdigit()) if len(bits) > 3 else ""
         if name and pw:
-            out.append({"name": name[:40], "pass": pw, "uid": uid})
+            out.append({"name": name[:40], "pass": pw, "uid": uid, "tg": tg})
+    seen_uid, seen_tg = set(), set()
+    for u in out:
+        if u["uid"] in seen_uid:
+            log.error("MA_USERS: uid takrorlandi (%s) — birinchisi g'olib", u["uid"])
+        if u["tg"] and u["tg"] in seen_tg:
+            log.error("MA_USERS: Telegram id takrorlandi (%s) — birinchisi g'olib", u["tg"])
+        seen_uid.add(u["uid"]); seen_tg.add(u["tg"])
     return out
 USERS = _parse_users(os.environ.get("MA_USERS", ""))
+
+
+def uid_for_telegram(tg_id: str):
+    """Tekshirilgan Telegram id → uid. MA_USERS'dagi bog'lanish birinchi; keyin eski aniq ro'yxat
+    (MA_ALLOWED_IDS) — o'z id'i uid bo'ladi; ikkalasida ham yo'q bo'lsa None (yopiq eshik)."""
+    tg_id = str(tg_id or "")
+    if not tg_id:
+        return None
+    for u in USERS:
+        if u["tg"] and u["tg"] == tg_id:
+            return u["uid"]
+    if tg_id in ALLOWED_IDS:
+        return tg_id
+    return None
 GOOGLE_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 GOOGLE_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 ALLOWED_EMAILS = {x.strip().lower() for x in os.environ.get("MA_ALLOWED_EMAILS", "").split(",") if x.strip()}
@@ -250,17 +277,17 @@ def current_user():
     if DEV:
         return "dev", None
     user = verify_init_data(request.headers.get("X-Telegram-Init-Data", ""))
-    if not user:
-        # Telegramdan tashqarida: parol bilan olingan cookie
-        uid = read_session(request.cookies.get(COOKIE, ""))
+    if user:
+        uid = uid_for_telegram(user.get("id"))
         if uid:
             return uid, None
-        return None, (jsonify({"error": "auth_failed", "passcode": bool(PASSCODE)}), 401)
-    uid = str(user.get("id", ""))
-    if ALLOWED_IDS and uid not in ALLOWED_IDS:
-        log.warning("Ruxsatsiz: %s", uid)
-        return None, (jsonify({"error": "forbidden"}), 403)
-    return uid, None
+        # bog'lanmagan Telegram id — yangi profil ochib bermaymiz; cookie bo'lsa (ism+parol bilan
+        # kirgan) o'sha ishlaydi, bo'lmasa kirish oynasi chiqadi
+        log.warning("Telegram: bog'lanmagan/ruxsatsiz id %s", user.get("id"))
+    uid = read_session(request.cookies.get(COOKIE, ""))
+    if uid:
+        return uid, None
+    return None, (jsonify({"error": "auth_failed", "passcode": bool(PASSCODE or USERS or GOOGLE_ON)}), 401)
 
 
 _SECRET_CACHE = None
@@ -270,7 +297,7 @@ def _secret() -> bytes:
     global _SECRET_CACHE
     if _SECRET_CACHE:
         return _SECRET_CACHE
-    env = os.environ.get("MA_SECRET", "") or BOT_TOKEN
+    env = os.environ.get("MA_SECRET", "")   # bot tokenini Telegram ham biladi — kalit sifatida yaroqsiz
     if env:
         _SECRET_CACHE = env.encode()
         return _SECRET_CACHE
@@ -415,7 +442,8 @@ def post_data():
 @app.get("/api/health")
 def health():
     return jsonify({"ok": True, "time": datetime.now(TZ).isoformat(), "dev": DEV,
-                    "whoop": bool(WHOOP_ID and WHOOP_SECRET), "ai": bool(AI_KEY)})
+                    "whoop": bool(WHOOP_ID and WHOOP_SECRET), "ai": bool(AI_KEY),
+                    "telegram": bool(BOT_TOKEN), "users": len(USERS)})
 
 
 @app.get("/api/backups")
@@ -494,17 +522,12 @@ def http_json(url, data=None, headers=None, method=None):
 def whoop_login():
     uid, err = current_user()
     if err and not DEV:
-        # Brauzer navigatsiyasida Telegram header yo'q — parol cookie'si yoki initData query
-        cookie_uid = read_session(request.cookies.get(COOKIE, ""))
-        if cookie_uid:
-            uid = cookie_uid
-        else:
-            user = verify_init_data(request.args.get("initData", ""))
-            if not user:
-                return "Avval ilovaga kiring (parol yoki Telegram)", 401
-            uid = str(user.get("id"))
-            if ALLOWED_IDS and uid not in ALLOWED_IDS:
-                return "forbidden", 403
+        # Brauzer navigatsiyasida Telegram header yo'q (cookie'ni current_user tekshirdi) —
+        # Telegram ichidan kelganda initData query orqali, o'sha bog'lanish bilan
+        user = verify_init_data(request.args.get("initData", ""))
+        uid = uid_for_telegram(user.get("id")) if user else None
+        if not uid:
+            return "Avval ilovaga kiring (parol yoki Telegram)", 401
     if not (WHOOP_ID and WHOOP_SECRET):
         return "WHOOP sozlanmagan (WHOOP_CLIENT_ID / WHOOP_CLIENT_SECRET)", 500
     nonce = secrets.token_hex(8)

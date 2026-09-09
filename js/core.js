@@ -314,9 +314,14 @@
         D.S.meta.deviceId = D.uid('dev');
         try { localStorage.removeItem(UI_KEY); } catch (e) {}
         if (D.whoop && D.whoop.resetCache) D.whoop.resetCache();
+        D.device.name = '';
         D.toast(D.t('auth.switched'), { ms: 3500 });
       }
-      if (owner) { D.S.meta.owner = owner; if (!D.device.uid) { D.device.uid = owner; D.saveDevice(); } }
+      if (owner) {
+        D.S.meta.owner = owner;
+        if (D.device.uid !== owner) { D.device.uid = owner; D.device.name = ''; D.saveDevice(); }
+        if (!D.device.name) D.api('/api/me').then((m) => { if (m && m.name) { D.device.name = m.name; D.saveDevice(); if (D.current() === 'settings') D.rerender(); } }).catch(() => {});
+      }
       const localEmpty = !Object.keys(D.S.logs).length && !D.S.habits.length && !D.S.tasks.length;
       if (remote && D.isOldFormat(remote)) {
         // server still holds the old Шахсий data.json → migrate once, keep local additions, push new format
@@ -989,12 +994,14 @@
         try { const r = await fetch('/api/auth/config', { credentials: 'same-origin', cache: 'no-store' }); if (r.ok) cfg = Object.assign(cfg, await r.json()); } catch (e) {}
         const users = Array.isArray(cfg.users) ? cfg.users : [];
         let chosen = users.includes(D.device.lastUser) ? D.device.lastUser : (users[0] || '');
+        const tgId = D.tg && D.tg.initDataUnsafe && D.tg.initDataUnsafe.user && D.tg.initDataUnsafe.user.id;
         const box = document.createElement('div');
         box.className = 'auth-gate';
         box.innerHTML = `<form class="auth-card" autocomplete="on">
             <div class="auth-ic">${D.ic('user', 26)}</div>
             <div class="auth-title">${D.esc(D.t(users.length ? 'auth.who' : 'auth.title'))}</div>
             <p class="auth-sub">${D.esc(D.t(users.length ? 'auth.pick' : 'auth.sub'))}</p>
+            ${tgId ? `<p class="auth-sub auth-tg">${D.esc(D.t('auth.tgId'))}: <b class="num">${D.esc(String(tgId))}</b></p>` : ''}
             ${users.length ? `<div class="auth-users">${users.map((u) => `<button type="button" class="auth-user ${u === chosen ? 'on' : ''}" data-u="${D.esc(u)}">${D.esc(u)}</button>`).join('')}</div>` : ''}
             ${users.length || cfg.passcode ? `<input class="inp auth-inp" type="password" name="password" autocomplete="current-password"
                    placeholder="${D.esc(D.t('auth.ph'))}" aria-label="${D.esc(D.t('auth.ph'))}">

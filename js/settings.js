@@ -250,7 +250,8 @@
     </div>
 
     ${D.serverEnabled() && (D.device.uid || D.device.name) ? `<div class="card flat set-account"><div class="row between wrap">
-      <div class="grow"><div class="eyebrow">${t('set.account')}</div><div class="small"><b>${esc(D.device.name || D.device.uid)}</b></div></div>
+      <div class="grow"><div class="eyebrow">${t('set.account')}</div><div class="small"><b>${esc(D.device.name || D.device.uid)}</b></div>
+        <div class="tiny muted num">${esc(D.device.uid)}${D.tg && D.tg.initDataUnsafe && D.tg.initDataUnsafe.user ? ` · Telegram ${esc(String(D.tg.initDataUnsafe.user.id))}` : ''}</div></div>
       <button class="btn ghost sm" data-act="setLogout">${D.ic('logout', 14)} ${t('set.logout')}</button>
     </div></div>` : ''}
 
@@ -676,7 +677,7 @@
         <div class="stat"><span class="zone ${server ? 'z-good' : ''}"></span><div class="stat-num set-stat-text">${server ? t('set.d.serverOn') : t('set.d.serverOff')}</div><div class="stat-label">${t('set.d.server')}</div></div>
         <div class="stat"><span class="zone ${st === 'ok' ? 'z-good' : st === 'err' ? 'z-bad' : st === 'wait' ? 'z-warn' : ''}"></span><div class="stat-num set-stat-text">${esc(t('sync.' + st))}</div><div class="stat-label">${t('set.d.state')}</div></div>
         <div class="stat"><div class="stat-num set-stat-text num">${esc(D.fmtTs(D.S.meta.updatedAt))}</div><div class="stat-label">${t('set.d.updated')}</div></div>
-        ${tgName ? `<div class="stat"><div class="stat-num set-stat-text">${esc(tgName)}</div><div class="stat-label">${t('set.d.tgUser')}</div></div>` : ''}
+        ${tgName ? `<div class="stat"><div class="stat-num set-stat-text">${esc(tgName)}</div><div class="stat-label">${t('set.d.tgUser')} · <span class="num">${esc(String(tgUser.id))}</span></div></div>` : ''}
       </div>
     </div>
 

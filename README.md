@@ -47,3 +47,5 @@ Serversiz ishlatmoqchi bo'lsangiz Nova bo'limida o'z kalitingizni kiritishingiz 
 
 ## Yangi bo'lim qo'shish
 `ARCHITECTURE.md` ni o'qing → `js/<nom>.js` da `D.view({...})` → `index.html` ga `<script>` → `sw.js` ro'yxatiga qo'shing.
+
+- `deploy/set-users.sh`, `deploy/set-telegram.sh`, `deploy/set-ai.sh` — foydalanuvchilar, Telegram bot, AI kaliti (qiymatlar yashirin kiritiladi)
