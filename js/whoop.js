@@ -5,6 +5,8 @@
    D.whoop.day(key)       — o'sha kunning ko'rsatkichlari
    D.whoop.trend(field,n) — [{k, v}] grafik uchun
    D.whoop.readiness()    — Bugun bo'limidagi tayyorlik chizig'i
+   D.whoop.bioAge()       — 30 kunlik o'rtachalardan biologik yosh taxmini
+   D.whoop.bodyPanel()    — Sog'liq → Tana: profil, tana, sinx, yosh paneli
    ===================================================================== */
 (function () {
   'use strict';
@@ -137,6 +139,39 @@
     },
   });
 
+  D.i18n.add({
+    uz: {
+      'wh.bd.profile': 'WHOOP profili', 'wh.bd.noProfile': 'Profil hali olinmadi — bir daqiqa kuting', 'wh.bd.lastSync': 'Oxirgi sinx', 'wh.bd.never': 'hali yo‘q',
+      'wh.bd.age': 'Yosh', 'wh.bd.whoopAge': 'WHOOP Age', 'wh.bd.pace': 'Pace of Aging', 'wh.bd.enteredAt': '{d} kiritilgan',
+      'wh.bd.enter': 'Sozlamalarda kiriting', 'wh.bd.fromApp': 'WHOOP ilovasidagi Healthspan sahifasidan ko‘chiring — API bu raqamlarni bermaydi',
+      'wh.bd.est': 'Biologik yosh (taxmin)', 'wh.bd.chrono': 'pasport yoshi {n}', 'wh.bd.younger': 'pasport yoshidan {n} yil yosh', 'wh.bd.older': 'pasport yoshidan {n} yil katta', 'wh.bd.same': 'pasport yoshi bilan teng',
+      'wh.bd.inputs': '30 kunlik o‘rtacha', 'wh.bd.ref': 'me’yor', 'wh.bd.effect': 'ta’sir, yil',
+      'wh.bd.caveat': 'Bu ilmiy o‘lchov emas — HRV, tinch puls, uyqu va yuklamaning yoshga nisbatan oddiy taxmini. Rasmiy raqam — WHOOP ilovasidagi WHOOP Age.',
+      'wh.bd.needAge': 'Taxmin uchun Sozlamalarda yoshingizni yoki tug‘ilgan yilingizni kiriting', 'wh.bd.needData': 'Taxmin uchun kamida 7 kunlik WHOOP ma’lumoti kerak',
+      'wh.bd.f.hrv': 'HRV', 'wh.bd.f.rhr': 'Tinch puls', 'wh.bd.f.sleepPerf': 'Uyqu sifati', 'wh.bd.f.sleepCons': 'Uyqu izchilligi', 'wh.bd.f.strain': 'Haftalik zo‘riqish', 'wh.bd.f.workouts': 'Mashg‘ulot / hafta',
+    },
+    uzk: {
+      'wh.bd.profile': 'WHOOP профили', 'wh.bd.noProfile': 'Профил ҳали олинмади — бир дақиқа кутинг', 'wh.bd.lastSync': 'Охирги синх', 'wh.bd.never': 'ҳали йўқ',
+      'wh.bd.age': 'Ёш', 'wh.bd.whoopAge': 'WHOOP Age', 'wh.bd.pace': 'Pace of Aging', 'wh.bd.enteredAt': '{d} киритилган',
+      'wh.bd.enter': 'Созламаларда киритинг', 'wh.bd.fromApp': 'WHOOP иловасидаги Healthspan саҳифасидан кўчиринг — API бу рақамларни бермайди',
+      'wh.bd.est': 'Биологик ёш (тахмин)', 'wh.bd.chrono': 'паспорт ёши {n}', 'wh.bd.younger': 'паспорт ёшидан {n} йил ёш', 'wh.bd.older': 'паспорт ёшидан {n} йил катта', 'wh.bd.same': 'паспорт ёши билан тенг',
+      'wh.bd.inputs': '30 кунлик ўртача', 'wh.bd.ref': 'меъёр', 'wh.bd.effect': 'таъсир, йил',
+      'wh.bd.caveat': 'Бу илмий ўлчов эмас — HRV, тинч пульс, уйқу ва юкламанинг ёшга нисбатан оддий тахмини. Расмий рақам — WHOOP иловасидаги WHOOP Age.',
+      'wh.bd.needAge': 'Тахмин учун Созламаларда ёшингизни ёки туғилган йилингизни киритинг', 'wh.bd.needData': 'Тахмин учун камида 7 кунлик WHOOP маълумоти керак',
+      'wh.bd.f.hrv': 'HRV', 'wh.bd.f.rhr': 'Тинч пульс', 'wh.bd.f.sleepPerf': 'Уйқу сифати', 'wh.bd.f.sleepCons': 'Уйқу изчиллиги', 'wh.bd.f.strain': 'Ҳафталик зўриқиш', 'wh.bd.f.workouts': 'Машғулот / ҳафта',
+    },
+    ru: {
+      'wh.bd.profile': 'Профиль WHOOP', 'wh.bd.noProfile': 'Профиль ещё не получен — подождите минуту', 'wh.bd.lastSync': 'Последняя синхронизация', 'wh.bd.never': 'ещё нет',
+      'wh.bd.age': 'Возраст', 'wh.bd.whoopAge': 'WHOOP Age', 'wh.bd.pace': 'Pace of Aging', 'wh.bd.enteredAt': 'введено {d}',
+      'wh.bd.enter': 'Укажите в настройках', 'wh.bd.fromApp': 'Перепишите со страницы Healthspan в приложении WHOOP — API эти цифры не отдаёт',
+      'wh.bd.est': 'Биологический возраст (оценка)', 'wh.bd.chrono': 'паспортный возраст {n}', 'wh.bd.younger': 'на {n} лет моложе паспортного', 'wh.bd.older': 'на {n} лет старше паспортного', 'wh.bd.same': 'совпадает с паспортным',
+      'wh.bd.inputs': 'Среднее за 30 дней', 'wh.bd.ref': 'норма', 'wh.bd.effect': 'эффект, лет',
+      'wh.bd.caveat': 'Это не научное измерение — простая оценка по HRV, пульсу покоя, сну и нагрузке относительно возраста. Официальная цифра — WHOOP Age в приложении WHOOP.',
+      'wh.bd.needAge': 'Для оценки укажите возраст или год рождения в настройках', 'wh.bd.needData': 'Для оценки нужно минимум 7 дней данных WHOOP',
+      'wh.bd.f.hrv': 'HRV', 'wh.bd.f.rhr': 'Пульс покоя', 'wh.bd.f.sleepPerf': 'Качество сна', 'wh.bd.f.sleepCons': 'Регулярность сна', 'wh.bd.f.strain': 'Нагрузка за неделю', 'wh.bd.f.workouts': 'Тренировок / нед.',
+    },
+  });
+
   /* ------------------------------------------------------------------ */
   /* state                                                               */
   /* ------------------------------------------------------------------ */
@@ -192,6 +227,8 @@
         sleepH: h1(r.sleepH), inBedH: h1(r.inBedH), awakeH: h1(r.awakeH), stages: r.stages, cycles: r.cycles, disturbances: r.disturbances,
         sleepNeedH: h1(r.sleepNeedH), needBaseH: h1(r.needBaseH), debtH: h1(r.debtH), sleepPerf: r.sleepPerf, sleepEff: r.sleepEff,
         sleepCons: r.sleepCons, resp: r.resp, bedTs: r.start, wakeTs: r.end,
+        // xom millisekundlar: o'lchanmagan vaqt va uyqu ehtiyojining to'rt bo'lagi (asos / qarz / zo'riqish / kunduzgi uyqu)
+        noData: num(r.noData), needBase: num(r.needBase), needDebt: num(r.needDebt), needStrain: num(r.needStrain), needNap: num(r.needNap),
       });
     }
     let live = null;
@@ -201,6 +238,7 @@
       if (!c.end) live = { k, strain: c.strain, kcal: c.kcal, hrAvg: c.hrAvg, hrMax: c.hrMax, since: c.start, updatedAt: c.updatedAt };
     }
     const byId = new Map();
+    // serverdagi mashg'ulot obyekti butunicha saqlanadi: sport, strain, puls, kcal, meters, altGain/altChange, percentRecorded, zones …
     for (const x of snap.workout || []) { const k = dayOfTs(x.start); if (k) byId.set(x.id, Object.assign({}, x, { k })); }
     if (byId.size) w.workouts = Array.from(byId.values());
     w.naps = naps;
@@ -229,7 +267,7 @@
     const bg = D.$('#modalBg'); if (bg && bg.classList.contains('show')) return false;
     return true;
   }
-  const LIVE_VIEWS = new Set(['today', 'health', 'gym', 'stats']);
+  const LIVE_VIEWS = new Set(['today', 'health', 'food']);
 
   async function fetchSnapshot() {
     const h = {};
@@ -427,6 +465,58 @@
   };
 
   /* ------------------------------------------------------------------ */
+  /* biologik yosh — oshkora taxmin, WHOOP raqami emas                   */
+  /* WHOOP API Healthspan / WHOOP Age ni bermaydi; bu yerda 30 kunlik    */
+  /* o'rtachalar pasport yoshiga nisbatan yillarga aylantiriladi.        */
+  /* Har omilning ta'siri chegaralangan, yig'indi ±15 yil.               */
+  /*                                                                     */
+  /* Ma'lumotnoma qiymatlari (populyatsiya o'rtachalari, taxminiy):      */
+  /*  · HRV (rMSSD) yoshga qarab: 65 ms × 0.985^(yosh−20) —              */
+  /*    ≈65 (20), 56 (30), 48 (40), 41 (50), 35 (60), 30 (70) ms;        */
+  /*    WHOOP a'zolarining yosh bo'yicha medianalariga yaqin egri.        */
+  /*  · Tinch puls: 60 bpm; uyqu sifati 85 %; uyqu izchilligi 75 %;      */
+  /*  · kunlik zo'riqish 8–14 oralig'i foydali (haftalik 56–98);         */
+  /*  · haftasiga 3 mashg'ulot.                                          */
+  /* Ta'sir (yil): HRV −12·ln(v/ref) [±6] · puls (v−60)·0.25 [±4] ·     */
+  /*  sifat −(v−85)·0.08 [±2.5] · izchillik −(v−75)·0.05 [±2] ·          */
+  /*  zo'riqish −(min(v,14)−8)·0.3 [±2] · mashg'ulot −(v−3)·0.4 [±2].    */
+  /* ------------------------------------------------------------------ */
+  const BIO_HRV_AT = (age) => 65 * Math.pow(0.985, age - 20);
+  D.whoop.chronoAge = () => D.profileAge();
+  D.whoop.bioAge = () => {
+    const w = W();
+    const chrono = D.whoop.chronoAge();
+    if (!chrono) return null;
+    const keys = D.lastDays(30);
+    const acc = { hrv: [], rhr: [], sleepPerf: [], sleepCons: [], strain: [] };
+    let n = 0;
+    for (const k of keys) {
+      const d = w.days[k]; if (!d) continue;
+      let any = false;
+      for (const f of Object.keys(acc)) { const v = num(d[f]); if (v !== null) { acc[f].push(v); any = true; } }
+      if (any) n++;
+    }
+    if (n < 7) return null;
+    const inputs = [];
+    let delta = 0;
+    const add = (k, v, ref, effect, cap, unit) => {
+      effect = D.round(D.clamp(effect, -cap, cap), 1);
+      inputs.push({ k, v, ref, effect, unit: unit || '' });
+      delta += effect;
+    };
+    if (acc.hrv.length) { const v = Math.round(D.avg(acc.hrv)), ref = Math.round(BIO_HRV_AT(chrono)); if (v > 0) add('hrv', v, ref, -12 * Math.log(v / ref), 6, 'ms'); }
+    if (acc.rhr.length) { const v = Math.round(D.avg(acc.rhr)); add('rhr', v, 60, (v - 60) * 0.25, 4, 'bpm'); }
+    if (acc.sleepPerf.length) { const v = Math.round(D.avg(acc.sleepPerf)); add('sleepPerf', v, 85, -(v - 85) * 0.08, 2.5, '%'); }
+    if (acc.sleepCons.length) { const v = Math.round(D.avg(acc.sleepCons)); add('sleepCons', v, 75, -(v - 75) * 0.05, 2, '%'); }
+    if (acc.strain.length) { const s = D.avg(acc.strain); add('strain', D.round(s * 7, 0), 70, -(Math.min(s, 14) - 8) * 0.3, 2, ''); }
+    const set = new Set(keys);
+    const wk = D.round((w.workouts.filter((x) => set.has(x.k)).length / 30) * 7, 1);
+    add('workouts', wk, 3, -(wk - 3) * 0.4, 2, '');
+    delta = D.round(D.clamp(delta, -15, 15), 1);
+    return { est: D.round(chrono + delta, 1), chrono, delta, inputs, days: n };
+  };
+
+  /* ------------------------------------------------------------------ */
   /* Health surfaces                                                     */
   /* The hero is the one bold thing: a body state, read at a glance.     */
   /* Everything after it is quiet and proportional — bars that are the   */
@@ -609,6 +699,55 @@
       <div class="grow"><div class="small"><b>${esc(t('wh.connectedAs', { name }))}</b></div><div class="tiny muted">${f ? esc(t('wh.updated', { t: f.label })) : esc(t('wh.pending'))}${w.rl && w.rl.remaining != null ? ` · ${w.rl.remaining}/${w.rl.limit}` : ''}</div></div>
       <div class="row"><button class="btn ghost sm" data-act="hlWhoopRefresh" id="hlWhRefresh" ${syncing ? 'disabled' : ''}>${D.ic('refresh', 14)} ${esc(t('wh.refreshNow'))}</button><button class="btn icon" data-act="hlWhoopDisconnect" aria-label="${esc(t('wh.disconnect'))}" title="${esc(t('wh.disconnect'))}">${D.ic('logout', 16)}</button></div>
     </div></div>`;
+  };
+
+  /** Sog'liq → Tana: WHOOP profili, tana o'lchamlari, oxirgi sinx va Yosh paneli.
+   *  Yosh paneli (qo'lda kiritilgan WHOOP Age / Pace of Aging va taxmin) soat ulanmagan bo'lsa ham
+   *  ko'rinadi — Sozlamalarda yozilgan raqamlar shu yerda; faqat profil kartasi ulanishga bog'liq. */
+  D.whoop.bodyPanel = () => {
+    const w = W();
+    const p = w.profile || {}, b = w.body || {}, pr = D.S.profile || {};
+    const name = [p.first, p.last].filter(Boolean).join(' ');
+    const row = (l, v) => `<div class="wh-body-row"><span>${esc(l)}</span><b class="num">${v}</b></div>`;
+    const dash = '—';
+    const prof = !w.connected ? '' : `<div class="card wh-body"><div class="card-head"><div class="title">${D.ic('user', 16)} ${esc(t('wh.bd.profile'))}</div>${freshHtml()}</div>
+      ${name ? row(t('common.name'), esc(name)) : `<div class="empty small">${esc(t('wh.bd.noProfile'))}</div>`}
+      ${p.email ? row('E-mail', esc(p.email)) : ''}
+      ${row(t('wh.height'), b.heightCm != null ? `${b.heightCm}<small>cm</small>` : dash)}
+      ${row(t('wh.weight'), b.weightKg != null ? `${b.weightKg}<small>${esc(t('unit.kg'))}</small>` : dash)}
+      ${row(t('wh.maxHr'), b.maxHr != null ? `${b.maxHr}<small>bpm</small>` : dash)}
+      ${row(t('wh.bd.lastSync'), w.fetchedAt ? esc(D.fmtTs(w.fetchedAt)) : esc(t('wh.bd.never')))}
+    </div>`;
+    // 1) WHOOP Age / Pace of Aging — foydalanuvchi ilovadan ko'chirib yozadi (API bermaydi)
+    const wa = num(pr.whoopAge), pa = num(pr.paceOfAging);
+    const typed = wa !== null || pa !== null;
+    const link = `<button class="wh-body-link" data-act="go" data-view="settings">${esc(t('wh.bd.enter'))}</button>`;
+    const whoopAge = `<div class="card wh-body-age"><div class="card-head"><div class="title">${D.ic('bolt', 16)} ${esc(t('wh.bd.age'))}</div>
+        ${typed && pr.whoopAgeAt ? `<span class="tiny muted">${esc(t('wh.bd.enteredAt', { d: D.fmtDate(pr.whoopAgeAt, 'short') }))}</span>` : ''}</div>
+      <div class="wh-body-big">
+        <div class="wh-body-stat"><b class="num">${wa !== null ? wa : dash}</b><span>${esc(t('wh.bd.whoopAge'))}</span></div>
+        <div class="wh-body-stat"><b class="num">${pa !== null ? pa : dash}</b><span>${esc(t('wh.bd.pace'))}</span></div>
+      </div>
+      ${typed ? '' : `<div class="help mt-s">${esc(t('wh.bd.fromApp'))} · ${link}</div>`}
+    </div>`;
+    // 2) bizning taxmin — omillar jadvali bilan, ogohlantirish bilan
+    const est = D.whoop.bioAge();
+    let estBody;
+    if (!est) {
+      const hasAge = !!D.whoop.chronoAge();
+      estBody = `<div class="empty small">${esc(hasAge ? t('wh.bd.needData') : t('wh.bd.needAge'))}${hasAge ? '' : ` · ${link}`}</div>`;
+    } else {
+      const d = est.delta;
+      const z = d <= -1 ? 'good' : d >= 1 ? 'bad' : 'warn';
+      const verdict = Math.abs(d) < 0.5 ? t('wh.bd.same') : d < 0 ? t('wh.bd.younger', { n: Math.abs(d) }) : t('wh.bd.older', { n: d });
+      const rows = est.inputs.map((i) => `<div class="wh-body-in"><span>${esc(t('wh.bd.f.' + i.k))}</span><b class="num">${i.v}${i.unit ? `<small>${esc(i.unit)}</small>` : ''}</b><span class="num muted">${i.ref}</span><b class="num ${i.effect < 0 ? 'good' : i.effect > 0 ? 'bad' : 'muted'}">${i.effect > 0 ? '+' : ''}${i.effect}</b></div>`).join('');
+      estBody = `<div class="wh-body-est"><div class="wh-body-num num ${z}">${est.est}</div><div class="grow"><div class="wh-body-verdict">${esc(verdict)}</div><div class="small muted">${esc(t('wh.bd.chrono', { n: est.chrono }))} · ${esc(t('wh.days', { n: est.days }))}</div></div></div>
+        <div class="wh-body-ins"><div class="wh-body-in head"><span>${esc(t('wh.bd.inputs'))}</span><b></b><span>${esc(t('wh.bd.ref'))}</span><b>${esc(t('wh.bd.effect'))}</b></div>${rows}</div>`;
+    }
+    const estCard = `<div class="card wh-body-estcard"><div class="card-head"><div class="title">${D.ic('trend', 16)} ${esc(t('wh.bd.est'))}</div></div>${estBody}<div class="help mt-s">${esc(t('wh.bd.caveat'))}</div></div>`;
+    let ai = '';
+    if (D.ai && typeof D.ai.card === 'function') { try { ai = D.ai.card('age'); } catch (e) { ai = ''; } }
+    return prof + whoopAge + estCard + ai;
   };
 
   /* ------------------------------------------------------------------ */

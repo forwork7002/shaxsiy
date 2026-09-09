@@ -1,0 +1,63 @@
+/* ==== food (Ovqat) ==== prefix fd-, tokens only, 360 px ga sig'adi */
+.fd-nav .fd-return { border: 0; background: transparent; color: var(--info); font-size: 11px; font-weight: 700; padding: 0; cursor: pointer; }
+
+/* summary: two rings side by side, then carbs/fat bars, then the WHOOP balance line */
+.fd-rings { display: flex; justify-content: space-around; align-items: flex-start; gap: 8px; margin: 2px 0 10px; }
+.fd-ring { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.fd-ring .ring-pct { font-size: 20px; }
+.fd-ring .ring-sub { font-size: 11px; color: var(--text3); font-weight: 600; }
+.fd-ring-num small { font-size: 12px; color: var(--text3); margin-left: 1px; }
+.fd-ring-lab { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); }
+.fd-bars .hbar-label { width: 72px; }
+.fd-bars .hbar-val { min-width: 72px; }
+.fd-burn { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--text2); }
+.fd-burn .ic { color: var(--warning); flex: none; }
+.fd-bal { margin-left: auto; font-size: 12px; color: var(--text3); }
+.fd-bal.good b { color: var(--success); }
+.fd-bal.bad b { color: var(--danger-text); }
+.fd-left { margin-top: 6px; color: var(--text3); }
+.fd-left.bad { color: var(--danger-text); }
+
+/* meal list */
+.fd-meal { align-items: center; }
+.fd-thumb { width: 44px; height: 44px; flex: none; border-radius: var(--r-xs); object-fit: cover; background: var(--inset); border: 1px solid var(--line); }
+.fd-thumb-ic { display: inline-flex; align-items: center; justify-content: center; color: var(--text3); }
+.fd-macro b { color: var(--text2); font-family: var(--mono); font-weight: 700; }
+.fd-macro { font-family: var(--mono); letter-spacing: .02em; }
+
+/* analysis: busy / error / result */
+.fd-busy-row { display: flex; align-items: center; gap: 10px; color: var(--text3); font-size: 13.5px; padding: 6px 0; }
+.fd-busy-row .ic { color: var(--violet); animation: aiPulse 1.4s ease-in-out infinite; }
+.fd-preview { width: 100%; max-height: 180px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--line); margin-bottom: 10px; display: block; }
+.fd-res-top { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+.fd-res-top .fd-preview { margin-bottom: 4px; }
+.fd-res-name { font-size: 15px; font-weight: 700; color: var(--text); overflow-wrap: anywhere; }
+.fd-res-tot { font-size: 12.5px; color: var(--text2); }
+.fd-res-tot b { font-size: 16px; color: var(--text); }
+.fd-items { overflow-x: auto; margin: 6px 0 8px; }
+.fd-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.fd-tbl th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); padding: 4px 6px 4px 0; border-bottom: 1px solid var(--line); }
+.fd-tbl td { padding: 5px 6px 5px 0; border-bottom: 1px solid var(--line); color: var(--text2); overflow-wrap: anywhere; }
+.fd-tbl td.num, .fd-tbl th:not(:first-child) { text-align: right; padding-right: 0; padding-left: 6px; white-space: nowrap; }
+.fd-tbl tr:last-child td { border-bottom: 0; }
+.fd-advice { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--text2); line-height: 1.45; padding: 8px 10px; border-radius: var(--r-sm); background: var(--inset); border: 1px dashed var(--line2); margin-bottom: 10px; }
+.fd-advice .ic { color: var(--info); flex: none; margin-top: 2px; }
+.fd-res-acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.fd-res-acts .btn.icon { margin-left: auto; }
+
+/* composer: camera · gallery · text · send — one row at 360 px */
+.fd-composer { display: flex; gap: 6px; align-items: center; padding: 10px; }
+.fd-composer .fd-text { flex: 1; min-width: 0; }
+.fd-composer label.btn { cursor: pointer; }
+.fd-composer .fd-send { color: var(--ink-on-light); }
+@media (max-width: 380px) { .fd-composer { padding: 8px; gap: 5px; } .fd-composer .btn.sq { width: 38px; height: 38px; } }
+
+/* edit sheet */
+.fd-ed-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 10px; }
+.fd-ed-f { margin-bottom: 8px; }
+.fd-ed-items { margin-top: 6px; }
+.fd-ed-item { display: flex; gap: 8px; font-size: 12.5px; padding: 6px 0; border-bottom: 1px solid var(--line); color: var(--text2); }
+.fd-ed-item:last-child { border-bottom: 0; }
+
+/* today tile */
+.fd-tile .val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

@@ -59,7 +59,9 @@
                   offsets: { bomdod: 0, quyosh: 0, peshin: 0, asr: 0, shom: 0, xufton: 0 }, hijriOffset: 0, notify: false },
         caffeineLimit: 400, showAmounts: true, onboarded: false,
       },
-      profile: { name: '', heightCm: null, weightKg: null, age: null, sex: 'm', activity: 3 },
+      // birthYear → yosh hisoblanadi; goal ovqat me'yorlari uchun; whoopAge/paceOfAging WHOOP ilovasidan qo'lda kiritiladi
+      profile: { name: '', heightCm: null, weightKg: null, age: null, birthYear: null, sex: 'm', activity: 3, goal: 'keep',
+                 whoopAge: null, paceOfAging: null, whoopAgeAt: null },
       habits: [], logs: {}, counts: {}, notes: {}, gratitude: [],
       tasks: [], goals: [],
       prayers: {}, dhikr: {}, fasting: {},
@@ -72,6 +74,8 @@
       nova: { threads: [] },
       ai: { cards: {}, log: [] },
       whoop: { connected: false, lastSync: null, cache: {}, days: {}, workouts: [], body: {} },
+      // food.logs: {'YYYY-MM-DD': [meal]}; targets: auto=true → profildan hisoblanadi, aks holda qo'lda kiritilgan qiymatlar
+      food: { logs: {}, targets: { kcal: null, p: null, c: null, f: null, auto: true } },
     };
   }
   D.defaultState = defaultState;
@@ -100,6 +104,13 @@
     n.tasks.forEach((t) => { if (!t.id) t.id = D.uid('t'); if (!t.priority) t.priority = 2; });
     n.goals.forEach((g) => { if (!g.id) g.id = D.uid('g'); if (!g.priority) g.priority = 2; if (!D.DIRS.includes(g.dir)) g.dir = 'shaxsiy'; });
     if (!n.finance.cats.length) n.finance.cats = defaultCats();
+    if (!['lose', 'keep', 'gain'].includes(n.profile.goal)) n.profile.goal = 'keep';
+    // ovqat yozuvlari: kun → massiv; har bir taomda id bo'lsin
+    for (const k of Object.keys(n.food.logs)) {
+      if (!Array.isArray(n.food.logs[k])) { delete n.food.logs[k]; continue; }
+      n.food.logs[k].forEach((m) => { if (m && !m.id) m.id = D.uid('fd'); });
+    }
+    if (typeof n.food.targets.auto !== 'boolean') n.food.targets.auto = true;
     n.meta.v = D.VERSION;
     return n;
   };
@@ -233,6 +244,9 @@
     out.gym.logs = Object.assign({}, r.gym.logs);
     for (const k of Object.keys(l.gym.logs || {})) out.gym.logs[k] = unionById(l.gym.logs[k], r.gym.logs[k]);
     out.nova.threads = unionById(l.nova.threads, r.nova.threads);
+    // ovqat: kun kaliti bo'yicha id-birlashma (lokal ustun), me'yorlar yangiroq tomondan (out allaqachon shunday)
+    out.food.logs = Object.assign({}, r.food.logs);
+    for (const k of Object.keys(l.food.logs || {})) out.food.logs[k] = unionById(l.food.logs[k], r.food.logs[k]);
     out.whoop.days = Object.assign({}, r.whoop.days, l.whoop.days);
     out.whoop.workouts = unionById(l.whoop.workouts, r.whoop.workouts);
     out.whoop.connected = !!(l.whoop.connected || r.whoop.connected);
@@ -354,6 +368,8 @@
         pushServer(); // fresh server, populated client
       }
       D.setSync('ok');
+      D.pulled = true;          // server nusxasi shu sessiyada kamida bir marta o'qildi
+      D.emit('pull:ok');
       return true;
     } catch (e) {
       console.warn('pull', e);
@@ -390,6 +406,15 @@
     return start && p.h < start ? D.addDays(k, -1) : k;
   };
   D.today = () => D.dayKey();
+  // Profil yoshi — bitta joyda: tug'ilgan yildan (har yangi yilda o'zi yangilanadi),
+  // bo'lmasa eski `age` maydonidan. food.js, whoop.js, ai.js, settings.js shuni ishlatadi.
+  D.profileAge = () => {
+    const p = (D.S && D.S.profile) || {};
+    const by = +p.birthYear;
+    if (Number.isFinite(by) && by > 1900) { const y = D.nowTz().y - Math.round(by); return y > 0 && y < 130 ? y : null; }
+    const a = +p.age;
+    return Number.isFinite(a) && a > 0 ? Math.round(a) : null;
+  };
   D.parseKey = (k) => { const [y, m, d] = String(k).split('-').map(Number); return { y, m, d }; };
   D.addDays = (key, n) => {
     const { y, m, d } = D.parseKey(key);
@@ -800,6 +825,7 @@
   // First load on a new device: local storage is empty and the server still owes us the data.
   // Show a skeleton instead of a briefly-empty app.
   D.loading = false;
+  D.pulled = false;   // D.pull() birinchi marta muvaffaqiyatli tugaganda true — onboarding shunga qaraydi
   const skeleton = () => `<div class="card skel-card"><div class="skel skel-eyebrow"></div><div class="skel skel-kpi"></div>
       <div class="skel-rows">${'<div class="skel skel-row"></div>'.repeat(3)}</div></div>
     <div class="card skel-card">${'<div class="skel skel-row"></div>'.repeat(5)}</div>

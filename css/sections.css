@@ -12,28 +12,22 @@
 [data-section="health"] { --sec: #5FD6B4; --sec2: #7DD3FC; --sec-soft: rgba(95,214,180,.11); }
 [data-section="finance"] { --sec: #E8C468; --sec2: #A9D96B; --sec-soft: rgba(232,196,104,.11); }
 [data-section="prayer"] { --sec: #6BE3A4; --sec2: #9BE7C4; --sec-soft: rgba(107,227,164,.11); }
-[data-section="gym"] { --sec: #FF8A6B; --sec2: #F2C063; --sec-soft: rgba(255,138,107,.11); }
+[data-section="food"] { --sec: #F5A38C; --sec2: #A9D96B; --sec-soft: rgba(245,163,140,.11); }
 [data-section="tasks"] { --sec: #9BB7F5; --sec2: #A78BFA; --sec-soft: rgba(155,183,245,.11); }
-[data-section="learn"] { --sec: #C3A6F5; --sec2: #7DD3FC; --sec-soft: rgba(195,166,245,.11); }
-[data-section="stats"] { --sec: #7DD3FC; --sec2: #6BE3A4; --sec-soft: rgba(125,211,252,.11); }
 [data-theme="light"][data-section="today"] { --sec: #C86B2E; --sec2: #B4472F; --sec-soft: rgba(200,107,46,.10); }
 [data-theme="light"][data-section="health"] { --sec: #24947A; --sec2: #2C7FA8; --sec-soft: rgba(36,148,122,.10); }
 [data-theme="light"][data-section="finance"] { --sec: #9A7A1E; --sec2: #5E8A2A; --sec-soft: rgba(154,122,30,.10); }
 [data-theme="light"][data-section="prayer"] { --sec: #2C8B5A; --sec2: #3F9E72; --sec-soft: rgba(44,139,90,.10); }
-[data-theme="light"][data-section="gym"] { --sec: #C2542F; --sec2: #B07C1E; --sec-soft: rgba(194,84,47,.10); }
+[data-theme="light"][data-section="food"] { --sec: #C25A3C; --sec2: #5E8A2A; --sec-soft: rgba(194,90,60,.10); }
 [data-theme="light"][data-section="tasks"] { --sec: #3C63B8; --sec2: #6B4FC0; --sec-soft: rgba(60,99,184,.10); }
-[data-theme="light"][data-section="learn"] { --sec: #6B4FC0; --sec2: #2C7FA8; --sec-soft: rgba(107,79,192,.10); }
-[data-theme="light"][data-section="stats"] { --sec: #2C7FA8; --sec2: #24947A; --sec-soft: rgba(44,127,168,.10); }
 
 /* the ambient page wash picks up the section colour too */
 [data-section="today"]   { --wash1: rgba(242,166,90,.35); }
 [data-section="health"]  { --wash1: rgba(95,214,180,.31); }
 [data-section="finance"] { --wash1: rgba(232,196,104,.31); --wash3: color-mix(in srgb, var(--sec) 26%, transparent); }
 [data-section="prayer"]  { --wash1: rgba(107,227,164,.31); }
-[data-section="gym"]     { --wash1: rgba(255,138,107,.32); }
+[data-section="food"]    { --wash1: rgba(245,163,140,.31); }
 [data-section="tasks"]   { --wash1: rgba(155,183,245,.30); }
-[data-section="learn"]   { --wash1: rgba(195,166,245,.30); }
-[data-section="stats"]   { --wash1: rgba(125,211,252,.30); }
 body::before { transition: background 1.2s ease; }
 
 /* section colour flows into the shared kit without touching each module */

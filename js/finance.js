@@ -612,7 +612,7 @@
   /* view                                                                */
   /* ------------------------------------------------------------------ */
   D.view({
-    id: 'finance', icon: 'wallet', order: 30, primary: true,
+    id: 'finance', icon: 'wallet', order: 30, primary: false,
     render() {
       let sub = D.sub('finance', 'month');
       if (!TABS.includes(sub)) sub = 'month';

@@ -36,6 +36,7 @@ import html
 import json
 import logging
 import os
+import re
 import secrets
 import threading
 import time
@@ -614,6 +615,7 @@ def post_data():
     # arxiv: kunlik faktlar + blob versiyasi (xato bo'lsa saqlash baribir muvaffaqiyatli)
     _archive(db.archive_state, uid, incoming, what="arxiv faktlar")
     _archive(db.record_state_version, uid, incoming, what="arxiv versiya")
+    _archive(food_sweep, uid, incoming, what="ovqat suratlari")
     return jsonify({"ok": True, "updated": incoming["meta"]["serverUpdated"]})
 
 
@@ -1050,6 +1052,9 @@ def _n_sleep(r):
         "sleepNeedH": round(need_ms / 3.6e6, 2) if need_ms > 0 else None,
         "needBaseH": _h(need.get("baseline_milli")), "debtH": _h(need.get("need_from_sleep_debt_milli")),
         "needStrainH": _h(need.get("need_from_recent_strain_milli")),
+        # xom millisekundlar — API bergan hamma narsa mijozga ham yetib boradi (soatli maydonlar o'z joyida qoladi)
+        "noData": nodata, "needBase": _num(need.get("baseline_milli")), "needDebt": _num(need.get("need_from_sleep_debt_milli")),
+        "needStrain": _num(need.get("need_from_recent_strain_milli")), "needNap": _num(need.get("need_from_recent_nap_milli")),
         "sleepPerf": _rnd(s.get("sleep_performance_percentage")), "sleepEff": _rnd(s.get("sleep_efficiency_percentage")),
         "sleepCons": _rnd(s.get("sleep_consistency_percentage")), "resp": _rnd(s.get("respiratory_rate"), 1),
         "state": r.get("score_state"),
@@ -1085,8 +1090,9 @@ def _n_workout(r):
         "id": r["id"], "start": r.get("start"), "end": r.get("end"), "sport": r.get("sport_name") or "", "sportId": r.get("sport_id"),
         "strain": _rnd(s.get("strain"), 1), "kcal": round(kj / 4.184) if kj is not None else None,
         "hrAvg": _rnd(s.get("average_heart_rate")), "hrMax": _rnd(s.get("max_heart_rate")),
-        "meters": _rnd(s.get("distance_meter")), "altGain": _rnd(s.get("altitude_gain_meter")),
-        "pctRecorded": _rnd((_num(s.get("percent_recorded")) or 0) * 100), "zones": zones if any(zones) else None,
+        "meters": _rnd(s.get("distance_meter")), "altGain": _rnd(s.get("altitude_gain_meter")), "altChange": _rnd(s.get("altitude_change_meter")),
+        "percentRecorded": _rnd((_num(s.get("percent_recorded")) or 0) * 100),
+        "zones": zones if any(zones) else None,
         "mins": mins, "state": r.get("score_state"),
     }
 
@@ -1268,7 +1274,7 @@ def _wh_tick(uid: str, now: float):
                 changed = True
         s2, p, h2 = _wh_get(WHOOP_API_V2 + "/user/profile/basic", token)
         if s2 == 200 and isinstance(p, dict):
-            prof = {"userId": p.get("user_id"), "first": p.get("first_name") or "", "last": p.get("last_name") or ""}
+            prof = {"userId": p.get("user_id"), "first": p.get("first_name") or "", "last": p.get("last_name") or "", "email": p.get("email") or ""}
             if snap.get("profile") != prof:
                 snap["profile"] = prof
                 changed = True
@@ -1417,14 +1423,16 @@ def ai_client():
     return _ai_client
 
 
-def ai_openai(system: str, msgs: list, max_tokens: int):
-    """OpenAI chat completions. (natija, None) yoki (None, (xato, status))."""
+def ai_openai(system: str, msgs: list, max_tokens: int, timeout: float = 120):
+    """OpenAI chat completions. (natija, None) yoki (None, (xato, status)).
+    gpt-5 oilasi `max_tokens` va `temperature`ni rad etadi — faqat `max_completion_tokens` yuboriladi.
+    msgs[].content matn yoki content-parts ro'yxati (text + image_url) bo'lishi mumkin."""
     body = {"model": OPENAI_MODEL, "messages": ([{"role": "system", "content": system}] if system else []) + msgs,
             "max_completion_tokens": max_tokens}
     req = urllib.request.Request(OPENAI_BASE + "/chat/completions", data=json.dumps(body).encode("utf-8"), method="POST",
                                  headers={"Authorization": "Bearer " + OPENAI_KEY, "Content-Type": "application/json", "User-Agent": USER_AGENT})
     try:
-        with urllib.request.urlopen(req, timeout=120) as r:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
             j = json.loads(r.read().decode("utf-8") or "{}")
     except urllib.error.HTTPError as e:
         raw = e.read().decode("utf-8", "replace")[:400]
@@ -1495,6 +1503,265 @@ def ai():
             return jsonify({"error": "ai_connection"}), 502
         log.exception("AI xato")
         return jsonify({"error": "ai_failed"}), 500
+
+
+# ═══════════════════════ Ovqat (rasm → kaloriya) ═══════════════════════
+# Mijoz taomni suratga oladi (≤1024 px JPEG) yoki matn bilan yozadi; biz sozlangan AI'dan qat'iy JSON
+# so'raymiz: {items:[{name,grams,kcal,p,c,f}], total:{kcal,p,c,f}, confidence, advice}. Surat faqat
+# DATA_DIR/<uid>.food/<id>.jpg da yotadi (blobga hech qachon kirmaydi) va faqat egasiga beriladi.
+
+FOOD_MAX_BYTES = 1_500_000                 # data URL ichidagi rasm (dekodlangan) chegarasi
+FOOD_MAX_REQ = 3 * 1024 * 1024             # butun so'rov (base64 rasm ≈ 2 MB + matn) — JSON o'qilishidan OLDIN tekshiriladi
+FOOD_TOKENS, FOOD_TOKENS_RETRY = 1500, 4000  # javob byudjeti; fikrlovchi model (gpt-5) byudjetni yeb qo'ysa — kattarog'i bilan bir marta qayta
+FOOD_KEEP_DAYS = 2                         # blobdagi hech bir taom ishlatmagan surat shuncha kundan keyin o'chadi (undo/bekor uchun muhlat)
+FOOD_ID_RE = re.compile(r"^fp_[0-9a-f]{12,32}$")
+FOOD_TIMEOUT = 60
+FOOD_LANG = {"uz": "Uzbek (Latin script)", "uzk": "Uzbek (Cyrillic script)", "ru": "Russian"}
+FOOD_SYSTEM = (
+    "You are a nutrition analyst. Estimate the meal from the photo and/or the description. "
+    "Reply with ONE JSON object only — no prose, no markdown, no code fences — exactly this shape:\n"
+    '{"items":[{"name":"...","grams":0,"kcal":0,"p":0,"c":0,"f":0}],"total":{"kcal":0,"p":0,"c":0,"f":0},'
+    '"confidence":0.0,"advice":"..."}\n'
+    "Rules: one item per distinct food; grams = estimated portion weight; kcal and macros (p=protein, c=carbs, f=fat, "
+    "all in grams) are for that portion; total = sum of items; confidence is 0..1; advice is one or two short sentences. "
+    "Item names and advice must be written in {lang}. If the input is not food, return items:[] with confidence 0 and say so in advice."
+)
+FOOD_REPAIR = "Your previous reply was not valid JSON. Reply again with ONLY the JSON object in the required shape, nothing else."
+
+
+def food_dir(uid: str) -> Path:
+    """DATA_DIR/<uid stem>.food — egasidan boshqa hech kim ko'rmaydi (700)."""
+    f = user_file(uid)
+    d = f.with_name(f.stem + ".food")
+    if not d.exists():
+        d.mkdir(mode=0o700, exist_ok=True)
+        try:
+            os.chmod(d, 0o700)
+        except OSError:
+            pass
+    return d
+
+
+def _food_decode(data_url: str):
+    """data URL → (bytes, mime) yoki None. Faqat JPEG/PNG (magic bytes bo'yicha), FOOD_MAX_BYTES gacha."""
+    if not isinstance(data_url, str):
+        return None
+    m = re.match(r"^data:(image/[a-zA-Z0-9.+-]+);base64,(.*)$", data_url, re.S)
+    if not m:
+        return None
+    b64 = m.group(2).strip()
+    if len(b64) > FOOD_MAX_BYTES * 4 // 3 + 4096:       # dekodlashdan oldin ham qirqamiz — xotira uchun
+        return None
+    try:
+        raw = base64.b64decode(b64, validate=True)
+    except Exception:  # noqa: BLE001
+        return None
+    if not raw or len(raw) > FOOD_MAX_BYTES:
+        return None
+    if raw[:3] == b"\xff\xd8\xff":
+        return raw, "image/jpeg"
+    if raw[:8] == b"\x89PNG\r\n\x1a\n":
+        return raw, "image/png"
+    return None
+
+
+def _food_json(text: str):
+    """AI javobidan JSON obyektini ajratadi: kod qavslarini olib tashlaydi, birinchi {…} ni oladi."""
+    if not isinstance(text, str):
+        return None
+    t = text.strip()
+    t = re.sub(r"^```[a-zA-Z]*\s*", "", t)
+    t = re.sub(r"\s*```$", "", t).strip()
+    for cand in (t, t[t.find("{"):t.rfind("}") + 1] if "{" in t and "}" in t else ""):
+        if not cand:
+            continue
+        try:
+            j = json.loads(cand)
+            if isinstance(j, dict):
+                return j
+        except ValueError:
+            pass
+    return None
+
+
+def _food_num(v, hi=100000):
+    n = _num(v)
+    if n is None or n < 0:
+        return 0
+    return round(min(n, hi), 1)
+
+
+def _food_shape(j: dict) -> dict:
+    """Raqamlarni tekshiradi, yig'indini hisoblaydi (bo'lmasa yoki noto'g'ri bo'lsa)."""
+    items = []
+    for x in (j.get("items") if isinstance(j.get("items"), list) else [])[:30]:
+        if not isinstance(x, dict):
+            continue
+        items.append({"name": str(x.get("name") or "").strip()[:80] or "?", "grams": _food_num(x.get("grams"), 5000),
+                      "kcal": _food_num(x.get("kcal")), "p": _food_num(x.get("p"), 2000), "c": _food_num(x.get("c"), 2000), "f": _food_num(x.get("f"), 2000)})
+    tot = j.get("total") if isinstance(j.get("total"), dict) else {}
+    total = {k: _food_num(tot.get(k)) for k in ("kcal", "p", "c", "f")}
+    if items and (not tot or all(total[k] == 0 for k in total)):
+        total = {k: round(sum(i[k] for i in items), 1) for k in ("kcal", "p", "c", "f")}
+    conf = _num(j.get("confidence"))
+    conf = 0.5 if conf is None else max(0.0, min(1.0, conf if conf <= 1 else conf / 100))
+    return {"items": items, "total": total, "confidence": round(conf, 2), "advice": str(j.get("advice") or "").strip()[:600]}
+
+
+def _food_ask(text: str, img):
+    """Provayder shaklidagi user-xabar: matn + (bo'lsa) rasm. img = (bytes, mime) yoki None.
+    Tizim ko'rsatmasi alohida, _food_call ga beriladi; ikkinchi urinish (JSON tuzatish) uchun chaqiruvchi suhbatni davom ettiradi."""
+    if AI_PROVIDER == "openai":
+        parts = [{"type": "text", "text": text}]
+        if img:
+            parts.append({"type": "image_url", "image_url": {"url": "data:%s;base64,%s" % (img[1], base64.b64encode(img[0]).decode("ascii"))}})
+        return [{"role": "user", "content": parts}]
+    parts = []
+    if img:
+        parts.append({"type": "image", "source": {"type": "base64", "media_type": img[1], "data": base64.b64encode(img[0]).decode("ascii")}})
+    parts.append({"type": "text", "text": text})
+    return [{"role": "user", "content": parts}]
+
+
+def _food_call(system: str, msgs: list, max_tokens: int = FOOD_TOKENS):
+    """Sozlangan provayderga bitta so'rov. (out{text,model,stop,usage}, None) yoki (None, (xato, status))."""
+    if AI_PROVIDER == "openai":
+        return ai_openai(system, msgs, max_tokens, timeout=FOOD_TIMEOUT)
+    try:
+        resp = ai_client().with_options(timeout=float(FOOD_TIMEOUT)).messages.create(model=AI_MODEL, max_tokens=max_tokens, system=system, messages=msgs)
+        text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+        return {"text": text, "model": resp.model, "stop": resp.stop_reason, "usage": {"in": resp.usage.input_tokens, "out": resp.usage.output_tokens}}, None
+    except ImportError:
+        return None, ("pip install anthropic", 501)
+    except Exception as e:  # noqa: BLE001
+        log.warning("Ovqat AI (anthropic): %s", e)
+        return None, ("ai_failed", 502)
+
+
+@app.post("/api/food/analyze")
+def food_analyze():
+    uid, err = current_user()
+    if err:
+        return err
+    if not AI_PROVIDER:
+        return jsonify({"error": "ai_not_configured"}), 501
+    if request.content_length and request.content_length > FOOD_MAX_REQ:
+        return jsonify({"error": "too_large"}), 413
+    body = request.get_json(silent=True) or {}
+    text = str(body.get("text") or "").strip()[:1500]
+    note = str(body.get("note") or "").strip()[:500]
+    lang = FOOD_LANG.get(str(body.get("lang") or "uz"), FOOD_LANG["uz"])
+    img = None
+    if body.get("image"):
+        img = _food_decode(body.get("image"))
+        if not img:
+            return jsonify({"error": "bad_image"}), 400
+    if not img and not text:
+        return jsonify({"error": "empty"}), 400
+    ask = []
+    if text:
+        ask.append("Meal description: " + text)
+    if note:
+        ask.append("Note (portion/brand): " + note)
+    if img:
+        ask.append("Analyse the attached photo.")
+    system = FOOD_SYSTEM.replace("{lang}", lang)
+    msgs = _food_ask("\n".join(ask), img)
+    out, fail = _food_call(system, msgs)
+    if fail:
+        return jsonify({"error": fail[0]}), fail[1]
+    usage_in, usage_out, model = (out.get("usage") or {}).get("in"), (out.get("usage") or {}).get("out"), out.get("model")
+    j = _food_json(out.get("text"))
+    if j is None:
+        if out.get("stop") in ("length", "max_tokens"):
+            # javob byudjetga sig'madi (fikrlovchi model o'ylab tugatdi, matn bo'sh) — tuzatish emas, kattaroq byudjet bilan xuddi shu so'rov
+            msgs2, budget = msgs, FOOD_TOKENS_RETRY
+        else:
+            # bir marta tuzatishni so'raymiz: avvalgi javob + "faqat JSON"
+            msgs2, budget = msgs + [{"role": "assistant", "content": str(out.get("text") or "")[:4000] or "-"}, {"role": "user", "content": FOOD_REPAIR}], FOOD_TOKENS
+        out2, fail2 = _food_call(system, msgs2, budget)
+        if not fail2:
+            u2 = out2.get("usage") or {}
+            usage_in = (usage_in or 0) + (u2.get("in") or 0); usage_out = (usage_out or 0) + (u2.get("out") or 0)
+            j = _food_json(out2.get("text"))
+    _archive(db.record_ai_call, uid, "food", model, usage_in, usage_out, what="arxiv ai")
+    if j is None:
+        log.warning("Ovqat AI: JSON o'qilmadi (%s)", str(out.get("text") or "")[:120])
+        return jsonify({"error": "ai_failed"}), 502
+    res = _food_shape(j)
+    photo = None
+    if img:
+        photo = "fp_" + secrets.token_hex(8)
+        f = food_dir(uid) / (photo + ".jpg")
+        try:
+            tmp = f.with_suffix(".tmp")
+            tmp.write_bytes(img[0])
+            os.chmod(tmp, 0o600)
+            tmp.replace(f)
+        except OSError as e:
+            log.warning("Ovqat surati saqlanmadi: %s", e)
+            photo = None
+    res.update({"ok": True, "photo": photo})
+    return jsonify(res)
+
+
+@app.get("/api/food/photo/<pid>")
+def food_photo(pid):
+    """Faqat egasining papkasidan; id qat'iy shaklda (papka yo'li so'rovdan kelmaydi)."""
+    uid, err = current_user()
+    if err:
+        return err
+    if not FOOD_ID_RE.match(pid or ""):
+        return jsonify({"error": "not_found"}), 404
+    f = food_dir(uid) / (pid + ".jpg")
+    if not f.is_file():
+        return jsonify({"error": "not_found"}), 404
+    raw = f.read_bytes()
+    mime = "image/png" if raw[:8] == b"\x89PNG\r\n\x1a\n" else "image/jpeg"
+    r = Response(raw, mimetype=mime)
+    r.headers["Cache-Control"] = "private, max-age=86400"
+    return r
+
+
+_food_swept: dict = {}   # uid → oxirgi tozalash vaqti (har saqlashda emas, soatiga bir)
+
+
+def food_used_photos(state: dict) -> set:
+    """Blobdagi taomlar ishlatayotgan surat id'lari."""
+    used = set()
+    food = state.get("food") if isinstance(state, dict) else None
+    logs = food.get("logs") if isinstance(food, dict) and isinstance(food.get("logs"), dict) else {}
+    for meals in logs.values():
+        for m in meals if isinstance(meals, list) else []:
+            if isinstance(m, dict) and isinstance(m.get("photo"), str):
+                used.add(m["photo"])
+    return used
+
+
+def food_sweep(uid: str, state: dict, force: bool = False) -> int:
+    """<uid>.food/ dagi yetim suratlarni o'chiradi: blobdagi hech bir taom ishlatmaydigan (bekor qilingan tahlil,
+    o'chirilgan taom) va FOOD_KEEP_DAYS dan eski — undo muhlati o'tgan. Chala .tmp'lar ham. O'chirilganlar soni."""
+    now = time.time()
+    if not force and now - _food_swept.get(uid, 0) < 3600:
+        return 0
+    _food_swept[uid] = now
+    f = user_file(uid)
+    d = f.with_name(f.stem + ".food")
+    if not d.is_dir():
+        return 0
+    used, cutoff, n = food_used_photos(state), now - FOOD_KEEP_DAYS * 86400, 0
+    for p in list(d.glob("fp_*.jpg")) + list(d.glob("fp_*.tmp")):
+        if p.stem in used:
+            continue
+        try:
+            if p.stat().st_mtime < cutoff:
+                p.unlink()
+                n += 1
+        except OSError:
+            pass
+    if n:
+        log.info("Ovqat suratlari tozalandi: %s — %d ta", uid, n)
+    return n
 
 
 # ═══════════════════════ Statik fayllar ═══════════════════════

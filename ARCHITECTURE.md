@@ -9,27 +9,35 @@ app/
   js/core.js        store, dates, i18n runtime, router, UI kit, icons, charts, undo, sync, migration
   js/i18n.js        string tables: uz (Latin), uzk (Cyrillic), ru
   js/prayer.js      prayer-time engine + hijri calendar (pure functions, no DOM)
-  js/today.js       Бугун
+  js/today.js       Бугун: checklist (habits, tasks, prayers, water + food tile, WHOOP readiness + workouts, AI card, note, gratitude)
   js/tasks.js       Вазифа + Мақсад
-  js/health.js      Соғлиқ: daily log, weight, water, caffeine, supplements, WHOOP
-  js/gym.js         Спорт (progressive overload)
+  js/health.js      Соғлиқ: WHOOP hub — day · sleep · strain · weight · water · body (age panel)
+  js/food.js        Овқат: food logger (photo/text → /api/food/analyze → per-day meals, targets, WHOOP burn)
   js/finance.js     Молия
-  js/learn.js       Таълим
-  js/stats.js       Стат + insights
   js/ai.js          shared AI analysis engine — D.ai.card(section) insight cards
-  js/whoop.js       WHOOP history sync, per-day store, trends, readiness
+  js/whoop.js       WHOOP snapshot client, per-day store, trends, readiness, workouts, bioAge/bodyPanel
   js/nova.js        AI mentor chat (uses D.ai.ask)
-  js/settings.js    Созлаш + data import/export
+  js/settings.js    Созлаш: general (profile incl. birth year / goal / WHOOP Age) · habits · food targets · prayer · finance · data
   js/history.js     Тарих: read-only archive browser over /api/history/* (month grid · year · chats · cards)
+  js/onboard.js     first-entry wizard (D.onboard): name → sex → birth year → height → weight → activity → goal → WHOOP
   js/app.js         boot
   sw.js manifest.json
-  api.py            Flask: accounts (register/login/Google/Telegram), per-uid /api/data, per-uid WHOOP OAuth+poller, /api/ai proxy, /api/history/*
+  api.py            Flask: accounts (register/login/Google), per-uid /api/data, per-uid WHOOP OAuth+poller, /api/ai proxy, /api/food/*, /api/history/*
   db.py             SQLite archive data/dash.db (WAL): day_facts / whoop_records / chat_threads+messages / ai_cards / ai_calls / state_versions — written on every save + WHOOP poll, never pruned
   legacy.py         one-off import of the old Шахсий export (Python port of D.migrateOld + existing-wins merge); deploy/import-legacy.sh runs it on the server
 ```
 
-Script order in index.html: core.js → i18n.js → prayer.js → ai.js → whoop.js → view modules (any order) → app.js.
+Script order in index.html: core.js → i18n.js → prayer.js → ai.js → whoop.js → today · tasks · health · finance · ibodat · nova → food.js → settings.js → history.js → onboard.js → app.js.
 `ai.js` and `whoop.js` are libraries, not views: they register no `D.view` and must load before the views that call them.
+`food.js` loads before `settings.js` (the food targets tab calls `D.food.recalcTargets`); `onboard.js` loads last so every view and `D.food` exist when it decides to open.
+No Telegram: there is no `telegram-web-app.js` in the shell; `D.tg` stays `null` and the few `D.tg && …` guards in core.js are dead but harmless.
+
+Removed on 2026-09-09 (files deleted, `<link>/<script>` and sw.js SHELL entries gone, i18n keys gone): `gym.js/css` (WHOOP workouts replace it),
+`learn.js/css`, `stats.js/css` (month/year stats live in Tarix), Health sub-tabs `caffeine` and `stack`, weekly `reviews`.
+Data safety: `defaultState` / `normalize` / `D.merge` keep the `gym`, `learn`, `caffeine`, `stack`, `reviews` keys so old blobs and the archive stay intact — nothing in the UI reads them
+(Tarix still shows archived stack/caffeine facts on a past day's sheet, read-only).
+
+Bottom bar = the first four `primary` views by order: today 10 · health 20 · food 25 · prayer 40; everything else (finance, tasks, nova, history, settings) sits in «Yana».
 
 ## Conventions (every module follows these)
 
@@ -48,7 +56,7 @@ Script order in index.html: core.js → i18n.js → prayer.js → ai.js → whoo
 8. **Deletion** → `D.remove(list, id, {label})` pushes an undo entry and shows a toast with «Bekor qilish». Habit-with-history deletion uses `D.confirm()` (promise → boolean). No native `confirm()/alert()`.
 9. **i18n**: all UI text via `D.t('key')` or `D.t('key', {n:3})`. Modules register their own keys with
    `D.i18n.add({ uz:{...}, uzk:{...}, ru:{...} })` at top of the IIFE. Key style: `today.title`, `tasks.empty`. Plural helper `D.t('x.count', {n})` where the string uses `{n}`.
-10. **CSS**: class prefix per module (`td-`, `tk-`, `hl-`, `gym-`, `fin-`, `ln-`, `st-`, `nv-`, `set-`). Use tokens, never raw colors. Reuse the kit classes below before inventing new ones. Module CSS lives in `app.css` under a `/* ==== module ==== */` header.
+10. **CSS**: class prefix per module (`td-`, `tk-`, `hl-`, `wh-`, `fd-`, `fin-`, `ib-`, `nv-`, `set-`, `hs-`, `ob-`). Use tokens, never raw colors. Reuse the kit classes below before inventing new ones. Module CSS lives in `css/<module>.css` (linked from index.html and listed in sw.js SHELL); `app.css` holds the design system.
 11. **Numbers**: `D.fmtNum(n)`, `D.fmtMoney(n)` (uses `S.settings.currency`), `D.fmtPct`. Mono font for numbers: class `num`.
 12. **Never throw from render** — wrap risky parts; core catches and shows an error card for that view.
 
@@ -69,6 +77,7 @@ D.lang()                    // 'uz' | 'uzk' | 'ru'
 D.esc(s)  D.uid(p)  D.clamp(n,a,b)  D.debounce(fn,ms)  D.sum(arr, fn)
 D.dayKey(date?)  D.today()  D.addDays(k,n)  D.daysBetween(a,b)  D.fmtDate(k,style)  D.monthKey(k)  D.weekKey(k)
 D.nowTz()                   // Date-like {y,m,d,h,min,s,dow} in settings tz
+D.profileAge()              // age from profile.birthYear (self-updating), else legacy profile.age; the ONLY age rule (food, whoop, ai, settings)
 D.fmtNum(n)  D.fmtMoney(n)  D.fmtPct(x)  D.fmtTime(h,m)
 D.toast(msg, {undo?:fn, ms?})  D.confirm({title,text,ok,danger}) → Promise<bool>
 D.modal({title, body, actions:[{label,act,primary,danger}], onOpen})  D.closeModal()
@@ -85,9 +94,10 @@ D.streak(datesSet)          // grace-day streak from a Set of day keys
 D.habitDue(habit, key)      // schedule check
 D.sphere(id)                // {id,name(),color}
 D.spheres                   // ordered list
-D.tg                        // Telegram WebApp or null
-D.api(path, opts)           // fetch with Telegram initData header, JSON
-D.emit(name, data) D.on(name, fn)   // simple event bus ('state:changed', 'view:changed', 'day:changed')
+D.tg                        // always null now (no Telegram script) — guards stay null-safe
+D.api(path, opts)           // fetch (same-origin session cookie), JSON
+D.serverEnabled()           // true when served by api.py (window.DASH_SERVER) or ?server=1
+D.emit(name, data) D.on(name, fn)   // simple event bus ('state:changed', 'view:changed', 'day:changed', 'pull:ok' — a D.pull() that read the server copy; D.pulled stays true after the first)
 D.theme.set('dark'|'light'|'auto')
 D.search.register(fn)       // fn(query) → [{label, sub, go:()=>{}}] for Ctrl+K palette
 D.merge(remote, local)      // union merge used by the server pull / stale-push path
@@ -104,8 +114,9 @@ D.ai.systemFor(section)        // section prompt built from the snapshot
 D.ai.mode()                    // 'server' | 'key' | 'none'
 D.ai.enoughData(section)  D.ai.isFresh(section)  D.ai.md(text)
 ```
-Sections: `today`, `health`, `finance`, `prayer`. Add one by extending `SECTIONS`, `QUESTION`,
-the `lines()` builder and the three `ai.hint.<section>` strings.
+Sections: `today`, `health`, `sleep`, `strain`, `food`, `age`, `finance`, `prayer` — one coach card per page
+(`history.js` SECTIONS mirrors this list for the Tarix «Kartalar» filter). Add one by extending `SECTIONS`, `QUESTION`,
+the `sectionLines()` builder and the three `ai.hint.<section>` strings.
 
 ## WHOOP (js/whoop.js)
 
@@ -115,10 +126,30 @@ D.whoop.autoSync()       // throttled to 30 min; runs on boot and when Health op
 D.whoop.day(key)  D.whoop.trend(field, n)  D.whoop.stats(field, n)
 D.whoop.readiness()      // {pct, zone, sleepH, strain, label} for the Today strip
 D.whoop.fillSleep()      // writes health[date].sleep when the user left it empty
-D.whoop.trendCard()  D.whoop.workoutsCard()  D.whoop.bodyCard()
+D.whoop.workoutsOn(key)  D.whoop.workoutRows(key, {empty:false})   // Today's WHOOP workouts card + Health › strain
+D.whoop.bioAge()         // {est, chrono, delta, inputs:[{k,v,effect}]} | null — transparent 30-day estimate
+D.whoop.bodyPanel()      // Health › body: profile, body, last sync, WHOOP Age / Pace of Aging (typed in), estimate
+D.whoop.trendCard()  D.whoop.footer()
 ```
 Day mapping: recovery → `created_at`, sleep → `end` (the morning you woke), cycle/workout → `start`.
 Naps are skipped. `health[k].sleepFromWhoop` marks an auto-filled value; a manual edit clears it.
+
+## Food (js/food.js)
+
+```js
+D.food.tile(dayKey)        // Today tile HTML ('' when nothing to show) → D.go('food')
+D.food.dayTotals(dayKey)   // {kcal,p,c,f} | null
+D.food.targets()           // {kcal,p,c,f,auto}
+D.food.recalcTargets()     // Mifflin-St Jeor × activity ± goal (−400/0/+300), protein 1.6 g/kg (2.0 gain), fat 25 %, carbs rest
+```
+Settings → Ovqat edits `S.food.targets`; a manual value sets `auto=false`, the «Avto» switch recalculates. Profile edits
+(height, weight, birth year, sex, activity, goal) call `recalcTargets()` while `auto` is on.
+
+## Onboarding (js/onboard.js)
+
+Trigger at boot: `D.serverEnabled() && S.settings.onboarded !== true && !(S.profile.age || S.profile.birthYear) && !S.profile.weightKg`.
+Full-screen steps in the auth-gate style; finish → `profile.*`, `food.targets.auto = true`, `settings.onboarded = true`, `D.save()`.
+Everything it asks is editable later in Settings → Profil.
 
 ## Kit classes (app.css)
 
@@ -143,8 +174,9 @@ Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --
  settings:{ lang:'uz', theme:'dark', tz:'Asia/Tashkent', dayStart:0, wakeHour:6, sleepHour:23,
             currency:'UZS', weightUnit:'kg', waterMl:250, waterTargetMl:null,
             prayer:{ lat:41.2995, lng:69.2401, fajr:18, isha:18, asr:'hanafi', offsets:{bomdod:0,quyosh:0,peshin:0,asr:0,shom:0,xufton:0}, hijriOffset:0, notify:false },
-            caffeineLimit:400, showAmounts:true },
- profile:{ name:'', heightCm:null, weightKg:null, age:null, sex:'m', activity:3 },
+            caffeineLimit:400 /* legacy, unused */, showAmounts:true, onboarded:false },
+ profile:{ name:'', heightCm:null, weightKg:null, age:null /* derived from birthYear when set */, birthYear:null, sex:'m', activity:3,
+           goal:'lose'|'keep'|'gain' /* default keep */, whoopAge:null, paceOfAging:null, whoopAgeAt:null /* 'YYYY-MM-DD' typed-in date */ },
  habits:[ {id,name,sphere:'ruh'|'aql'|'qalb'|'tana'|'boshqa'|'aralash',active,schedule:{type:'daily'}|{type:'days',days:[0..6]}|{type:'week',n},
            target:null|{n,unit}, remind:null|'HH:MM', createdAt, order} ],
  logs:{ 'YYYY-MM-DD':[habitId] },               // key deleted when empty (Кун stat relies on it)
@@ -157,15 +189,15 @@ Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --
  dhikr:{ 'YYYY-MM-DD':{ total:n, sessions:[{name,n,ts}] } },
  fasting:{ 'YYYY-MM-DD':{ type:'ramadan'|'sunnah'|'qaza'|'nafl', done } },
  health:{ 'YYYY-MM-DD':{ weight, sleep, sleepFromWhoop?:true, bed:'HH:MM', wake:'HH:MM', water:n, mood:0..4, tags:[], note } },
- caffeine:{ logs:[{id,name,mg,ts}], custom:[{id,name,mg}] },
- stack:{ items:[{id,name,dose,window:'morning'|'noon'|'evening'|'any',low:false,order}], taken:{ 'YYYY-MM-DD':{itemId:ts} } },
- gym:{ gyms:[{id,name}], days:[{id,name}], exercises:[{id,name,gymId,dayId,repMin,repMax,step,bw,order}],
-       logs:{ exId:[{id,w,reps,date,ts}] }, done:{ 'YYYY-MM-DD':ts }, split:{names:[],anchor:{date,i}} },
+ food:{ logs:{ 'YYYY-MM-DD':[ {id,ts,name,grams,kcal,p,c,f,photo:id|null,items:[{name,grams,kcal,p,c,f}],note,src:'photo'|'text'|'manual'} ] },
+        targets:{ kcal,p,c,f, auto:true } },      // merge: logs per day union by id (local wins); targets from the newer side
+ caffeine:{ logs:[{id,name,mg,ts}], custom:[{id,name,mg}] },   // legacy — kept for old blobs/archive, no UI
+ stack:{ items:[…], taken:{…} },                                 // legacy — kept, no UI
+ gym:{ … },                                                     // legacy — kept, no UI
  finance:{ tx:[{id,date,type:'in'|'out',amount,cat,note,accountId}], cats:[{id,name,icon}],
            budgets:{ 'YYYY-MM':{catId:amount} }, accounts:[{id,name,type:'cash'|'bank'|'card'|'crypto'|'other',balance}],
            subs:[{id,name,amount,period:'monthly'|'yearly'|'weekly',next,accountId,auto,last}], snapshots:[{t,v}], wishlist:[{id,name,amount}] },
- learn:[ {id,type:'kitob'|'sura'|'kurs'|'audio',name,author,status:'jarayonda'|'tugadi',progress,total,createdAt} ],
- reviews:[ {id,week,wins,lessons,focus,createdAt} ],
+ learn:[ … ], reviews:[ … ],                                    // legacy — kept (legacy import may still fill learn), no UI
  nova:{ threads:[{id,ts,messages:[{role,content,ts}]}] },
  whoop:{ connected:false, lastSync, cache:{}, days:{ 'YYYY-MM-DD':{recovery,hrv,rhr,spo2,skin,sleepH,sleepPerf,sleepEff,sleepCons,resp,stages,bedTs,wakeTs,strain,kcal,hrAvg,hrMax} }, workouts:[{id,k,start,end,sport,strain,kcal,hrAvg,hrMax,meters,mins}], body:{heightCm,weightKg,maxHr} },
  ai:{ cards:{ '<section>':{day,text,ts} }, log:[{section,day,text,ts}] }
@@ -190,19 +222,20 @@ Prayer habits (names ПЕШИН/АСР/ШОМ/БОМДОД/ХУФТОН) stay as
 
 - `GET /api/data` → full state; `POST /api/data` body = full state (server merges per top-level key using `meta.updatedAt`; returns `{ok, updated}`)
 - `GET /api/health`
-- `GET /api/whoop/login` → redirect to WHOOP; `GET /api/whoop/callback` → stores tokens server-side keyed by Telegram user id → redirect `/#health`
+- `GET /api/whoop/login` → redirect to WHOOP; `GET /api/whoop/callback` → stores tokens server-side keyed by uid → redirect `/#health`
 - `GET /api/whoop/data?path=/recovery&limit=1` → proxied with server-held token (auto-refresh)
 - `POST /api/ai` `{messages, system, max_tokens?, kind?}` → AI proxy (Anthropic or OpenAI, key from env), returns `{text, model, usage}`; `kind` = `chat` (Nova) | `card:<section>` (D.ai.advise) is only logged to `ai_calls`
-- All routes require Telegram `X-Telegram-Init-Data` unless `MA_DEV=1`.
+- `POST /api/food/analyze` `{image?: dataURL jpeg/png ≤ 1.5 MB, text?, note?, lang}` → `{ok, items:[{name,grams,kcal,p,c,f}], total:{kcal,p,c,f}, confidence, advice, photo:id|null}`; errors `ai_not_configured` 501, `bad_image` 400, `ai_failed` 502. `GET /api/food/photo/<id>` → image/jpeg (auth, per-uid `data/<uid>.food/`).
+- All routes require a signed-in session (name+password, Google) unless `MA_DEV=1`.
 
 ### History archive (`/api/history/*`, read by js/history.js only — never by other modules)
 Server-side SQLite archive (`db.py`) filled from every state save and WHOOP poll; the client never keeps it in `D.S`.
 All per-uid, `from`/`to` are day keys, ranges capped at 400 days, default = last 31 days.
 The blob is the whole state: a fact that disappears from it (habit un-ticked, note cleared) gets `day_facts.gone_at` and drops out of every reader; it comes back untouched when the blob has it again. No cross-request hash cache — each `archive_state` reads the live hashes from the DB, so two gunicorn workers see each other's writes. Day keys use Tashkent time with `dayStart = 0`.
 - `GET /api/history/range` → `{first, last, days, whoopFirst, threads}`
-- `GET /api/history/days?from&to` → `{days:{ 'YYYY-MM-DD': {health, habits:[habitId], counts:{id:n}, prayers, note, gratitude:[{id,text}|text], stack:{itemId:ts}, caffeine:[{name,mg,ts}], tasks:[{id,text}|text]} }}`
+- `GET /api/history/days?from&to` → `{days:{ 'YYYY-MM-DD': {health, habits:[habitId], counts:{id:n}, prayers, note, gratitude:[{id,text}|text], food:[{id,ts,name,grams,kcal,p,c,f}] (no photos), stack:{itemId:ts}, caffeine:[{name,mg,ts}], tasks:[{id,text}|text]} }}`
 - `GET /api/history/whoop?from&to` → `{recovery:[{ts,recovery,hrv,rhr}], sleep:[{start,end,nap,sleepH,sleepPerf}], cycle:[{start,end,strain,kcal}], workout:[{id,start,end,sport,strain,kcal,mins}]}` — raw server records; the client keys days exactly like `whoop.js`: recovery → `ts`, sleep → `end`, cycle → `start + 12h`, workout → `start` (all through `D.dayKey`); `whoop_records.day_hint` is filed by the same rule (`db.whoop_day`), so a cycle that starts before midnight lands on its waking day.
-- `GET /api/history/months?year=YYYY` → `{months:{ 'YYYY-MM': {days, habitPct, sleepH, recovery, strain, kcal, workouts, weightStart, weightEnd, notes} }}`
+- `GET /api/history/months?year=YYYY` → `{months:{ 'YYYY-MM': {days, habitPct, sleepH, recovery, strain, kcal, kcalEaten, workouts, weightStart, weightEnd, notes} }}` — `kcal` = WHOOP burn, `kcalEaten` = logged meals, both daily averages
 - `GET /api/history/chats?q&limit&before` → `{threads:[{id,ts,title,count,deleted}]}`; `GET /api/history/chats/<id>` → `{id,ts,title,messages:[{idx,ts,role,content}]}`
 - `GET /api/history/cards?section&from&to&limit` → `{cards:[{section,day,ts,text}]}` — newest first, at most 2000 (`db.CARDS_MAX`)
 - `POST /api/history/restore-thread {id}` → `{ok, thread?:{id,ts,messages}}` — re-inserts the thread into the blob; the client also adds it to `D.S.nova.threads` locally and opens Nova on it.

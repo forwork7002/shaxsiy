@@ -1,9 +1,9 @@
 /* Service worker: cache-first app shell, network-first API. Bump CACHE on every release. */
-const CACHE = 'dash-v12';
+const CACHE = 'dash-v13';
 const SHELL = [
-  './', './index.html', './app.css', './css/sections.css', './css/ai.css', './css/whoop.css', './css/today.css', './css/tasks.css', './css/health.css', './css/gym.css', './css/finance.css', './css/learn.css', './css/stats.css', './css/ibodat.css', './css/nova.css', './css/settings.css', './css/history.css', './manifest.json', './icons/icon.svg',
-  './js/core.js', './js/i18n.js', './js/prayer.js', './js/ai.js', './js/whoop.js', './js/today.js', './js/tasks.js', './js/health.js', './js/gym.js',
-  './js/finance.js', './js/learn.js', './js/stats.js', './js/ibodat.js', './js/nova.js', './js/settings.js', './js/history.js', './js/app.js',
+  './', './index.html', './app.css', './css/sections.css', './css/ai.css', './css/whoop.css', './css/today.css', './css/tasks.css', './css/health.css', './css/finance.css', './css/ibodat.css', './css/nova.css', './css/food.css', './css/settings.css', './css/history.css', './css/onboard.css', './manifest.json', './icons/icon.svg',
+  './js/core.js', './js/i18n.js', './js/prayer.js', './js/ai.js', './js/whoop.js', './js/today.js', './js/tasks.js', './js/health.js',
+  './js/finance.js', './js/ibodat.js', './js/nova.js', './js/food.js', './js/settings.js', './js/history.js', './js/onboard.js', './js/app.js',
 ];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL).catch(() => {})).then(() => self.skipWaiting()));

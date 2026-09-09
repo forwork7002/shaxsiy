@@ -1,6 +1,6 @@
 /* =====================================================================
-   Dash — Соғлиқ (health): daily log · weight · water · caffeine ·
-   supplement stack · WHOOP. Class prefix: hl-
+   Dash — Соғлиқ (health): daily log · WHOOP (day, sleep, strain, body) ·
+   weight · water. Class prefix: hl-
    ===================================================================== */
 (function () {
   'use strict';
@@ -12,9 +12,7 @@
     'hl.sub.day': ['Kun', 'Кун', 'День'],
     'hl.sub.weight': ['Vazn', 'Вазн', 'Вес'],
     'hl.sub.water': ['Suv', 'Сув', 'Вода'],
-    'hl.sub.caffeine': ['Kofein', 'Кофеин', 'Кофеин'],
-    'hl.sub.stack': ['Stack', 'Стек', 'Стек'],
-    'hl.sub.whoop': ['WHOOP', 'WHOOP', 'WHOOP'],
+    'hl.sub.body': ['Tana', 'Тана', 'Тело'],
     'hl.days': ['{n} kun', '{n} кун', '{n} дн.'],
     'hl.year1': ['1 yil', '1 йил', '1 год'],
     'hl.ago': ['{n} kun oldin', '{n} кун олдин', '{n} дн. назад'],
@@ -87,75 +85,9 @@
     'hl.wa.srcLast': ['oxirgi vazn', 'охирги вазн', 'последний вес'],
     'hl.wa.srcDefault': ['standart', 'стандарт', 'по умолчанию'],
     'hl.wa.serving': ['1 stakan = {ml} ml', '1 стакан = {ml} мл', '1 стакан = {ml} мл'],
-    'hl.c.activeNow': ['Faol hozir', 'Фаол ҳозир', 'Активно сейчас'],
-    'hl.c.today': ['Bugun', 'Бугун', 'Сегодня'],
-    'hl.c.limit': ['Limit', 'Лимит', 'Лимит'],
-    'hl.c.peak': ["Cho'qqi", 'Чўққи', 'Пик'],
-    'hl.c.crash': ['Tushish', 'Тушиш', 'Спад'],
-    'hl.c.cutoff': ['Oxirgi kofe', 'Охирги кофе', 'Последний кофе'],
-    'hl.c.log': ["Ichimlik qo'shish", 'Ичимлик қўшиш', 'Добавить напиток'],
-    'hl.c.customName': ['Ichimlik nomi', 'Ичимлик номи', 'Название напитка'],
-    'hl.c.custom': ['Shaxsiy', 'Шахсий', 'Свои'],
-    'hl.c.logged': ['Bugun ichilgan', 'Бугун ичилган', 'Выпито сегодня'],
-    'hl.c.empty': ["Bugun hali yo'q — yuqoridan tanlang", 'Бугун ҳали йўқ — юқоридан танланг', 'Сегодня пока пусто — выберите выше'],
-    'hl.c.curve': ['24 soatlik egri', '24 соатлик эгри', 'Кривая за 24 ч'],
-    'hl.c.tipLate': ["Oxirgi kofe {t} dan keyin — uyquga ta'sir qilishi mumkin", 'Охирги кофе {t} дан кейин — уйқуга таъсир қилиши мумкин', 'Последний кофе после {t} — может повлиять на сон'],
-    'hl.c.tipOver': ['Limitdan oshdi — bugun yetarli', 'Лимитдан ошди — бугун етарли', 'Лимит превышен — на сегодня хватит'],
-    'hl.c.tipBed': ["Uyqu vaqtida ~{mg} mg faol bo'ladi — chuqur uyquni kechiktiradi", 'Уйқу вақтида ~{mg} мг фаол бўлади — чуқур уйқуни кечиктиради', 'Ко сну останется ~{mg} мг — задержит глубокий сон'],
-    'hl.c.added': ["Qo'shildi: {n}", 'Қўшилди: {n}', 'Добавлено: {n}'],
-    'hl.c.halfLife': ['Yarim yemirilish davri — 5 soat', 'Ярим емирилиш даври — 5 соат', 'Период полувыведения — 5 ч'],
-    'hl.c.axis': ['06:00 → 06:00', '06:00 → 06:00', '06:00 → 06:00'],
-    'hl.c.mgNow': ['{mg} mg hozir', '{mg} мг ҳозир', '{mg} мг сейчас'],
-    'hl.c.now': ['hozir', 'ҳозир', 'сейчас'],
-    'hl.c.atBed': ['Uyqu vaqtida', 'Уйқу вақтида', 'Ко сну'],
-    'hl.c.none': ["Yo'q", 'Йўқ', 'Нет'],
-    'hl.cd.espresso': ['Espresso', 'Эспрессо', 'Эспрессо'],
-    'hl.cd.americano': ['Amerikano', 'Американо', 'Американо'],
-    'hl.cd.cappuccino': ['Kapuchino', 'Капучино', 'Капучино'],
-    'hl.cd.latte': ['Latte', 'Латте', 'Латте'],
-    'hl.cd.turk': ['Turk kofe', 'Турк кофе', 'Кофе по-турецки'],
-    'hl.cd.instant': ['Eruvchan kofe', 'Эрувчан кофе', 'Растворимый кофе'],
-    'hl.cd.filter': ['Filtr kofe', 'Фильтр кофе', 'Фильтр-кофе'],
-    'hl.cd.coldbrew': ['Cold brew', 'Cold brew', 'Колд брю'],
-    'hl.cd.iced': ['Muzli kofe', 'Музли кофе', 'Айс-кофе'],
-    'hl.cd.decaf': ['Kofeinsiz', 'Кофеинсиз', 'Без кофеина'],
-    'hl.cd.blacktea': ['Qora choy', 'Қора чой', 'Чёрный чай'],
-    'hl.cd.greentea': ["Ko'k choy", 'Кўк чой', 'Зелёный чай'],
-    'hl.cd.matcha': ['Matcha', 'Матча', 'Матча'],
-    'hl.cd.chai': ['Sutli choy', 'Сутли чой', 'Чай с молоком'],
-    'hl.cd.mate': ['Mate', 'Мате', 'Мате'],
-    'hl.cd.cola': ['Cola', 'Кола', 'Кола'],
-    'hl.cd.pepsi': ['Pepsi', 'Пепси', 'Пепси'],
-    'hl.cd.dietcola': ['Cola Zero', 'Кола Zero', 'Кола Zero'],
-    'hl.cd.energy250': ['Energetik 250', 'Энергетик 250', 'Энергетик 250'],
-    'hl.cd.energy500': ['Energetik 500', 'Энергетик 500', 'Энергетик 500'],
-    'hl.cd.preworkout': ['Pre-workout', 'Пре-воркаут', 'Предтреник'],
-    'hl.cd.pill': ['Kofein tabletka', 'Кофеин таблетка', 'Кофеин таблетка'],
-    'hl.cd.darkchoc': ['Qora shokolad', 'Қора шоколад', 'Тёмный шоколад'],
-    'hl.cd.cocoa': ['Kakao', 'Какао', 'Какао'],
-    'hl.cd.mocha': ['Mokko', 'Мокко', 'Мокко'],
-    'hl.s.title': ['Bugungi stack', 'Бугунги стек', 'Стек на сегодня'],
-    'hl.s.taken': ['{a}/{b} qabul qilindi', '{a}/{b} қабул қилинди', '{a}/{b} принято'],
-    'hl.s.streak': ["To'liq kunlar seriyasi", 'Тўлиқ кунлар серияси', 'Серия полных дней'],
-    'hl.s.win.morning': ['Ertalab', 'Эрталаб', 'Утро'],
-    'hl.s.win.noon': ['Tushlik', 'Тушлик', 'Обед'],
-    'hl.s.win.evening': ['Kechqurun', 'Кечқурун', 'Вечер'],
-    'hl.s.win.any': ['Istalgan vaqt', 'Исталган вақт', 'В любое время'],
-    'hl.s.dose': ['Doza', 'Доза', 'Доза'],
-    'hl.s.window': ['Vaqt', 'Вақт', 'Время'],
-    'hl.s.low': ['Tugayapti', 'Тугаяпти', 'Заканчивается'],
-    'hl.s.lowFlag': ['Tugayapti belgisi', 'Тугаяпти белгиси', 'Метка «заканчивается»'],
-    'hl.s.empty': ["Stack bo'sh — pastdan qo'shing", 'Стек бўш — пастдан қўшинг', 'Стек пуст — добавьте ниже'],
-    'hl.s.namePh': ['Masalan: Vitamin D3', 'Масалан: Витамин D3', 'Например: Витамин D3'],
-    'hl.s.dosePh': ['1 kaps / 5 g', '1 капс / 5 г', '1 капс / 5 г'],
-    'hl.s.up': ['Yuqoriga', 'Юқорига', 'Вверх'],
-    'hl.s.down': ['Pastga', 'Пастга', 'Вниз'],
-    'hl.s.editDose': ['Dozani tahrirlash', 'Дозани таҳрирлаш', 'Изменить дозу'],
-    'hl.s.add': ["Stackga qo'shish", 'Стекка қўшиш', 'Добавить в стек'],
-    'hl.s.allDone': ['Bugun hammasi qabul qilindi', 'Бугун ҳаммаси қабул қилинди', 'Сегодня всё принято'],
     'hl.wh.intro': ["WHOOP bilan ulang — tiklanish, HRV, tinch pulsi, uyqu bosqichlari va strain shu yerda ko'rinadi.", 'WHOOP билан уланг — тикланиш, HRV, тинч пульси, уйқу босқичлари ва strain шу ерда кўринади.', 'Подключите WHOOP — восстановление, HRV, пульс покоя, фазы сна и нагрузка появятся здесь.'],
     'hl.wh.connect': ['Ulash', 'Улаш', 'Подключить'],
-    'hl.wh.needServer': ['Server kerak — Telegram ilovasi ichida oching', 'Сервер керак — Telegram иловаси ичида очинг', 'Нужен сервер — откройте внутри Telegram-приложения'],
+    'hl.wh.needServer': ['Server kerak — ilovani server bilan oching', 'Сервер керак — иловани сервер билан очинг', 'Нужен сервер — откройте приложение с сервера'],
     'hl.wh.refresh': ['Yangilash', 'Янгилаш', 'Обновить'],
     'hl.wh.check': ['Ulanganini tekshirish', 'Уланганини текшириш', 'Проверить подключение'],
     'hl.wh.disconnect': ['Uzish', 'Узиш', 'Отключить'],
@@ -190,8 +122,6 @@
     'hl.wh.zoneWarn': ['Kuzating', 'Кузатинг', 'Внимание'],
     'hl.wh.zoneBad': ['Past / yuqori', 'Паст / юқори', 'Низко / высоко'],
     'hl.wh.trendLegend': ['EWMA, α=0.1', 'EWMA, α=0.1', 'EWMA, α=0.1'],
-    'hl.search.sup': ["Qo'shimcha → Stack", 'Қўшимча → Стек', 'Добавка → Стек'],
-    'hl.search.drink': ['Ichimlik → Kofein', 'Ичимлик → Кофеин', 'Напиток → Кофеин'],
     'hl.ins': ['Uyqu va tiklanish', 'Уйқу ва тикланиш', 'Сон и восстановление'],
     'hl.ins.debt': ['Uyqu qarzi', 'Уйқу қарзи', 'Долг сна'],
     'hl.ins.debtSub': ['14 kunda, me’yor {n} soat', '14 кунда, меъёр {n} соат', 'за 14 дн., норма {n} ч'],
@@ -204,8 +134,6 @@
     'hl.ins.sleepMoodDown': ['Yaxshi uxlagan kunlardan keyin kayfiyat **{d}** ball past', 'Яхши ухлаган кунлардан кейин кайфият **{d}** балл паст', 'После хорошего сна настроение ниже на **{d}** балла'],
     'hl.ins.sleepHabitUp': ['Yaxshi uxlagan kunlarda odatlar **{d}%** ko‘p bajarilgan', 'Яхши ухлаган кунларда одатлар **{d}%** кўп бажарилган', 'В дни хорошего сна привычек выполнено на **{d}%** больше'],
     'hl.ins.sleepHabitDown': ['Yaxshi uxlagan kunlarda odatlar **{d}%** kam bajarilgan', 'Яхши ухлаган кунларда одатлар **{d}%** кам бажарилган', 'В дни хорошего сна привычек выполнено на **{d}%** меньше'],
-    'hl.ins.cafSleepUp': ['Kofein ko‘p bo‘lgan kunlari uyqu **{d} soat** ko‘p', 'Кофеин кўп бўлган кунлари уйқу **{d} соат** кўп', 'В дни с большим кофеином сон длиннее на **{d} ч**'],
-    'hl.ins.cafSleepDown': ['Kofein ko‘p bo‘lgan kunlari uyqu **{d} soat** kam', 'Кофеин кўп бўлган кунлари уйқу **{d} соат** кам', 'В дни с большим кофеином сон короче на **{d} ч**'],
     'hl.ins.ok': ['Sezilarli bog‘liqlik topilmadi', 'Сезиларли боғлиқлик топилмади', 'Заметных связей не найдено'],
     'hl.ins.assoc': ['bog‘liqlik, sabab emas · {n} kun', 'боғлиқлик, сабаб эмас · {n} кун', 'связь, не причина · {n} дн.'],
   };
@@ -217,45 +145,9 @@
   /* static data                                                         */
   /* ------------------------------------------------------------------ */
   D.i18n.add({ uz: { 'hl.sub.sleep': 'Uyqu', 'hl.sub.strain': "Zo'riqish" }, uzk: { 'hl.sub.sleep': 'Уйқу', 'hl.sub.strain': 'Зўриқиш' }, ru: { 'hl.sub.sleep': 'Сон', 'hl.sub.strain': 'Нагрузка' } });
-  const SUBS = ['day', 'sleep', 'strain', 'weight', 'water', 'caffeine', 'stack'];
+  const SUBS = ['day', 'sleep', 'strain', 'weight', 'water', 'body'];
   const TAGS = ['uyqusiz', 'ish', 'oila', 'ibodat', 'kasal', 'safar'];
   const MOODS = ['😔', '😐', '🙂', '😄', '🤩'];
-  const WINDOWS = ['morning', 'noon', 'evening', 'any'];
-  const WIN_ICON = { morning: '🌅', noon: '☀️', evening: '🌙', any: '⏱️' };
-  const WIN_TIME = { morning: '7–10', noon: '12–14', evening: '21–23', any: '' };
-  const HALF_LIFE_MS = 5 * 3600000;
-
-  // caffeine drink DB: id, mg, emoji (names via i18n hl.cd.<id>)
-  const DRINKS = [
-    ['espresso', 63, '☕'], ['americano', 95, '☕'], ['cappuccino', 63, '☕'], ['latte', 63, '☕'], ['mocha', 128, '☕'],
-    ['turk', 80, '☕'], ['instant', 62, '☕'], ['filter', 140, '☕'], ['coldbrew', 205, '🧊'], ['iced', 120, '🧊'], ['decaf', 3, '☕'],
-    ['blacktea', 47, '🍵'], ['greentea', 28, '🍵'], ['matcha', 70, '🍵'], ['chai', 50, '🍵'], ['mate', 85, '🧉'],
-    ['cola', 34, '🥤'], ['pepsi', 38, '🥤'], ['dietcola', 46, '🥤'],
-    ['energy250', 80, '⚡'], ['energy500', 160, '⚡'], ['preworkout', 200, '💊'], ['pill', 200, '💊'],
-    ['darkchoc', 24, '🍫'], ['cocoa', 5, '🍫'],
-  ].map(([id, mg, e]) => ({ id, mg, e }));
-  const drinkName = (id) => D.t('hl.cd.' + id);
-
-  // supplement DB (compact subset): latin name, cyrillic name, default dose, window, emoji
-  const SUPS = [
-    ['Creatine', 'Креатин', '5 g', 'any', '🏋️'], ['Whey protein', 'Протеин', '30 g', 'any', '🥤'], ['Beta-alanine', 'Бета-аланин', '3 g', 'morning', '🏋️'],
-    ['L-citrulline', 'Цитруллин', '6 g', 'morning', '🏋️'], ['L-carnitine', 'Л-карнитин', '1 g', 'morning', '🏋️'], ['Glutamine', 'Глютамин', '5 g', 'any', '🏋️'],
-    ['Vitamin D3', 'Витамин D3', '2000 IU', 'noon', '☀️'], ['Vitamin K2', 'Витамин K2', '100 mcg', 'noon', '💊'], ['Vitamin C', 'Витамин C', '500 mg', 'morning', '🍊'],
-    ['Vitamin B12', 'Витамин B12', '500 mcg', 'morning', '⚡'], ['B-complex', 'B-комплекс', '1', 'morning', '⚡'], ['Vitamin A', 'Витамин A', '5000 IU', 'noon', '💊'],
-    ['Vitamin E', 'Витамин E', '400 IU', 'noon', '💊'], ['Folate (B9)', 'Фолат (B9)', '400 mcg', 'morning', '💊'], ['Biotin', 'Биотин', '5 mg', 'any', '💅'],
-    ['Multivitamin', 'Мультивитамин', '1', 'noon', '💊'], ['Magnesium glycinate', 'Магний глицинат', '300 mg', 'evening', '🌙'], ['Magnesium citrate', 'Магний цитрат', '300 mg', 'evening', '🌙'],
-    ['Zinc', 'Цинк (Zn)', '20 mg', 'evening', '💊'], ['Iron', 'Темир (Fe)', '30 mg', 'morning', '💊'], ['Calcium', 'Кальций', '500 mg', 'evening', '🦴'],
-    ['Selenium', 'Селен', '100 mcg', 'any', '💊'], ['Iodine', 'Йод', '150 mcg', 'morning', '💊'], ['Omega-3', 'Омега-3', '2 g', 'noon', '🐟'],
-    ['Krill oil', 'Крилл мойи', '1000 mg', 'noon', '🐟'], ['L-theanine', 'Л-теанин', '200 mg', 'morning', '🧠'], ['Rhodiola', 'Родиола', '300 mg', 'morning', '🌿'],
-    ["Lion's mane", "Lion's mane", '1000 mg', 'morning', '🍄'], ['Ashwagandha', 'Ашваганда', '500 mg', 'evening', '🌿'], ['Melatonin', 'Мелатонин', '1 mg', 'evening', '🌙'],
-    ['Glycine', 'Глицин', '3 g', 'evening', '🌙'], ['NAC', 'NAC', '600 mg', 'morning', '💊'], ['Probiotics', 'Пробиотик', '1', 'morning', '🦠'],
-    ['Curcumin', 'Куркумин', '500 mg', 'noon', '🌿'], ['CoQ10', 'CoQ10', '100 mg', 'noon', '💊'], ['Alpha-GPC', 'Alpha-GPC', '300 mg', 'morning', '🧠'],
-    ['Collagen', 'Коллаген', '10 g', 'any', '💅'], ['Glucosamine', 'Глюкозамин', '1500 mg', 'noon', '🦴'], ['MSM', 'MSM', '2 g', 'any', '🦴'],
-    ['Spirulina', 'Спирулина', '3 g', 'morning', '🌱'], ['Berberine', 'Берберин', '500 mg', 'noon', '💊'],
-  ].map(([lat, cyr, dose, win, e]) => ({ lat, cyr, dose, win, e }));
-  const supName = (s) => (D.lang() === 'uz' ? s.lat : s.cyr);
-  const findSup = (name) => { const n = String(name || '').trim().toLowerCase(); if (!n) return null; return SUPS.find((s) => s.lat.toLowerCase() === n || s.cyr.toLowerCase() === n) || null; };
-
   /* ------------------------------------------------------------------ */
   /* helpers                                                             */
   /* ------------------------------------------------------------------ */
@@ -265,7 +157,6 @@
   const hEnsure = (k) => (D.S.health[k] = D.S.health[k] || { weight: null, sleep: null, bed: null, wake: null, water: 0, mood: null, tags: [], note: '' });
   const num = (v) => (v === null || v === undefined || v === '' || isNaN(+v) ? null : +v);
   const fmtMl = (ml) => (ml >= 1000 ? D.round(ml / 1000, 1) + ' L' : Math.round(ml) + ' ml');
-  const tsTime = (ts) => { const p = D.nowTz(new Date(ts)); return D.fmtTime(p.h, p.min); };
   const signed = (v, d = 1) => (v > 0 ? '+' : v < 0 ? '−' : '') + D.round(Math.abs(v), d);
   const stat = (n, label, o = {}) => `<div class="stat">${o.zone ? `<i class="zone z-${o.zone}"></i>` : ''}<div class="stat-num num ${o.cls || ''}">${n}</div><div class="stat-label">${label}</div>${o.sub ? `<div class="stat-sub">${o.sub}</div>` : ''}</div>`;
   const hmToMin = (s) => { const m = /^(\d{1,2}):(\d{2})$/.exec(String(s || '')); return m ? +m[1] * 60 + +m[2] : null; };
@@ -324,36 +215,6 @@
   const servingMl = () => Math.max(50, num(D.S.settings.waterMl) || 250);
   const waterOf = (k) => { const h = hGet(k); return h ? +h.water || 0 : 0; };
 
-  /* ---- caffeine ---- */
-  const activeAt = (ts, logs) => { let s = 0; const from = ts - 24 * 3600000; for (const l of logs || D.S.caffeine.logs) { if (l.ts <= ts && l.ts > from) s += (+l.mg || 0) * Math.pow(0.5, (ts - l.ts) / HALF_LIFE_MS); } return s; };
-  function todayLogs() { const t = D.today(), from = Date.now() - 36 * 3600000; return D.S.caffeine.logs.filter((l) => l.ts > from && D.dayKey(new Date(l.ts)) === t).sort((a, b) => b.ts - a.ts); }
-  function sixAmTs() { const p = D.nowTz(); const mins = ((p.h - 6 + 24) % 24) * 60 + p.min; return Date.now() - mins * 60000 - p.s * 1000; }
-  function caffeineModel() {
-    const now = Date.now(), start = sixAmTs(), step = 15 * 60000;
-    const recent = D.S.caffeine.logs.filter((l) => l && l.ts > start - 24 * 3600000 && l.ts <= start + 24 * 3600000);
-    const pts = [];
-    for (let i = 0; i < 96; i++) pts.push({ ts: start + i * step, v: activeAt(start + i * step, recent) });
-    const nowIdx = D.clamp(Math.round((now - start) / step), 0, 95);
-    let peak = null;
-    for (let i = nowIdx; i < 96; i++) if (!peak || pts[i].v > peak.v) peak = pts[i];
-    let crash = null;
-    if (peak && peak.v >= 10) { for (let i = pts.indexOf(peak) + 1; i < 96; i++) if (pts[i].v < peak.v * 0.25) { crash = pts[i]; break; } }
-    const sleepH = D.clamp(num(D.S.settings.sleepHour) ?? 23, 0, 24), cutoffH = (sleepH - 6 + 24) % 24;
-    const p = D.nowTz();
-    const bedMs = now + ((((sleepH - (p.h + p.min / 60)) % 24) + 24) % 24) * 3600000;
-    return { pts, nowIdx, peak, crash, cutoffH, sleepH, activeNow: activeAt(now, recent), atBed: activeAt(bedMs), start };
-  }
-
-  /* ---- stack ---- */
-  const stackItems = () => D.S.stack.items.slice().sort((a, b) => (a.order || 0) - (b.order || 0));
-  const takenOf = (k) => D.S.stack.taken[k] || {};
-  function stackStreak(items) {
-    if (!items.length) return 0;
-    const set = new Set();
-    for (const k of Object.keys(D.S.stack.taken)) { const t = D.S.stack.taken[k]; if (items.every((i) => t[i.id])) set.add(k); }
-    return D.streak(set);
-  }
-
   /* ---- whoop ---- */
   const zRec = (v) => (v >= 67 ? 'good' : v >= 34 ? 'warn' : 'bad');
   const zSleep = (p) => (p >= 85 ? 'good' : p >= 70 ? '' : 'warn');
@@ -371,7 +232,8 @@
   function render() {
     const sub = SUBS.includes(D.sub('health', 'day')) ? D.sub('health', 'day') : 'day';
     const seg = `<div class="seg hl-seg">${SUBS.map((s) => `<button class="${sub === s ? 'on' : ''}" data-act="sub" data-view="health" data-sub="${s}">${esc(D.t('hl.sub.' + s))}</button>`).join('')}</div>`;
-    const body = { day: renderDay, sleep: renderSleep, strain: renderStrain, weight: renderWeight, water: renderWater, caffeine: renderCaffeine, stack: renderStack }[sub]();
+    const body = { day: renderDay, sleep: renderSleep, strain: renderStrain, weight: renderWeight, water: renderWater, body: renderBody }[sub]();
+    // Tana bo'limi o'z AI kartasini (age) panel ichida ko'rsatadi
     const ai = D.ai && (sub === 'day' ? D.ai.card('health') : sub === 'sleep' ? D.ai.card('sleep') : sub === 'strain' ? D.ai.card('strain') : '') || '';
     return `<div class="hl">${seg}${body}${ai}</div>`;
   }
@@ -397,6 +259,11 @@
   function renderStrain() {
     const k = viewKey();
     return dayNav(k) + (whoopOn() ? D.whoop.strainPage(k) : '') + D.whoop.footer();
+  }
+  // Tana: WHOOP profili, tana o'lchamlari, sinx va yosh paneli; ulanmagan bo'lsa — ulash kartasi
+  function renderBody() {
+    // yosh paneli soat ulanmagan bo'lsa ham ko'rinadi; footer ulanmaganda ulash kartasi
+    return D.whoop.bodyPanel() + D.whoop.footer();
   }
   function renderDay() {
     const k = viewKey(), today = D.today(), h = hGet(k) || {};
@@ -593,139 +460,6 @@
   };
 
   /* ------------------------------------------------------------------ */
-  /* CAFFEINE                                                            */
-  /* ------------------------------------------------------------------ */
-  function renderCaffeine() {
-    const m = caffeineModel(), logs = todayLogs(), total = Math.round(D.sum(logs, (l) => l.mg));
-    const limit = Math.max(50, num(D.S.settings.caffeineLimit) || 400), pct = (total / limit) * 100;
-    const color = pct >= 100 ? 'var(--danger)' : pct >= 75 ? 'var(--warning)' : 'var(--success)';
-    const ring = D.chart.ring({ pct, size: 130, stroke: 10, color, label: `${total}<span class="hl-ring-of">mg</span>`, sub: `${D.t('hl.c.limit')} ${limit}` });
-    const cutoffStr = D.fmtTime(m.cutoffH, 0);
-    const last = logs[0];
-    const lastP = last ? D.nowTz(new Date(last.ts)) : null;
-    const tips = [];
-    if (pct >= 100) tips.push(['bad', D.t('hl.c.tipOver')]);
-    if (lastP && lastP.h + lastP.min / 60 >= m.cutoffH && m.cutoffH > 6) tips.push(['', D.t('hl.c.tipLate', { t: cutoffStr })]);
-    if (m.atBed >= 50) tips.push(['', D.t('hl.c.tipBed', { mg: Math.round(m.atBed) })]);
-    const hero = `<div class="card hl-caf"><div class="row hl-water-row">${ring}<div class="grow stack">
-        <div class="eyebrow">${esc(D.t('hl.c.activeNow'))}</div><div class="kpi"><span class="kpi-num">${Math.round(m.activeNow)}</span><span class="kpi-total">mg</span></div>
-        <div class="tiny muted">${esc(D.t('hl.c.halfLife'))}</div></div></div>
-      ${tips.map(([c, t]) => `<div class="banner ${c}">${D.ic('alert', 16)}<span>${esc(t)}</span></div>`).join('')}
-      <div class="stat-grid hl-caf-stats">
-        ${stat(m.peak && m.peak.v >= 10 ? `${Math.round(m.peak.v)}<small>mg</small>` : '—', D.t('hl.c.peak'), { sub: m.peak && m.peak.v >= 10 ? tsTime(m.peak.ts) : '' })}
-        ${stat(m.crash ? tsTime(m.crash.ts) : '—', D.t('hl.c.crash'), { sub: m.crash ? `< ${Math.round(m.peak.v * 0.25)} mg` : esc(D.t('hl.c.none')) })}
-        ${stat(cutoffStr, D.t('hl.c.cutoff'), { zone: lastP && lastP.h + lastP.min / 60 >= m.cutoffH ? 'warn' : 'good', sub: `${D.t('hl.c.atBed')} ~${Math.round(m.atBed)} mg` })}
-      </div></div>`;
-
-    // 24h curve
-    const H = 110, vals = m.pts.map((p) => p.v), hasAny = vals.some((v) => v > 1);
-    const nowPct = ((Date.now() - m.start) / (24 * 3600000)) * 100;
-    const curve = `<div class="card"><div class="card-head"><div class="title">${D.ic('coffee')} ${esc(D.t('hl.c.curve'))}</div><span class="tiny muted num">${esc(D.t('hl.c.axis'))}</span></div>
-      <div class="hl-chart" style="height:${H}px"><div class="hl-layer">${hasAny ? D.chart.spark({ values: vals, color: 'var(--tana)', height: H, fill: true, min: 0, max: Math.max(100, ...vals) * 1.05 }) : `<div class="empty small">${esc(D.t('hl.c.empty'))}</div>`}</div>
-        <i class="hl-now" style="left:${D.clamp(nowPct, 0, 100).toFixed(1)}%"><b>${esc(D.t('hl.c.now'))}</b></i>
-        ${m.cutoffH > 6 ? `<i class="hl-cut" style="left:${(((m.cutoffH - 6) / 24) * 100).toFixed(1)}%"><b>${esc(cutoffStr)}</b></i>` : ''}</div>
-      <div class="spark-labels hl-axis"><span>06</span><span>12</span><span>18</span><span>00</span><span>06</span></div></div>`;
-
-    // drink chips
-    const chips = DRINKS.map((d) => `<button class="pill big hl-drink" data-act="hlCafLog" data-id="${d.id}"><span class="hl-drink-e">${d.e}</span>${esc(drinkName(d.id))}<b class="num">${d.mg}</b></button>`).join('');
-    const custom = (D.S.caffeine.custom || []).map((c) => `<span class="hl-chipwrap"><button class="pill big hl-drink" data-act="hlCafLog" data-cid="${esc(c.id)}"><span class="hl-drink-e">➕</span>${esc(c.name)}<b class="num">${+c.mg || 0}</b></button><button class="hl-chip-x" data-act="hlCafCustomDel" data-id="${esc(c.id)}" aria-label="${esc(D.t('btn.delete'))}">${D.ic('x', 12)}</button></span>`).join('');
-    const logCard = `<div class="card"><div class="card-head"><div class="title">${D.ic('plus')} ${esc(D.t('hl.c.log'))}</div></div>
-      <div class="hl-chips">${chips}</div>
-      ${custom ? `<div class="eyebrow mt">${esc(D.t('hl.c.custom'))}</div><div class="hl-chips">${custom}</div>` : ''}
-      <div class="form-foot"><input class="inp sm grow" id="hlCafName" placeholder="${esc(D.t('hl.c.customName'))}" maxlength="40" data-enter="hlCafAdd" aria-label="${esc(D.t('hl.c.customName'))}"><input class="inp sm num hl-mg" id="hlCafMg" type="number" inputmode="numeric" min="0" max="1000" placeholder="mg" data-enter="hlCafAdd" aria-label="mg"><button class="btn sm" data-act="hlCafAdd">${esc(D.t('btn.add'))}</button></div></div>`;
-
-    const list = logs.length ? logs.map((l) => `<li class="li"><span class="hl-drink-e">${esc(l.e || '☕')}</span><div class="li-body"><div class="li-text">${esc(l.name)}</div><div class="li-meta num">${tsTime(l.ts)} · ${esc(D.t('hl.c.mgNow', { mg: Math.round((+l.mg || 0) * Math.pow(0.5, (Date.now() - l.ts) / HALF_LIFE_MS)) }))}</div></div>
-        <b class="li-right num">${+l.mg || 0} mg</b><button class="li-del" data-act="hlCafDel" data-id="${esc(l.id)}" aria-label="${esc(D.t('btn.delete'))}">${D.ic('trash', 16)}</button></li>`).join('') : `<li class="empty">${esc(D.t('hl.c.empty'))}</li>`;
-    return `${hero}${curve}${logCard}<div class="section-title">${esc(D.t('hl.c.logged'))}<span class="right num">${total} mg</span></div><ul class="list">${list}</ul>`;
-  }
-  function logDrink(name, mg, e) {
-    D.S.caffeine.logs.push({ id: D.uid('cf'), name, mg: Math.round(+mg || 0), e: e || '☕', ts: Date.now() });
-    if (D.S.caffeine.logs.length > 2000) D.S.caffeine.logs.splice(0, D.S.caffeine.logs.length - 2000);
-    D.save(); D.rerender(); D.toast(D.t('hl.c.added', { n: name }));
-  }
-  D.act.hlCafLog = (el) => {
-    if (el.dataset.cid) { const c = (D.S.caffeine.custom || []).find((x) => x.id === el.dataset.cid); if (c) logDrink(c.name, c.mg, '➕'); return; }
-    const d = DRINKS.find((x) => x.id === el.dataset.id); if (d) logDrink(drinkName(d.id), d.mg, d.e);
-  };
-  D.act.hlCafAdd = () => {
-    const nameEl = D.$('#hlCafName'), mgEl = D.$('#hlCafMg');
-    const name = (nameEl && nameEl.value || '').trim().slice(0, 40), mg = num(mgEl && mgEl.value);
-    if (!name) { if (nameEl) nameEl.focus(); return; }
-    if (mg === null || mg < 0 || mg > 1000) { if (mgEl) mgEl.focus(); return; }
-    D.S.caffeine.custom = D.S.caffeine.custom || [];
-    if (!D.S.caffeine.custom.some((c) => c.name.toLowerCase() === name.toLowerCase())) D.S.caffeine.custom.push({ id: D.uid('cd'), name, mg: Math.round(mg) });
-    logDrink(name, mg, '➕');
-  };
-  D.act.hlCafDel = (el) => D.remove(D.S.caffeine.logs, el.dataset.id, { label: D.t('undo.deleted') });
-  D.act.hlCafCustomDel = (el) => D.remove(D.S.caffeine.custom, el.dataset.id, { label: D.t('undo.deleted') });
-
-  /* ------------------------------------------------------------------ */
-  /* STACK                                                               */
-  /* ------------------------------------------------------------------ */
-  function renderStack() {
-    const today = D.today(), items = stackItems(), taken = takenOf(today);
-    const done = items.filter((i) => taken[i.id]).length, total = items.length, pct = total ? (done / total) * 100 : 0;
-    const streak = stackStreak(items);
-    const head = `<div class="card ${total && done === total ? 'all-done' : ''}"><div class="card-head"><div><div class="eyebrow">${esc(D.t('hl.s.title'))}</div><div class="kpi"><span class="kpi-num">${done}</span><span class="kpi-total">/ ${total}</span></div></div>
-        <div class="right"><span class="streak">${D.ic('fire', 14)} ${streak} ${D.t('unit.days')}</span><div class="tiny muted">${esc(D.t('hl.s.streak'))}</div></div></div>
-      <span class="bar thick"><i class="bar-fill" style="width:${pct.toFixed(0)}%"></i></span>
-      <div class="small muted mt-s">${total && done === total ? `<span class="good">${esc(D.t('hl.s.allDone'))}</span>` : esc(D.t('hl.s.taken', { a: done, b: total }))}</div></div>`;
-
-    const groups = WINDOWS.map((w) => {
-      const list = items.filter((i) => (WINDOWS.includes(i.window) ? i.window : 'any') === w);
-      if (!list.length) return '';
-      const rows = list.map((it, idx) => {
-        const on = !!taken[it.id];
-        return `<li class="li hl-item ${on ? 'done' : ''} ${it.low ? 'hl-low' : ''}"><input type="checkbox" class="chk" ${on ? 'checked' : ''} data-change="hlStackTake" data-id="${esc(it.id)}" aria-label="${esc(it.name)}">
-          <div class="li-body"><div class="li-text">${esc(it.name)}</div><div class="li-meta">${it.dose ? `<span class="num">${esc(it.dose)}</span>` : ''}${on ? `<span class="num muted">· ${tsTime(taken[it.id])}</span>` : ''}${it.low ? `<span class="tag" style="--c:var(--warning)">${esc(D.t('hl.s.low'))}</span>` : ''}</div></div>
-          <div class="hl-rowbtns">
-            <button class="btn icon ${it.low ? 'warn' : ''}" data-act="hlStackLow" data-id="${esc(it.id)}" aria-label="${esc(D.t('hl.s.lowFlag'))}" title="${esc(D.t('hl.s.low'))}">${D.ic('flag', 16)}</button>
-            <button class="btn icon" data-act="hlStackDose" data-id="${esc(it.id)}" aria-label="${esc(D.t('hl.s.editDose'))}">${D.ic('edit', 16)}</button>
-            <button class="btn icon" data-act="hlStackMove" data-id="${esc(it.id)}" data-dir="-1" ${idx === 0 ? 'disabled' : ''} aria-label="${esc(D.t('hl.s.up'))}">${D.ic('chevD', 16, 'style="transform:rotate(180deg)"')}</button>
-            <button class="btn icon" data-act="hlStackMove" data-id="${esc(it.id)}" data-dir="1" ${idx === list.length - 1 ? 'disabled' : ''} aria-label="${esc(D.t('hl.s.down'))}">${D.ic('chevD', 16)}</button>
-            <button class="li-del" data-act="hlStackDel" data-id="${esc(it.id)}" aria-label="${esc(D.t('btn.delete'))}">${D.ic('trash', 16)}</button></div></li>`;
-      }).join('');
-      return `<div class="section-title">${WIN_ICON[w]} ${esc(D.t('hl.s.win.' + w))}${WIN_TIME[w] ? `<span class="right num muted">${WIN_TIME[w]}</span>` : ''}</div><ul class="list">${rows}</ul>`;
-    }).join('');
-
-    const dl = `<datalist id="hlSupList">${SUPS.map((s) => `<option value="${esc(supName(s))}">`).join('')}</datalist>`;
-    const form = `<div class="card"><div class="card-head"><div class="title">${D.ic('pill')} ${esc(D.t('hl.s.add'))}</div></div>
-      <div class="field"><input class="inp" id="hlSupName" list="hlSupList" placeholder="${esc(D.t('hl.s.namePh'))}" autocomplete="off" maxlength="60" data-input="hlStackName" data-enter="hlStackAdd" aria-label="${esc(D.t('common.name'))}">${dl}</div>
-      <div class="input-row"><input class="inp sm" id="hlSupDose" placeholder="${esc(D.t('hl.s.dosePh'))}" maxlength="30" data-enter="hlStackAdd" aria-label="${esc(D.t('hl.s.dose'))}">
-        <select class="sel sm" id="hlSupWin" aria-label="${esc(D.t('hl.s.window'))}">${WINDOWS.map((w) => `<option value="${w}">${WIN_ICON[w]} ${esc(D.t('hl.s.win.' + w))}</option>`).join('')}</select>
-        <button class="btn sm" data-act="hlStackAdd">${esc(D.t('btn.add'))}</button></div></div>`;
-    return `${head}${groups || `<div class="empty">${esc(D.t('hl.s.empty'))}</div>`}${form}`;
-  }
-  D.act.hlStackTake = (el) => { const k = D.today(), id = el.dataset.id; if (!D.S.stack.items.some((i) => i.id === id)) return; const t = (D.S.stack.taken[k] = D.S.stack.taken[k] || {}); if (t[id]) delete t[id]; else t[id] = Date.now(); if (!Object.keys(t).length) delete D.S.stack.taken[k]; D.save(); D.rerender(); };
-  D.act.hlStackLow = (el) => { const it = D.S.stack.items.find((i) => i.id === el.dataset.id); if (!it) return; it.low = !it.low; D.save(); D.rerender(); };
-  D.act.hlStackDose = async (el) => { const it = D.S.stack.items.find((i) => i.id === el.dataset.id); if (!it) return; const v = await D.prompt({ title: D.t('hl.s.dose'), value: it.dose || '', placeholder: D.t('hl.s.dosePh') }); if (v === null) return; it.dose = String(v).trim().slice(0, 30); D.save(); D.rerender(); };
-  D.act.hlStackMove = (el) => {
-    const it = D.S.stack.items.find((i) => i.id === el.dataset.id); if (!it) return;
-    const w = WINDOWS.includes(it.window) ? it.window : 'any';
-    const group = stackItems().filter((i) => (WINDOWS.includes(i.window) ? i.window : 'any') === w);
-    const i = group.indexOf(it), j = i + (+el.dataset.dir || 0);
-    if (j < 0 || j >= group.length) return;
-    const other = group[j];
-    stackItems().forEach((x, idx) => { x.order = idx; }); // distinct, gap-free orders
-    const a = it.order, b = other.order;
-    it.order = b; other.order = a;
-    D.save(); D.rerender();
-  };
-  D.act.hlStackDel = (el) => { const it = D.S.stack.items.find((i) => i.id === el.dataset.id); D.remove(D.S.stack.items, el.dataset.id, { label: it ? it.name : D.t('undo.deleted') }); };
-  D.act.hlStackName = (el) => { const s = findSup(el.value); if (!s) return; const d = D.$('#hlSupDose'), w = D.$('#hlSupWin'); if (d && !d.value) d.value = s.dose; if (w) w.value = s.win; };
-  D.act.hlStackAdd = () => {
-    const n = D.$('#hlSupName'), d = D.$('#hlSupDose'), w = D.$('#hlSupWin');
-    const name = (n && n.value || '').trim(); if (!name) { if (n) n.focus(); return; }
-    const sup = findSup(name);
-    const win = w && WINDOWS.includes(w.value) ? w.value : sup ? sup.win : 'any';
-    const dose = ((d && d.value) || (sup ? sup.dose : '')).trim().slice(0, 30);
-    const order = D.S.stack.items.reduce((m, i) => Math.max(m, i.order || 0), -1) + 1;
-    D.S.stack.items.push({ id: D.uid('sp'), name: name.slice(0, 60), dose, window: win, low: false, order });
-    D.save(); D.rerender();
-    const nn = D.$('#hlSupName'); if (nn) nn.focus();
-  };
-
-  /* ------------------------------------------------------------------ */
   /* sleep & recovery insight                                            */
   /* ------------------------------------------------------------------ */
   const SLEEP_TARGET = 7.5;
@@ -762,7 +496,6 @@
     const days = D.lastDays(60);
     const sleepOf = (k) => { const r = D.S.health[k]; return r ? num(r.sleep) : null; };
     const moodOf = (k) => { const r = D.S.health[k]; return r ? num(r.mood) : null; };
-    const cafByDay = (() => { const m = {}; for (const x of D.S.caffeine.logs || []) { if (!x || !x.ts) continue; const k = D.dayKey(new Date(x.ts)); m[k] = (m[k] || 0) + (+x.mg || 0); } return m; })();
     const habitOf = (k) => { const due = D.dueHabits(k); if (!due.length) return null; return (due.filter((h) => D.habitDone(h, k)).length / due.length) * 100; };
     const split = (pairs) => {
       if (pairs.length < MIN_PAIRS) return null;
@@ -774,27 +507,23 @@
       return { d: mean(hi) - mean(lo), n: pairs.length };
     };
     const rows = [];
-    const pSM = [], pSH = [], pCS = [];
+    const pSM = [], pSH = [];
     for (const k of days) {
       const s = sleepOf(k);
       const mNext = moodOf(D.addDays(k, 1));
       if (s !== null && mNext !== null) pSM.push([s, mNext]);
       const h = habitOf(k);
       if (s !== null && h !== null) pSH.push([s, h]);
-      const c = cafByDay[k] || 0, sNext = sleepOf(D.addDays(k, 1));
-      if (c > 0 && sNext !== null) pCS.push([c, sNext]);
     }
     // Each sentence has an up/down form so a negative delta never reads as "higher".
     const sm = split(pSM);
     if (sm && Math.abs(sm.d) >= 0.3) rows.push({ txt: D.t(sm.d > 0 ? 'hl.ins.sleepMoodUp' : 'hl.ins.sleepMoodDown', { d: D.round(Math.abs(sm.d), 1) }), n: sm.n, good: sm.d > 0 });
     const sh = split(pSH);
     if (sh && Math.abs(sh.d) >= 5) rows.push({ txt: D.t(sh.d > 0 ? 'hl.ins.sleepHabitUp' : 'hl.ins.sleepHabitDown', { d: Math.round(Math.abs(sh.d)) }), n: sh.n, good: sh.d > 0 });
-    const cs = split(pCS);
-    if (cs && Math.abs(cs.d) >= 0.3) rows.push({ txt: D.t(cs.d > 0 ? 'hl.ins.cafSleepUp' : 'hl.ins.cafSleepDown', { d: D.round(Math.abs(cs.d), 1) }), n: cs.n, good: cs.d > 0 });
 
     const head = `<div class="hl-links"><div class="eyebrow mb-s">${esc(D.t('hl.ins.link'))}</div>`;
     if (!rows.length) {
-      const maxN = Math.max(pSM.length, pSH.length, pCS.length);
+      const maxN = Math.max(pSM.length, pSH.length);
       return head + `<div class="empty">${esc(maxN < MIN_PAIRS ? D.t('hl.ins.needMore', { n: MIN_PAIRS }) : D.t('hl.ins.ok'))}</div></div>`;
     }
     const strip = (h) => h.replace(/^<p>/, '').replace(/<\/p>$/, '');
@@ -808,8 +537,8 @@
   /* ------------------------------------------------------------------ */
   D.act.hlWhoopConnect = () => {
     if (!D.serverEnabled()) { D.toast(D.t('hl.wh.needServer'), { ms: 3500 }); return; }
-    // Browser navigation carries no Telegram header, so pass initData as a query param; inside Telegram open
-    // the OAuth flow in the external browser (tokens are stored server-side, keyed by the Telegram user).
+    // Cookie session carries the browser navigation; tokens are stored server-side per uid.
+    // (D.tg guards stay null-safe for a legacy in-app webview — no Telegram shell is shipped.)
     const q = D.tg && D.tg.initData ? '?initData=' + encodeURIComponent(D.tg.initData) : '';
     const url = location.origin + '/api/whoop/login' + q;
     if (D.tg && D.tg.openLink) { try { D.tg.openLink(url); return; } catch (e) {} }
@@ -852,35 +581,10 @@
   };
 
   /* ------------------------------------------------------------------ */
-  /* search provider                                                     */
-  /* ------------------------------------------------------------------ */
-  D.search.register((q) => {
-    if (!q || q.length < 2) return [];
-    const out = [];
-    for (const s of SUPS) out.push({ label: `${s.e} ${supName(s)}`, sub: D.t('hl.search.sup') + ' · ' + s.dose, icon: 'pill', go: () => D.go('health', 'stack') });
-    for (const d of DRINKS) out.push({ label: `${d.e} ${drinkName(d.id)}`, sub: D.t('hl.search.drink') + ' · ' + d.mg + ' mg', icon: 'coffee', go: () => D.go('health', 'caffeine') });
-    return out;
-  });
-
-  /* ------------------------------------------------------------------ */
   /* view                                                                */
   /* ------------------------------------------------------------------ */
-  let timer = null;
   D.view({
     id: 'health', icon: 'heart', order: 20, nav: true, primary: true,
     render,
-    mount() {
-      clearInterval(timer);
-      timer = setInterval(() => {
-        if (D.current() !== 'health' || D.sub('health', 'day') !== 'caffeine' || document.hidden) return;
-        const a = document.activeElement;
-        if (a && a.matches && a.matches('input,textarea,select')) return;
-        const draft = D.$('#hlCafName'), draftMg = D.$('#hlCafMg');
-        if ((draft && draft.value) || (draftMg && draftMg.value)) return;
-        const bg = D.$('#modalBg'); if (bg && bg.classList.contains('show')) return;
-        D.rerender();
-      }, 60000);
-    },
-    unmount() { clearInterval(timer); timer = null; },
   });
 })();

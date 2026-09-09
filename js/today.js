@@ -1,7 +1,7 @@
 /* =====================================================================
    today.js — Бугун: the daily hub.
    date stepper · task ticker · day ring + prayers · habits · tasks ·
-   quick strip (water/caffeine/stack) · daily note · gratitude
+   quick strip (water + food) · WHOOP workouts · daily note · gratitude
    ===================================================================== */
 (function () {
   'use strict';
@@ -38,7 +38,7 @@
       'today.planned': '{n} ta reja', 'today.tomorrowEmpty': "Ertaga uchun hali reja yo'q", 'today.addTomorrow': 'Ertaga uchun vazifa…',
       'today.showMore': "Yana {n} ta ko'rsatish", 'today.showLess': "Kamroq ko'rsatish",
       'today.lockedTitle': 'Ertaga faollashadi', 'today.taskDeleted': "Vazifa o'chirildi",
-      'today.water': 'Suv', 'today.caffeine': 'Kofein', 'today.stack': "Qo'shimchalar",
+      'today.water': 'Suv', 'today.workouts': "WHOOP mashg'ulotlari",
       'today.note': 'Kunlik tahlil', 'today.notePh': 'Bugungi kun haqida qisqacha…', 'today.words': "{n} so'z",
       'today.gratitude': 'Shukr', 'today.gratPh': 'Bugun nimaga shukr qilasiz?', 'today.gratEmpty': 'Bugun hali shukr yozilmagan',
       'today.gratEarlier': 'Ilgari yozilgan', 'today.gratOnThisDay': 'Shu kuni', 'today.gratDeleted': "Shukr yozuvi o'chirildi",
@@ -76,7 +76,7 @@
       'today.planned': '{n} та режа', 'today.tomorrowEmpty': 'Эртага учун ҳали режа йўқ', 'today.addTomorrow': 'Эртага учун вазифа…',
       'today.showMore': 'Яна {n} та кўрсатиш', 'today.showLess': 'Камроқ кўрсатиш',
       'today.lockedTitle': 'Эртага фаоллашади', 'today.taskDeleted': 'Вазифа ўчирилди',
-      'today.water': 'Сув', 'today.caffeine': 'Кофеин', 'today.stack': 'Қўшимчалар',
+      'today.water': 'Сув', 'today.workouts': 'WHOOP машғулотлари',
       'today.note': 'Кунлик таҳлил', 'today.notePh': 'Бугунги кун ҳақида қисқача…', 'today.words': '{n} сўз',
       'today.gratitude': 'Шукр', 'today.gratPh': 'Бугун нимага шукр қиласиз?', 'today.gratEmpty': 'Бугун ҳали шукр ёзилмаган',
       'today.gratEarlier': 'Илгари ёзилган', 'today.gratOnThisDay': 'Шу куни', 'today.gratDeleted': 'Шукр ёзуви ўчирилди',
@@ -114,7 +114,7 @@
       'today.planned': 'в плане: {n}', 'today.tomorrowEmpty': 'На завтра пока ничего не запланировано', 'today.addTomorrow': 'Задача на завтра…',
       'today.showMore': 'Показать ещё {n}', 'today.showLess': 'Свернуть',
       'today.lockedTitle': 'Активируется завтра', 'today.taskDeleted': 'Задача удалена',
-      'today.water': 'Вода', 'today.caffeine': 'Кофеин', 'today.stack': 'Добавки',
+      'today.water': 'Вода', 'today.workouts': 'Тренировки WHOOP',
       'today.note': 'Дневной анализ', 'today.notePh': 'Коротко о сегодняшнем дне…', 'today.words': 'слов: {n}',
       'today.gratitude': 'Благодарность', 'today.gratPh': 'За что вы благодарны сегодня?', 'today.gratEmpty': 'Сегодня записей ещё нет',
       'today.gratEarlier': 'Из прошлых записей', 'today.gratOnThisDay': 'В этот день', 'today.gratDeleted': 'Запись удалена',
@@ -647,35 +647,30 @@
     return { water, serv, pct: D.clamp((water / serv) * 100, 0, 100), zone: water >= serv ? 'z-good' : water >= serv / 2 ? 'z-warn' : '' };
   }
   const waterBar = (w) => `<i class="bar-fill" style="width:${w.pct.toFixed(0)}%;background:var(--info)"></i>`;
+  // water + the food tile (food.js owns the tile; without it the row is water only)
   function quickStrip(k) {
     const w = waterInfo(k);
-    const limit = +D.S.settings.caffeineLimit || 400;
-    let mg = 0;
-    for (const l of (D.S.caffeine && D.S.caffeine.logs) || []) if (l && l.ts && D.dayKey(new Date(l.ts)) === k) mg += +l.mg || 0;
-    const cz = mg > limit ? 'z-bad' : mg > limit * 0.75 ? 'z-warn' : mg ? 'z-good' : '';
-    const items = (D.S.stack && D.S.stack.items) || [], taken = (D.S.stack && D.S.stack.taken && D.S.stack.taken[k]) || {};
-    const tk = items.filter((i) => taken[i.id]).length;
-    const sz = items.length ? (tk >= items.length ? 'z-good' : tk ? 'z-warn' : '') : '';
+    let food = '';
+    try { food = D.food && D.food.tile ? D.food.tile(k) || '' : ''; } catch (e) { console.error('food tile', e); D.logError(e); food = ''; }
     return `<div class="bento td-quick">
-      <div class="bento-tile td-tile td-tile-water b-wide" data-act="go" data-view="health" data-sub="water" role="button" tabindex="0">
+      <div class="bento-tile td-tile td-tile-water ${food ? '' : 'b-wide'}" data-act="go" data-view="health" data-sub="water" role="button" tabindex="0">
         <div class="val"><span id="tdWaterNum">${w.water}</span><span class="td-tile-of">/${w.serv}</span></div>
         <div class="lab">${D.ic('droplet', 12)} ${esc(t('today.water'))}</div>
         <span class="bar thin td-tile-bar" id="tdWaterBar">${waterBar(w)}</span>
         <button class="td-plus" data-act="tdWater" aria-label="+1 ${esc(t('unit.glass'))}">${D.ic('plus', 16)}</button>
       </div>
-      <div class="bento-tile td-tile" data-act="go" data-view="health" data-sub="caffeine" role="button" tabindex="0">
-        <i class="zone ${cz}"></i>
-        <div class="val ${mg > limit ? 'bad' : ''}">${D.fmtNum(mg)}<span class="td-tile-of"> mg</span></div>
-        <div class="lab">${D.ic('coffee', 12)} ${esc(t('today.caffeine'))}</div>
-        <div class="sub num">/ ${D.fmtNum(limit)}</div>
-      </div>
-      <div class="bento-tile td-tile" data-act="go" data-view="health" data-sub="stack" role="button" tabindex="0">
-        <i class="zone ${sz}"></i>
-        <div class="val">${tk}<span class="td-tile-of">/${items.length}</span></div>
-        <div class="lab">${D.ic('pill', 12)} ${esc(t('today.stack'))}</div>
-        <div class="sub">${esc(t('common.today'))}</div>
-      </div>
+      ${food}
     </div>`;
+  }
+  // WHOOP workouts of the day — only when the strap is connected and actually recorded something
+  function workoutsCard(k) {
+    if (!D.whoop || !D.whoop.workoutRows || !D.whoop.workoutsOn) return '';
+    if (!(D.S.whoop && D.S.whoop.connected)) return '';
+    if (!D.whoop.workoutsOn(k).length) return '';
+    const rows = D.whoop.workoutRows(k, { empty: false });
+    if (!rows) return '';
+    return `<div class="card td-workouts"><div class="card-head"><div class="title">${D.ic('dumbbell', 16)} ${esc(t('today.workouts'))}</div>
+      <button class="btn ghost sm" data-act="go" data-view="health" data-sub="strain">${D.ic('chevR', 14)} ${esc(t('nav.health'))}</button></div>${rows}</div>`;
   }
   D.act.tdWater = () => {
     const k = key();
@@ -797,9 +792,9 @@
       // AI advice sits under the day/habits summary — high enough to be read, below the things you act on first.
       const ai = today && D.ai ? safe(() => D.ai.card('today')) : '';
       // Order follows the question "what do I do now?": time → what's left → today's tasks →
-      // a compact body row → AI → the end-of-day wrap-up.
+      // a compact body row (water + food) → WHOOP workouts → AI → the end-of-day wrap-up.
       return safe(() => dateNav(k, today)) + safe(() => ticker(k)) + safe(() => dayCard(k)) + safe(() => qazaHtml(k)) + safe(() => habitsCard(k)) +
-        safe(() => tasksCard(k)) + safe(() => quickStrip(k)) + ai +
+        safe(() => tasksCard(k)) + safe(() => quickStrip(k)) + safe(() => workoutsCard(k)) + ai +
         `<div class="section-title">${esc(t('today.wrap'))}</div>` + safe(() => noteCard(k)) + safe(() => gratCard(k));
     },
     mount() { startTicker(); },

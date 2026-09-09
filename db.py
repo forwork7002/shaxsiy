@@ -35,7 +35,8 @@ VERSION_GAP_S = 600           # 10 daqiqa ichidagi saqlashlar bitta versiyaga yo
 KEEP_ALL_DAYS, KEEP_DAILY_DAYS = 7, 400
 BACKUP_KEEP = 14
 DAY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-FACT_KINDS = ("health", "habits", "counts", "prayers", "note", "gratitude", "stack", "caffeine", "tasks")
+FACT_KINDS = ("health", "habits", "counts", "prayers", "note", "gratitude", "stack", "caffeine", "tasks", "food")
+FOOD_MEAL_KEYS = ("id", "ts", "name", "grams", "kcal", "p", "c", "f", "photo", "items", "note", "src")   # surat baytlari hech qachon emas
 WHOOP_TS_KEY = {"cycle": "start", "recovery": "ts", "sleep": "end", "workout": "start"}   # _wh_merge bilan bir xil
 WHOOP_DAY_SHIFT_H = {"cycle": 12}   # mijoz (whoop.js/history.js) sikl kunini start+12h dan oladi — day_hint ham shunday
 
@@ -240,6 +241,20 @@ def _facts_of(blob: dict) -> dict:
             tasks.setdefault(day, []).append({k: x.get(k) for k in ("id", "text", "date", "doneAt", "priority", "goalId")})
     for day, v in tasks.items():
         put(day, "tasks", v)
+    # ovqat: food.logs[kun] = [taom]; surat faqat id sifatida qoladi (data: URL bo'lsa tashlab yuboriladi)
+    food = blob.get("food") if isinstance(blob.get("food"), dict) else {}
+    for day, v in (food.get("logs") if isinstance(food.get("logs"), dict) else {}).items():
+        if not isinstance(v, list):
+            continue
+        meals = []
+        for m in v:
+            if not isinstance(m, dict):
+                continue
+            o = {k: m.get(k) for k in FOOD_MEAL_KEYS if k in m}
+            if isinstance(o.get("photo"), str) and o["photo"].startswith("data:"):
+                o["photo"] = None
+            meals.append(o)
+        put(day, "food", sorted(meals, key=lambda x: x.get("ts") or 0))
     return out
 
 
@@ -557,13 +572,13 @@ def _avg(xs):
 
 
 def months(uid: str, year: int) -> dict:
-    """Yil bo'yicha oylik yig'indilar: {YYYY-MM: {days, habitPct, sleepH, recovery, strain, kcal,
+    """Yil bo'yicha oylik yig'indilar: {YYYY-MM: {days, habitPct, sleepH, recovery, strain, kcal, kcalEaten,
     workouts, weightStart, weightEnd, notes}}. Barcha 12 oy qaytadi (bo'sh oy — days:0)."""
     y = int(year)
     frm, to = f"{y:04d}-01-01", f"{y:04d}-12-31"
-    m = {f"{y:04d}-{i:02d}": {"days": 0, "habitPct": None, "sleepH": None, "recovery": None, "strain": None, "kcal": None,
+    m = {f"{y:04d}-{i:02d}": {"days": 0, "habitPct": None, "sleepH": None, "recovery": None, "strain": None, "kcal": None, "kcalEaten": None,
                               "workouts": 0, "weightStart": None, "weightEnd": None, "notes": 0} for i in _brange(1, 13)}
-    acc = {k: {"days": set(), "habits": [], "ids": set(), "sleep": [], "rec": [], "strain": [], "kcal": [], "w": [], "weights": []} for k in m}
+    acc = {k: {"days": set(), "habits": [], "ids": set(), "sleep": [], "rec": [], "strain": [], "kcal": [], "eaten": [], "w": [], "weights": []} for k in m}
     c = _conn()
     try:
         for r in c.execute("SELECT day, kind, json FROM day_facts WHERE uid=? AND day BETWEEN ? AND ? AND gone_at IS NULL ORDER BY day", (uid, frm, to)):
@@ -581,6 +596,8 @@ def months(uid: str, year: int) -> dict:
                     a["weights"].append((r["day"], float(v["weight"])))
             elif r["kind"] == "note":
                 m[mk]["notes"] += 1
+            elif r["kind"] == "food" and isinstance(v, list):
+                a["eaten"].append(sum(float(x.get("kcal") or 0) for x in v if isinstance(x, dict) and isinstance(x.get("kcal"), (int, float))))
         for r in c.execute("SELECT kind, day_hint, json FROM whoop_records WHERE uid=? AND day_hint BETWEEN ? AND ?", (uid, frm, to)):
             mk = r["day_hint"][:7]
             if mk not in acc:
@@ -604,6 +621,7 @@ def months(uid: str, year: int) -> dict:
             den = max(1, len(a["ids"]))
             o["habitPct"] = round(100 * sum(a["habits"]) / (den * len(a["habits"])))
         o["sleepH"] = _avg(a["sleep"]); o["recovery"] = _avg(a["rec"]); o["strain"] = _avg(a["strain"]); o["kcal"] = _avg(a["kcal"])
+        o["kcalEaten"] = _avg(a["eaten"])
         o["workouts"] = len(a["w"])
         if a["weights"]:
             ws = sorted(a["weights"])

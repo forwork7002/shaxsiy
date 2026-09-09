@@ -79,7 +79,6 @@
 
 /* quick strip */
 .td-quick { grid-template-columns: repeat(2, 1fr); margin-bottom: 12px; } /* same rhythm as .card */
-@media (min-width: 700px) { .td-quick { grid-template-columns: repeat(3, 1fr); } .td-quick .b-wide { grid-column: span 1; } }
 .td-tile { cursor: pointer; transition: background .2s, border-color .2s; }
 .td-tile:hover { background: var(--hover); border-color: var(--line2); }
 .td-tile .stat-label { display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

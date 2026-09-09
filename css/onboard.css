@@ -1,0 +1,54 @@
+/* ==== onboard — birinchi kirish: auth-gate ustiga 8 qadam ==== */
+.ob-gate { z-index: 490; }                       /* auth (500) doim ustida */
+.ob-card { max-width: 360px; gap: 12px; padding: 26px 22px 22px; }
+.ob-card .auth-title { text-align: center; }
+
+/* qadam nuqtalari */
+.ob-dots { display: flex; gap: 6px; justify-content: center; width: 100%; margin-bottom: 2px; }
+.ob-dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--line2); transition: background .2s, transform .2s, width .2s; }
+.ob-dots i.done { background: color-mix(in srgb, var(--success) 55%, transparent); }
+.ob-dots i.on { width: 22px; border-radius: 4px; background: var(--success); box-shadow: 0 0 8px var(--success-glow); }
+
+.ob-q { font-family: var(--font-display); font-size: 19px; font-weight: 700; color: var(--text); text-align: center; line-height: 1.3; }
+.ob-body { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.ob-hint { font-size: 12.5px; color: var(--text3); text-align: center; line-height: 1.45; margin: 0; }
+.ob-hint-lg { font-size: 13.5px; color: var(--text2); margin-bottom: 4px; }
+
+/* matn/raqam kiritish — katta, markazda */
+.ob-inp { text-align: center; min-height: 54px; font-size: 20px; letter-spacing: 0; }
+.ob-inp.ob-text { font-size: 18px; }
+.ob-inp.bad { border-color: var(--danger-text); }
+.ob-num-wrap { position: relative; width: 100%; }
+.ob-num-wrap .ob-inp { font-family: var(--font-display); font-size: 30px; font-weight: 700; padding-right: 56px; padding-left: 56px; -moz-appearance: textfield; }
+.ob-num-wrap .ob-inp::-webkit-outer-spin-button, .ob-num-wrap .ob-inp::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.ob-unit { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 13px; font-weight: 700; color: var(--text3); pointer-events: none; }
+.ob-age { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--success); min-height: 20px; text-align: center; }
+.ob-seg { margin: 0 auto; }
+
+/* katta tanlov tugmalari (jins, maqsad) */
+.ob-opts { display: grid; gap: 8px; width: 100%; }
+.ob-opts-2 { grid-template-columns: 1fr 1fr; }
+.ob-opt { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 60px; padding: 12px 14px;
+  border-radius: 14px; border: 1px solid var(--line2); background: var(--glass); color: var(--text2); font: inherit; cursor: pointer;
+  transition: background .15s, border-color .15s, color .15s, transform .1s; }
+.ob-opt:active { transform: scale(.97); }
+.ob-opt-l { font-size: 15px; font-weight: 700; color: var(--text); }
+.ob-opt-s { font-size: 11.5px; color: var(--text3); }
+.ob-opt.on { background: var(--btn-grad); border-color: transparent; }
+.ob-opt.on .ob-opt-l, .ob-opt.on .ob-opt-s { color: var(--ink-on-light); }
+
+/* faollik slayderi */
+.ob-act-lbl { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 2px; font-size: 15px; font-weight: 700; color: var(--text); }
+.ob-slider { width: 100%; height: 44px; }
+.ob-slider::-webkit-slider-thumb { width: 28px; height: 28px; margin-top: -11px; }
+.ob-slider::-moz-range-thumb { width: 22px; height: 22px; }
+
+/* orqaga / keyingi */
+.ob-nav { display: flex; gap: 8px; width: 100%; margin-top: 2px; }
+.ob-nav .ob-back { flex: none; width: 52px; min-height: 50px; padding: 0; }
+.ob-nav .ob-next { flex: 1; min-height: 50px; font-size: 14px; }
+.ob-back-link, .ob-skip { font-size: 12.5px; color: var(--text3); font-weight: 600; text-decoration: none; }
+.ob-skip { margin-top: -2px; }
+.ob-whoop { font-weight: 700; min-height: 50px; }
+.ob-err { min-height: 0; }
+.ob-err:not([hidden]) { margin-top: -4px; }

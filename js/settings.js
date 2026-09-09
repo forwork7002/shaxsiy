@@ -1,5 +1,5 @@
 /* =====================================================================
-   Dash — Созлаш (settings): general · habits · prayer · finance · data
+   Dash — Созлаш (settings): general · habits · food · prayer · finance · data
    ===================================================================== */
 (function () {
   'use strict';
@@ -9,16 +9,23 @@
   /* ------------------------------------------------------------------ */
   D.i18n.add({
     uz: {
-      'set.tab.general': 'Umumiy', 'set.tab.habits': 'Odatlar', 'set.tab.prayer': 'Ibodat', 'set.tab.finance': 'Moliya', 'set.tab.data': "Ma'lumot",
+      'set.tab.general': 'Umumiy', 'set.tab.habits': 'Odatlar', 'set.tab.food': 'Ovqat', 'set.tab.prayer': 'Ibodat', 'set.tab.finance': 'Moliya', 'set.tab.data': "Ma'lumot",
       'set.lang': 'Til', 'set.lang.uz': "O'zbek lotin", 'set.lang.uzk': 'Ўзбек кирилл', 'set.lang.ru': 'Русский', 'set.theme': 'Mavzu',
       'set.profile': 'Profil', 'set.name': 'Ism', 'set.namePh': 'Ismingiz', 'set.height': "Bo'y", 'set.weight': 'Vazn', 'set.age': 'Yosh',
       'set.sex': 'Jins', 'set.sex.m': 'Erkak', 'set.sex.f': 'Ayol', 'set.activity': 'Faollik',
       'set.act.0': 'Harakatsiz', 'set.act.1': 'Kam harakat', 'set.act.2': 'Yengil', 'set.act.3': "O'rtacha", 'set.act.4': 'Faol', 'set.act.5': 'Juda faol',
       'set.bmi': 'BMI', 'set.bmiHint': "bo'y va vazndan",
+      'set.birthYear': "Tug'ilgan yil", 'set.ageN': '{n} yosh', 'set.goal': 'Maqsad', 'set.goal.lose': 'Vazn tashlash', 'set.goal.keep': 'Saqlash', 'set.goal.gain': 'Vazn olish',
+      'set.whoopAgeTitle': 'WHOOP yoshi', 'set.whoopAge': 'WHOOP Age', 'set.paceOfAging': 'Pace of Aging', 'set.whoopAgeHint': 'WHOOP ilovasidan ko‘chiring (Healthspan sahifasi)',
+      'set.whoopAgeAt': '{d} holatiga', 'set.whoopAgeGo': "Sog'liq → Tana", 'set.whoopAgeNone': "Hali kiritilmagan", 'set.onboard': "Savol-javob bilan to'ldirish",
+      'set.fd.title': 'Kunlik maqsadlar', 'set.fd.auto': 'Avto', 'set.fd.autoHint': "Profil bo'yicha: Mifflin-St Jeor × faollik ± maqsad; oqsil 1,6 g/kg (olishda 2,0), yog' 25 %",
+      'set.fd.manualHint': "Qo'lda kiritilgan — «Avto» yoqilsa profil bo'yicha qayta hisoblanadi",
+      'set.fd.kcal': 'Kaloriya', 'set.fd.p': 'Oqsil', 'set.fd.c': 'Uglevod', 'set.fd.f': "Yog'", 'set.fd.recalc': 'Qayta hisoblash', 'set.fd.goFood': "Ovqat bo'limiga o'tish",
+      'set.fd.needProfile': "Avto hisob uchun profilda bo'y, vazn va tug'ilgan yil kerak",
       'set.day': 'Kun sozlamalari', 'set.tz': 'Vaqt mintaqasi', 'set.tz.browser': 'brauzer', 'set.dayStart': 'Kun boshlanishi',
       'set.dayStartHint': 'Shu soatgacha qilingan yozuvlar kechagi kunga tegishli', 'set.midnight': 'Yarim tun (00:00)', 'set.wake': "Uyg'onish soati", 'set.sleep': 'Uyqu soati',
       'set.units': 'Birliklar', 'set.weightUnit': 'Vazn birligi', 'set.waterMl': 'Stakan hajmi', 'set.waterTarget': 'Kunlik suv maqsadi',
-      'set.waterAuto': "avto (vazn bo'yicha)", 'set.caffeine': 'Kofein limiti', 'set.currency': 'Valyuta',
+      'set.waterAuto': "avto (vazn bo'yicha)", 'set.currency': 'Valyuta',
       'set.shortcuts': 'Tezkor tugmalar', 'set.sc.search': 'Qidiruv / buyruqlar', 'set.sc.undo': 'Bekor qilish', 'set.sc.esc': 'Yopish',
       'set.about': 'Dastur haqida', 'set.version': 'Versiya', 'set.device': 'Qurilma ID', 'set.storage': "Ma'lumot hajmi",
       'set.h.title': 'Odatlar', 'set.h.count': '{n} faol / {total}',
@@ -44,27 +51,34 @@
       'set.f.reassign': 'Yozuvlar «Boshqa»ga o\'tkaziladi', 'set.f.accounts': 'Hisoblar',
       'set.f.accountsHint': "Hisoblar, qoldiqlar va obunalar Moliya bo'limida boshqariladi.", 'set.f.goAccounts': "Hisoblarga o'tish",
       'set.d.sync': 'Sinxronizatsiya', 'set.d.server': 'Server', 'set.d.serverOn': 'ulangan', 'set.d.serverOff': 'faqat lokal', 'set.d.state': 'Holat',
-      'set.d.updated': "So'nggi o'zgarish", 'set.d.tgUser': 'Telegram', 'set.d.syncNow': 'Hozir sinxronlash',
+      'set.d.updated': "So'nggi o'zgarish", 'set.d.syncNow': 'Hozir sinxronlash',
       'set.d.backup': 'Zaxira nusxa', 'set.d.export': 'JSON eksport', 'set.d.import': 'JSON import',
       'set.d.importHint': 'Eski «Shaxsiy» mini-ilova eksporti (shaxsiy_*.json) ham qabul qilinadi — format avtomatik aniqlanadi.',
       'set.d.importFail': 'Import xatosi: {msg}', 'set.d.danger': 'Xavfli zona', 'set.d.reset': "Hammasini o'chirish",
       'set.d.resetTitle': "Hamma ma'lumotni o'chirish", 'set.d.resetText': "Barcha odatlar, tarix, vazifalar, moliya va sozlamalar o'chiriladi. Avval eksport qiling!",
       'set.d.resetOk': "Ha, o'chirish", 'set.d.resetDone': "Hamma ma'lumot o'chirildi",
       'set.d.diag': 'Diagnostika', 'set.d.noErrors': "Xatolar yo'q", 'set.d.copy': 'Nusxalash', 'set.d.copied': 'Nusxalandi', 'set.d.copyFail': "Nusxalab bo'lmadi",
-      'set.d.errors': '{n} ta xato', 'set.d.tgClose': 'Telegram ilovani yopish', 'set.search.sub': 'Sozlamalar',
+      'set.d.errors': '{n} ta xato', 'set.search.sub': 'Sozlamalar',
       'set.auto': 'avto', 'set.f.icon': 'Belgi',
     },
     uzk: {
-      'set.tab.general': 'Умумий', 'set.tab.habits': 'Одатлар', 'set.tab.prayer': 'Ибодат', 'set.tab.finance': 'Молия', 'set.tab.data': 'Маълумот',
+      'set.tab.general': 'Умумий', 'set.tab.habits': 'Одатлар', 'set.tab.food': 'Овқат', 'set.tab.prayer': 'Ибодат', 'set.tab.finance': 'Молия', 'set.tab.data': 'Маълумот',
       'set.lang': 'Тил', 'set.lang.uz': "O'zbek lotin", 'set.lang.uzk': 'Ўзбек кирилл', 'set.lang.ru': 'Русский', 'set.theme': 'Мавзу',
       'set.profile': 'Профил', 'set.name': 'Исм', 'set.namePh': 'Исмингиз', 'set.height': 'Бўй', 'set.weight': 'Вазн', 'set.age': 'Ёш',
       'set.sex': 'Жинс', 'set.sex.m': 'Эркак', 'set.sex.f': 'Аёл', 'set.activity': 'Фаоллик',
       'set.act.0': 'Ҳаракатсиз', 'set.act.1': 'Кам ҳаракат', 'set.act.2': 'Енгил', 'set.act.3': 'Ўртача', 'set.act.4': 'Фаол', 'set.act.5': 'Жуда фаол',
       'set.bmi': 'BMI', 'set.bmiHint': 'бўй ва вазндан',
+      'set.birthYear': 'Туғилган йил', 'set.ageN': '{n} ёш', 'set.goal': 'Мақсад', 'set.goal.lose': 'Вазн ташлаш', 'set.goal.keep': 'Сақлаш', 'set.goal.gain': 'Вазн олиш',
+      'set.whoopAgeTitle': 'WHOOP ёши', 'set.whoopAge': 'WHOOP Age', 'set.paceOfAging': 'Pace of Aging', 'set.whoopAgeHint': 'WHOOP иловасидан кўчиринг (Healthspan саҳифаси)',
+      'set.whoopAgeAt': '{d} ҳолатига', 'set.whoopAgeGo': 'Соғлиқ → Тана', 'set.whoopAgeNone': 'Ҳали киритилмаган', 'set.onboard': 'Савол-жавоб билан тўлдириш',
+      'set.fd.title': 'Кунлик мақсадлар', 'set.fd.auto': 'Авто', 'set.fd.autoHint': 'Профил бўйича: Mifflin-St Jeor × фаоллик ± мақсад; оқсил 1,6 г/кг (олишда 2,0), ёғ 25 %',
+      'set.fd.manualHint': 'Қўлда киритилган — «Авто» ёқилса профил бўйича қайта ҳисобланади',
+      'set.fd.kcal': 'Калория', 'set.fd.p': 'Оқсил', 'set.fd.c': 'Углевод', 'set.fd.f': 'Ёғ', 'set.fd.recalc': 'Қайта ҳисоблаш', 'set.fd.goFood': 'Овқат бўлимига ўтиш',
+      'set.fd.needProfile': 'Авто ҳисоб учун профилда бўй, вазн ва туғилган йил керак',
       'set.day': 'Кун созламалари', 'set.tz': 'Вақт минтақаси', 'set.tz.browser': 'браузер', 'set.dayStart': 'Кун бошланиши',
       'set.dayStartHint': 'Шу соатгача қилинган ёзувлар кечаги кунга тегишли', 'set.midnight': 'Ярим тун (00:00)', 'set.wake': 'Уйғониш соати', 'set.sleep': 'Уйқу соати',
       'set.units': 'Бирликлар', 'set.weightUnit': 'Вазн бирлиги', 'set.waterMl': 'Стакан ҳажми', 'set.waterTarget': 'Кунлик сув мақсади',
-      'set.waterAuto': 'авто (вазн бўйича)', 'set.caffeine': 'Кофеин лимити', 'set.currency': 'Валюта',
+      'set.waterAuto': 'авто (вазн бўйича)', 'set.currency': 'Валюта',
       'set.shortcuts': 'Тезкор тугмалар', 'set.sc.search': 'Қидирув / буйруқлар', 'set.sc.undo': 'Бекор қилиш', 'set.sc.esc': 'Ёпиш',
       'set.about': 'Дастур ҳақида', 'set.version': 'Версия', 'set.device': 'Қурилма ID', 'set.storage': 'Маълумот ҳажми',
       'set.h.title': 'Одатлар', 'set.h.count': '{n} фаол / {total}',
@@ -90,27 +104,34 @@
       'set.f.reassign': 'Ёзувлар «Бошқа»га ўтказилади', 'set.f.accounts': 'Ҳисоблар',
       'set.f.accountsHint': 'Ҳисоблар, қолдиқлар ва обуналар Молия бўлимида бошқарилади.', 'set.f.goAccounts': 'Ҳисобларга ўтиш',
       'set.d.sync': 'Синхронизация', 'set.d.server': 'Сервер', 'set.d.serverOn': 'уланган', 'set.d.serverOff': 'фақат маҳаллий', 'set.d.state': 'Ҳолат',
-      'set.d.updated': 'Сўнгги ўзгариш', 'set.d.tgUser': 'Telegram', 'set.d.syncNow': 'Ҳозир синхронлаш',
+      'set.d.updated': 'Сўнгги ўзгариш', 'set.d.syncNow': 'Ҳозир синхронлаш',
       'set.d.backup': 'Захира нусха', 'set.d.export': 'JSON экспорт', 'set.d.import': 'JSON импорт',
       'set.d.importHint': 'Эски «Шахсий» мини-илова экспорти (shaxsiy_*.json) ҳам қабул қилинади — формат автоматик аниқланади.',
       'set.d.importFail': 'Импорт хатоси: {msg}', 'set.d.danger': 'Хавфли зона', 'set.d.reset': 'Ҳаммасини ўчириш',
       'set.d.resetTitle': 'Ҳамма маълумотни ўчириш', 'set.d.resetText': 'Барча одатлар, тарих, вазифалар, молия ва созламалар ўчирилади. Аввал экспорт қилинг!',
       'set.d.resetOk': 'Ҳа, ўчириш', 'set.d.resetDone': 'Ҳамма маълумот ўчирилди',
       'set.d.diag': 'Диагностика', 'set.d.noErrors': 'Хатолар йўқ', 'set.d.copy': 'Нусхалаш', 'set.d.copied': 'Нусхаланди', 'set.d.copyFail': 'Нусхалаб бўлмади',
-      'set.d.errors': '{n} та хато', 'set.d.tgClose': 'Telegram иловани ёпиш', 'set.search.sub': 'Созламалар',
+      'set.d.errors': '{n} та хато', 'set.search.sub': 'Созламалар',
       'set.auto': 'авто', 'set.f.icon': 'Белги',
     },
     ru: {
-      'set.tab.general': 'Общие', 'set.tab.habits': 'Привычки', 'set.tab.prayer': 'Намаз', 'set.tab.finance': 'Финансы', 'set.tab.data': 'Данные',
+      'set.tab.general': 'Общие', 'set.tab.habits': 'Привычки', 'set.tab.food': 'Питание', 'set.tab.prayer': 'Намаз', 'set.tab.finance': 'Финансы', 'set.tab.data': 'Данные',
       'set.lang': 'Язык', 'set.lang.uz': "O'zbek lotin", 'set.lang.uzk': 'Ўзбек кирилл', 'set.lang.ru': 'Русский', 'set.theme': 'Тема',
       'set.profile': 'Профиль', 'set.name': 'Имя', 'set.namePh': 'Ваше имя', 'set.height': 'Рост', 'set.weight': 'Вес', 'set.age': 'Возраст',
       'set.sex': 'Пол', 'set.sex.m': 'Муж.', 'set.sex.f': 'Жен.', 'set.activity': 'Активность',
       'set.act.0': 'Минимальная', 'set.act.1': 'Низкая', 'set.act.2': 'Лёгкая', 'set.act.3': 'Средняя', 'set.act.4': 'Высокая', 'set.act.5': 'Очень высокая',
       'set.bmi': 'ИМТ', 'set.bmiHint': 'по росту и весу',
+      'set.birthYear': 'Год рождения', 'set.ageN': '{n} лет', 'set.goal': 'Цель', 'set.goal.lose': 'Похудеть', 'set.goal.keep': 'Сохранить', 'set.goal.gain': 'Набрать',
+      'set.whoopAgeTitle': 'Возраст WHOOP', 'set.whoopAge': 'WHOOP Age', 'set.paceOfAging': 'Pace of Aging', 'set.whoopAgeHint': 'Скопируйте из приложения WHOOP (страница Healthspan)',
+      'set.whoopAgeAt': 'на {d}', 'set.whoopAgeGo': 'Здоровье → Тело', 'set.whoopAgeNone': 'Ещё не введено', 'set.onboard': 'Заполнить пошагово',
+      'set.fd.title': 'Дневные цели', 'set.fd.auto': 'Авто', 'set.fd.autoHint': 'По профилю: Mifflin-St Jeor × активность ± цель; белок 1,6 г/кг (при наборе 2,0), жиры 25 %',
+      'set.fd.manualHint': 'Введено вручную — при включении «Авто» пересчитается по профилю',
+      'set.fd.kcal': 'Калории', 'set.fd.p': 'Белки', 'set.fd.c': 'Углеводы', 'set.fd.f': 'Жиры', 'set.fd.recalc': 'Пересчитать', 'set.fd.goFood': 'Перейти в Питание',
+      'set.fd.needProfile': 'Для авторасчёта нужны рост, вес и год рождения в профиле',
       'set.day': 'Настройки дня', 'set.tz': 'Часовой пояс', 'set.tz.browser': 'браузер', 'set.dayStart': 'Начало дня',
       'set.dayStartHint': 'Записи до этого часа относятся к предыдущему дню', 'set.midnight': 'Полночь (00:00)', 'set.wake': 'Время подъёма', 'set.sleep': 'Время отхода ко сну',
       'set.units': 'Единицы', 'set.weightUnit': 'Единица веса', 'set.waterMl': 'Объём стакана', 'set.waterTarget': 'Дневная норма воды',
-      'set.waterAuto': 'авто (по весу)', 'set.caffeine': 'Лимит кофеина', 'set.currency': 'Валюта',
+      'set.waterAuto': 'авто (по весу)', 'set.currency': 'Валюта',
       'set.shortcuts': 'Горячие клавиши', 'set.sc.search': 'Поиск / команды', 'set.sc.undo': 'Отменить', 'set.sc.esc': 'Закрыть',
       'set.about': 'О приложении', 'set.version': 'Версия', 'set.device': 'ID устройства', 'set.storage': 'Объём данных',
       'set.h.title': 'Привычки', 'set.h.count': '{n} активных / {total}',
@@ -136,14 +157,14 @@
       'set.f.reassign': 'Записи будут перенесены в «Другое»', 'set.f.accounts': 'Счета',
       'set.f.accountsHint': 'Счета, балансы и подписки управляются в разделе Финансы.', 'set.f.goAccounts': 'Перейти к счетам',
       'set.d.sync': 'Синхронизация', 'set.d.server': 'Сервер', 'set.d.serverOn': 'подключён', 'set.d.serverOff': 'только локально', 'set.d.state': 'Состояние',
-      'set.d.updated': 'Последнее изменение', 'set.d.tgUser': 'Telegram', 'set.d.syncNow': 'Синхронизировать',
+      'set.d.updated': 'Последнее изменение', 'set.d.syncNow': 'Синхронизировать',
       'set.d.backup': 'Резервная копия', 'set.d.export': 'Экспорт JSON', 'set.d.import': 'Импорт JSON',
       'set.d.importHint': 'Экспорт старого мини-приложения «Шахсий» (shaxsiy_*.json) тоже принимается — формат определяется автоматически.',
       'set.d.importFail': 'Ошибка импорта: {msg}', 'set.d.danger': 'Опасная зона', 'set.d.reset': 'Удалить всё',
       'set.d.resetTitle': 'Удалить все данные', 'set.d.resetText': 'Все привычки, история, задачи, финансы и настройки будут удалены. Сначала сделайте экспорт!',
       'set.d.resetOk': 'Да, удалить', 'set.d.resetDone': 'Все данные удалены',
       'set.d.diag': 'Диагностика', 'set.d.noErrors': 'Ошибок нет', 'set.d.copy': 'Копировать', 'set.d.copied': 'Скопировано', 'set.d.copyFail': 'Не удалось скопировать',
-      'set.d.errors': 'ошибок: {n}', 'set.d.tgClose': 'Закрыть мини-приложение Telegram', 'set.search.sub': 'Настройки',
+      'set.d.errors': 'ошибок: {n}', 'set.search.sub': 'Настройки',
       'set.auto': 'авто', 'set.f.icon': 'Значок',
     },
   });
@@ -151,7 +172,8 @@
   /* ------------------------------------------------------------------ */
   /* constants + helpers                                                 */
   /* ------------------------------------------------------------------ */
-  const TABS = ['general', 'habits', 'prayer', 'finance', 'data'];
+  const TABS = ['general', 'habits', 'food', 'prayer', 'finance', 'data'];
+  const GOALS = ['lose', 'keep', 'gain'];
   const TZS = ['Asia/Tashkent', 'Asia/Almaty', 'Europe/Moscow', 'Asia/Dubai', 'Europe/Istanbul', 'UTC'];
   const CURS = ['UZS', 'USD', 'EUR', 'RUB', 'KZT'];
   const HABIT_SPHERES = ['ruh', 'aql', 'qalb', 'tana', 'boshqa'];
@@ -164,6 +186,15 @@
   const S = () => D.S.settings;
   const num = (v) => { const n = parseFloat(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? n : null; };
   const attr = (v) => (v === null || v === undefined ? '' : esc(v));
+
+  // yosh: D.profileAge — tug'ilgan yildan; bo'lmasa eski `age` maydonidan (hamma modulda bitta qoida)
+  const ageOf = () => D.profileAge();
+  // S.food shakli — D.normalize (core.js) har doim to'ldiradi, shu yerda ikkinchi standart yo'q
+  const FOOD = () => D.S.food;
+  // profil o'zgarganda avto maqsadlar qayta hisoblanadi (food.js bo'lsa)
+  function recalcFood() {
+    try { if (D.food && D.food.recalcTargets && FOOD().targets.auto !== false) D.food.recalcTargets(); } catch (e) { console.warn('food targets', e); }
+  }
 
   function browserTz() { try { return (Intl.DateTimeFormat().resolvedOptions().timeZone) || ''; } catch (e) { return ''; } }
   function tzOptions() {
@@ -222,6 +253,7 @@
     const bmi = p.heightCm && p.weightKg ? D.round(p.weightKg / Math.pow(p.heightCm / 100, 2), 1) : null;
     const bmiZone = bmi == null ? '' : bmi < 18.5 ? 'z-warn' : bmi < 25 ? 'z-good' : bmi < 30 ? 'z-warn' : 'z-bad';
     const act = D.clamp(+p.activity || 0, 0, 5);
+    const age = ageOf(), goal = GOALS.includes(p.goal) ? p.goal : 'keep';
     const hours = Array.from({ length: 24 }, (_, i) => ({ v: i, l: D.fmtTime(i, 0) }));
     return `
     <div class="card">
@@ -239,7 +271,7 @@
       <div class="set-grid3">
         <div class="field"><label class="field-label">${t('set.height')} <span class="set-unit">cm</span></label>${numInp(p.heightCm, 'setProfileNum', 'data-k="heightCm" min="100" max="250" step="1" placeholder="—"')}</div>
         <div class="field"><label class="field-label">${t('set.weight')} <span class="set-unit">${lb ? 'lb' : 'kg'}</span></label>${numInp(wShown, 'setProfileNum', 'data-k="weightKg" min="20" max="500" step="0.1" placeholder="—"')}</div>
-        <div class="field"><label class="field-label">${t('set.age')}</label>${numInp(p.age, 'setProfileNum', 'data-k="age" min="5" max="120" step="1" placeholder="—"')}</div>
+        <div class="field"><label class="field-label">${t('set.birthYear')}${age != null ? ` <span class="set-unit num">${esc(t('set.ageN', { n: age }))}</span>` : ''}</label>${numInp(p.birthYear, 'setProfileNum', `data-k="birthYear" min="1900" max="${D.nowTz().y - 1}" step="1" placeholder="${p.birthYear ? '' : esc(String(D.nowTz().y - (age || 30)))}"`)}</div>
       </div>
       <div class="set-grid2">
         <div class="field"><label class="field-label">${t('set.sex')}</label>${seg([{ v: 'm', l: t('set.sex.m') }, { v: 'f', l: t('set.sex.f') }], p.sex === 'f' ? 'f' : 'm', 'setSex', 'set-seg-last')}</div>
@@ -247,11 +279,24 @@
           <div class="set-slider-lbl" id="setActLabel">${actLabel(act)}</div>
           <input class="slider" type="range" min="0" max="5" step="1" value="${act}" data-input="setActivity" aria-label="${esc(t('set.activity'))}"></div>
       </div>
+      <div class="field"><label class="field-label">${t('set.goal')}</label>${seg(GOALS.map((g) => ({ v: g, l: t('set.goal.' + g) })), goal, 'setGoal', 'set-seg-last')}</div>
+      ${D.onboard ? `<button class="btn ghost sm mt-s" data-act="setOnboard">${D.ic('chevR', 14)} ${t('set.onboard')}</button>` : ''}
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="title">${D.ic('heart')} ${t('set.whoopAgeTitle')}</div>
+        <span class="tiny muted num">${p.whoopAgeAt ? esc(t('set.whoopAgeAt', { d: D.fmtDate(p.whoopAgeAt, 'short') })) : esc(t('set.whoopAgeNone'))}</span></div>
+      <div class="set-grid2">
+        <div class="field"><label class="field-label">${t('set.whoopAge')}</label>${numInp(p.whoopAge, 'setWhoopAge', 'data-k="whoopAge" min="10" max="120" step="0.1" placeholder="—"')}</div>
+        <div class="field"><label class="field-label">${t('set.paceOfAging')}</label>${numInp(p.paceOfAging, 'setWhoopAge', 'data-k="paceOfAging" min="0.3" max="2.5" step="0.01" placeholder="1.00"')}</div>
+      </div>
+      <div class="help">${esc(t('set.whoopAgeHint'))}</div>
+      <button class="btn ghost sm mt-s" data-act="go" data-view="health" data-sub="body">${D.ic('chevR', 14)} ${t('set.whoopAgeGo')}</button>
     </div>
 
     ${D.serverEnabled() && (D.device.uid || D.device.name) ? `<div class="card flat set-account"><div class="row between wrap">
       <div class="grow"><div class="eyebrow">${t('set.account')}</div><div class="small"><b>${esc(D.device.name || D.device.uid)}</b></div>
-        <div class="tiny muted num">${esc(D.device.uid)}${D.tg && D.tg.initDataUnsafe && D.tg.initDataUnsafe.user ? ` · Telegram ${esc(String(D.tg.initDataUnsafe.user.id))}` : ''}</div></div>
+        <div class="tiny muted num">${esc(D.device.uid)}</div></div>
       <button class="btn ghost sm" data-act="setLogout">${D.ic('logout', 14)} ${t('set.logout')}</button>
     </div></div>` : ''}
 
@@ -268,7 +313,6 @@
       ${row(t('set.weightUnit'), seg([{ v: 'kg', l: 'kg' }, { v: 'lb', l: 'lb' }], lb ? 'lb' : 'kg', 'setWeightUnit', 'compact'))}
       ${row(t('set.waterMl'), `<div class="set-inp-unit">${numInp(s.waterMl, 'setNum', 'data-k="waterMl" min="50" max="2000" step="10"')}<span>${t('unit.ml')}</span></div>`)}
       ${row(t('set.waterTarget'), `<div class="set-inp-unit">${numInp(s.waterTargetMl, 'setNum', `data-k="waterTargetMl" min="500" max="8000" step="50" placeholder="${esc(t('set.auto'))}"`)}<span>${t('unit.ml')}</span></div>`, t('set.waterAuto'))}
-      ${row(t('set.caffeine'), `<div class="set-inp-unit">${numInp(s.caffeineLimit, 'setNum', 'data-k="caffeineLimit" min="0" max="2000" step="10"')}<span>mg</span></div>`)}
       ${row(t('set.currency'), sel(CURS.map((c) => ({ v: c, l: c })), s.currency || 'UZS', 'setCurrency'))}
     </div>
 
@@ -291,20 +335,37 @@
 
   D.act.setLang = (el) => { if (el.dataset.val !== D.lang()) D.setLang(el.dataset.val); };
   D.act.setTheme = (el) => D.theme.set(el.dataset.val);
+  D.act.setOnboard = () => { if (D.onboard && D.onboard.open) D.onboard.open(); };   // Profilni qadam-baqadam qayta to'ldirish
   D.act.setProfileText = (el) => { D.S.profile[el.dataset.k] = el.value.trim().slice(0, 40); D.save(); };
   D.act.setProfileNum = (el) => {
     const k = el.dataset.k;
     let v = num(el.value);
     if (k === 'weightKg' && v != null && S().weightUnit === 'lb') v = D.round(v / 2.20462, 1);
-    const lim = { heightCm: [50, 250], weightKg: [20, 500], age: [1, 120] }[k];
+    const lim = { heightCm: [50, 250], weightKg: [20, 500], age: [1, 120], birthYear: [1900, D.nowTz().y - 1] }[k];
     if (v != null && lim) v = D.clamp(v, lim[0], lim[1]);
     if (v != null && k !== 'weightKg') v = Math.round(v);
     if (!lim) return;
     D.S.profile[k] = v;
+    // yosh tug'ilgan yildan chiqadi; eski `age` maydoni o'qiydigan joylar uchun sinxron turadi
+    if (k === 'birthYear') D.S.profile.age = v == null ? null : D.nowTz().y - v;
+    recalcFood();
     D.save(); D.rerender();
   };
-  D.act.setSex = (el) => { D.S.profile.sex = el.dataset.val === 'f' ? 'f' : 'm'; D.save(); D.rerender(); };
-  D.act.setActivity = (el) => { const a = D.clamp(+el.value || 0, 0, 5); D.S.profile.activity = a; D.save(); D.patch('setActLabel', actLabel(a)); };
+  D.act.setSex = (el) => { D.S.profile.sex = el.dataset.val === 'f' ? 'f' : 'm'; recalcFood(); D.save(); D.rerender(); };
+  D.act.setActivity = (el) => { const a = D.clamp(+el.value || 0, 0, 5); D.S.profile.activity = a; recalcFood(); D.save(); D.patch('setActLabel', actLabel(a)); };
+  D.act.setGoal = (el) => { D.S.profile.goal = GOALS.includes(el.dataset.val) ? el.dataset.val : 'keep'; recalcFood(); D.save(); D.rerender(); };
+  // WHOOP Age / Pace of Aging — API bermaydi, foydalanuvchi WHOOP ilovasidan ko'chiradi; sana qachon ko'chirilganini eslab turadi
+  D.act.setWhoopAge = (el) => {
+    const k = el.dataset.k;
+    const lim = { whoopAge: [10, 120], paceOfAging: [0.3, 2.5] }[k];
+    if (!lim) return;
+    let v = num(el.value);
+    if (v != null) v = D.round(D.clamp(v, lim[0], lim[1]), 2);
+    const p = D.S.profile;
+    p[k] = v;
+    p.whoopAgeAt = p.whoopAge != null || p.paceOfAging != null ? D.today() : null;
+    D.save(); D.rerender();
+  };
   D.act.setTz = (el) => { S().tz = el.value; D.save(); D.renderNav(); D.rerender(); D.emit('day:changed', D.today()); };
   D.act.setDayStart = (el) => { S().dayStart = D.clamp(+el.value || 0, 0, 6); D.save(); D.rerender(); D.emit('day:changed', D.today()); };
   D.act.setHour = (el) => { S()[el.dataset.k] = D.clamp(+el.value || 0, 0, 23); D.save(); D.rerender(); };
@@ -505,6 +566,49 @@
   };
 
   /* ------------------------------------------------------------------ */
+  /* FOOD — kunlik kkal / oqsil / uglevod / yog' maqsadlari              */
+  /* ------------------------------------------------------------------ */
+  const FD_KEYS = [['kcal', 'kcal', 800, 6000, 10], ['p', 'g', 20, 400, 5], ['c', 'g', 20, 800, 5], ['f', 'g', 10, 300, 5]];
+  function renderFood() {
+    const f = FOOD();
+    let tg = f.targets;
+    try { if (D.food && D.food.targets) tg = D.food.targets() || tg; } catch (e) { console.warn('food targets', e); }
+    const auto = tg.auto !== false;
+    const p = D.S.profile, canAuto = !!(num(p.heightCm) && num(p.weightKg) && ageOf() != null);
+    return `
+    <div class="card">
+      <div class="card-head"><div class="title">${D.ic('apple')} ${t('set.fd.title')}</div>
+        <button type="button" class="toggle ${auto ? 'on' : ''}" data-act="setFoodAuto" role="switch" aria-checked="${auto}" aria-label="${esc(t('set.fd.auto'))}"></button></div>
+      <div class="help mb-s">${esc(auto ? t('set.fd.autoHint') : t('set.fd.manualHint'))}</div>
+      ${auto && !canAuto ? `<div class="set-ok mb-s"><span class="zone z-warn"></span>${esc(t('set.fd.needProfile'))}</div>` : ''}
+      <div class="set-grid2">
+        ${FD_KEYS.map(([k, unit, min, max, step]) => `<div class="field"><label class="field-label">${t('set.fd.' + k)} <span class="set-unit">${unit}</span></label>${numInp(tg[k] == null ? null : Math.round(tg[k]), 'setFoodTarget', `data-k="${k}" min="${min}" max="${max}" step="${step}" placeholder="—" ${auto ? 'disabled' : ''}`)}</div>`).join('')}
+      </div>
+      <div class="row wrap mt-s">
+        ${auto && D.food && D.food.recalcTargets ? `<button class="btn ghost sm" data-act="setFoodRecalc">${D.ic('refresh', 14)} ${t('set.fd.recalc')}</button>` : ''}
+        <button class="btn ghost sm" data-act="go" data-view="food">${D.ic('chevR', 14)} ${t('set.fd.goFood')}</button>
+      </div>
+    </div>`;
+  }
+  D.act.setFoodAuto = () => {
+    const tg = FOOD().targets;
+    tg.auto = tg.auto === false;
+    if (tg.auto) recalcFood();
+    D.save(); D.rerender();
+  };
+  D.act.setFoodTarget = (el) => {
+    const k = el.dataset.k, spec = FD_KEYS.find((x) => x[0] === k);
+    if (!spec) return;
+    const v = num(el.value);
+    if (v == null) { D.rerender(); return; }
+    const tg = FOOD().targets;
+    tg[k] = Math.round(D.clamp(v, spec[2], spec[3]));
+    tg.auto = false; // qo'lda kiritildi — avto o'chadi
+    D.save(); D.rerender();
+  };
+  D.act.setFoodRecalc = () => { FOOD().targets.auto = true; recalcFood(); D.save(); D.rerender(); };
+
+  /* ------------------------------------------------------------------ */
   /* PRAYER                                                              */
   /* ------------------------------------------------------------------ */
   let reminderTimers = [];
@@ -684,8 +788,6 @@
   }
   function renderData() {
     const server = D.serverEnabled(), st = D.syncState();
-    const tgUser = D.tg && D.tg.initDataUnsafe && D.tg.initDataUnsafe.user;
-    const tgName = tgUser ? [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ') + (tgUser.username ? ' @' + tgUser.username : '') : '';
     const errs = (D.errors || []).slice().reverse();
     return `
     <div class="card">
@@ -694,7 +796,6 @@
         <div class="stat"><span class="zone ${server ? 'z-good' : ''}"></span><div class="stat-num set-stat-text">${server ? t('set.d.serverOn') : t('set.d.serverOff')}</div><div class="stat-label">${t('set.d.server')}</div></div>
         <div class="stat"><span class="zone ${st === 'ok' ? 'z-good' : st === 'err' ? 'z-bad' : st === 'wait' ? 'z-warn' : ''}"></span><div class="stat-num set-stat-text">${esc(t('sync.' + st))}</div><div class="stat-label">${t('set.d.state')}</div></div>
         <div class="stat"><div class="stat-num set-stat-text num">${esc(D.fmtTs(D.S.meta.updatedAt))}</div><div class="stat-label">${t('set.d.updated')}</div></div>
-        ${tgName ? `<div class="stat"><div class="stat-num set-stat-text">${esc(tgName)}</div><div class="stat-label">${t('set.d.tgUser')} · <span class="num">${esc(String(tgUser.id))}</span></div></div>` : ''}
       </div>
     </div>
 
@@ -719,7 +820,6 @@
       <div class="eyebrow mb-s">${t('set.d.danger')}</div>
       <div class="row wrap">
         <button class="btn danger" data-act="setReset">${D.ic('trash', 16)} ${t('set.d.reset')}</button>
-        ${D.tg && D.tg.initData ? `<button class="btn ghost" data-act="setTgClose">${D.ic('logout', 16)} ${t('set.d.tgClose')}</button>` : ''}
       </div>
     </div>`;
   }
@@ -766,14 +866,13 @@
       D.toast(t('set.d.copied'));
     } catch (e) { D.toast(t('set.d.copyFail')); }
   };
-  D.act.setTgClose = () => { if (D.tg && D.tg.close) D.tg.close(); };
 
   /* ------------------------------------------------------------------ */
   /* view                                                                */
   /* ------------------------------------------------------------------ */
   function render() {
     const sub = TABS.includes(D.sub('settings', 'general')) ? D.sub('settings', 'general') : 'general';
-    const body = { general: renderGeneral, habits: renderHabits, prayer: renderPrayer, finance: renderFinance, data: renderData }[sub];
+    const body = { general: renderGeneral, habits: renderHabits, food: renderFood, prayer: renderPrayer, finance: renderFinance, data: renderData }[sub];
     return `<div class="set-page">
       <div class="seg set-tabs">${TABS.map((x) => `<button type="button" class="${x === sub ? 'on' : ''}" data-act="sub" data-view="settings" data-sub="${x}">${esc(t('set.tab.' + x))}</button>`).join('')}</div>
       ${body()}
@@ -783,7 +882,7 @@
   D.search.register((q) => {
     if (!q || q.length < 2) return [];
     const items = TABS.map((x) => ({ label: `${t('nav.settings')} › ${t('set.tab.' + x)}`, sub: t('search.view'), icon: 'gear', go: () => D.go('settings', x) }));
-    const deep = [['set.lang', 'general'], ['set.theme', 'general'], ['set.tz', 'general'], ['set.currency', 'general'], ['set.h.add', 'habits'], ['set.pr.location', 'prayer'], ['set.pr.notify', 'prayer'], ['set.f.cats', 'finance'], ['set.d.export', 'data'], ['set.d.import', 'data']];
+    const deep = [['set.lang', 'general'], ['set.theme', 'general'], ['set.profile', 'general'], ['set.goal', 'general'], ['set.whoopAgeTitle', 'general'], ['set.tz', 'general'], ['set.currency', 'general'], ['set.waterTarget', 'general'], ['set.h.add', 'habits'], ['set.fd.title', 'food'], ['set.pr.location', 'prayer'], ['set.pr.notify', 'prayer'], ['set.f.cats', 'finance'], ['set.d.export', 'data'], ['set.d.import', 'data']];
     for (const [k, tab] of deep) items.push({ label: `${t('nav.settings')} › ${t(k)}`, sub: t('set.search.sub'), icon: 'gear', go: () => D.go('settings', tab) });
     return items;
   });

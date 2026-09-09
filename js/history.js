@@ -12,7 +12,7 @@
   const t = (k, p) => D.t(k, p);
   const VIEW = 'history';
   const SUBS = ['month', 'year', 'chats', 'cards'];
-  const SECTIONS = ['today', 'health', 'sleep', 'strain', 'gym', 'week', 'finance', 'prayer'];
+  const SECTIONS = ['today', 'health', 'sleep', 'strain', 'food', 'age', 'finance', 'prayer']; // ai.js SECTIONS bilan bir xil
   const MOODS = ['😔', '😐', '🙂', '😄', '🤩'];
   const DOW_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Dushanbadan boshlanadi
   const FRESH_MS = 120000;                  // bugunga tegib turgan oraliq shuncha vaqtdan keyin qayta so'raladi
@@ -57,6 +57,8 @@
     'hs.d.note': ['Yozuv', 'Ёзув', 'Запись'],
     'hs.d.stack': ["Qo'shimchalar", 'Қўшимчалар', 'Добавки'],
     'hs.d.caffeine': ['Kofein', 'Кофеин', 'Кофеин'],
+    'hs.d.food': ['Ovqat', 'Овқат', 'Питание'],
+    'hs.f.macros': ["oqsil / uglevod / yog'", 'оқсил / углевод / ёғ', 'белки / углеводы / жиры'],
     'hs.d.empty': ["Bu kunda yozuv yo'q", 'Бу кунда ёзув йўқ', 'В этот день записей нет'],
     'hs.d.open': ['Shu kunni ochish', 'Шу кунни очиш', 'Открыть этот день'],
     'hs.d.weight': ['Vazn', 'Вазн', 'Вес'],
@@ -67,6 +69,7 @@
     'hs.w.sleep': ['Uyqu', 'Уйқу', 'Сон'],
     'hs.w.strain': ['Strain', 'Strain', 'Нагрузка'],
     'hs.w.kcal': ['kkal', 'ккал', 'ккал'],
+    'hs.m.eaten': ['Yeyilgan kkal (kunlik o\'rtacha)', 'Ейилган ккал (кунлик ўртача)', 'Съедено ккал (в среднем за день)'],
     'hs.w.wo': ["Mashg'ulotlar", 'Машғулотлар', 'Тренировки'],
 
     'hs.y.months': ['Oylar', 'Ойлар', 'Месяцы'],
@@ -101,8 +104,8 @@
     'hs.sec.health': ["Sog'liq", 'Соғлиқ', 'Здоровье'],
     'hs.sec.sleep': ['Uyqu', 'Уйқу', 'Сон'],
     'hs.sec.strain': ['Strain', 'Strain', 'Нагрузка'],
-    'hs.sec.gym': ['Sport', 'Спорт', 'Спорт'],
-    'hs.sec.week': ['Hafta', 'Ҳафта', 'Неделя'],
+    'hs.sec.food': ['Ovqat', 'Овқат', 'Питание'],
+    'hs.sec.age': ['Yosh', 'Ёш', 'Возраст'],
     'hs.sec.finance': ['Moliya', 'Молия', 'Финансы'],
     'hs.sec.prayer': ['Ibodat', 'Ибодат', 'Ибадат'],
 
@@ -204,7 +207,9 @@
   }
   const dayFacts = (e) => (ok(e) && e.data.days && typeof e.data.days === 'object' ? e.data.days : {});
   const habitsOf = (d) => (d && Array.isArray(d.habits) ? d.habits : []);
-  const hasAny = (d) => !!d && (habitsOf(d).length > 0 || !!d.health || !!d.prayers || !!d.note || (Array.isArray(d.gratitude) && d.gratitude.length > 0) || (Array.isArray(d.tasks) && d.tasks.length > 0));
+  // arxiv 'food' fakti: ovqatlar ro'yxati (rasmsiz) — massiv yoki {meals|logs:[…]}
+  const foodOf = (d) => { const f = d && d.food; if (Array.isArray(f)) return f; if (f && typeof f === 'object') { if (Array.isArray(f.meals)) return f.meals; if (Array.isArray(f.logs)) return f.logs; } return []; };
+  const hasAny = (d) => !!d && (habitsOf(d).length > 0 || !!d.health || !!d.prayers || !!d.note || (Array.isArray(d.gratitude) && d.gratitude.length > 0) || (Array.isArray(d.tasks) && d.tasks.length > 0) || foodOf(d).length > 0);
 
   /* ------------------------------------------------------------------ */
   /* tanlagichlar                                                        */
@@ -341,7 +346,13 @@
     const note = x.note ? `<div class="hs-note">${esc(String(x.note))}</div>` : '';
     const stack = x.stack && typeof x.stack === 'object' && Object.keys(x.stack).length ? `<div class="hs-chips">${Object.keys(x.stack).map((id) => { const it = ((D.S.stack || {}).items || []).find((s) => s.id === id); return `<span class="pill">${esc(it ? it.name : id)}</span>`; }).join('')}</div>` : '';
     const caf = Array.isArray(x.caffeine) && x.caffeine.length ? `<div class="hs-chips">${x.caffeine.map((c) => `<span class="pill">${esc(txt(c) || '☕')}${num(c && c.mg) ? ` <b class="num">${num(c.mg)} mg</b>` : ''}</span>`).join('')}</div>` : '';
-    const body = sec(t('hs.d.habits'), habits) + sec(t('hs.d.prayers'), prayers) + sec(t('hs.d.health'), health) + sec(t('hs.d.whoop'), whoop)
+    const meals = foodOf(x);
+    const g0 = (v) => Math.round(num(v) || 0);
+    const macros = (m) => `${g0(m.kcal)} ${esc(t('hs.w.kcal'))} · ${g0(m.p)}/${g0(m.c)}/${g0(m.f)} g`;
+    const food = meals.length ? `<div class="list">${meals.map((m) => `<div class="li hs-wo-row"><span class="li-text">${esc(txt(m) || '—')}${num(m && m.grams) ? ` <span class="muted num">${g0(m.grams)} g</span>` : ''}</span><span class="li-meta num">${macros(m || {})}</span></div>`).join('')}</div>
+      ${kv(t('common.total'), macros({ kcal: D.sum(meals, (m) => num(m && m.kcal) || 0), p: D.sum(meals, (m) => num(m && m.p) || 0), c: D.sum(meals, (m) => num(m && m.c) || 0), f: D.sum(meals, (m) => num(m && m.f) || 0) }))}
+      <div class="help">${esc(t('hs.f.macros'))}</div>` : '';
+    const body = sec(t('hs.d.habits'), habits) + sec(t('hs.d.prayers'), prayers) + sec(t('hs.d.health'), health) + sec(t('hs.d.whoop'), whoop) + sec(t('hs.d.food'), food)
       + sec(t('hs.d.gratitude'), grat) + sec(t('hs.d.tasks'), tasks) + sec(t('hs.d.note'), note) + sec(t('hs.d.stack'), stack) + sec(t('hs.d.caffeine'), caf);
     return `<div class="hs-day">${body || `<div class="empty">${esc(t('hs.d.empty'))}</div>`}
       <div class="row mt"><button class="btn" data-act="hsOpenDay" data-day="${k}">${D.ic('calendar', 16)} ${esc(t('hs.d.open'))}</button></div></div>`;
@@ -377,6 +388,7 @@
           <span title="${esc(t('hs.m.rec'))}" class="hs-z-${zoneOf(num(m.recovery))}">${D.ic('heart', 12)} ${num(m.recovery) != null ? Math.round(num(m.recovery)) + '%' : '—'}</span>
           <span title="${esc(t('hs.w.strain'))}">${D.ic('bolt', 12)} ${num(m.strain) != null ? D.round(num(m.strain), 1) : '—'}</span>
           <span title="${esc(t('hs.w.kcal'))}">${D.ic('fire', 12)} ${num(m.kcal) != null ? Math.round(num(m.kcal)) : '—'}</span>
+          <span title="${esc(t('hs.m.eaten'))}">${D.ic('apple', 12)} ${num(m.kcalEaten) != null ? Math.round(num(m.kcalEaten)) : '—'}</span>
           <span title="${esc(t('hs.m.wo'))}">${D.ic('dumbbell', 12)} ${num(m.workouts) != null ? num(m.workouts) : 0}</span>
           <span title="${esc(t('hs.m.weight'))}">${D.ic('scale', 12)} ${wd != null ? (wd > 0 ? '+' : '') + wd + esc(t('unit.kg')) : num(m.weightEnd) != null ? D.round(num(m.weightEnd), 1) + esc(t('unit.kg')) : '—'}</span>
         </div>
