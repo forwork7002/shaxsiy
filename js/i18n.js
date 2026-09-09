@@ -80,6 +80,25 @@ D.i18n.add({
   },
 });
 
+/* kirish: o'z hisobini ochish */
+D.i18n.add({
+  uz: { 'auth.sub2': 'Ismingiz va parolingiz.', 'auth.name': 'Ism', 'auth.regTitle': 'Hisob ochish', 'auth.regSub': 'Ism va parol tanlang — ma’lumotlaringiz faqat sizniki bo‘ladi.',
+    'auth.pass2': 'Parol (yana bir marta)', 'auth.invite': 'Taklif kodi', 'auth.create': 'Hisob ochish', 'auth.noAcc': 'Hisobingiz yo‘qmi?', 'auth.haveAcc': 'Hisobingiz bormi?',
+    'auth.ownerHint': 'Egasi: ismni bo‘sh qoldirib, asosiy parolni kiriting.',
+    'auth.e.taken': 'Bu ism band — boshqasini tanlang', 'auth.e.weak': 'Parol kamida 6 ta belgi', 'auth.e.name': 'Ism 2–40 ta belgi: harf, raqam, bo‘sh joy', 'auth.e.mismatch': 'Parollar bir xil emas',
+    'auth.e.invite': 'Taklif kodi noto‘g‘ri', 'auth.e.closed': 'Hozir yangi hisob ochilmaydi', 'auth.e.many': 'Juda ko‘p urinish — birozdan keyin' },
+  uzk: { 'auth.sub2': 'Исмингиз ва паролингиз.', 'auth.name': 'Исм', 'auth.regTitle': 'Ҳисоб очиш', 'auth.regSub': 'Исм ва парол танланг — маълумотларингиз фақат сизники бўлади.',
+    'auth.pass2': 'Парол (яна бир марта)', 'auth.invite': 'Таклиф коди', 'auth.create': 'Ҳисоб очиш', 'auth.noAcc': 'Ҳисобингиз йўқми?', 'auth.haveAcc': 'Ҳисобингиз борми?',
+    'auth.ownerHint': 'Эгаси: исмни бўш қолдириб, асосий паролни киритинг.',
+    'auth.e.taken': 'Бу исм банд — бошқасини танланг', 'auth.e.weak': 'Парол камида 6 та белги', 'auth.e.name': 'Исм 2–40 та белги: ҳарф, рақам, бўш жой', 'auth.e.mismatch': 'Пароллар бир хил эмас',
+    'auth.e.invite': 'Таклиф коди нотўғри', 'auth.e.closed': 'Ҳозир янги ҳисоб очилмайди', 'auth.e.many': 'Жуда кўп уриниш — бироздан кейин' },
+  ru: { 'auth.sub2': 'Ваше имя и пароль.', 'auth.name': 'Имя', 'auth.regTitle': 'Создать аккаунт', 'auth.regSub': 'Выберите имя и пароль — ваши данные будут только вашими.',
+    'auth.pass2': 'Пароль (ещё раз)', 'auth.invite': 'Код приглашения', 'auth.create': 'Создать аккаунт', 'auth.noAcc': 'Нет аккаунта?', 'auth.haveAcc': 'Уже есть аккаунт?',
+    'auth.ownerHint': 'Владелец: оставьте имя пустым и введите основной пароль.',
+    'auth.e.taken': 'Это имя занято — выберите другое', 'auth.e.weak': 'Пароль не короче 6 символов', 'auth.e.name': 'Имя 2–40 символов: буквы, цифры, пробел', 'auth.e.mismatch': 'Пароли не совпадают',
+    'auth.e.invite': 'Неверный код приглашения', 'auth.e.closed': 'Регистрация сейчас закрыта', 'auth.e.many': 'Слишком много попыток — попробуйте позже' },
+});
+
 /* kirish: bir nechta odam */
 D.i18n.add({
   uz: { 'auth.tgId': 'Sizning Telegram ID', 'auth.who': 'Kim kiryapti?', 'auth.pick': 'Ismingizni tanlang va parolni kiriting.', 'auth.or': 'yoki', 'auth.google': 'Google bilan kirish', 'auth.switched': 'Hisob almashdi — bu qurilmadagi ma’lumot yangilandi' },

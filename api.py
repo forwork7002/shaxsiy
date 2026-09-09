@@ -13,6 +13,11 @@ Env (start.sh):
   MA_BOT_TOKEN       Telegram bot tokeni (initData tekshiruvi uchun) — Telegram Mini App uchun kerak
   MA_USERS           Ism:parol[:uid][:telegram_id],... — har kim o'z hisobi; telegram_id o'sha odamni
                      Telegram ichida ham shu uid'ga bog'laydi. Yozilgach MA_PASSCODE e'tiborsiz.
+  MA_REGISTER        "0" bo'lsa kirish oynasidagi «Hisob ochish» yopiladi (default: ochiq — har kim
+                     o'ziga hisob ochadi, hisoblar data/users.json da, parollar xeshlangan)
+  MA_INVITE          taklif kodi: berilsa hisob ochishda shu kod so'raladi (bo'sh = kodsiz)
+  GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET   Google bilan kirish; MA_ALLOWED_EMAILS berilsa faqat
+                     o'sha emaillar, bo'lmasa (ro'yxatdan o'tish ochiq bo'lsa) har qanday Google hisobi
   MA_SECRET          sessiya cookie imzosi kaliti — set-users.sh bir marta yozadi, keyin o'zgartirilmaydi
   MA_ALLOWED_IDS     eski aniq ro'yxat: bu id'lar o'z raqami bilan uid oladi (bo'sh = faqat MA_USERS dagilar)
   MA_DATA_DIR        ma'lumot papkasi (default: ./data)
@@ -80,6 +85,71 @@ def _parse_users(raw: str):
     return out
 USERS = _parse_users(os.environ.get("MA_USERS", ""))
 
+# O'zi ro'yxatdan o'tganlar: data/users.json — {"ism_kichik": {name, uid, salt, hash, iter, createdAt}}.
+# Parol hech qachon ochiq saqlanmaydi (PBKDF2-SHA256). uid tasodifiy — ismdan topib bo'lmaydi.
+REGISTER_ON = os.environ.get("MA_REGISTER", "1") != "0"
+INVITE = os.environ.get("MA_INVITE", "").strip()
+USERS_FILE = DATA_DIR / "users.json"
+RESERVED_NAMES = {"me", "dev", "admin", "root", "system", "whoop", "nova", "google"}
+PW_ITER = 200_000
+NAME_MIN, NAME_MAX, PASS_MIN = 2, 40, 6
+
+
+def _reg_load() -> dict:
+    try:
+        d = json.loads(USERS_FILE.read_text(encoding="utf-8"))
+        return d if isinstance(d, dict) else {}
+    except FileNotFoundError:
+        return {}
+    except Exception as e:  # noqa: BLE001
+        log.error("users.json o'qilmadi: %s", e)
+        return {}
+
+
+def _reg_save(d: dict):
+    tmp = USERS_FILE.with_suffix(".tmp")
+    tmp.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
+    try:
+        os.chmod(tmp, 0o600)
+    except OSError:
+        pass
+    tmp.replace(USERS_FILE)
+
+
+def _pw_hash(pw: str, salt: str, it: int = PW_ITER) -> str:
+    return hashlib.pbkdf2_hmac("sha256", pw.encode("utf-8"), bytes.fromhex(salt), it).hex()
+
+
+def _clean_name(raw) -> str:
+    """Ism: harf/raqam/bo'sh joy/'-_. — ortiqcha bo'sh joylar yig'iladi. Yaroqsiz bo'lsa ''."""
+    name = " ".join(str(raw or "").split())
+    if not (NAME_MIN <= len(name) <= NAME_MAX):
+        return ""
+    if any(not (c.isalnum() or c in " '’-_.") for c in name):
+        return ""
+    if not any(c.isalpha() for c in name):
+        return ""
+    return name
+
+
+def _name_taken(name: str) -> bool:
+    key = name.casefold()
+    if key in RESERVED_NAMES:
+        return True
+    for u in USERS:
+        if u["name"].casefold() == key or u["uid"].casefold() == key:
+            return True
+    return key in _reg_load()
+
+
+def _reg_check(name: str, pw: str):
+    """Ro'yxatdagi odam → uid yoki None. Vaqt jihatidan doimiy taqqoslash."""
+    rec = _reg_load().get((name or "").casefold())
+    if not rec:
+        return None
+    ok = hmac.compare_digest(_pw_hash(pw, rec["salt"], int(rec.get("iter") or PW_ITER)), rec["hash"])
+    return rec["uid"] if ok else None
+
 
 def uid_for_telegram(tg_id: str):
     """Tekshirilgan Telegram id → uid. MA_USERS'dagi bog'lanish birinchi; keyin eski aniq ro'yxat
@@ -96,11 +166,11 @@ def uid_for_telegram(tg_id: str):
 GOOGLE_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 GOOGLE_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 ALLOWED_EMAILS = {x.strip().lower() for x in os.environ.get("MA_ALLOWED_EMAILS", "").split(",") if x.strip()}
-# Google kirish faqat ruxsat ro'yxati bilan ma'noga ega: ro'yxat bo'sh bo'lsa istalgan Google hisobi
-# o'ziga yangi profil ochib olardi. Uchala shart ham bo'lmasa — Google eshigi yopiq.
-GOOGLE_ON = bool(GOOGLE_ID and GOOGLE_SECRET and ALLOWED_EMAILS)
-if GOOGLE_ID and GOOGLE_SECRET and not ALLOWED_EMAILS:
-    log.error("GOOGLE_CLIENT_ID bor, lekin MA_ALLOWED_EMAILS bo'sh — Google kirish o'chirilgan")
+# Google eshigi: ruxsat ro'yxati bo'lsa — faqat o'sha emaillar; bo'lmasa ro'yxatdan o'tish ochiq
+# bo'lgandagina (istalgan Google hisobi o'ziga profil ochadi — «Hisob ochish» bilan bir xil eshik).
+GOOGLE_ON = bool(GOOGLE_ID and GOOGLE_SECRET and (ALLOWED_EMAILS or REGISTER_ON))
+if GOOGLE_ID and GOOGLE_SECRET and not GOOGLE_ON:
+    log.error("GOOGLE_CLIENT_ID bor, lekin MA_REGISTER=0 va MA_ALLOWED_EMAILS bo'sh — Google kirish o'chirilgan")
 SESSION_DAYS = int(os.environ.get("MA_SESSION_DAYS", "30"))
 COOKIE = "dash_s"
 WHOOP_ID = os.environ.get("WHOOP_CLIENT_ID", "")
@@ -176,31 +246,82 @@ def _set_session(resp, uid: str):
 
 @app.get("/api/auth/config")
 def auth_config():
-    """Kirish oynasi nimani ko'rsatishini biladi: ismlar ro'yxati, umumiy parol bormi, Google bormi."""
-    return jsonify({"users": [u["name"] for u in USERS], "passcode": bool(PASSCODE) and not USERS, "google": GOOGLE_ON})
+    """Kirish oynasi nimani ko'rsatishini biladi: ismli hisoblar bormi, egasining umumiy paroli
+    ishlaydimi, Google bormi, hisob ochish ochiqmi, taklif kodi so'raladimi. Ismlar ro'yxati
+    chiqarilmaydi — ochiq saytda bu begonaga kimlar borligini aytib qo'yardi."""
+    return jsonify({"named": bool(USERS), "passcode": bool(PASSCODE) and not USERS, "google": GOOGLE_ON,
+                    "register": REGISTER_ON, "invite": bool(INVITE)})
 
 
 @app.post("/api/login")
 def login():
-    """Ism + parol (MA_USERS) yoki eski umumiy parol (MA_PASSCODE). Telegram ichida kerak emas."""
-    if not USERS and not PASSCODE:
+    """Ism + parol (MA_USERS yoki data/users.json) yoki ismsiz — egasining umumiy paroli (MA_PASSCODE).
+    Telegram ichida kerak emas."""
+    if not (USERS or PASSCODE or REGISTER_ON or USERS_FILE.exists()):
         return jsonify({"error": "no_passcode"}), 501
     body = request.get_json(silent=True) or {}
     time.sleep(0.4)  # parolni terib topishga qarshi sekinlashtirish
-    pw = str(body.get("pass") or "")
-    name = str(body.get("user") or "").strip()
+    pw = str(body.get("pass") or "")[:200]
+    name = " ".join(str(body.get("user") or "").split())
     uid = None
-    if name and USERS:
+    if name:
         for u in USERS:
-            if u["name"].lower() == name.lower() and hmac.compare_digest(pw, u["pass"]):
+            if u["name"].casefold() == name.casefold() and hmac.compare_digest(pw, u["pass"]):
                 uid = u["uid"]
                 break
-    elif not name and not USERS and PASSCODE and hmac.compare_digest(pw, PASSCODE):
-        uid = "me"   # eski bir kishilik rejim — ismlar yozilgach bu eshik yopiladi
+        if not uid:
+            uid = _reg_check(name, pw)
+    elif not USERS and PASSCODE and hmac.compare_digest(pw, PASSCODE):
+        uid = "me"   # eski bir kishilik rejim — MA_USERS yozilgach bu eshik yopiladi
     if not uid:
         log.warning("Noto'g'ri parol (%s): %s", name or "-", request.headers.get("X-Forwarded-For", request.remote_addr))
         return jsonify({"error": "bad_pass"}), 401
     return _set_session(jsonify({"ok": True, "uid": uid, "name": display_name(uid)}), uid)
+
+
+_reg_recent: dict = {}   # ip → [vaqtlar] — bitta manzildan soatiga ko'pi bilan 5 ta hisob
+
+
+@app.post("/api/register")
+def register():
+    """Yangi hisob: ism + parol (+ taklif kodi, MA_INVITE bo'lsa). Darhol kiritib qo'yadi."""
+    if not REGISTER_ON:
+        return jsonify({"error": "closed"}), 403
+    body = request.get_json(silent=True) or {}
+    time.sleep(0.4)
+    if INVITE and not hmac.compare_digest(str(body.get("invite") or "").strip(), INVITE):
+        return jsonify({"error": "bad_invite"}), 403
+    name = _clean_name(body.get("user"))
+    if not name:
+        return jsonify({"error": "bad_name"}), 400
+    pw, pw2 = str(body.get("pass") or ""), str(body.get("pass2") or "")
+    if len(pw) < PASS_MIN or len(pw) > 200:
+        return jsonify({"error": "weak_pass"}), 400
+    if "pass2" in body and pw != pw2:
+        return jsonify({"error": "mismatch"}), 400
+    ip = request.headers.get("X-Forwarded-For", request.remote_addr or "?").split(",")[0].strip()
+    now = time.time()
+    hits = [t for t in _reg_recent.get(ip, []) if now - t < 3600]
+    if len(hits) >= 5:
+        return jsonify({"error": "too_many"}), 429
+    with _lock:
+        if _name_taken(name):
+            return jsonify({"error": "name_taken"}), 409
+        reg = _reg_load()
+        uid = "u_" + secrets.token_hex(6)
+        while uid in {u["uid"] for u in USERS} or any(r.get("uid") == uid for r in reg.values()):
+            uid = "u_" + secrets.token_hex(6)
+        salt = secrets.token_hex(16)
+        reg[name.casefold()] = {"name": name, "uid": uid, "salt": salt, "hash": _pw_hash(pw, salt),
+                                "iter": PW_ITER, "createdAt": datetime.now(TZ).isoformat()}
+        _reg_save(reg)
+        try:
+            who_file(uid).write_text(json.dumps({"name": name}, ensure_ascii=False), encoding="utf-8")
+        except OSError:
+            pass
+    _reg_recent[ip] = hits + [now]
+    log.info("Yangi hisob: %s (%s)", name, uid)
+    return _set_session(jsonify({"ok": True, "uid": uid, "name": name}), uid)
 
 
 @app.get("/api/me")
@@ -261,7 +382,7 @@ def google_callback():
     if st2 != 200 or info.get("aud") != GOOGLE_ID or str(info.get("email_verified", "")).lower() != "true" or not info.get("sub"):
         return "Google hisobini tekshirib bo'lmadi", 401
     email = str(info.get("email", "")).lower()
-    if not email or email not in ALLOWED_EMAILS:   # so'zsiz: ro'yxat bo'sh bo'lsa GOOGLE_ON ham yolg'on
+    if not email or (ALLOWED_EMAILS and email not in ALLOWED_EMAILS):   # ro'yxat bo'sh = ochiq eshik
         log.warning("Google: ruxsatsiz email %s", email)
         return "Bu Google hisobiga ruxsat berilmagan", 403
     uid = "g_" + hashlib.sha256(str(info["sub"]).encode()).hexdigest()[:20]
@@ -296,7 +417,7 @@ def current_user():
     uid = read_session(request.cookies.get(COOKIE, ""))
     if uid:
         return uid, None
-    return None, (jsonify({"error": "auth_failed", "passcode": bool(PASSCODE or USERS or GOOGLE_ON)}), 401)
+    return None, (jsonify({"error": "auth_failed", "passcode": bool(PASSCODE or USERS or GOOGLE_ON or REGISTER_ON)}), 401)
 
 
 _SECRET_CACHE = None
@@ -342,7 +463,11 @@ def display_name(uid: str) -> str:
     try:
         return (json.loads(who_file(uid).read_text(encoding="utf-8")) or {}).get("name") or uid
     except Exception:  # noqa: BLE001
-        return uid
+        pass
+    for rec in _reg_load().values():
+        if rec.get("uid") == uid:
+            return rec.get("name") or uid
+    return uid
 
 
 # ═══════════════════════ Ma'lumot ═══════════════════════

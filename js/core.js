@@ -989,59 +989,84 @@
     ask() {
       if (authPending) return authPending;
       authPending = new Promise(async (resolve) => {
-        // what the server offers: named users, a shared passcode, Google — or nothing yet
-        let cfg = { users: [], passcode: true, google: false };
+        // what the server offers: named accounts, the owner's passcode, Google, open registration
+        let cfg = { named: false, passcode: true, google: false, register: false, invite: false };
         try { const r = await fetch('/api/auth/config', { credentials: 'same-origin', cache: 'no-store' }); if (r.ok) cfg = Object.assign(cfg, await r.json()); } catch (e) {}
-        const users = Array.isArray(cfg.users) ? cfg.users : [];
-        let chosen = users.includes(D.device.lastUser) ? D.device.lastUser : (users[0] || '');
         const tgId = D.tg && D.tg.initDataUnsafe && D.tg.initDataUnsafe.user && D.tg.initDataUnsafe.user.id;
+        const askName = !!(cfg.named || cfg.register);
+        const canLogin = !!(cfg.named || cfg.passcode || cfg.register);
+        let mode = 'login';
+        let name = D.device.lastUser || '';
         const box = document.createElement('div');
         box.className = 'auth-gate';
-        box.innerHTML = `<form class="auth-card" autocomplete="on">
-            <div class="auth-ic">${D.ic('user', 26)}</div>
-            <div class="auth-title">${D.esc(D.t(users.length ? 'auth.who' : 'auth.title'))}</div>
-            <p class="auth-sub">${D.esc(D.t(users.length ? 'auth.pick' : 'auth.sub'))}</p>
-            ${tgId ? `<p class="auth-sub auth-tg">${D.esc(D.t('auth.tgId'))}: <b class="num">${D.esc(String(tgId))}</b></p>` : ''}
-            ${users.length ? `<div class="auth-users">${users.map((u) => `<button type="button" class="auth-user ${u === chosen ? 'on' : ''}" data-u="${D.esc(u)}">${D.esc(u)}</button>`).join('')}</div>` : ''}
-            ${users.length || cfg.passcode ? `<input class="inp auth-inp" type="password" name="password" autocomplete="current-password"
-                   placeholder="${D.esc(D.t('auth.ph'))}" aria-label="${D.esc(D.t('auth.ph'))}">
-            <div class="auth-err" hidden></div>
-            <button class="btn auth-btn" type="submit">${D.esc(D.t('auth.go'))}</button>` : ''}
-            ${cfg.google ? `${users.length || cfg.passcode ? `<div class="auth-or">${D.esc(D.t('auth.or'))}</div>` : ''}<button type="button" class="btn ghost auth-btn auth-google">${D.ic('globe', 16)} ${D.esc(D.t('auth.google'))}</button>` : ''}
-          </form>`;
         document.body.appendChild(box);
-        const form = box.querySelector('form');
-        const inp = box.querySelector('.auth-inp');
-        const err = box.querySelector('.auth-err');
-        const btn = box.querySelector('.auth-btn');
-        for (const b of box.querySelectorAll('.auth-user')) b.addEventListener('click', () => {
-          chosen = b.dataset.u; D.device.lastUser = chosen; D.saveDevice();
-          for (const x of box.querySelectorAll('.auth-user')) x.classList.toggle('on', x === b);
-          if (inp) inp.focus();
-        });
-        const g = box.querySelector('.auth-google');
-        if (g) g.addEventListener('click', () => { location.href = '/api/auth/google'; });
-        if (inp) setTimeout(() => inp.focus(), 60);
-        form.addEventListener('submit', async (ev) => {
-          ev.preventDefault();
-          if (!inp) return;
-          const v = inp.value;
-          if (!v) return;
-          btn.disabled = true; err.hidden = true;
-          try {
-            const r = await fetch('/api/login', {
-              method: 'POST', credentials: 'same-origin',
-              headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pass: v, user: users.length ? chosen : '' }),
-            });
-            if (r.ok) {
-              const j = await r.json().catch(() => ({}));
-              if (j && j.uid) { D.device.uid = j.uid; D.device.name = j.name || ''; D.saveDevice(); }
-              box.remove(); authPending = null; resolve(true); return;
+        const t = D.t, esc = D.esc;
+        const errKey = (code, status) => ({
+          name_taken: 'auth.e.taken', weak_pass: 'auth.e.weak', bad_name: 'auth.e.name', mismatch: 'auth.e.mismatch',
+          bad_invite: 'auth.e.invite', closed: 'auth.e.closed', too_many: 'auth.e.many', bad_pass: 'auth.bad',
+        })[code] || (status === 401 ? 'auth.bad' : 'auth.err');
+        const done = (j) => {
+          if (j && j.uid) { D.device.uid = j.uid; D.device.name = j.name || ''; D.device.lastUser = j.name || name; D.saveDevice(); }
+          box.remove(); authPending = null; resolve(true);
+        };
+        const draw = () => {
+          const reg = mode === 'register';
+          const sub = reg ? 'auth.regSub' : askName ? 'auth.sub2' : 'auth.sub';
+          box.innerHTML = `<form class="auth-card" autocomplete="on">
+            <div class="auth-ic">${D.ic(reg ? 'plus' : 'user', 26)}</div>
+            <div class="auth-title">${esc(t(reg ? 'auth.regTitle' : 'auth.title'))}</div>
+            <p class="auth-sub">${esc(t(sub))}</p>
+            ${tgId ? `<p class="auth-sub auth-tg">${esc(t('auth.tgId'))}: <b class="num">${esc(String(tgId))}</b></p>` : ''}
+            ${reg || askName ? `<input class="inp auth-inp auth-name" type="text" name="username" autocomplete="username" autocapitalize="words"
+                   maxlength="40" value="${esc(name)}" placeholder="${esc(t('auth.name'))}" aria-label="${esc(t('auth.name'))}">` : ''}
+            ${reg || canLogin ? `<input class="inp auth-inp auth-pass" type="password" name="password" autocomplete="${reg ? 'new-password' : 'current-password'}"
+                   placeholder="${esc(t('auth.ph'))}" aria-label="${esc(t('auth.ph'))}">` : ''}
+            ${reg ? `<input class="inp auth-inp auth-pass2" type="password" name="password2" autocomplete="new-password"
+                   placeholder="${esc(t('auth.pass2'))}" aria-label="${esc(t('auth.pass2'))}">` : ''}
+            ${reg && cfg.invite ? `<input class="inp auth-inp auth-name auth-invite" type="text" name="invite" autocomplete="off" autocapitalize="off"
+                   placeholder="${esc(t('auth.invite'))}" aria-label="${esc(t('auth.invite'))}">` : ''}
+            <div class="auth-err" hidden></div>
+            ${reg || canLogin ? `<button class="btn auth-btn" type="submit">${esc(t(reg ? 'auth.create' : 'auth.go'))}</button>` : ''}
+            ${!reg && cfg.passcode && askName ? `<p class="auth-hint">${esc(t('auth.ownerHint'))}</p>` : ''}
+            ${cfg.register ? `<p class="auth-switch">${esc(t(reg ? 'auth.haveAcc' : 'auth.noAcc'))} <button type="button" class="auth-link">${esc(t(reg ? 'auth.go' : 'auth.regTitle'))}</button></p>` : ''}
+            ${cfg.google ? `${reg || canLogin ? `<div class="auth-or">${esc(t('auth.or'))}</div>` : ''}<button type="button" class="btn ghost auth-btn auth-google">${D.ic('globe', 16)} ${esc(t('auth.google'))}</button>` : ''}
+          </form>`;
+          const form = box.querySelector('form');
+          const q = (c) => box.querySelector(c);
+          const nameEl = q('.auth-name:not(.auth-invite)'), pass = q('.auth-pass'), pass2 = q('.auth-pass2'), inv = q('.auth-invite');
+          const err = q('.auth-err'), btn = q('.auth-btn[type=submit]');
+          const fail = (key) => { err.textContent = t(key); err.hidden = false; if (btn) btn.disabled = false; };
+          const g = q('.auth-google');
+          if (g) g.addEventListener('click', () => { location.href = '/api/auth/google'; });
+          const sw = q('.auth-link');
+          if (sw) sw.addEventListener('click', () => { if (nameEl) name = nameEl.value; mode = reg ? 'login' : 'register'; draw(); });
+          const first = (nameEl && !nameEl.value) ? nameEl : pass;
+          if (first) setTimeout(() => first.focus(), 60);
+          form.addEventListener('submit', async (ev) => {
+            ev.preventDefault();
+            if (!pass) return;
+            name = nameEl ? nameEl.value.trim() : '';
+            const v = pass.value;
+            if (!v) return;
+            if (reg) {
+              if (name.length < 2) return fail('auth.e.name');
+              if (v.length < 6) return fail('auth.e.weak');
+              if (pass2 && pass2.value !== v) return fail('auth.e.mismatch');
             }
-            err.textContent = D.t(r.status === 401 ? 'auth.bad' : 'auth.err');
-          } catch (e) { err.textContent = D.t('auth.err'); }
-          err.hidden = false; btn.disabled = false; inp.select();
-        });
+            btn.disabled = true; err.hidden = true;
+            try {
+              const body = reg ? { user: name, pass: v, pass2: pass2 ? pass2.value : v, invite: inv ? inv.value.trim() : '' } : { pass: v, user: name };
+              const r = await fetch(reg ? '/api/register' : '/api/login', {
+                method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
+              });
+              const j = await r.json().catch(() => ({}));
+              if (r.ok) return done(j);
+              fail(errKey(j && j.error, r.status));
+            } catch (e) { fail('auth.err'); }
+            (reg && err.textContent === t('auth.e.taken') && nameEl ? nameEl : pass).select();
+          });
+        };
+        draw();
       });
       return authPending;
     },

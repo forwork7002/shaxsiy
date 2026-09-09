@@ -49,3 +49,4 @@ Serversiz ishlatmoqchi bo'lsangiz Nova bo'limida o'z kalitingizni kiritishingiz 
 `ARCHITECTURE.md` ni o'qing → `js/<nom>.js` da `D.view({...})` → `index.html` ga `<script>` → `sw.js` ro'yxatiga qo'shing.
 
 - `deploy/set-users.sh`, `deploy/set-telegram.sh`, `deploy/set-ai.sh` — foydalanuvchilar, Telegram bot, AI kaliti (qiymatlar yashirin kiritiladi)
+- `deploy/set-register.sh` — hisob ochish eshigi (ochiq / taklif kodi / yopiq), `list`, `pass Ism` (parolni almashtirish). Har kim kirish oynasida o'ziga hisob ochadi (`data/users.json`, parollar xeshlangan), o'z WHOOP'ini o'zi ulaydi.

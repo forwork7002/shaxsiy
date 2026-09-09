@@ -22,7 +22,7 @@ app/
   js/settings.js    Созлаш + data import/export
   js/app.js         boot
   sw.js manifest.json
-  api.py            Flask: Telegram auth, /api/data, WHOOP OAuth+proxy, /api/ai proxy
+  api.py            Flask: accounts (register/login/Google/Telegram), per-uid /api/data, per-uid WHOOP OAuth+poller, /api/ai proxy
 ```
 
 Script order in index.html: core.js → i18n.js → prayer.js → ai.js → whoop.js → view modules (any order) → app.js.
