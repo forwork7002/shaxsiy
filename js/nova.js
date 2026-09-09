@@ -91,7 +91,7 @@
   const t = (k, p) => D.t(k, p);
   const esc = D.esc;
   const MAX_MSGS = 20;        // messages sent per request
-  const MAX_SYS = 2500;       // system prompt cap (chars)
+  const MAX_SYS = 11000;      // system prompt cap (chars) — the chat sees every section plus 14 days of WHOOP
   const QUICK = ['day', 'tomorrow', 'week', 'motivation'];
 
   /* transient (per page load) */
@@ -189,6 +189,8 @@
   }
 
   function buildSystem() {
+    // the shared coach context knows everything the section cards know, and the watch's last two weeks
+    if (D.ai && D.ai.chatSystem) { try { return D.ai.chatSystem(); } catch (e) { console.warn('chatSystem', e); } }
     const c = snapshot();
     const S = D.S;
     const L = [];

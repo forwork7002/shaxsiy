@@ -1,5 +1,5 @@
 /* =====================================================================
-   Ibodat — prayer times · prayer log + qaza ledger · tasbih · fasting · qibla
+   Ibodat — prayer times · prayer log + qaza ledger · fasting
    view id 'prayer'. Reads D.prayer / D.hijri (prayer.js); mirrors prayer
    states into the ПЕШИН/АСР/ШОМ/БОМДОД/ХУФТОН habits (same rule as today.js).
    ===================================================================== */
@@ -8,7 +8,7 @@
 
   D.i18n.add({
     uz: {
-      'ib.sub.times': 'Vaqtlar', 'ib.sub.log': 'Qayd', 'ib.sub.tasbih': 'Tasbeh', 'ib.sub.fasting': "Ro'za", 'ib.sub.qibla': 'Qibla',
+      'ib.sub.times': 'Vaqtlar', 'ib.sub.log': 'Qayd', 'ib.sub.fasting': "Ro'za", 
       'ib.next': 'Keyingi namoz', 'ib.left': 'qoldi', 'ib.current': 'Joriy vaqt', 'ib.night': 'Tun', 'ib.duha': 'Quyosh — namoz vaqti emas',
       'ib.timesFor': 'Namoz vaqtlari', 'ib.backToday': 'Bugunga', 'ib.hijri': 'Hijriy',
       'ib.ramadan': 'Ramazon muborak!', 'ib.ramadanDay': 'Ramazon, {d}-kun',
@@ -19,10 +19,7 @@
       'ib.st.jamaat': 'Jamoat', 'ib.st.alone': 'Yakka', 'ib.st.qaza': 'Qazo', 'ib.st.missed': "O'tkazib",
       'ib.qazaHint': 'qazo?',
       'ib.last30': "So'nggi 30 kun", 'ib.heatJamaat': 'Jamoat ulushi (kunlik)', 'ib.streak5': '5 vaqt seriyasi', 'ib.jamaat': 'Jamoat', 'ib.ontime': "O'z vaqtida",
-      'ib.tasbih': 'Tasbeh', 'ib.rounds': '{n} davra', 'ib.prevDay': 'Oldingi kun', 'ib.nextDay': 'Keyingi kun', 'ib.tapHint': 'Sanash uchun bosing', 'ib.custom': 'Boshqa…', 'ib.customPh': 'Zikr nomi',
-      'ib.saved': 'Saqlandi: {n}', 'ib.completed': '{name} — {n} tugallandi', 'ib.reset': 'Nol', 'ib.nothingToSave': 'Avval sanang',
-      'ib.todayTotal': 'Bugun', 'ib.week7': '7 kun', 'ib.dhikrStreak': 'Seriya', 'ib.sessions': 'Bugungi seanslar', 'ib.noSessions': "Bugun hali saqlangan zikr yo'q", 'ib.sessionDeleted': "Seans o'chirildi",
-      'ib.d.subhanallah': 'Subhanalloh', 'ib.d.alhamdulillah': 'Alhamdulillah', 'ib.d.allahuakbar': 'Allohu akbar', 'ib.d.istighfar': "Istig'for", 'ib.d.salavot': 'Salavot',
+      'ib.prevDay': 'Oldingi kun', 'ib.nextDay': 'Keyingi kun', 
       'ib.fastToday': "Bugun ro'za", 'ib.fasted': "Ro'za tutdim", 'ib.suggest': 'Tavsiya', 'ib.noSuggest': "Bugun sunnat ro'za kuni emas", 'ib.fastType': "Ro'za turi",
       'ib.f.ramadan': 'Ramazon', 'ib.f.ayyam_bid': 'Ayyomi biyz', 'ib.f.arafa': 'Arafa', 'ib.f.ashura': 'Ashuro', 'ib.f.shawwal': 'Shavvol 6', 'ib.f.mon_thu': 'Dushanba-Payshanba',
       'ib.ft.ramadan': 'Ramazon', 'ib.ft.sunnah': 'Sunnat', 'ib.ft.qaza': 'Qazo', 'ib.ft.nafl': 'Nafl',
@@ -30,14 +27,10 @@
       'ib.qazaFast': "Qazo ro'zalar", 'ib.owed': 'qarz (kun)', 'ib.qazaDone': 'Tutilgan', 'ib.remaining': 'Qolgan',
       'ib.ramadanMode': 'Ramazon', 'ib.ramadanProgress': "Tutilgan ro'za", 'ib.khatm': "Xatm sur'ati", 'ib.khatmHint': 'Kuniga ~{p} sahifa · bugungacha {page}-sahifa (juz {juz})',
       'ib.toRamadan': 'Ramazongacha {n} kun', 'ib.lastTen': 'Oxirgi 10 kecha — Laylatul qadrni izlang',
-      'ib.qibla': 'Qibla', 'ib.bearing': "Ka'ba yo'nalishi", 'ib.fromNorth': 'shimoldan, soat mili bo\'ylab',
-      'ib.live': 'Jonli kompas', 'ib.liveOff': "Kompasni o'chirish", 'ib.noCompass': "Bu qurilmada kompas yo'q", 'ib.compassDenied': 'Kompasga ruxsat berilmadi',
-      'ib.turnLeft': 'Chapga {n}° buriling', 'ib.turnRight': "O'ngga {n}° buriling", 'ib.aligned': "Qibla to'g'ri!", 'ib.waiting': 'Kompas signali kutilmoqda…',
-      'ib.coords': 'Koordinatalar', 'ib.qiblaHint': "Telefonni tekis tuting va metall buyumlardan uzoqlashtiring. Ko'rsatkich taxminiy.",
-      'ib.staticHint': "Telefon shimolga qaratilganda igna qiblani ko'rsatadi",
+      
     },
     uzk: {
-      'ib.sub.times': 'Вақтлар', 'ib.sub.log': 'Қайд', 'ib.sub.tasbih': 'Тасбеҳ', 'ib.sub.fasting': 'Рўза', 'ib.sub.qibla': 'Қибла',
+      'ib.sub.times': 'Вақтлар', 'ib.sub.log': 'Қайд', 'ib.sub.fasting': 'Рўза', 
       'ib.next': 'Кейинги намоз', 'ib.left': 'қолди', 'ib.current': 'Жорий вақт', 'ib.night': 'Тун', 'ib.duha': 'Қуёш — намоз вақти эмас',
       'ib.timesFor': 'Намоз вақтлари', 'ib.backToday': 'Бугунга', 'ib.hijri': 'Ҳижрий',
       'ib.ramadan': 'Рамазон муборак!', 'ib.ramadanDay': 'Рамазон, {d}-кун',
@@ -48,10 +41,7 @@
       'ib.st.jamaat': 'Жамоат', 'ib.st.alone': 'Якка', 'ib.st.qaza': 'Қазо', 'ib.st.missed': 'Ўтказиб',
       'ib.qazaHint': 'қазо?',
       'ib.last30': 'Сўнгги 30 кун', 'ib.heatJamaat': 'Жамоат улуши (кунлик)', 'ib.streak5': '5 вақт серияси', 'ib.jamaat': 'Жамоат', 'ib.ontime': 'Ўз вақтида',
-      'ib.tasbih': 'Тасбеҳ', 'ib.rounds': '{n} давра', 'ib.prevDay': 'Олдинги кун', 'ib.nextDay': 'Кейинги кун', 'ib.tapHint': 'Санаш учун босинг', 'ib.custom': 'Бошқа…', 'ib.customPh': 'Зикр номи',
-      'ib.saved': 'Сақланди: {n}', 'ib.completed': '{name} — {n} тугалланди', 'ib.reset': 'Нол', 'ib.nothingToSave': 'Аввал сананг',
-      'ib.todayTotal': 'Бугун', 'ib.week7': '7 кун', 'ib.dhikrStreak': 'Серия', 'ib.sessions': 'Бугунги сеанслар', 'ib.noSessions': 'Бугун ҳали сақланган зикр йўқ', 'ib.sessionDeleted': 'Сеанс ўчирилди',
-      'ib.d.subhanallah': 'Субҳаналлоҳ', 'ib.d.alhamdulillah': 'Алҳамдулиллаҳ', 'ib.d.allahuakbar': 'Аллоҳу акбар', 'ib.d.istighfar': 'Истиғфор', 'ib.d.salavot': 'Салавот',
+      'ib.prevDay': 'Олдинги кун', 'ib.nextDay': 'Кейинги кун', 
       'ib.fastToday': 'Бугун рўза', 'ib.fasted': 'Рўза тутдим', 'ib.suggest': 'Тавсия', 'ib.noSuggest': 'Бугун суннат рўза куни эмас', 'ib.fastType': 'Рўза тури',
       'ib.f.ramadan': 'Рамазон', 'ib.f.ayyam_bid': 'Айёми бийз', 'ib.f.arafa': 'Арафа', 'ib.f.ashura': 'Ашуро', 'ib.f.shawwal': 'Шаввол 6', 'ib.f.mon_thu': 'Душанба-Пайшанба',
       'ib.ft.ramadan': 'Рамазон', 'ib.ft.sunnah': 'Суннат', 'ib.ft.qaza': 'Қазо', 'ib.ft.nafl': 'Нафл',
@@ -59,14 +49,10 @@
       'ib.qazaFast': 'Қазо рўзалар', 'ib.owed': 'қарз (кун)', 'ib.qazaDone': 'Тутилган', 'ib.remaining': 'Қолган',
       'ib.ramadanMode': 'Рамазон', 'ib.ramadanProgress': 'Тутилган рўза', 'ib.khatm': 'Хатм суръати', 'ib.khatmHint': 'Кунига ~{p} саҳифа · бугунгача {page}-саҳифа (жуз {juz})',
       'ib.toRamadan': 'Рамазонгача {n} кун', 'ib.lastTen': 'Охирги 10 кеча — Лайлатул қадрни изланг',
-      'ib.qibla': 'Қибла', 'ib.bearing': 'Каъба йўналиши', 'ib.fromNorth': 'шимолдан, соат мили бўйлаб',
-      'ib.live': 'Жонли компас', 'ib.liveOff': 'Компасни ўчириш', 'ib.noCompass': 'Бу қурилмада компас йўқ', 'ib.compassDenied': 'Компасга рухсат берилмади',
-      'ib.turnLeft': 'Чапга {n}° бурилинг', 'ib.turnRight': 'Ўнгга {n}° бурилинг', 'ib.aligned': 'Қибла тўғри!', 'ib.waiting': 'Компас сигнали кутилмоқда…',
-      'ib.coords': 'Координаталар', 'ib.qiblaHint': 'Телефонни текис тутинг ва металл буюмлардан узоқлаштиринг. Кўрсаткич тахминий.',
-      'ib.staticHint': 'Телефон шимолга қаратилганда игна қиблани кўрсатади',
+      
     },
     ru: {
-      'ib.sub.times': 'Время', 'ib.sub.log': 'Журнал', 'ib.sub.tasbih': 'Тасбих', 'ib.sub.fasting': 'Пост', 'ib.sub.qibla': 'Кибла',
+      'ib.sub.times': 'Время', 'ib.sub.log': 'Журнал', 'ib.sub.fasting': 'Пост', 
       'ib.next': 'Следующий намаз', 'ib.left': 'осталось', 'ib.current': 'Сейчас', 'ib.night': 'Ночь', 'ib.duha': 'Восход — не время намаза',
       'ib.timesFor': 'Время намазов', 'ib.backToday': 'Сегодня', 'ib.hijri': 'По хиджре',
       'ib.ramadan': 'Рамадан мубарак!', 'ib.ramadanDay': 'Рамадан, день {d}',
@@ -77,10 +63,7 @@
       'ib.st.jamaat': 'Джамаат', 'ib.st.alone': 'Один', 'ib.st.qaza': 'Каза', 'ib.st.missed': 'Пропущен',
       'ib.qazaHint': 'каза?',
       'ib.last30': 'Последние 30 дней', 'ib.heatJamaat': 'Доля джамаата (по дням)', 'ib.streak5': 'Серия 5/5', 'ib.jamaat': 'Джамаат', 'ib.ontime': 'Вовремя',
-      'ib.tasbih': 'Тасбих', 'ib.rounds': 'круг ×{n}', 'ib.prevDay': 'Предыдущий день', 'ib.nextDay': 'Следующий день', 'ib.tapHint': 'Нажмите, чтобы считать', 'ib.custom': 'Другой…', 'ib.customPh': 'Название зикра',
-      'ib.saved': 'Сохранено: {n}', 'ib.completed': '{name} — {n} выполнено', 'ib.reset': 'Сброс', 'ib.nothingToSave': 'Сначала посчитайте',
-      'ib.todayTotal': 'Сегодня', 'ib.week7': '7 дней', 'ib.dhikrStreak': 'Серия', 'ib.sessions': 'Сегодняшние сеансы', 'ib.noSessions': 'Сегодня зикр ещё не сохранён', 'ib.sessionDeleted': 'Сеанс удалён',
-      'ib.d.subhanallah': 'Субханаллах', 'ib.d.alhamdulillah': 'Альхамдулиллях', 'ib.d.allahuakbar': 'Аллаху акбар', 'ib.d.istighfar': 'Истигфар', 'ib.d.salavot': 'Салават',
+      'ib.prevDay': 'Предыдущий день', 'ib.nextDay': 'Следующий день', 
       'ib.fastToday': 'Пост сегодня', 'ib.fasted': 'Пост соблюдён', 'ib.suggest': 'Рекомендация', 'ib.noSuggest': 'Сегодня не день сунна-поста', 'ib.fastType': 'Тип поста',
       'ib.f.ramadan': 'Рамадан', 'ib.f.ayyam_bid': 'Айям аль-бид', 'ib.f.arafa': 'Арафа', 'ib.f.ashura': 'Ашура', 'ib.f.shawwal': '6 дней Шавваля', 'ib.f.mon_thu': 'Понедельник и четверг',
       'ib.ft.ramadan': 'Рамадан', 'ib.ft.sunnah': 'Сунна', 'ib.ft.qaza': 'Каза', 'ib.ft.nafl': 'Нафль',
@@ -88,11 +71,7 @@
       'ib.qazaFast': 'Каза-посты', 'ib.owed': 'долг (дней)', 'ib.qazaDone': 'Восполнено', 'ib.remaining': 'Осталось',
       'ib.ramadanMode': 'Рамадан', 'ib.ramadanProgress': 'Дней поста', 'ib.khatm': 'Темп хатма', 'ib.khatmHint': '~{p} стр. в день · сегодня стр. {page} (джуз {juz})',
       'ib.toRamadan': 'До Рамадана {n} дн.', 'ib.lastTen': 'Последние 10 ночей — ищите Ляйлятуль-кадр',
-      'ib.qibla': 'Кибла', 'ib.bearing': 'Направление на Каабу', 'ib.fromNorth': 'от севера по часовой стрелке',
-      'ib.live': 'Живой компас', 'ib.liveOff': 'Выключить компас', 'ib.noCompass': 'На этом устройстве нет компаса', 'ib.compassDenied': 'Нет доступа к компасу',
-      'ib.turnLeft': 'Поверните влево на {n}°', 'ib.turnRight': 'Поверните вправо на {n}°', 'ib.aligned': 'Кибла найдена!', 'ib.waiting': 'Ожидание сигнала компаса…',
-      'ib.coords': 'Координаты', 'ib.qiblaHint': 'Держите телефон горизонтально, подальше от металла. Показание приблизительное.',
-      'ib.staticHint': 'Если телефон направлен на север, стрелка указывает на киблу',
+      
     },
   });
 
@@ -190,9 +169,7 @@
   const esc = D.esc, t = D.t;
   const PR = D.PRAYERS;
   const STATES = ['jamaat', 'alone', 'qaza', 'missed'];
-  const SUBS = ['times', 'log', 'qaza', 'tasbih', 'fasting', 'qibla'];
-  const DHIKR = ['subhanallah', 'alhamdulillah', 'allahuakbar', 'istighfar', 'salavot'];
-  const PRESETS = [33, 100, 1000, 0]; // 0 = ∞
+  const SUBS = ['times', 'log', 'qaza', 'fasting'];
   const FTYPES = ['ramadan', 'sunnah', 'qaza', 'nafl'];
   const NEXT_OF = { bomdod: 'quyosh', peshin: 'asr', asr: 'shom', shom: 'xufton' };
   const PRAYER_RX = {
@@ -823,119 +800,6 @@
     haptic('success'); D.save(); D.rerender();
   };
   /* ------------------------------------------------------------------ */
-  /* 3. TASBIH                                                           */
-  /* ------------------------------------------------------------------ */
-  const TAP_R = 94, TAP_C = 2 * Math.PI * TAP_R;
-  function T() {
-    const f = F();
-    let s = f.ibTasbih;
-    if (!s || typeof s !== 'object') s = f.ibTasbih = { name: 'subhanallah', custom: '', preset: 33, n: 0 };
-    if (!DHIKR.includes(s.name) && s.name !== 'custom') s.name = 'subhanallah';
-    if (!PRESETS.includes(+s.preset)) s.preset = 33; else s.preset = +s.preset;
-    s.n = Math.max(0, Math.floor(+s.n || 0));
-    return s;
-  }
-  const dhikrLabel = (s) => (s.name === 'custom' ? s.custom || t('ib.custom') : t('ib.d.' + s.name));
-  function tapProgress(s) { if (!s.preset) return 0; const r = s.n % s.preset; return s.n && r === 0 ? 1 : r / s.preset; }
-  function tapInner(s) {
-    const rounds = s.preset ? Math.floor(s.n / s.preset) : 0;
-    const subTxt = s.preset ? `${s.n % s.preset || (s.n ? s.preset : 0)} / ${s.preset}${rounds ? ` · ${t('ib.rounds', { n: rounds })}` : ''}` : dhikrLabel(s);
-    return `<div class="ib-tap-n num">${D.fmtNum(s.n)}</div><div class="ib-tap-sub">${esc(subTxt)}</div>`;
-  }
-  function tasbihCard() {
-    const s = T();
-    const names = DHIKR.map((d) => `<button class="${s.name === d ? 'on' : ''}" data-act="ibName" data-name="${d}">${esc(t('ib.d.' + d))}</button>`).join('') +
-      `<button class="${s.name === 'custom' ? 'on' : ''}" data-act="ibCustomName">${D.ic('edit', 12)} ${esc(s.name === 'custom' && s.custom ? s.custom : t('ib.custom'))}</button>`;
-    const presets = PRESETS.map((p) => `<button class="num ${s.preset === p ? 'on' : ''}" data-act="ibPreset" data-p="${p}">${p || '∞'}</button>`).join('');
-    const off = (TAP_C * (1 - tapProgress(s))).toFixed(1);
-    return `<div class="card ib-tasbih-card">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('ib.tasbih'))}</div><div class="title">${esc(dhikrLabel(s))}</div></div></div>
-      <div class="tabs ib-names">${names}</div>
-      <div class="ib-tap-wrap">
-        <button class="ib-tap" data-act="ibTap" aria-label="${esc(t('ib.tapHint'))}">
-          <svg class="ib-tap-ring" viewBox="0 0 200 200" aria-hidden="true"><circle class="ib-tap-track" cx="100" cy="100" r="${TAP_R}"/><circle class="ib-tap-fill" id="ibTapFill" cx="100" cy="100" r="${TAP_R}" stroke-dasharray="${TAP_C.toFixed(1)}" stroke-dashoffset="${off}"/></svg>
-          <div class="ib-tap-inner" id="ibTapInner">${tapInner(s)}</div>
-        </button>
-      </div>
-      <div class="tabs ib-presets">${presets}</div>
-      <div class="row"><button class="btn grow" data-act="ibTasbihSave">${D.ic('save', 14)} ${esc(t('btn.save'))}</button><button class="btn ghost" data-act="ibTasbihReset">${D.ic('refresh', 14)} ${esc(t('ib.reset'))}</button></div>
-    </div>`;
-  }
-  function dhikrStats() {
-    const td = D.today();
-    const days = D.lastDays(7);
-    const tot = (k) => { const d = D.S.dhikr[k]; return d && typeof d === 'object' ? +d.total || 0 : 0; };
-    const values = days.map(tot);
-    const labels = days.map((k) => D.t('weekdaysShort')[D.dowOf(k)]);
-    const streak = memo('dhikrStreak', stateSig(), () => { const set = new Set(); for (const k of Object.keys(D.S.dhikr)) if (isDay(k) && tot(k) > 0) set.add(k); return D.streak(set); });
-    const today = D.S.dhikr[td];
-    const sessions = today && Array.isArray(today.sessions) ? today.sessions.slice().reverse() : [];
-    const list = sessions.length ? `<div class="list">${sessions.map((x) => {
-      const id = x.id || String(x.ts || '');
-      const p = x.ts ? D.nowTz(new Date(x.ts)) : null;
-      return `<div class="li"><div class="li-body"><div class="li-text">${esc(x.name || '')}</div><div class="li-meta num">${p ? D.fmtTime(p.h, p.min) : ''}</div></div>
-        <span class="li-right num">${D.fmtNum(x.n)}</span><button class="li-del" data-act="ibSessDel" data-key="${td}" data-id="${esc(id)}" aria-label="${esc(t('btn.delete'))}">${D.ic('x', 16)}</button></div>`;
-    }).join('')}</div>` : `<div class="empty">${esc(t('ib.noSessions'))}</div>`;
-    return `<div class="card">
-      <div class="stat-grid">
-        <div class="stat"><div class="stat-num num">${D.fmtNum(tot(td))}</div><div class="stat-label">${esc(t('ib.todayTotal'))}</div></div>
-        <div class="stat"><div class="stat-num num">${D.fmtNum(D.sum(values))}</div><div class="stat-label">${esc(t('ib.week7'))}</div></div>
-        <div class="stat"><div class="stat-num num">${D.ic('fire', 16)} ${D.fmtNum(streak)}</div><div class="stat-label">${esc(t('ib.dhikrStreak'))}</div></div>
-      </div>
-      <div class="mt">${D.chart.bars({ values, labels, color: 'var(--violet)', height: 64 })}</div>
-      <div class="section-title">${esc(t('ib.sessions'))}</div>${list}
-    </div>`;
-  }
-  const renderTasbih = () => tasbihCard() + dhikrStats();
-
-  function paintTap(s) {
-    D.patch('ibTapInner', tapInner(s));
-    const f = document.getElementById('ibTapFill');
-    if (f) f.setAttribute('stroke-dashoffset', (TAP_C * (1 - tapProgress(s))).toFixed(1));
-  }
-  D.act.ibTap = () => {
-    const s = T(); s.n++;
-    D.saveUi(); paintTap(s);
-    if (s.preset && s.n % s.preset === 0) { haptic('success'); D.toast(t('ib.completed', { name: dhikrLabel(s), n: s.preset })); }
-    else haptic('light');
-  };
-  D.act.ibPreset = (el) => { const s = T(); const p = +el.dataset.p; if (!PRESETS.includes(p)) return; s.preset = p; D.saveUi(); D.rerender(); };
-  D.act.ibName = (el) => { const s = T(); const n = el.dataset.name; if (!DHIKR.includes(n)) return; s.name = n; D.saveUi(); D.rerender(); };
-  D.act.ibCustomName = async () => {
-    const s = T();
-    const v = await D.prompt({ title: t('ib.custom'), placeholder: t('ib.customPh'), value: s.custom || '' });
-    if (v === null) return;
-    const name = String(v).trim().slice(0, 40);
-    if (!name) return;
-    s.custom = name; s.name = 'custom'; D.saveUi(); D.rerender();
-  };
-  D.act.ibTasbihReset = () => { const s = T(); s.n = 0; D.saveUi(); paintTap(s); haptic(); };
-  D.act.ibTasbihSave = () => {
-    const s = T();
-    if (!s.n) { D.toast(t('ib.nothingToSave')); return; }
-    const k = D.today();
-    const d = D.S.dhikr[k] && typeof D.S.dhikr[k] === 'object' ? D.S.dhikr[k] : { total: 0, sessions: [] };
-    if (!Array.isArray(d.sessions)) d.sessions = [];
-    d.sessions.push({ id: D.uid('dz'), name: dhikrLabel(s), n: s.n, ts: Date.now() });
-    d.total = D.sum(d.sessions, (x) => x.n);
-    D.S.dhikr[k] = d;
-    const n = s.n; s.n = 0;
-    D.saveUi(); haptic('success'); D.save(); D.rerender(); D.toast(t('ib.saved', { n: D.fmtNum(n) }));
-  };
-  D.act.ibSessDel = (el) => {
-    const k = el.dataset.key, id = el.dataset.id;
-    const d = D.S.dhikr[k]; if (!d || !Array.isArray(d.sessions)) return;
-    const i = d.sessions.findIndex((x) => x.id === id || String(x.ts) === id);
-    if (i < 0) return;
-    const [item] = d.sessions.splice(i, 1);
-    const recount = () => { d.total = D.sum(d.sessions, (x) => x.n); if (d.sessions.length) D.S.dhikr[k] = d; else delete D.S.dhikr[k]; };
-    recount();
-    D.undo.push({ label: t('ib.sessionDeleted'), undo: () => { d.sessions.splice(Math.min(i, d.sessions.length), 0, item); recount(); } });
-    D.save(); D.rerender();
-    D.toast(t('ib.sessionDeleted'), { undo: () => D.undo.pop() });
-  };
-
-  /* ------------------------------------------------------------------ */
   /* 4. FASTING                                                          */
   /* ------------------------------------------------------------------ */
   const fastRec = (k) => { const r = D.S.fasting[k]; return r && typeof r === 'object' ? r : null; };
@@ -1033,96 +897,6 @@
   };
 
   /* ------------------------------------------------------------------ */
-  /* 5. QIBLA                                                            */
-  /* ------------------------------------------------------------------ */
-  let orient = { on: false, handler: null, evName: null, heading: null };
-  const hasOrientation = () => typeof window.DeviceOrientationEvent !== 'undefined';
-  function compassSvg(b) {
-    const cx = 120, cy = 120;
-    let ticks = '';
-    for (let i = 0; i < 72; i++) {
-      const a = i * 5 * Math.PI / 180, major = i % 18 === 0, mid = i % 6 === 0;
-      const r1 = 112, r0 = major ? 98 : mid ? 103 : 107;
-      ticks += `<line class="ib-tick ${major ? 'major' : ''}" x1="${(cx + r0 * Math.sin(a)).toFixed(1)}" y1="${(cy - r0 * Math.cos(a)).toFixed(1)}" x2="${(cx + r1 * Math.sin(a)).toFixed(1)}" y2="${(cy - r1 * Math.cos(a)).toFixed(1)}"/>`;
-    }
-    const card = [['N', 0, 'n'], ['E', 90, ''], ['S', 180, ''], ['W', 270, '']].map(([l, deg, c]) => { const a = deg * Math.PI / 180; return `<text class="ib-cardinal ${c}" x="${(cx + 84 * Math.sin(a)).toFixed(1)}" y="${(cy - 84 * Math.cos(a)).toFixed(1)}">${l}</text>`; }).join('');
-    return `<svg viewBox="0 0 240 240" aria-hidden="true">
-      <circle class="ib-dial-ring" cx="${cx}" cy="${cy}" r="116"/>
-      <g id="ibDial" class="ib-dial">${ticks}${card}
-        <g transform="rotate(${b.toFixed(1)} ${cx} ${cy})">
-          <path class="ib-needle-tail" d="M${cx} ${cy + 4} L${cx - 7} ${cy + 20} L${cx} ${cy + 66} L${cx + 7} ${cy + 20} Z"/>
-          <path class="ib-needle" d="M${cx} ${cy - 62} L${cx + 8} ${cy - 4} L${cx} ${cy + 4} L${cx - 8} ${cy - 4} Z"/>
-          <rect class="ib-kaaba" x="${cx - 6}" y="${cy - 80}" width="12" height="12" rx="2"/>
-        </g>
-      </g>
-      <circle class="ib-hub" cx="${cx}" cy="${cy}" r="6"/>
-      <path class="ib-idx" d="M${cx} 2 l7 12 h-14 z"/>
-    </svg>`;
-  }
-  function renderQibla() {
-    const b = D.prayer.qibla(); const st = D.S.settings.prayer || {};
-    const live = orient.on;
-    const hint = live ? (orient.heading == null ? esc(t('ib.waiting')) : hintFor(orient.heading)) : esc(t('ib.staticHint'));
-    return `<div class="card ib-qibla-card">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('ib.qibla'))}</div><div class="title">${esc(t('ib.bearing'))}</div></div>${live ? `<span class="pill good">${D.ic('compass', 12)} ${esc(t('ib.live'))}</span>` : ''}</div>
-      <div class="ib-compass-wrap"><div class="ib-compass" id="ibCompass">${compassSvg(b)}</div></div>
-      <div class="ib-qibla-deg"><span class="num">${b.toFixed(1)}°</span><div class="small muted">${esc(t('ib.fromNorth'))}</div></div>
-      <div class="small center mt-s" id="ibQiblaHint">${hint}</div>
-      <div class="row mt ib-center">${hasOrientation()
-        ? `<button class="btn ${live ? 'ghost' : ''}" data-act="ibLive">${D.ic('compass', 16)} ${esc(t(live ? 'ib.liveOff' : 'ib.live'))}</button>`
-        : `<span class="pill">${D.ic('info', 12)} ${esc(t('ib.noCompass'))}</span>`}</div>
-      <div class="help mt center">${esc(t('ib.qiblaHint'))}</div>
-    </div>
-    <div class="card flat"><div class="row between wrap">
-      <div class="grow"><div class="eyebrow">${esc(t('ib.coords'))}</div><div class="num small">${(+st.lat || 41.2995).toFixed(4)}, ${(+st.lng || 69.2401).toFixed(4)}</div></div>
-      <button class="btn ghost sm" data-act="go" data-view="settings" data-sub="prayer">${D.ic('gear', 14)} ${esc(t('ib.openSettings'))}</button>
-    </div></div>`;
-  }
-  function hintFor(hd) {
-    const b = D.prayer.qibla();
-    const d = ((b - hd + 540) % 360) - 180;
-    if (Math.abs(d) <= 5) return `<span class="good">${D.ic('check', 14)} ${esc(t('ib.aligned'))}</span>`;
-    return esc(d > 0 ? t('ib.turnRight', { n: Math.round(d) }) : t('ib.turnLeft', { n: Math.round(-d) }));
-  }
-  function applyHeading(hd) {
-    const prev = orient.heading;
-    orient.heading = hd;
-    if (prev != null && Math.abs(((hd - prev + 540) % 360) - 180) < 1) return;
-    const dial = document.getElementById('ibDial');
-    if (dial) dial.style.transform = `rotate(${(-hd).toFixed(1)}deg)`;
-    D.patch('ibQiblaHint', hintFor(hd));
-    if (Math.abs(((D.prayer.qibla() - hd + 540) % 360) - 180) <= 5 && !(prev != null && Math.abs(((D.prayer.qibla() - prev + 540) % 360) - 180) <= 5)) haptic('success');
-  }
-  function startOrient() {
-    const h = (ev) => {
-      let hd = null;
-      if (typeof ev.webkitCompassHeading === 'number' && !isNaN(ev.webkitCompassHeading)) hd = ev.webkitCompassHeading;
-      else if (typeof ev.alpha === 'number' && !isNaN(ev.alpha)) hd = (360 - ev.alpha) % 360;
-      if (hd == null) return;
-      applyHeading((hd + 360) % 360);
-    };
-    const evName = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
-    window.addEventListener(evName, h, true);
-    orient = { on: true, handler: h, evName, heading: null };
-  }
-  function stopOrient() {
-    if (orient.handler) { try { window.removeEventListener(orient.evName, orient.handler, true); } catch (e) {} }
-    orient = { on: false, handler: null, evName: null, heading: null };
-  }
-  D.act.ibLive = async () => {
-    if (orient.on) { stopOrient(); D.rerender(); return; }
-    if (!hasOrientation()) { D.toast(t('ib.noCompass')); return; }
-    try {
-      const DOE = window.DeviceOrientationEvent;
-      if (DOE && typeof DOE.requestPermission === 'function') {
-        const r = await DOE.requestPermission();
-        if (r !== 'granted') { D.toast(t('ib.compassDenied')); return; }
-      }
-      startOrient(); D.rerender();
-    } catch (e) { D.toast(t('ib.compassDenied')); }
-  };
-
-  /* ------------------------------------------------------------------ */
   /* view                                                                */
   /* ------------------------------------------------------------------ */
   let timer = null, lastMin = null, lastId = null;
@@ -1143,8 +917,7 @@
 
   function render() {
     const s = sub();
-    const body = s === 'log' ? safe(renderLog) : s === 'qaza' ? safe(renderQaza) : s === 'tasbih' ? safe(renderTasbih)
-      : s === 'fasting' ? safe(renderFasting) : s === 'qibla' ? safe(renderQibla) : safe(renderTimes);
+    const body = s === 'log' ? safe(renderLog) : s === 'qaza' ? safe(renderQaza) : s === 'fasting' ? safe(renderFasting) : safe(renderTimes);
     // the qaza debt is the one thing that must never be out of sight
     const remind = s === 'qaza' ? '' : safe(qzBanner);
     const ai = D.ai && (s === 'times' || s === 'log' || s === 'qaza' || s === 'fasting') ? safe(() => D.ai.card('prayer')) : '';
@@ -1158,10 +931,8 @@
       stopTimer();
       const s = sub();
       if (s === 'times') { tick(); timer = setInterval(tick, 1000); }
-      if (s !== 'qibla' && orient.on) stopOrient();
-      else if (s === 'qibla' && orient.on && orient.heading != null) { const hd = orient.heading; orient.heading = null; applyHeading(hd); }
     },
-    unmount() { stopTimer(); stopOrient(); },
+    unmount() { stopTimer(); },
   });
 
   D.on('day:changed', () => { F().ibLogDate = null; F().ibTimesDate = null; D.saveUi(); if (D.current() === 'prayer') D.rerender(); });

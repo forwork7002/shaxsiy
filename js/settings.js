@@ -249,6 +249,11 @@
       </div>
     </div>
 
+    ${D.serverEnabled() && (D.device.uid || D.device.name) ? `<div class="card flat set-account"><div class="row between wrap">
+      <div class="grow"><div class="eyebrow">${t('set.account')}</div><div class="small"><b>${esc(D.device.name || D.device.uid)}</b></div></div>
+      <button class="btn ghost sm" data-act="setLogout">${D.ic('logout', 14)} ${t('set.logout')}</button>
+    </div></div>` : ''}
+
     <div class="card">
       <div class="card-head"><div class="title">${D.ic('clock')} ${t('set.day')}</div></div>
       ${row(t('set.tz'), sel(tzOptions(), s.tz, 'setTz'))}
@@ -699,6 +704,13 @@
       </div>
     </div>`;
   }
+  D.act.setLogout = async () => {
+    if (!(await D.confirm({ text: t('set.logoutQ'), ok: t('set.logout') }))) return;
+    D.auth.logout();
+  };
+  D.i18n.add({ uz: { 'set.account': 'Hisob', 'set.logout': 'Chiqish', 'set.logoutQ': 'Chiqilsinmi? Bu qurilmadagi nusxa o‘chiriladi, serverdagi ma’lumot saqlanadi.' },
+    uzk: { 'set.account': 'Ҳисоб', 'set.logout': 'Чиқиш', 'set.logoutQ': 'Чиқилсинми? Бу қурилмадаги нусха ўчирилади, сервердаги маълумот сақланади.' },
+    ru: { 'set.account': 'Аккаунт', 'set.logout': 'Выйти', 'set.logoutQ': 'Выйти? Копия на этом устройстве будет удалена, данные на сервере сохранятся.' } });
   D.act.setSyncNow = async () => { await D.pull(); D.rerender(); };
   D.act.setExport = () => D.exportJson();
   D.act.setImportPick = () => { const i = D.$('#setImportInp'); if (i) i.click(); };

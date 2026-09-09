@@ -4,7 +4,6 @@
 .ib-return { position: relative; display: inline-flex; align-items: center; gap: 4px; margin-top: 2px; min-height: 28px; padding: 2px 8px; border: 0; border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--success) 12%, transparent); color: var(--success); font-size: 11px; font-weight: 700; }
 .ib-return::before { content: ''; position: absolute; inset: -6px -4px; } /* 40px hit area, small visual */
-.ib-center { justify-content: center; }
 
 /* state colours (shared by pills, dots, times) */
 .ib-c-jamaat { --c: var(--success); }
@@ -63,23 +62,6 @@
 .ib-ledger .btn.sq { width: 42px; height: 42px; }
 
 /* tasbih */
-.ib-names, .ib-presets { margin-bottom: 4px; }
-.ib-presets { justify-content: center; margin: 4px 0 14px; }
-.ib-presets button { min-width: 58px; text-align: center; font-size: 13px; }
-.ib-names button, .ib-presets button { min-height: 38px; }
-.ib-tap-wrap { display: flex; justify-content: center; padding: 12px 0 10px; }
-.ib-tap { position: relative; width: 208px; height: 208px; border-radius: 50%; border: 0; padding: 0; color: var(--text);
-  background: radial-gradient(circle at 50% 30%, var(--hover), var(--inset) 72%); box-shadow: var(--sh), inset 0 1px 0 var(--line3);
-  user-select: none; -webkit-user-select: none; touch-action: manipulation; transition: transform .08s var(--ease-out), box-shadow .2s; }
-.ib-tap:active { transform: scale(.955); box-shadow: var(--sh), inset 0 2px 12px color-mix(in srgb, var(--violet) 20%, transparent); }
-.ib-tap-ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); pointer-events: none; overflow: visible; }
-.ib-tap-track { fill: none; stroke: var(--line2); stroke-width: 6; }
-.ib-tap-fill { fill: none; stroke: var(--violet); stroke-width: 6; stroke-linecap: round; filter: drop-shadow(0 0 6px var(--violet)); transition: stroke-dashoffset .18s var(--ease-out); }
-.ib-tap-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; padding: 0 24px; }
-.ib-tap-n { font-size: 58px; font-weight: 800; letter-spacing: -.05em; line-height: 1; color: var(--text); }
-.ib-tap-sub { margin-top: 8px; font-size: 10.5px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); font-family: var(--mono);
-  max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (max-width: 360px) { .ib-tap { width: 180px; height: 180px; } .ib-tap-n { font-size: 50px; } }
 
 /* fasting */
 .ib-fast-toggle { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; width: 100%; padding: 8px 16px 8px 12px; border-radius: var(--r-sm);
@@ -101,22 +83,6 @@
 .ib-ramadan .bar { display: block; }
 
 /* qibla */
-.ib-compass-wrap { display: flex; justify-content: center; padding: 6px 0; }
-.ib-compass { width: min(260px, 72vw); aspect-ratio: 1; }
-.ib-compass svg { width: 100%; height: 100%; display: block; overflow: visible; }
-.ib-dial { transform-box: fill-box; transform-origin: center; transition: transform .25s var(--ease-out); }
-.ib-dial-ring { fill: var(--inset); stroke: var(--line2); stroke-width: 1.5; }
-.ib-tick { stroke: var(--line3); stroke-width: 1.5; }
-.ib-tick.major { stroke: var(--text3); stroke-width: 2.5; }
-.ib-cardinal { fill: var(--text3); font-size: 15px; font-weight: 800; font-family: var(--mono); text-anchor: middle; dominant-baseline: central; }
-.ib-cardinal.n { fill: var(--danger-text); }
-.ib-needle { fill: var(--success); filter: drop-shadow(0 0 8px var(--success-glow)); }
-.ib-needle-tail { fill: var(--line3); }
-.ib-kaaba { fill: var(--text); stroke: var(--success); stroke-width: 1.5; }
-.ib-hub { fill: var(--bg3); stroke: var(--line3); stroke-width: 2; }
-.ib-idx { fill: var(--warning); }
-.ib-qibla-deg { text-align: center; margin-top: 4px; }
-.ib-qibla-deg .num { font-size: 34px; font-weight: 800; letter-spacing: -.04em; color: var(--text); line-height: 1.1; }
 
 /* namozlar kesimida */
 .ib-per-row { display: grid; grid-template-columns: 68px 1fr 42px; align-items: center; gap: 9px; padding: 8px 0; border-top: 1px solid var(--line); }

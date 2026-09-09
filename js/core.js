@@ -161,7 +161,7 @@
 
   D.ui = fill(lsGet(UI_KEY), { view: 'today', sub: {}, viewDate: null, filters: {}, collapsed: {} });
   D.saveUi = D.debounce(() => lsSet(UI_KEY, D.ui), 150);
-  D.device = fill(lsGet(DEV_KEY), { novaKey: '', whoop: null, lockHash: '' });
+  D.device = fill(lsGet(DEV_KEY), { novaKey: '', whoop: null, lockHash: '', uid: '', name: '', lastUser: '' });
   D.saveDevice = () => lsSet(DEV_KEY, D.device);
 
   D.S = null;
@@ -306,6 +306,17 @@
     try {
       D.setSync('wait');
       const remote = await D.api('/api/data');
+      // Another person signed in on this device: their server copy replaces what is here,
+      // and nothing local is ever pushed into their account.
+      const owner = remote && remote.meta && remote.meta.owner;
+      if (owner && D.S.meta.owner && D.S.meta.owner !== owner) {
+        D.S = D.normalize(defaultState());
+        D.S.meta.deviceId = D.uid('dev');
+        try { localStorage.removeItem(UI_KEY); } catch (e) {}
+        if (D.whoop && D.whoop.resetCache) D.whoop.resetCache();
+        D.toast(D.t('auth.switched'), { ms: 3500 });
+      }
+      if (owner) { D.S.meta.owner = owner; if (!D.device.uid) { D.device.uid = owner; D.saveDevice(); } }
       const localEmpty = !Object.keys(D.S.logs).length && !D.S.habits.length && !D.S.tasks.length;
       if (remote && D.isOldFormat(remote)) {
         // server still holds the old Шахсий data.json → migrate once, keep local additions, push new format
@@ -334,7 +345,7 @@
           pushServer();
         } else if (lU > rU) pushServer();
         if (remote.whoop && typeof remote.whoop.connected === 'boolean') D.S.whoop.connected = remote.whoop.connected;
-      } else if (remote && !Object.keys(remote).length && !localEmpty) {
+      } else if (remote && !Object.keys(remote).filter((k) => k !== 'meta').length && !localEmpty) {
         pushServer(); // fresh server, populated client
       }
       D.setSync('ok');
@@ -972,35 +983,54 @@
     /** Bir vaqtda bitta oyna; hamma kutayotgan so'rovlar bitta javobni oladi. */
     ask() {
       if (authPending) return authPending;
-      authPending = new Promise((resolve) => {
+      authPending = new Promise(async (resolve) => {
+        // what the server offers: named users, a shared passcode, Google — or nothing yet
+        let cfg = { users: [], passcode: true, google: false };
+        try { const r = await fetch('/api/auth/config', { credentials: 'same-origin', cache: 'no-store' }); if (r.ok) cfg = Object.assign(cfg, await r.json()); } catch (e) {}
+        const users = Array.isArray(cfg.users) ? cfg.users : [];
+        let chosen = users.includes(D.device.lastUser) ? D.device.lastUser : (users[0] || '');
         const box = document.createElement('div');
         box.className = 'auth-gate';
         box.innerHTML = `<form class="auth-card" autocomplete="on">
-            <div class="auth-ic">${D.ic('key', 26)}</div>
-            <div class="auth-title">${D.esc(D.t('auth.title'))}</div>
-            <p class="auth-sub">${D.esc(D.t('auth.sub'))}</p>
-            <input class="inp auth-inp" type="password" name="password" autocomplete="current-password"
-                   placeholder="${D.esc(D.t('auth.ph'))}" aria-label="${D.esc(D.t('auth.title'))}">
+            <div class="auth-ic">${D.ic('user', 26)}</div>
+            <div class="auth-title">${D.esc(D.t(users.length ? 'auth.who' : 'auth.title'))}</div>
+            <p class="auth-sub">${D.esc(D.t(users.length ? 'auth.pick' : 'auth.sub'))}</p>
+            ${users.length ? `<div class="auth-users">${users.map((u) => `<button type="button" class="auth-user ${u === chosen ? 'on' : ''}" data-u="${D.esc(u)}">${D.esc(u)}</button>`).join('')}</div>` : ''}
+            ${users.length || cfg.passcode ? `<input class="inp auth-inp" type="password" name="password" autocomplete="current-password"
+                   placeholder="${D.esc(D.t('auth.ph'))}" aria-label="${D.esc(D.t('auth.ph'))}">
             <div class="auth-err" hidden></div>
-            <button class="btn auth-btn" type="submit">${D.esc(D.t('auth.go'))}</button>
+            <button class="btn auth-btn" type="submit">${D.esc(D.t('auth.go'))}</button>` : ''}
+            ${cfg.google ? `${users.length || cfg.passcode ? `<div class="auth-or">${D.esc(D.t('auth.or'))}</div>` : ''}<button type="button" class="btn ghost auth-btn auth-google">${D.ic('globe', 16)} ${D.esc(D.t('auth.google'))}</button>` : ''}
           </form>`;
         document.body.appendChild(box);
         const form = box.querySelector('form');
         const inp = box.querySelector('.auth-inp');
         const err = box.querySelector('.auth-err');
         const btn = box.querySelector('.auth-btn');
-        setTimeout(() => inp.focus(), 60);
+        for (const b of box.querySelectorAll('.auth-user')) b.addEventListener('click', () => {
+          chosen = b.dataset.u; D.device.lastUser = chosen; D.saveDevice();
+          for (const x of box.querySelectorAll('.auth-user')) x.classList.toggle('on', x === b);
+          if (inp) inp.focus();
+        });
+        const g = box.querySelector('.auth-google');
+        if (g) g.addEventListener('click', () => { location.href = '/api/auth/google'; });
+        if (inp) setTimeout(() => inp.focus(), 60);
         form.addEventListener('submit', async (ev) => {
           ev.preventDefault();
+          if (!inp) return;
           const v = inp.value;
           if (!v) return;
           btn.disabled = true; err.hidden = true;
           try {
             const r = await fetch('/api/login', {
               method: 'POST', credentials: 'same-origin',
-              headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pass: v }),
+              headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pass: v, user: users.length ? chosen : '' }),
             });
-            if (r.ok) { box.remove(); authPending = null; resolve(true); return; }
+            if (r.ok) {
+              const j = await r.json().catch(() => ({}));
+              if (j && j.uid) { D.device.uid = j.uid; D.device.name = j.name || ''; D.saveDevice(); }
+              box.remove(); authPending = null; resolve(true); return;
+            }
             err.textContent = D.t(r.status === 401 ? 'auth.bad' : 'auth.err');
           } catch (e) { err.textContent = D.t('auth.err'); }
           err.hidden = false; btn.disabled = false; inp.select();
@@ -1008,8 +1038,11 @@
       });
       return authPending;
     },
+    /** Sign out and leave nothing of this person on the device for the next one. */
     async logout() {
       try { await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }); } catch (e) {}
+      try { localStorage.removeItem(LS_KEY); localStorage.removeItem(UI_KEY); } catch (e) {}
+      D.device.uid = ''; D.device.name = ''; D.saveDevice();
       location.reload();
     },
   };

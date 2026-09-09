@@ -52,6 +52,21 @@ STATIC_DIR = Path(os.environ.get("MA_STATIC_DIR", HERE))
 DEV = os.environ.get("MA_DEV", "") == "1"
 # Telegramsiz kirish uchun parol (ochiq serverda MAJBURIY, MA_DEV=1 bo'lmasa).
 PASSCODE = os.environ.get("MA_PASSCODE", "")
+# Bir nechta odam: MA_USERS="Murod:parol1,Ali:parol2" — har biri o'z uid'i va o'z fayllari bilan.
+def _parse_users(raw: str):
+    out = []
+    for part in (raw or "").split(","):
+        if ":" not in part:
+            continue
+        name, pw = part.split(":", 1)
+        name, pw = name.strip(), pw.strip()
+        if name and pw:
+            out.append({"name": name[:40], "pass": pw, "uid": "u_" + "".join(c for c in name.lower() if c.isalnum())[:24]})
+    return out
+USERS = _parse_users(os.environ.get("MA_USERS", ""))
+GOOGLE_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
+ALLOWED_EMAILS = {x.strip().lower() for x in os.environ.get("MA_ALLOWED_EMAILS", "").split(",") if x.strip()}
 SESSION_DAYS = int(os.environ.get("MA_SESSION_DAYS", "30"))
 COOKIE = "dash_s"
 WHOOP_ID = os.environ.get("WHOOP_CLIENT_ID", "")
@@ -110,20 +125,99 @@ def read_session(tok: str):
     return uid
 
 
+def _set_session(resp, uid: str):
+    resp.set_cookie(COOKIE, make_session(uid), max_age=SESSION_DAYS * 86400, httponly=True,
+                    samesite="Lax", secure=request.headers.get("X-Forwarded-Proto", "") == "https")
+    return resp
+
+
+@app.get("/api/auth/config")
+def auth_config():
+    """Kirish oynasi nimani ko'rsatishini biladi: ismlar ro'yxati, umumiy parol bormi, Google bormi."""
+    return jsonify({"users": [u["name"] for u in USERS], "passcode": bool(PASSCODE), "google": bool(GOOGLE_ID and GOOGLE_SECRET)})
+
+
 @app.post("/api/login")
 def login():
-    """Parol bilan kirish. Telegram ichida kerak emas — u yerda initData ishlaydi."""
-    if not PASSCODE:
+    """Ism + parol (MA_USERS) yoki eski umumiy parol (MA_PASSCODE). Telegram ichida kerak emas."""
+    if not USERS and not PASSCODE:
         return jsonify({"error": "no_passcode"}), 501
     body = request.get_json(silent=True) or {}
     time.sleep(0.4)  # parolni terib topishga qarshi sekinlashtirish
-    if not hmac.compare_digest(str(body.get("pass") or ""), PASSCODE):
-        log.warning("Noto'g'ri parol: %s", request.headers.get("X-Forwarded-For", request.remote_addr))
+    pw = str(body.get("pass") or "")
+    name = str(body.get("user") or "").strip()
+    uid = None
+    if name and USERS:
+        for u in USERS:
+            if u["name"].lower() == name.lower() and hmac.compare_digest(pw, u["pass"]):
+                uid = u["uid"]
+                break
+    elif not name and PASSCODE and hmac.compare_digest(pw, PASSCODE):
+        uid = "me"
+    if not uid:
+        log.warning("Noto'g'ri parol (%s): %s", name or "-", request.headers.get("X-Forwarded-For", request.remote_addr))
         return jsonify({"error": "bad_pass"}), 401
-    r = jsonify({"ok": True})
-    r.set_cookie(COOKIE, make_session("me"), max_age=SESSION_DAYS * 86400, httponly=True,
-                 samesite="Lax", secure=request.headers.get("X-Forwarded-Proto", "") == "https")
-    return r
+    return _set_session(jsonify({"ok": True, "uid": uid, "name": display_name(uid)}), uid)
+
+
+@app.get("/api/me")
+def me():
+    uid, err = current_user()
+    if err:
+        return err
+    return jsonify({"uid": uid, "name": display_name(uid)})
+
+
+# ── Google bilan kirish (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET qo'yilganda faollashadi) ──
+GOOGLE_AUTH = "https://accounts.google.com/o/oauth2/v2/auth"
+GOOGLE_TOKEN = "https://oauth2.googleapis.com/token"
+GOOGLE_INFO = "https://oauth2.googleapis.com/tokeninfo"
+
+
+@app.get("/api/auth/google")
+def google_login():
+    if not (GOOGLE_ID and GOOGLE_SECRET):
+        return "Google kirish sozlanmagan (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET)", 501
+    nonce = secrets.token_hex(12)
+    state = f"{nonce}.{sign('g:' + nonce)}"
+    q = urllib.parse.urlencode({
+        "client_id": GOOGLE_ID, "redirect_uri": base_url() + "/api/auth/google/callback",
+        "response_type": "code", "scope": "openid email profile", "state": state, "prompt": "select_account",
+    })
+    return redirect(f"{GOOGLE_AUTH}?{q}")
+
+
+@app.get("/api/auth/google/callback")
+def google_callback():
+    if request.args.get("error"):
+        return f"Google xato: {html.escape(request.args.get('error', '')[:200])}", 400
+    code, state = request.args.get("code", ""), request.args.get("state", "")
+    try:
+        nonce, sig = state.split(".")
+    except ValueError:
+        return "state noto'g'ri", 400
+    if not hmac.compare_digest(sig, sign("g:" + nonce)):
+        return "state imzosi noto'g'ri", 400
+    status, tok = http_json(GOOGLE_TOKEN, {
+        "grant_type": "authorization_code", "code": code, "redirect_uri": base_url() + "/api/auth/google/callback",
+        "client_id": GOOGLE_ID, "client_secret": GOOGLE_SECRET,
+    })
+    if status != 200 or not tok.get("id_token"):
+        log.error("Google token xato %s: %s", status, str(tok)[:200])
+        return "Google bilan kirish muvaffaqiyatsiz", 502
+    st2, info = http_json(GOOGLE_INFO + "?" + urllib.parse.urlencode({"id_token": tok["id_token"]}))
+    if st2 != 200 or info.get("aud") != GOOGLE_ID or str(info.get("email_verified", "")).lower() != "true" or not info.get("sub"):
+        return "Google hisobini tekshirib bo'lmadi", 401
+    email = str(info.get("email", "")).lower()
+    if ALLOWED_EMAILS and email not in ALLOWED_EMAILS:
+        log.warning("Google: ruxsatsiz email %s", email)
+        return "Bu Google hisobiga ruxsat berilmagan", 403
+    uid = "g_" + hashlib.sha256(str(info["sub"]).encode()).hexdigest()[:20]
+    try:
+        who_file(uid).write_text(json.dumps({"name": info.get("name") or email.split("@")[0], "email": email}), encoding="utf-8")
+    except OSError:
+        pass
+    return _set_session(redirect("/#today"), uid)
 
 
 @app.post("/api/logout")
@@ -151,9 +245,47 @@ def current_user():
     return uid, None
 
 
+_SECRET_CACHE = None
+def _secret() -> bytes:
+    """Sessiya imzosi uchun kalit. Bot tokeni bo'lmasa ham taxmin qilib bo'lmaydigan bo'lishi shart —
+    aks holda har kim istalgan uid bilan cookie yasab kira olardi."""
+    global _SECRET_CACHE
+    if _SECRET_CACHE:
+        return _SECRET_CACHE
+    env = os.environ.get("MA_SECRET", "") or BOT_TOKEN
+    if env:
+        _SECRET_CACHE = env.encode()
+        return _SECRET_CACHE
+    f = DATA_DIR / ".secret"
+    try:
+        if not f.exists():
+            f.write_text(secrets.token_hex(32), encoding="utf-8")
+            try:
+                os.chmod(f, 0o600)
+            except OSError:
+                pass
+        _SECRET_CACHE = f.read_text(encoding="utf-8").strip().encode()
+    except OSError:
+        _SECRET_CACHE = b"dev-secret"
+    return _SECRET_CACHE
+
+
 def sign(value: str) -> str:
-    key = (BOT_TOKEN or "dev-secret").encode()
-    return hmac.new(key, value.encode(), hashlib.sha256).hexdigest()[:32]
+    return hmac.new(_secret(), value.encode(), hashlib.sha256).hexdigest()[:32]
+
+
+def who_file(uid: str) -> Path:
+    return user_file(uid).with_name(user_file(uid).stem + ".who.json")
+
+
+def display_name(uid: str) -> str:
+    for u in USERS:
+        if u["uid"] == uid:
+            return u["name"]
+    try:
+        return (json.loads(who_file(uid).read_text(encoding="utf-8")) or {}).get("name") or uid
+    except Exception:  # noqa: BLE001
+        return uid
 
 
 # ═══════════════════════ Ma'lumot ═══════════════════════
@@ -230,6 +362,9 @@ def get_data():
         # WHOOP holati server tomonidan belgilanadi
         if isinstance(d, dict) and "whoop" in d and isinstance(d["whoop"], dict):
             d["whoop"]["connected"] = whoop_tokens(uid) is not None
+        # egasi kim — boshqa odam shu qurilmada kirsa, mijoz eski ma'lumotni almashtirib qo'yadi
+        if isinstance(d, dict):
+            d.setdefault("meta", {})["owner"] = uid
         return jsonify(d)
 
 
@@ -874,7 +1009,7 @@ def ai():
         return jsonify({"error": "ai_not_configured"}), 501
     body = request.get_json(silent=True) or {}
     msgs = body.get("messages")
-    system = str(body.get("system") or "")[:8000]
+    system = str(body.get("system") or "")[:12000]
     if not isinstance(msgs, list) or not msgs:
         return jsonify({"error": "messages required"}), 400
     clean = []

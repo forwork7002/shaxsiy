@@ -522,3 +522,12 @@ body { font-weight: 500; }
 /* on a wide screen a full-bleed prayer strip leaves a canyon between the name
    and the countdown; keep it at a readable width */
 @media (min-width: 760px) { .h-prayer { max-width: 400px; } }
+
+/* login: pick who you are */
+.auth-users { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; width: 100%; margin-bottom: 4px; }
+.auth-user { flex: 1 1 96px; min-height: 44px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line2); background: var(--glass);
+  color: var(--text2); font-size: 14px; font-weight: 700; transition: background .15s, border-color .15s, color .15s, transform .1s; }
+.auth-user.on { background: var(--btn-grad); color: var(--ink-on-light); border-color: transparent; }
+.auth-user:active { transform: scale(.97); }
+.auth-or { width: 100%; text-align: center; font-size: 11.5px; color: var(--text4); margin: 4px 0; }
+.auth-google { font-weight: 700; }

@@ -79,3 +79,10 @@ D.i18n.add({
     'hijri.months': ['Мухаррам', 'Сафар', 'Раби аль-авваль', 'Раби ас-сани', 'Джумада аль-уля', 'Джумада ас-сани', 'Раджаб', 'Шаабан', 'Рамадан', 'Шавваль', 'Зуль-када', 'Зуль-хиджа'],
   },
 });
+
+/* kirish: bir nechta odam */
+D.i18n.add({
+  uz: { 'auth.who': 'Kim kiryapti?', 'auth.pick': 'Ismingizni tanlang va parolni kiriting.', 'auth.or': 'yoki', 'auth.google': 'Google bilan kirish', 'auth.switched': 'Hisob almashdi — bu qurilmadagi ma’lumot yangilandi' },
+  uzk: { 'auth.who': 'Ким киряпти?', 'auth.pick': 'Исмингизни танланг ва паролни киритинг.', 'auth.or': 'ёки', 'auth.google': 'Google билан кириш', 'auth.switched': 'Ҳисоб алмашди — бу қурилмадаги маълумот янгиланди' },
+  ru: { 'auth.who': 'Кто входит?', 'auth.pick': 'Выберите имя и введите пароль.', 'auth.or': 'или', 'auth.google': 'Войти через Google', 'auth.switched': 'Аккаунт сменился — данные на этом устройстве обновлены' },
+});

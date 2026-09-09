@@ -249,8 +249,9 @@
     if (polling || !D.serverEnabled()) return false;
     polling = true; lastPollAt = Date.now();
     try {
-      const snap = await fetchSnapshot();
+      let snap = await fetchSnapshot();
       if (!snap) return false;
+      if (snap.same && (!W().connected || !Object.keys(W().days).length)) { etag = null; snap = await fetchSnapshot(); if (!snap) return false; }
       if (snap.same) return false;
       const w = W();
       if (snap.connected === false) {
@@ -295,6 +296,8 @@
   };
   // kept for older callers
   D.whoop.autoSync = () => { D.whoop.poll(); };
+  /** Forget the ETag — the next poll fetches in full. Used when the account on this device changes. */
+  D.whoop.resetCache = () => { etag = null; pendingTries = 0; };
 
   function schedule() {
     clearInterval(pollTimer);
