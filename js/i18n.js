@@ -86,17 +86,17 @@ D.i18n.add({
     'auth.pass2': 'Parol (yana bir marta)', 'auth.invite': 'Taklif kodi', 'auth.create': 'Hisob ochish', 'auth.noAcc': 'Hisobingiz yo‘qmi?', 'auth.haveAcc': 'Hisobingiz bormi?',
     'auth.ownerHint': 'Egasi: ismni bo‘sh qoldirib, asosiy parolni kiriting.',
     'auth.e.taken': 'Bu ism band — boshqasini tanlang', 'auth.e.weak': 'Parol kamida 6 ta belgi', 'auth.e.name': 'Ism 2–40 ta belgi: harf, raqam, bo‘sh joy', 'auth.e.mismatch': 'Parollar bir xil emas',
-    'auth.e.invite': 'Taklif kodi noto‘g‘ri', 'auth.e.closed': 'Hozir yangi hisob ochilmaydi', 'auth.e.many': 'Juda ko‘p urinish — birozdan keyin' },
+    'auth.e.invite': 'Taklif kodi noto‘g‘ri', 'auth.e.inviteNeed': 'Yangi hisob uchun taklif kodi kerak', 'auth.gSub': 'Ma’lumotlaringiz Google hisobingizga bog‘lanadi — boshqa qurilmada ham shu bilan kirasiz.', 'auth.gInviteSub': 'Yangi hisob uchun taklif kodini kiriting.', 'auth.gGo': 'Google bilan davom etish', 'auth.back': 'Orqaga', 'auth.e.closed': 'Hozir yangi hisob ochilmaydi', 'auth.e.many': 'Juda ko‘p urinish — birozdan keyin' },
   uzk: { 'auth.sub2': 'Исмингиз ва паролингиз.', 'auth.name': 'Исм', 'auth.regTitle': 'Ҳисоб очиш', 'auth.regSub': 'Исм ва парол танланг — маълумотларингиз фақат сизники бўлади.',
     'auth.pass2': 'Парол (яна бир марта)', 'auth.invite': 'Таклиф коди', 'auth.create': 'Ҳисоб очиш', 'auth.noAcc': 'Ҳисобингиз йўқми?', 'auth.haveAcc': 'Ҳисобингиз борми?',
     'auth.ownerHint': 'Эгаси: исмни бўш қолдириб, асосий паролни киритинг.',
     'auth.e.taken': 'Бу исм банд — бошқасини танланг', 'auth.e.weak': 'Парол камида 6 та белги', 'auth.e.name': 'Исм 2–40 та белги: ҳарф, рақам, бўш жой', 'auth.e.mismatch': 'Пароллар бир хил эмас',
-    'auth.e.invite': 'Таклиф коди нотўғри', 'auth.e.closed': 'Ҳозир янги ҳисоб очилмайди', 'auth.e.many': 'Жуда кўп уриниш — бироздан кейин' },
+    'auth.e.invite': 'Таклиф коди нотўғри', 'auth.e.inviteNeed': 'Янги ҳисоб учун таклиф коди керак', 'auth.gSub': 'Маълумотларингиз Google ҳисобингизга боғланади — бошқа қурилмада ҳам шу билан кирасиз.', 'auth.gInviteSub': 'Янги ҳисоб учун таклиф кодини киритинг.', 'auth.gGo': 'Google билан давом этиш', 'auth.back': 'Орқага', 'auth.e.closed': 'Ҳозир янги ҳисоб очилмайди', 'auth.e.many': 'Жуда кўп уриниш — бироздан кейин' },
   ru: { 'auth.sub2': 'Ваше имя и пароль.', 'auth.name': 'Имя', 'auth.regTitle': 'Создать аккаунт', 'auth.regSub': 'Выберите имя и пароль — ваши данные будут только вашими.',
     'auth.pass2': 'Пароль (ещё раз)', 'auth.invite': 'Код приглашения', 'auth.create': 'Создать аккаунт', 'auth.noAcc': 'Нет аккаунта?', 'auth.haveAcc': 'Уже есть аккаунт?',
     'auth.ownerHint': 'Владелец: оставьте имя пустым и введите основной пароль.',
     'auth.e.taken': 'Это имя занято — выберите другое', 'auth.e.weak': 'Пароль не короче 6 символов', 'auth.e.name': 'Имя 2–40 символов: буквы, цифры, пробел', 'auth.e.mismatch': 'Пароли не совпадают',
-    'auth.e.invite': 'Неверный код приглашения', 'auth.e.closed': 'Регистрация сейчас закрыта', 'auth.e.many': 'Слишком много попыток — попробуйте позже' },
+    'auth.e.invite': 'Неверный код приглашения', 'auth.e.inviteNeed': 'Для нового аккаунта нужен код приглашения', 'auth.gSub': 'Данные привяжутся к вашему Google-аккаунту — с ним же войдёте на другом устройстве.', 'auth.gInviteSub': 'Введите код приглашения для нового аккаунта.', 'auth.gGo': 'Продолжить с Google', 'auth.back': 'Назад', 'auth.e.closed': 'Регистрация сейчас закрыта', 'auth.e.many': 'Слишком много попыток — попробуйте позже' },
 });
 
 /* kirish: bir nechta odam */

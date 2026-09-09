@@ -8,15 +8,16 @@
 set -euo pipefail
 HOST="${1:-}"
 [ -z "$HOST" ] && { echo "Foydalanish: $0 root@SERVER_IP"; exit 1; }
+. "$(dirname "$0")/_remote.sh"
 printf 'Bot tokeni (ko'"'"'rinmaydi): '
 read -rs TOKEN; echo
 TOKEN="$(printf '%s' "$TOKEN" | tr -d '[:space:]')"
 printf '%s' "$TOKEN" | grep -Eq '^[0-9]+:[A-Za-z0-9_-]{30,}$' || { echo "Token shakli noto'g'ri (123456:ABC…)."; exit 1; }
 echo "→ ${#TOKEN} belgi, bot id ${TOKEN%%:*}"
-printf '%s\n' "$TOKEN" | ssh "$HOST" 'bash -s' <<'REMOTE'
+REMOTE=$(cat <<'EOS'
 set -euo pipefail
 read -r TOKEN
-F=/opt/shaxsiy/.env
+APP="${SHAXSIY_APP:-/opt/shaxsiy}"; F="$APP/.env"
 python3 - "$F" "$TOKEN" <<'PYR'
 import sys, pathlib, secrets
 f, val = pathlib.Path(sys.argv[1]), sys.argv[2]
@@ -26,7 +27,7 @@ for line in lines:
     out.append(line)
 if not done: out.append("MA_BOT_TOKEN=" + val)
 if not any(l.startswith("MA_SECRET=") for l in out):
-    p = pathlib.Path("/opt/shaxsiy/data/.secret")
+    p = pathlib.Path(sys.argv[1]).parent / "data/.secret"
     out.append("MA_SECRET=" + (p.read_text().strip() if p.exists() else secrets.token_hex(32)))
 f.write_text("\n".join(out) + "\n")
 PYR
@@ -41,6 +42,8 @@ except Exception as e:
     print("getMe muvaffaqiyatsiz:", str(e)[:120])
 PYR
 curl -s http://127.0.0.1:8081/api/health; echo
-REMOTE
+EOS
+)
+printf '%s\n' "$TOKEN" | remote_bash "$HOST" "$REMOTE"
 echo "✓ Telegram yoqildi. Endi @BotFather: /mybots → bot → Bot Settings → Menu Button → URL https://138-68-111-121.sslip.io/"
 echo "  Har kim botni ochganda kirish oynasida o'z Telegram ID'sini ko'radi — uni set-users.sh ga kiriting."

@@ -50,3 +50,5 @@ Serversiz ishlatmoqchi bo'lsangiz Nova bo'limida o'z kalitingizni kiritishingiz 
 
 - `deploy/set-users.sh`, `deploy/set-telegram.sh`, `deploy/set-ai.sh` — foydalanuvchilar, Telegram bot, AI kaliti (qiymatlar yashirin kiritiladi)
 - `deploy/set-register.sh` — hisob ochish eshigi (ochiq / taklif kodi / yopiq), `list`, `pass Ism` (parolni almashtirish). Har kim kirish oynasida o'ziga hisob ochadi (`data/users.json`, parollar xeshlangan), o'z WHOOP'ini o'zi ulaydi.
+- `deploy/set-google.sh` — Google bilan kirish (Google Cloud OAuth mijoz ID + secret; redirect URI `https://<domen>/api/auth/google/callback`). Emaillar ro'yxati bo'lmasa Google eshigi «Hisob ochish» bilan bir xil: taklif kodi bo'lsa yangi Google hisobi ham kodni so'raydi; kirish oynasida Google birinchi turadi.
+- `deploy/_remote.sh` — skriptlar uchun umumiy `remote_bash` (qiymatlar stdin orqali; `ssh 'bash -s' <<EOF` bilan quvur yo'qolardi).

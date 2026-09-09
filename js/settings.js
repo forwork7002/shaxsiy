@@ -701,7 +701,7 @@
       <div class="eyebrow mb-s">${t('set.d.danger')}</div>
       <div class="row wrap">
         <button class="btn danger" data-act="setReset">${D.ic('trash', 16)} ${t('set.d.reset')}</button>
-        ${D.tg ? `<button class="btn ghost" data-act="setTgClose">${D.ic('logout', 16)} ${t('set.d.tgClose')}</button>` : ''}
+        ${D.tg && D.tg.initData ? `<button class="btn ghost" data-act="setTgClose">${D.ic('logout', 16)} ${t('set.d.tgClose')}</button>` : ''}
       </div>
     </div>`;
   }

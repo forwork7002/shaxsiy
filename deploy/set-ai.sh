@@ -7,6 +7,7 @@
 set -euo pipefail
 HOST="${1:-}"
 [ -z "$HOST" ] && { echo "Foydalanish: $0 root@SERVER_IP"; exit 1; }
+. "$(dirname "$0")/_remote.sh"
 printf 'Provayder [openai/anthropic] (bo'"'"'sh = openai): '
 read -r PROV
 PROV="$(printf '%s' "${PROV:-openai}" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
@@ -19,10 +20,10 @@ printf 'Model (bo'"'"'sh = standart): '
 read -r MODEL
 MODEL="$(printf '%s' "$MODEL" | tr -d '[:space:]')"
 echo "→ $PROV, ${#KEY} belgi, boshi ${KEY:0:7}…${MODEL:+, model $MODEL}"
-printf '%s\n%s\n%s\n' "$PROV" "$KEY" "$MODEL" | ssh "$HOST" 'bash -s' <<'REMOTE'
+REMOTE=$(cat <<'EOS'
 set -euo pipefail
 read -r PROV; read -r KEY; read -r MODEL
-F=/opt/shaxsiy/.env
+APP="${SHAXSIY_APP:-/opt/shaxsiy}"; F="$APP/.env"
 python3 - "$F" "$PROV" "$KEY" "$MODEL" <<'PYR'
 import sys, pathlib
 f, prov, key, model = pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3], sys.argv[4]
@@ -41,5 +42,7 @@ PYR
 chmod 600 "$F"
 systemctl restart shaxsiy && sleep 2 && systemctl is-active shaxsiy
 curl -s http://127.0.0.1:8081/api/health; echo
-REMOTE
+EOS
+)
+printf '%s\n%s\n%s\n' "$PROV" "$KEY" "$MODEL" | remote_bash "$HOST" "$REMOTE"
 echo "✓ AI yoqildi — «Tahlil qil» va Nova endi shu provayder bilan ishlaydi."

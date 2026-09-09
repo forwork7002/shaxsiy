@@ -990,7 +990,7 @@
       if (authPending) return authPending;
       authPending = new Promise(async (resolve) => {
         // what the server offers: named accounts, the owner's passcode, Google, open registration
-        let cfg = { named: false, passcode: true, google: false, register: false, invite: false };
+        let cfg = { named: false, passcode: true, google: false, register: false, invite: false, googleInvite: false, googleSeen: false };
         try { const r = await fetch('/api/auth/config', { credentials: 'same-origin', cache: 'no-store' }); if (r.ok) cfg = Object.assign(cfg, await r.json()); } catch (e) {}
         const tgId = D.tg && D.tg.initDataUnsafe && D.tg.initDataUnsafe.user && D.tg.initDataUnsafe.user.id;
         const askName = !!(cfg.named || cfg.register);
@@ -1010,26 +1010,33 @@
           box.remove(); authPending = null; resolve(true);
         };
         const draw = () => {
-          const reg = mode === 'register';
-          const sub = reg ? 'auth.regSub' : askName ? 'auth.sub2' : 'auth.sub';
+          const reg = mode === 'register', goog = mode === 'google';
+          const sub = goog ? 'auth.gInviteSub' : reg ? 'auth.regSub' : askName ? 'auth.sub2' : 'auth.sub';
+          const gBtn = cfg.google ? `<button type="button" class="btn auth-btn auth-google">${D.ic('globe', 16)} ${esc(t('auth.google'))}</button>` : '';
           box.innerHTML = `<form class="auth-card" autocomplete="on">
-            <div class="auth-ic">${D.ic(reg ? 'plus' : 'user', 26)}</div>
-            <div class="auth-title">${esc(t(reg ? 'auth.regTitle' : 'auth.title'))}</div>
+            <div class="auth-ic">${D.ic(reg ? 'plus' : goog ? 'globe' : 'user', 26)}</div>
+            <div class="auth-title">${esc(t(goog ? 'auth.google' : reg ? 'auth.regTitle' : 'auth.title'))}</div>
             <p class="auth-sub">${esc(t(sub))}</p>
             ${tgId ? `<p class="auth-sub auth-tg">${esc(t('auth.tgId'))}: <b class="num">${esc(String(tgId))}</b></p>` : ''}
-            ${reg || askName ? `<input class="inp auth-inp auth-name" type="text" name="username" autocomplete="username" autocapitalize="words"
+            ${goog ? `<input class="inp auth-inp auth-name auth-invite" type="text" name="invite" autocomplete="off" autocapitalize="off"
+                   placeholder="${esc(t('auth.invite'))}" aria-label="${esc(t('auth.invite'))}">
+            <div class="auth-err" hidden></div>
+            <button class="btn auth-btn" type="submit">${D.ic('globe', 16)} ${esc(t('auth.gGo'))}</button>
+            <p class="auth-switch"><button type="button" class="auth-link">${esc(t('auth.back'))}</button></p>` : ''}
+            ${!goog && !reg && gBtn ? `${gBtn}<p class="auth-hint">${esc(t('auth.gSub'))}</p>${canLogin ? `<div class="auth-or">${esc(t('auth.or'))}</div>` : ''}` : ''}
+            ${!goog && (reg || askName) ? `<input class="inp auth-inp auth-name" type="text" name="username" autocomplete="username" autocapitalize="words"
                    maxlength="40" value="${esc(name)}" placeholder="${esc(t('auth.name'))}" aria-label="${esc(t('auth.name'))}">` : ''}
-            ${reg || canLogin ? `<input class="inp auth-inp auth-pass" type="password" name="password" autocomplete="${reg ? 'new-password' : 'current-password'}"
+            ${!goog && (reg || canLogin) ? `<input class="inp auth-inp auth-pass" type="password" name="password" autocomplete="${reg ? 'new-password' : 'current-password'}"
                    placeholder="${esc(t('auth.ph'))}" aria-label="${esc(t('auth.ph'))}">` : ''}
             ${reg ? `<input class="inp auth-inp auth-pass2" type="password" name="password2" autocomplete="new-password"
                    placeholder="${esc(t('auth.pass2'))}" aria-label="${esc(t('auth.pass2'))}">` : ''}
             ${reg && cfg.invite ? `<input class="inp auth-inp auth-name auth-invite" type="text" name="invite" autocomplete="off" autocapitalize="off"
                    placeholder="${esc(t('auth.invite'))}" aria-label="${esc(t('auth.invite'))}">` : ''}
-            <div class="auth-err" hidden></div>
-            ${reg || canLogin ? `<button class="btn auth-btn" type="submit">${esc(t(reg ? 'auth.create' : 'auth.go'))}</button>` : ''}
-            ${!reg && cfg.passcode && askName ? `<p class="auth-hint">${esc(t('auth.ownerHint'))}</p>` : ''}
-            ${cfg.register ? `<p class="auth-switch">${esc(t(reg ? 'auth.haveAcc' : 'auth.noAcc'))} <button type="button" class="auth-link">${esc(t(reg ? 'auth.go' : 'auth.regTitle'))}</button></p>` : ''}
-            ${cfg.google ? `${reg || canLogin ? `<div class="auth-or">${esc(t('auth.or'))}</div>` : ''}<button type="button" class="btn ghost auth-btn auth-google">${D.ic('globe', 16)} ${esc(t('auth.google'))}</button>` : ''}
+            ${goog ? '' : '<div class="auth-err" hidden></div>'}
+            ${!goog && (reg || canLogin) ? `<button class="btn ${gBtn ? 'ghost ' : ''}auth-btn" type="submit">${esc(t(reg ? 'auth.create' : 'auth.go'))}</button>` : ''}
+            ${!goog && !reg && cfg.passcode && askName ? `<p class="auth-hint">${esc(t('auth.ownerHint'))}</p>` : ''}
+            ${!goog && cfg.register ? `<p class="auth-switch">${esc(t(reg ? 'auth.haveAcc' : 'auth.noAcc'))} <button type="button" class="auth-link">${esc(t(reg ? 'auth.go' : 'auth.regTitle'))}</button></p>` : ''}
+            ${reg && gBtn ? `<div class="auth-or">${esc(t('auth.or'))}</div><button type="button" class="btn ghost auth-btn auth-google">${D.ic('globe', 16)} ${esc(t('auth.google'))}</button>` : ''}
           </form>`;
           const form = box.querySelector('form');
           const q = (c) => box.querySelector(c);
@@ -1037,13 +1044,21 @@
           const err = q('.auth-err'), btn = q('.auth-btn[type=submit]');
           const fail = (key) => { err.textContent = t(key); err.hidden = false; if (btn) btn.disabled = false; };
           const g = q('.auth-google');
-          if (g) g.addEventListener('click', () => { location.href = '/api/auth/google'; });
+          // a new Google profile needs the invite code when the server asks for one; a browser that
+          // already signed in with Google (googleSeen) goes straight through
+          if (g) g.addEventListener('click', () => { if (cfg.googleInvite && !cfg.googleSeen) { mode = 'google'; draw(); } else location.href = '/api/auth/google'; });
           const sw = q('.auth-link');
-          if (sw) sw.addEventListener('click', () => { if (nameEl) name = nameEl.value; mode = reg ? 'login' : 'register'; draw(); });
-          const first = (nameEl && !nameEl.value) ? nameEl : pass;
+          if (sw) sw.addEventListener('click', () => { if (nameEl) name = nameEl.value; mode = (reg || goog) ? 'login' : 'register'; draw(); });
+          const first = goog ? inv : (nameEl && !nameEl.value) ? nameEl : pass;
           if (first) setTimeout(() => first.focus(), 60);
           form.addEventListener('submit', async (ev) => {
             ev.preventDefault();
+            if (goog) {
+              const code = inv ? inv.value.trim() : '';
+              if (!code) return fail('auth.e.inviteNeed');
+              location.href = '/api/auth/google?invite=' + encodeURIComponent(code);
+              return;
+            }
             if (!pass) return;
             name = nameEl ? nameEl.value.trim() : '';
             const v = pass.value;

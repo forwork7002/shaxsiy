@@ -9,6 +9,7 @@
 set -euo pipefail
 HOST="${1:-}"
 [ -z "$HOST" ] && { echo "Foydalanish: $0 root@SERVER_IP"; exit 1; }
+. "$(dirname "$0")/_remote.sh"
 LIST=""
 while true; do
   printf 'Ism (bo'"'"'sh qoldirsangiz — tugatadi): '
@@ -37,10 +38,10 @@ if [ -z "${HAVE_ME:-}" ]; then
   echo "   hech bir ismga bog'lanmaydi va ilovada ko'rinmaydi. Davom etilsinmi? [y/N]"
   read -r GO; case "$GO" in y|Y|ha|Ha) ;; *) echo "Bekor qilindi."; exit 1;; esac
 fi
-printf '%s\n' "$LIST" | ssh "$HOST" 'bash -s' <<'REMOTE'
+REMOTE=$(cat <<'EOS'
 set -euo pipefail
 read -r LIST
-F=/opt/shaxsiy/.env
+APP="${SHAXSIY_APP:-/opt/shaxsiy}"; F="$APP/.env"
 python3 - "$F" "$LIST" <<'PY'
 import sys, pathlib
 f, val = pathlib.Path(sys.argv[1]), sys.argv[2]
@@ -52,11 +53,13 @@ if not done: out.append("MA_USERS=" + val)
 # sessiya kaliti bir marta qat'iylashadi — mavjud .secret ko'chiriladi, shunda hech kim chiqib ketmaydi
 if not any(l.startswith("MA_SECRET=") for l in out):
     import secrets
-    p = pathlib.Path("/opt/shaxsiy/data/.secret")
+    p = pathlib.Path(sys.argv[1]).parent / "data/.secret"
     out.append("MA_SECRET=" + (p.read_text().strip() if p.exists() else secrets.token_hex(32)))
 f.write_text("\n".join(out) + "\n")
 PY
 chmod 600 "$F"
 systemctl restart shaxsiy && sleep 2 && systemctl is-active shaxsiy
-REMOTE
+EOS
+)
+printf '%s\n' "$LIST" | remote_bash "$HOST" "$REMOTE"
 echo "✓ foydalanuvchilar yozildi. Endi faqat ismli kirish ishlaydi — eski umumiy parol yopildi."

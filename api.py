@@ -250,7 +250,9 @@ def auth_config():
     ishlaydimi, Google bormi, hisob ochish ochiqmi, taklif kodi so'raladimi. Ismlar ro'yxati
     chiqarilmaydi — ochiq saytda bu begonaga kimlar borligini aytib qo'yardi."""
     return jsonify({"named": bool(USERS), "passcode": bool(PASSCODE) and not USERS, "google": GOOGLE_ON,
-                    "register": REGISTER_ON, "invite": bool(INVITE)})
+                    "register": REGISTER_ON, "invite": bool(INVITE),
+                    "googleInvite": GOOGLE_ON and bool(INVITE) and not ALLOWED_EMAILS,   # Google ham kod so'raydi
+                    "googleSeen": bool(request.cookies.get("g_seen"))})              # bu brauzer Google bilan kirgan
 
 
 @app.post("/api/login")
@@ -342,8 +344,18 @@ GOOGLE_INFO = "https://oauth2.googleapis.com/tokeninfo"
 def google_login():
     if not GOOGLE_ON:
         return "Google kirish sozlanmagan (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / MA_ALLOWED_EMAILS)", 501
+    # Ro'yxat bo'lmasa Google eshigi = «Hisob ochish» eshigi: taklif kodi shu yerda ham so'raladi.
+    # Kodni bilmagan, lekin oldin shu brauzerda Google bilan kirgan odam (g_seen) o'z hisobiga kiradi —
+    # callback'da yangi profil ochilmaydi (bayroq 0).
+    need_code = bool(INVITE) and not ALLOWED_EMAILS
+    code_in = str(request.args.get("invite") or "").strip()
+    if need_code and code_in and not hmac.compare_digest(code_in, INVITE):
+        return "Taklif kodi noto'g'ri", 403
+    if need_code and not code_in and not request.cookies.get("g_seen"):
+        return "Yangi hisob uchun taklif kodi kerak", 403
+    flag = "1" if (not need_code or code_in) else "0"
     nonce = secrets.token_hex(12)
-    state = f"{nonce}.{sign('g:' + nonce)}"
+    state = f"{nonce}.{flag}.{sign('g:' + nonce + '.' + flag)}"
     q = urllib.parse.urlencode({
         "client_id": GOOGLE_ID, "redirect_uri": base_url() + "/api/auth/google/callback",
         "response_type": "code", "scope": "openid email profile", "state": state, "prompt": "select_account",
@@ -364,10 +376,10 @@ def google_callback():
         return f"Google xato: {html.escape(request.args.get('error', '')[:200])}", 400
     code, state = request.args.get("code", ""), request.args.get("state", "")
     try:
-        nonce, sig = state.split(".")
+        nonce, flag, sig = state.split(".")
     except ValueError:
         return "state noto'g'ri", 400
-    if not hmac.compare_digest(sig, sign("g:" + nonce)):
+    if not hmac.compare_digest(sig, sign("g:" + nonce + "." + flag)):
         return "state imzosi noto'g'ri", 400
     if not hmac.compare_digest(request.cookies.get("g_st", ""), nonce):
         return "kirish shu brauzerda boshlanmagan — qaytadan urinib ko'ring", 400
@@ -386,12 +398,23 @@ def google_callback():
         log.warning("Google: ruxsatsiz email %s", email)
         return "Bu Google hisobiga ruxsat berilmagan", 403
     uid = "g_" + hashlib.sha256(str(info["sub"]).encode()).hexdigest()[:20]
+    is_new = not who_file(uid).exists() and not user_file(uid).exists()
+    if is_new and INVITE and not ALLOWED_EMAILS and flag != "1":
+        log.warning("Google: yangi profil kodsiz rad etildi (%s)", email)
+        return ("<meta charset='utf-8'><body style='font:15px/1.6 system-ui;max-width:34em;margin:12vh auto;padding:0 20px'>"
+                "<h2>Taklif kodi kerak</h2><p>Bu Google hisobi uchun hali profil yo'q. Kirish oynasida «Google bilan kirish» "
+                "bosilganda taklif kodini kiriting.</p><p><a href='/'>Ilovaga qaytish</a></p></body>", 403)
+    if is_new:
+        log.info("Yangi hisob (Google): %s (%s)", email, uid)
     try:
         who_file(uid).write_text(json.dumps({"name": info.get("name") or email.split("@")[0], "email": email}), encoding="utf-8")
     except OSError:
         pass
     r = _set_session(redirect("/#today"), uid)
     r.delete_cookie("g_st")
+    # bu brauzer Google bilan kirgan: keyingi safar taklif kodi so'ralmaydi (yangi profil baribir ochilmaydi)
+    r.set_cookie("g_seen", "1", max_age=365 * 86400, httponly=True, samesite="Lax",
+                 secure=request.headers.get("X-Forwarded-Proto", "") == "https")
     return r
 
 
