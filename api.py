@@ -184,6 +184,10 @@ AI_MODEL = os.environ.get("AI_MODEL", "claude-opus-5")
 OPENAI_KEY = os.environ.get("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-5")
 OPENAI_BASE = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
+# gpt-5 oilasi "fikrlash" tokenlarini ham shu byudjetdan sarflaydi: maslahat ilovasi uchun past
+# daraja yetadi — tezroq, arzonroq, javob uchun ko'proq joy qoladi (minimal|low|medium|high).
+OPENAI_REASONING = os.environ.get("OPENAI_REASONING", "low").strip().lower()
+AI_MIN_TOKENS, AI_MAX_TOKENS = 800, 8000
 AI_PROVIDER = (os.environ.get("AI_PROVIDER") or ("openai" if OPENAI_KEY else "anthropic" if AI_KEY else "")).lower()
 if AI_PROVIDER == "openai" and not OPENAI_KEY:
     log.error("AI_PROVIDER=openai, lekin OPENAI_API_KEY bo'sh — AI o'chirilgan"); AI_PROVIDER = ""
@@ -1429,6 +1433,8 @@ def ai_openai(system: str, msgs: list, max_tokens: int, timeout: float = 120):
     msgs[].content matn yoki content-parts ro'yxati (text + image_url) bo'lishi mumkin."""
     body = {"model": OPENAI_MODEL, "messages": ([{"role": "system", "content": system}] if system else []) + msgs,
             "max_completion_tokens": max_tokens}
+    if OPENAI_REASONING in ("minimal", "low", "medium", "high") and (OPENAI_MODEL.startswith("gpt-5") or OPENAI_MODEL.startswith("o")):
+        body["reasoning_effort"] = OPENAI_REASONING   # faqat fikrlaydigan modellar qabul qiladi
     req = urllib.request.Request(OPENAI_BASE + "/chat/completions", data=json.dumps(body).encode("utf-8"), method="POST",
                                  headers={"Authorization": "Bearer " + OPENAI_KEY, "Content-Type": "application/json", "User-Agent": USER_AGENT})
     try:
@@ -1476,7 +1482,11 @@ def ai():
         return jsonify({"error": "first message must be user"}), 400
     kind = str(body.get("kind") or "chat")[:40]   # chat | card:<section> — faqat hisob uchun
     if AI_PROVIDER == "openai":
-        out, fail = ai_openai(system, clean, int(body.get("max_tokens") or 2048))
+        budget = max(AI_MIN_TOKENS, min(int(body.get("max_tokens") or 2048), AI_MAX_TOKENS))
+        out, fail = ai_openai(system, clean, budget)
+        if not fail and not out.get("text") and out.get("stop") == "length":
+            # fikrlash butun byudjetni yeb qo'ydi (bo'sh javob) — bir marta kattaroq byudjet bilan
+            out, fail = ai_openai(system, clean, min(budget * 3, AI_MAX_TOKENS))
         if fail:
             return jsonify({"error": fail[0]}), fail[1]
         _archive(db.record_ai_call, uid, kind, out.get("model"), (out.get("usage") or {}).get("in"), (out.get("usage") or {}).get("out"), what="arxiv ai")
