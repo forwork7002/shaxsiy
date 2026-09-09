@@ -329,7 +329,6 @@
     actions.push({ label: meal ? t('btn.save') : t('btn.add'), act: 'fdEdSave', primary: true });
     D.modal({ title: meal ? t('food.editMeal') : t('food.newMeal'), body, actions, onClose: () => { editing = null; } });
   }
-  D.act.fdEdit = (el) => openEdit(el.dataset.day || key(), el.dataset.id);
   D.act.fdAddManual = () => openEdit(key(), null, { src: 'manual' });
   D.act.fdEdGrams = (el) => {
     if (!editing) return;
@@ -403,18 +402,25 @@
   /* Makro uchligi — kun xulosasida ham, bitta taom tahlilida ham bir xil ko'rinish.
      Me'yor bo'lsa chiziq me'yorga nisbatan, bo'lmasa taomdagi kaloriya ulushiga. */
   const MACROS = [['p', 'food.protein', 'var(--info)'], ['c', 'food.carbs', 'var(--warning)'], ['f', 'food.fat', 'var(--violet)']];
-  const KPG = { p: 4, c: 4, f: 9 };
-  function macroGrid(tot, tg) {
-    const share = D.sum(['p', 'c', 'f'], (x) => (+tot[x] || 0) * KPG[x]);
+  /* Chiziq faqat me'yori bor joyda — kun xulosasida. Bitta taomda me'yor yo'q,
+     shuning uchun u yerda chiziq emas, rangli nuqta: bir xil ko'rinish ikki xil
+     ma'no bermasin (chiziq = me'yorning shuncha qismi, boshqa hech narsa). */
+  function macroBars(tot, tg) {
     return `<div class="fd-macros">${MACROS.map(([x, lab, col]) => {
       const v = r0(tot[x] || 0), max = tg && tg[x] ? tg[x] : null;
-      const pct = max ? D.clamp((v / max) * 100, 0, 100) : share ? ((+tot[x] || 0) * KPG[x] / share) * 100 : 0;
+      const pct = max ? D.clamp((v / max) * 100, 0, 100) : 0;
       return `<div class="fd-macro">
         <div class="fd-macro-lab">${esc(t(lab))}</div>
         <div class="fd-macro-val num">${D.fmtNum(v)}<small>${max ? ` / ${D.fmtNum(max)} g` : ' g'}</small></div>
         <span class="bar thin"><i class="bar-fill" style="width:${pct.toFixed(0)}%;background:${col}"></i></span>
       </div>`;
     }).join('')}</div>`;
+  }
+  function macroRow(tot) {
+    return `<div class="fd-macros fd-macros-flat">${MACROS.map(([x, lab, col]) => `<div class="fd-macro">
+      <div class="fd-macro-lab"><i class="fd-dot" style="background:${col}"></i>${esc(t(lab))}</div>
+      <div class="fd-macro-val num">${D.fmtNum(r0(tot[x] || 0))}<small> g</small></div>
+    </div>`).join('')}</div>`;
   }
   /* Tola · shakar · tuz — AI bergan bo'lsa bitta jimgina qator, bermasa yo'q. */
   const EXTRA_LAB = { fib: 'food.fib', sug: 'food.sug', salt: 'food.salt' };
@@ -441,7 +447,7 @@
           <button class="btn xs ghost fd-tgt" data-act="fdTargets">${D.ic('target', 12)} ${esc(t('food.targets'))}</button>
         </div>
       </div>
-      ${macroGrid(tot, tg)}
+      ${macroBars(tot, tg)}
       ${extraLine(tot)}
     </div>`;
   }
@@ -498,9 +504,9 @@
       ${r.preview ? `<img class="fd-preview" src="${r.preview}" alt="">` : ''}
       <div class="fd-res-name">${esc(r.name)}${rough ? ` <span class="fd-rough">${esc(t('food.rough'))}</span>` : ''}</div>
       <div class="fd-big"><b class="num">${D.fmtNum(r.total.kcal)}</b><span>${esc(t('food.kcal'))}</span>${r.grams ? `<span class="fd-big-g num">${D.fmtNum(r.grams)} g</span>` : ''}</div>
-      ${macroGrid(r.total, null)}
+      ${macroRow(r.total)}
       ${extraLine(r.total)}
-      ${r.items.length > 1 ? `<div class="fd-parts">${r.items.map((i) => `<div class="fd-part"><span class="grow">${esc(i.name)}</span><span class="num">${r0(i.grams)} g<span class="sep">·</span>${D.fmtNum(r0(i.kcal))} ${esc(t('food.kcal'))}</span></div>`).join('')}</div>` : ''}
+      ${partsBlock(r.items)}
       ${r.advice ? `<div class="fd-advice">${D.ic('info', 14)}<span>${esc(r.advice)}</span></div>` : ''}
       <div class="fd-res-acts">
         <button class="btn sm" data-act="fdSaveRes">${D.ic('check', 14)} ${esc(t('food.save'))}</button>
@@ -509,9 +515,40 @@
       </div></div>`;
   }
 
+  // tarkib — bitta taomdan iborat bo'lsa nomning o'zi yetarli, takrorlash ortiqcha
+  const partsBlock = (items) => (Array.isArray(items) && items.length > 1
+    ? `<div class="fd-parts">${items.map((i) => `<div class="fd-part"><span class="grow">${esc(i.name)}</span><span class="num">${r0(i.grams)} g<span class="sep">·</span>${D.fmtNum(r0(i.kcal))} ${esc(t('food.kcal'))}</span></div>`).join('')}</div>`
+    : '');
+
+  /* Saqlangan taomni bosganda avval o'sha tushunarli ko'rinish ochiladi —
+     rasm, katta kaloriya, makrolar, tarkib. Tahrirlash formasi undan keyin. */
+  D.act.fdView = (el) => {
+    const k = el.dataset.day || key(), m = findMeal(k, el.dataset.id);
+    if (!m) return;
+    const when = timeOf(m, k);
+    const body = `${m.photo ? `<img class="fd-preview" src="/api/food/photo/${esc(m.photo)}" alt="">` : ''}
+      <div class="fd-big"><b class="num">${D.fmtNum(r0(m.kcal))}</b><span>${esc(t('food.kcal'))}</span>${m.grams ? `<span class="fd-big-g num">${D.fmtNum(r0(m.grams))} g</span>` : ''}</div>
+      ${macroRow(m)}
+      ${extraLine(m)}
+      ${partsBlock(m.items)}
+      ${m.note ? `<div class="fd-note">${esc(m.note)}</div>` : ''}
+      ${when ? `<div class="fd-when">${esc(t('food.time'))} ${esc(when)}</div>` : ''}`;
+    D.modal({
+      title: m.name, body, noFocus: true,
+      actions: [{ label: t('btn.delete'), act: 'fdViewDel', danger: true, data: { day: k, id: m.id } },
+                { label: t('food.edit'), act: 'fdToEdit', primary: true, data: { day: k, id: m.id } }],
+    });
+  };
+  D.act.fdToEdit = (el) => { const k = el.dataset.day, id = el.dataset.id; D.closeModal(); openEdit(k, id); };
+  D.act.fdViewDel = (el) => {
+    const k = el.dataset.day, id = el.dataset.id, m = findMeal(k, id);
+    D.closeModal();
+    D.remove(meals(k), id, { label: m ? t('food.deleted') + ': ' + m.name : t('food.deleted') });
+  };
+
   function mealList(k) {
     const ms = mealsSorted(k);
-    const rows = ms.map((m) => `<div class="li tap fd-meal" data-k="${esc(m.id)}" data-act="fdEdit" data-id="${esc(m.id)}" data-day="${esc(k)}" role="button" tabindex="0">
+    const rows = ms.map((m) => `<div class="li tap fd-meal" data-k="${esc(m.id)}" data-act="fdView" data-id="${esc(m.id)}" data-day="${esc(k)}" role="button" tabindex="0">
         ${thumb(m)}
         <div class="li-body"><div class="li-text">${esc(m.name)}</div>
           <div class="li-meta"><span class="num">${D.fmtNum(r0(m.kcal))} ${esc(t('food.kcal'))}</span><span>·</span><span class="num">${r0(m.p)} g ${esc(t('food.protein').toLowerCase())}</span></div></div>

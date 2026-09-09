@@ -16,8 +16,11 @@
 .fd-hero-burn .ic { color: var(--warning); flex: none; }
 .fd-tgt { margin-top: 2px; }
 
-/* ---- uchta makro: bir xil og'irlikda, uchtasi ham bir xil ko'rinishda ---- */
+/* ---- uchta makro: bir xil og'irlikda, uchtasi ham bir xil ko'rinishda ----
+   chiziqli variant — kun me'yoriga nisbatan; nuqtali (flat) — bitta taom uchun */
 .fd-macros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.fd-macros-flat .fd-macro-val { margin-bottom: 0; }
+.fd-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 .fd-macro { min-width: 0; }
 .fd-macro-lab { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fd-macro-val { font-size: 15px; font-weight: 700; color: var(--text); margin: 1px 0 5px; white-space: nowrap; }
@@ -58,6 +61,10 @@
 .fd-advice .ic { color: var(--info); flex: none; margin-top: 2px; }
 .fd-res-acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
 .fd-res-acts .btn.icon { margin-left: auto; }
+
+/* ---- bitta taomning to'liq ko'rinishi (modal) ---- */
+.fd-note { margin-top: 12px; padding: 8px 10px; border-radius: var(--r-sm); background: var(--inset); font-size: 12.5px; color: var(--text2); line-height: 1.45; overflow-wrap: anywhere; }
+.fd-when { margin-top: 10px; font-size: 11.5px; color: var(--text3); }
 
 /* ---- taomlar ro'yxati ---- */
 .fd-meal { align-items: center; }
