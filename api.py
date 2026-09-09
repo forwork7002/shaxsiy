@@ -92,6 +92,10 @@ USERS = _parse_users(os.environ.get("MA_USERS", ""))
 # Parol hech qachon ochiq saqlanmaydi (PBKDF2-SHA256). uid tasodifiy — ismdan topib bo'lmaydi.
 REGISTER_ON = os.environ.get("MA_REGISTER", "1") != "0"
 INVITE = os.environ.get("MA_INVITE", "").strip()
+# Google bilan kirganlar odatda taklif kodini so'ramaydi: Google Cloud'dagi ilova «Testing» rejimida
+# bo'lsa faqat test users ro'yxatidagilar kira oladi — bu o'zi ro'yxat. MA_GOOGLE_INVITE=1 bo'lsa
+# Google uchun ham kod so'raladi (ro'yxat bo'lmaganda).
+GOOGLE_INVITE = os.environ.get("MA_GOOGLE_INVITE", "") == "1"
 USERS_FILE = DATA_DIR / "users.json"
 RESERVED_NAMES = {"me", "dev", "admin", "root", "system", "whoop", "nova", "google"}
 PW_ITER = 200_000
@@ -271,7 +275,7 @@ def auth_config():
     chiqarilmaydi — ochiq saytda bu begonaga kimlar borligini aytib qo'yardi."""
     return jsonify({"named": bool(USERS), "passcode": bool(PASSCODE) and not USERS, "google": GOOGLE_ON,
                     "register": REGISTER_ON, "invite": bool(INVITE),
-                    "googleInvite": GOOGLE_ON and bool(INVITE) and not ALLOWED_EMAILS,   # Google ham kod so'raydi
+                    "googleInvite": GOOGLE_ON and GOOGLE_INVITE and bool(INVITE) and not ALLOWED_EMAILS,   # Google ham kod so'raydi
                     "googleSeen": bool(request.cookies.get("g_seen"))})              # bu brauzer Google bilan kirgan
 
 
@@ -369,7 +373,7 @@ def google_login():
     # Ro'yxat bo'lmasa Google eshigi = «Hisob ochish» eshigi: taklif kodi shu yerda ham so'raladi.
     # Kodni bilmagan, lekin oldin shu brauzerda Google bilan kirgan odam (g_seen) o'z hisobiga kiradi —
     # callback'da yangi profil ochilmaydi (bayroq 0).
-    need_code = bool(INVITE) and not ALLOWED_EMAILS
+    need_code = GOOGLE_INVITE and bool(INVITE) and not ALLOWED_EMAILS
     code_in = str(request.args.get("invite") or "").strip()
     if need_code and code_in and not hmac.compare_digest(code_in, INVITE):
         return "Taklif kodi noto'g'ri", 403
@@ -421,7 +425,7 @@ def google_callback():
         return "Bu Google hisobiga ruxsat berilmagan", 403
     uid = "g_" + hashlib.sha256(str(info["sub"]).encode()).hexdigest()[:20]
     is_new = not who_file(uid).exists() and not user_file(uid).exists()
-    if is_new and INVITE and not ALLOWED_EMAILS and flag != "1":
+    if is_new and GOOGLE_INVITE and INVITE and not ALLOWED_EMAILS and flag != "1":
         log.warning("Google: yangi profil kodsiz rad etildi (%s)", email)
         return ("<meta charset='utf-8'><body style='font:15px/1.6 system-ui;max-width:34em;margin:12vh auto;padding:0 20px'>"
                 "<h2>Taklif kodi kerak</h2><p>Bu Google hisobi uchun hali profil yo'q. Kirish oynasida «Google bilan kirish» "
@@ -1381,6 +1385,7 @@ def whoop_refresh():
 
 
 @app.post("/api/whoop/webhook")
+@app.post("/api/whoop/callback")   # WHOOP dashboard'da eski manzil qolgan bo'lsa ham qabul qilamiz
 def whoop_webhook():
     """WHOOP yangilanish bergan zahoti chaqiradi. Imzo: base64(HMAC-SHA256(timestamp + body, client_secret))."""
     if not WHOOP_SECRET:
