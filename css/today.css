@@ -160,8 +160,11 @@
 .td-kpi.z-bad  { --c: var(--danger-text); }
 .td-kpi-lab { font-size: 9.5px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; color: var(--text3);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.td-kpi-val { font-size: 20px; font-weight: 700; letter-spacing: -.03em; color: var(--text); line-height: 1.05; }
+.td-kpi-val { font-size: 20px; font-weight: 700; letter-spacing: -.03em; color: var(--text); line-height: 1.05; overflow-wrap: anywhere; }
 .td-kpi-val small { font-size: 11px; color: var(--text3); font-weight: 600; margin-left: 1px; }
+/* Davomiylik «7 soat 12 daq» ko'rinishida keladi — mono shrift bunga juda keng va
+   qiymatni ikki qatorga bo'lib yuboradi, shuning uchun bu yerda proporsional shrift. */
+.td-kpi-val.dur { font-family: var(--font); font-size: 15px; line-height: 1.2; letter-spacing: -.015em; }
 .td-kpi-d { font-size: 11px; font-weight: 700; color: var(--c); line-height: 1.3; overflow-wrap: anywhere; }
 .td-hero-foot { display: flex; align-items: center; gap: 6px; margin-top: 11px; font-size: 11.5px; font-weight: 600; color: var(--text3); }
 .td-hero-foot .ic { color: var(--text4); }
@@ -169,6 +172,7 @@
   .td-ready-top { gap: 12px; }
   .td-ready-state { font-size: 17px; }
   .td-kpi-val { font-size: 18px; }
+  .td-kpi-val.dur { font-size: 13.5px; }
   .td-kpis { gap: 6px; }
 }
 

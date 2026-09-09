@@ -127,9 +127,9 @@
       'today.adv.warn': "{n} atrofida zo'riqish yetarli",
       'today.adv.bad': "Dam oling — {n} dan oshirmang",
       'today.adv.over': "Chegara oshdi ({s}/{n}) — qolgan kun dam",
-      'today.d.short': '{h} soat kam', 'today.d.over': '{h} soat ortiq', 'today.d.target': 'chegara {n}',
+      'today.d.short': '{h} kam', 'today.d.over': '{h} ortiq', 'today.d.target': 'chegara {n}',
       'today.d.base': "o'rtachadan {p}", 'today.d.noData': "ma'lumot yo'q",
-      'today.debt': '7 kunda {h} soat uyqu qarzi',
+      'today.debt': '7 kunda {h} uyqu qarzi',
       'today.detail': 'Batafsil',
       'today.focus': 'Bugun bajarish kerak', 'today.focusDone': "Bugungi ro'yxat tugadi",
       'today.focusEmpty': "Bugunga vazifa ham, odat ham yo'q",
@@ -141,9 +141,9 @@
       'today.adv.warn': '{n} атрофида зўриқиш етарли',
       'today.adv.bad': 'Дам олинг — {n} дан оширманг',
       'today.adv.over': 'Чегара ошди ({s}/{n}) — қолган кун дам',
-      'today.d.short': '{h} соат кам', 'today.d.over': '{h} соат ортиқ', 'today.d.target': 'чегара {n}',
+      'today.d.short': '{h} кам', 'today.d.over': '{h} ортиқ', 'today.d.target': 'чегара {n}',
       'today.d.base': 'ўртачадан {p}', 'today.d.noData': 'маълумот йўқ',
-      'today.debt': '7 кунда {h} соат уйқу қарзи',
+      'today.debt': '7 кунда {h} уйқу қарзи',
       'today.detail': 'Батафсил',
       'today.focus': 'Бугун бажариш керак', 'today.focusDone': 'Бугунги рўйхат тугади',
       'today.focusEmpty': 'Бугунга вазифа ҳам, одат ҳам йўқ',
@@ -155,9 +155,9 @@
       'today.adv.warn': 'Достаточно нагрузки около {n}',
       'today.adv.bad': 'Отдыхайте — не выше {n}',
       'today.adv.over': 'Предел превышен ({s}/{n}) — дальше отдых',
-      'today.d.short': 'меньше на {h} ч', 'today.d.over': 'больше на {h} ч', 'today.d.target': 'предел {n}',
+      'today.d.short': 'меньше на {h}', 'today.d.over': 'больше на {h}', 'today.d.target': 'предел {n}',
       'today.d.base': '{p} от среднего', 'today.d.noData': 'нет данных',
-      'today.debt': 'долг сна за 7 дней: {h} ч',
+      'today.debt': 'долг сна за 7 дней: {h}',
       'today.detail': 'Подробно',
       'today.focus': 'Сегодня нужно сделать', 'today.focusDone': 'Список на сегодня закрыт',
       'today.focusEmpty': 'На сегодня нет ни задач, ни привычек',
@@ -347,10 +347,10 @@
   /* hech narsa aytmaydi, farq aytadi.                                   */
   /* ---------------------------------------------------------------- */
   const ZONE_COLOR = { good: 'var(--success)', warn: 'var(--warning)', bad: 'var(--danger-text)' };
-  function kpiHtml(lab, val, delta, zone) {
+  function kpiHtml(lab, val, delta, zone, dur) {
     return `<div class="td-kpi ${zone || ''}">
       <span class="td-kpi-lab">${esc(lab)}</span>
-      <span class="td-kpi-val num">${val}</span>
+      <span class="td-kpi-val num ${dur ? 'dur' : ''}">${val}</span>
       <span class="td-kpi-d">${delta ? esc(delta) : esc(t('today.d.noData'))}</span></div>`;
   }
   /** Shu kunning WHOOP kesimi — bugun uchun ham, orqaga qaralgan kun uchun ham. */
@@ -377,45 +377,45 @@
 
     // maslahat — bitta jumla: avval chegaradan oshgani, keyin zona bo'yicha
     let adv;
-    if (i.load === 'over' && tgt != null) adv = t('today.adv.over', { s: strain, n: tgt });
-    else if (tgt != null) adv = t('today.adv.' + r.zone, { n: tgt });
+    if (i.load === 'over' && tgt != null) adv = t('today.adv.over', { s: D.fmtNum(strain, 1), n: D.fmtNum(tgt, 1) });
+    else if (tgt != null) adv = t('today.adv.' + r.zone, { n: D.fmtNum(tgt, 1) });
     else adv = r.label;
 
     // 1) uyqu — kerakli miqdordan farqi
-    let sVal = '—', sD = '', sZ = '';
+    let sVal = '—', sD = '', sZ = '', sDur = false;
     if (i.sleepH != null || r.sleepH != null) {
-      const h = i.sleepH != null ? i.sleepH : r.sleepH;
-      sVal = `${h}<small>${esc(t('unit.h'))}</small>`;
+      // Ilova qoidasi: davomiylik hech qachon kasr soatda emas — «7 soat 12 daq».
+      sVal = D.fmtHm(i.sleepH != null ? i.sleepH : r.sleepH); sDur = true;
       if (i.gapH != null) {
-        sD = i.gapH >= 0 ? t('today.d.over', { h: D.round(i.gapH, 1) }) : t('today.d.short', { h: D.round(-i.gapH, 1) });
+        sD = t(i.gapH >= 0 ? 'today.d.over' : 'today.d.short', { h: D.fmtHm(Math.abs(i.gapH)) });
         sZ = i.gapH >= -0.5 ? 'z-good' : i.gapH >= -1.5 ? 'z-warn' : 'z-bad';
-      } else if (i.perf != null) { sD = i.perf + '%'; sZ = i.perf >= 85 ? 'z-good' : i.perf >= 70 ? 'z-warn' : 'z-bad'; }
+      } else if (i.perf != null) { sD = D.fmtNum(i.perf, 1) + '%'; sZ = i.perf >= 85 ? 'z-good' : i.perf >= 70 ? 'z-warn' : 'z-bad'; }
     }
     // 2) zo'riqish — tiklanish ruxsat bergan chegaraga nisbatan
     let tVal = '—', tD = '', tZ = '';
     if (strain != null) {
-      tVal = `${strain}${live ? '<i class="wh-dot"></i>' : ''}`;
+      tVal = `${D.fmtNum(strain, 1)}${live ? '<i class="wh-dot"></i>' : ''}`;
       if (tgt != null) {
-        tD = t('today.d.target', { n: tgt });
+        tD = t('today.d.target', { n: D.fmtNum(tgt, 1) });
         tZ = i.load === 'over' ? 'z-bad' : i.load === 'under' ? 'z-warn' : i.load === 'ok' ? 'z-good' : '';
       }
     }
     // 3) HRV — o'z 30 kunlik bazasidan og'ish; HRV yo'q bo'lsa tinch puls
     let hLab = t('wh.hrv'), hVal = '—', hD = '', hZ = '';
     if (i.hrv != null) {
-      hVal = `${i.hrv}<small>ms</small>`;
-      if (i.hrvPct !== undefined) { hD = t('today.d.base', { p: (i.hrvPct > 0 ? '+' : '') + i.hrvPct + '%' }); hZ = i.hrvPct >= -5 ? 'z-good' : i.hrvPct >= -15 ? 'z-warn' : 'z-bad'; }
+      hVal = `${D.fmtNum(i.hrv, 1)}<small>ms</small>`;
+      if (i.hrvPct !== undefined) { hD = t('today.d.base', { p: D.fmtSigned(i.hrvPct, 1) + '%' }); hZ = i.hrvPct >= -5 ? 'z-good' : i.hrvPct >= -15 ? 'z-warn' : 'z-bad'; }
     } else if (i.rhr != null || r.rhr != null) {
-      hLab = t('wh.rhr'); hVal = `${i.rhr != null ? i.rhr : r.rhr}<small>bpm</small>`;
-      if (i.rhrDelta !== undefined) { hD = t('today.d.base', { p: (i.rhrDelta > 0 ? '+' : '') + i.rhrDelta }); hZ = i.rhrDelta <= 1 ? 'z-good' : i.rhrDelta <= 4 ? 'z-warn' : 'z-bad'; }
+      hLab = t('wh.rhr'); hVal = `${D.fmtNum(i.rhr != null ? i.rhr : r.rhr, 1)}<small>bpm</small>`;
+      if (i.rhrDelta !== undefined) { hD = t('today.d.base', { p: D.fmtSigned(i.rhrDelta, 1) }); hZ = i.rhrDelta <= 1 ? 'z-good' : i.rhrDelta <= 4 ? 'z-warn' : 'z-bad'; }
     }
     // uyqu qarzi ko'zga ko'rinmaydigan narsa — bugun va sezilarli bo'lgandagina bitta qator
     const dbt = today && D.whoop.sleepDebt ? safeVal(() => D.whoop.sleepDebt(7)) : null;
-    const foot = dbt && dbt.h >= 2 ? `<div class="td-hero-foot">${D.ic('moon', 12)} ${esc(t('today.debt', { h: dbt.h }))}</div>` : '';
+    const foot = dbt && dbt.h >= 2 ? `<div class="td-hero-foot">${D.ic('moon', 12)} ${esc(t('today.debt', { h: D.fmtHm(dbt.h) }))}</div>` : '';
 
     return `<div class="hero td-ready z-${r.zone}" data-act="go" data-view="health" data-sub="ready" role="button" tabindex="0">
       <div class="td-ready-top">
-        ${D.chart.ring({ pct: r.pct, size: 104, stroke: 9, color: col, label: `${r.pct}<small>%</small>`, sub: esc(t('wh.recovery')) })}
+        ${D.chart.ring({ pct: r.pct, size: 104, stroke: 9, color: col, label: `${D.fmtNum(r.pct)}<small>%</small>`, sub: esc(t('wh.recovery')) })}
         <div class="td-ready-id">
           <div class="eyebrow">WHOOP${f ? ` <span class="td-fresh ${f.stale ? 'stale' : ''}">${esc(f.label)}</span>` : ''}</div>
           <div class="td-ready-state">${esc(t('today.state.' + r.zone))}</div>
@@ -423,7 +423,7 @@
         </div>
         <span class="td-ready-go">${D.ic('chevR', 16)}</span>
       </div>
-      <div class="td-kpis">${kpiHtml(t('wh.sleepH'), sVal, sD, sZ)}${kpiHtml(t('wh.strain'), tVal, tD, tZ)}${kpiHtml(hLab, hVal, hD, hZ)}</div>
+      <div class="td-kpis">${kpiHtml(t('wh.sleepH'), sVal, sD, sZ, sDur)}${kpiHtml(t('wh.strain'), tVal, tD, tZ)}${kpiHtml(hLab, hVal, hD, hZ)}</div>
       ${foot}</div>`;
   }
 
@@ -844,12 +844,11 @@
       const td = D.today();
       if (D.ui.viewDate && D.ui.viewDate >= td) { D.ui.viewDate = null; D.saveUi(); }
       const k = key(), today = k === td;
-      const ai = today && D.ai ? safe(() => D.ai.card('today')) : '';
       // Tartib bitta savolga qarab qurilgan: "tanam qanday?" → "kun qayerda?" →
       // namoz → raqamlar → "hozir nima qilaman?" → tafsilot → kun yakuni.
       return safe(() => dateNav(k, today)) + safe(() => heroCard(k)) + safe(() => dayStrip(k)) +
         safe(() => prayerCard(k)) + safe(() => qazaHtml(k)) + safe(() => statTiles(k)) +
-        safe(() => focusCard(k)) + safe(() => workoutsCard(k)) + ai + safe(() => wrapCard(k));
+        safe(() => focusCard(k)) + safe(() => workoutsCard(k)) + safe(() => wrapCard(k));
     },
   });
 })();
