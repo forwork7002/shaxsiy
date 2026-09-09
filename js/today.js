@@ -1,7 +1,8 @@
 /* =====================================================================
-   today.js — Бугун: the daily hub.
-   date stepper · task ticker · day ring + prayers · habits · tasks ·
-   quick strip (water + food) · WHOOP workouts · daily note · gratitude
+   today.js — Bugun: kunlik tahlil sahifasi.
+   sana · WHOOP tayyorlik hero (tiklanish + uyqu/zo'riqish/HRV) · kun chizig'i ·
+   namoz · qazo · xulosa plitkalari (vazifa/odat/suv/ovqat) · fokus ro'yxati ·
+   WHOOP mashg'ulotlari · AI · kun yakuni (izoh + shukr)
    ===================================================================== */
 (function () {
   'use strict';
@@ -11,9 +12,6 @@
       'today.left.n': 'Qolgan {n} ta', 'today.showAll': 'Barchasini ko‘rsatish', 'today.showLess': 'Yig‘ish',
       'today.doneN': 'Bajarilgan {n}', 'today.allDoneShort': 'Bugungi odatlar tugadi',
       'today.wrap': 'Kun yakuni', 'today.nothingLeft': 'Hozircha hammasi joyida',
-      'today.ticker': 'VAZIFA',
-      'today.ticker.empty': "Bugunga vazifa yo'q — pastda qo'shing",
-      'today.ticker.allDone': "✓ Hammasi bajarildi — zo'r kun",
       'today.backToday': 'bugunga qaytish',
       'today.dayRing': 'Kun',
       'today.prayers': 'Namozlar',
@@ -49,9 +47,6 @@
       'today.left.n': 'Қолган {n} та', 'today.showAll': 'Барчасини кўрсатиш', 'today.showLess': 'Йиғиш',
       'today.doneN': 'Бажарилган {n}', 'today.allDoneShort': 'Бугунги одатлар тугади',
       'today.wrap': 'Кун якуни', 'today.nothingLeft': 'Ҳозирча ҳаммаси жойида',
-      'today.ticker': 'ВАЗИФА',
-      'today.ticker.empty': 'Бугунга вазифа йўқ — пастда қўшинг',
-      'today.ticker.allDone': '✓ Ҳаммаси бажарилди — зўр кун',
       'today.backToday': 'бугунга қайтиш',
       'today.dayRing': 'Кун',
       'today.prayers': 'Намозлар',
@@ -87,9 +82,6 @@
       'today.left.n': 'Осталось {n}', 'today.showAll': 'Показать все', 'today.showLess': 'Свернуть',
       'today.doneN': 'Выполнено {n}', 'today.allDoneShort': 'Привычки на сегодня закрыты',
       'today.wrap': 'Итог дня', 'today.nothingLeft': 'Пока всё в порядке',
-      'today.ticker': 'ЗАДАЧИ',
-      'today.ticker.empty': 'На сегодня задач нет — добавьте ниже',
-      'today.ticker.allDone': '✓ Всё выполнено — отличный день',
       'today.backToday': 'вернуться к сегодня',
       'today.dayRing': 'День',
       'today.prayers': 'Намазы',
@@ -127,6 +119,52 @@
   /* constants                                                           */
   /* ------------------------------------------------------------------ */
   // "contains" match on the normalised (translit) habit name; asr keeps a word boundary (nasr, kasr, asrlar…)
+  /* Bugun 2.0 — WHOOP tahlili birinchi o'ringa chiqqach kerak bo'lgan qatorlar */
+  D.i18n.add({
+    uz: {
+      'today.state.good': 'TAYYOR', 'today.state.warn': "O'RTACHA", 'today.state.bad': 'DAM OL',
+      'today.adv.good': "Bugun {n} gacha zo'riqish ko'tarasiz",
+      'today.adv.warn': "{n} atrofida zo'riqish yetarli",
+      'today.adv.bad': "Dam oling — {n} dan oshirmang",
+      'today.adv.over': "Chegara oshdi ({s}/{n}) — qolgan kun dam",
+      'today.d.short': '{h} soat kam', 'today.d.over': '{h} soat ortiq', 'today.d.target': 'chegara {n}',
+      'today.d.base': "o'rtachadan {p}", 'today.d.noData': "ma'lumot yo'q",
+      'today.debt': '7 kunda {h} soat uyqu qarzi',
+      'today.detail': 'Batafsil',
+      'today.focus': 'Bugun bajarish kerak', 'today.focusDone': "Bugungi ro'yxat tugadi",
+      'today.focusEmpty': "Bugunga vazifa ham, odat ham yo'q",
+      'today.leftN': "Qolgan {n} ta", 'today.doneN2': 'Bajarilgan {n} ta',
+    },
+    uzk: {
+      'today.state.good': 'ТАЙЁР', 'today.state.warn': 'ЎРТАЧА', 'today.state.bad': 'ДАМ ОЛ',
+      'today.adv.good': 'Бугун {n} гача зўриқиш кўтарасиз',
+      'today.adv.warn': '{n} атрофида зўриқиш етарли',
+      'today.adv.bad': 'Дам олинг — {n} дан оширманг',
+      'today.adv.over': 'Чегара ошди ({s}/{n}) — қолган кун дам',
+      'today.d.short': '{h} соат кам', 'today.d.over': '{h} соат ортиқ', 'today.d.target': 'чегара {n}',
+      'today.d.base': 'ўртачадан {p}', 'today.d.noData': 'маълумот йўқ',
+      'today.debt': '7 кунда {h} соат уйқу қарзи',
+      'today.detail': 'Батафсил',
+      'today.focus': 'Бугун бажариш керак', 'today.focusDone': 'Бугунги рўйхат тугади',
+      'today.focusEmpty': 'Бугунга вазифа ҳам, одат ҳам йўқ',
+      'today.leftN': 'Қолган {n} та', 'today.doneN2': 'Бажарилган {n} та',
+    },
+    ru: {
+      'today.state.good': 'ГОТОВ', 'today.state.warn': 'СРЕДНЕ', 'today.state.bad': 'ОТДЫХ',
+      'today.adv.good': 'Сегодня выдержите нагрузку до {n}',
+      'today.adv.warn': 'Достаточно нагрузки около {n}',
+      'today.adv.bad': 'Отдыхайте — не выше {n}',
+      'today.adv.over': 'Предел превышен ({s}/{n}) — дальше отдых',
+      'today.d.short': 'меньше на {h} ч', 'today.d.over': 'больше на {h} ч', 'today.d.target': 'предел {n}',
+      'today.d.base': '{p} от среднего', 'today.d.noData': 'нет данных',
+      'today.debt': 'долг сна за 7 дней: {h} ч',
+      'today.detail': 'Подробно',
+      'today.focus': 'Сегодня нужно сделать', 'today.focusDone': 'Список на сегодня закрыт',
+      'today.focusEmpty': 'На сегодня нет ни задач, ни привычек',
+      'today.leftN': 'Осталось {n}', 'today.doneN2': 'Выполнено {n}',
+    },
+  });
+
   const PRAYER_RX = {
     bomdod: /(bomdod|fajr|fadjr)/, peshin: /(peshin|zuhr|zuxr)/, asr: /\basr\b/,
     shom: /(shom|maghrib|magrib)/, xufton: /(xufton|isha)/,
@@ -136,8 +174,6 @@
   const RING_PALETTE = [[0, [255, 216, 158]], [12.5, [255, 205, 121]], [25, [255, 227, 143]], [37.5, [255, 183, 106]], [50, [255, 149, 89]],
     [62.5, [243, 111, 79]], [75, [226, 93, 122]], [87.5, [123, 91, 176]], [100, [47, 58, 102]]];
   const RING_R = 52, RING_C = 2 * Math.PI * RING_R;
-  const CORE_SPHERES = ['ruh', 'aql', 'qalb', 'tana'];
-  const FOLD = 5; // tasks shown before "show more"
 
   /* ------------------------------------------------------------------ */
   /* helpers                                                             */
@@ -151,6 +187,8 @@
   const words = (s) => ((s || '').trim().match(/\S+/g) || []).length;
   const hashStr = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; };
   const safe = (fn) => { try { return fn(); } catch (e) { console.error('today', e); D.logError(e); return `<div class="card flat"><div class="small muted">${esc(t('error.view'))}</div></div>`; } };
+  // safe() xato o'rniga karta qaytaradi; bu esa qiymat kutilgan joylar uchun
+  const safeVal = (fn) => { try { return fn(); } catch (e) { console.error('today', e); return null; } };
 
   // prayer ↔ habit map, memoised on the habit list signature
   let phCache = { sig: null, map: {}, rev: {} };
@@ -225,45 +263,6 @@
   };
   D.act.tdToday = () => { D.ui.viewDate = null; D.saveUi(); D.rerender(); };
 
-  /* ------------------------------------------------------------------ */
-  /* 2. ticker                                                           */
-  /* ------------------------------------------------------------------ */
-  let tickTimer = null, fadeTimer = null, cycle = 0;
-  function tickerItems(k) {
-    const list = tasksFor(k), total = list.length;
-    let done = 0, overdue = 0;
-    for (const x of list) { if (x.done) done++; else if (x.date < k) overdue++; }
-    if (!total) return { items: [{ s: 'empty', text: t('today.ticker.empty') }], done, total, overdue };
-    if (done === total) return { items: [{ s: 'done', text: t('today.ticker.allDone') }], done, total, overdue };
-    return { items: list.filter((x) => !x.done).map((x) => ({ s: 'pending', text: x.text })), done, total, overdue };
-  }
-  const glyph = (s) => (s === 'done' ? '✓' : s === 'pending' ? '○' : '·');
-  const rowHtml = (it) => `<span class="ticker-status" data-s="${it.s}">${glyph(it.s)}</span><span class="ticker-text">${esc(it.text)}</span>`;
-  function ticker(k) {
-    const { items, done, total, overdue } = tickerItems(k);
-    return `<div class="ticker ${overdue ? 'urgent' : ''}" aria-live="polite" aria-atomic="true">
-      <span class="ticker-led"></span><span class="ticker-label">${esc(t('today.ticker'))}</span>
-      <div class="ticker-stage"><div class="ticker-row" id="tdTickRow">${rowHtml(items[0])}</div></div>
-      <span class="ticker-meta" id="tdTickMeta">${done}/${total}</span></div>`;
-  }
-  function tickerTick(first) {
-    const row = document.getElementById('tdTickRow');
-    if (!row) return;
-    const { items, done, total } = tickerItems(key());
-    if (cycle >= items.length) cycle = 0;
-    const it = items[cycle];
-    const apply = () => {
-      row.innerHTML = rowHtml(it);
-      row.classList.remove('fade');
-      const m = document.getElementById('tdTickMeta');
-      if (m) m.textContent = done + '/' + total;
-    };
-    if (first || items.length === 1) apply();
-    else { row.classList.add('fade'); clearTimeout(fadeTimer); fadeTimer = setTimeout(apply, 220); }
-    cycle = (cycle + 1) % items.length;
-  }
-  function startTicker() { stopTicker(); cycle = 0; tickerTick(true); tickTimer = setInterval(() => tickerTick(false), 5000); }
-  function stopTicker() { clearInterval(tickTimer); clearTimeout(fadeTimer); tickTimer = fadeTimer = null; }
 
   /* ------------------------------------------------------------------ */
   /* 3. day card: day ring + prayers                                     */
@@ -292,11 +291,11 @@
     if (sleep > 24 && hours < wake && hours + 24 < sleep) hours += 24; // still awake after midnight
     const clock = D.fmtTime(p.h, p.min);
     const base = { clock, wake, sleep: sleep % 24 };
-    if (hours < wake) return { ...base, off: RING_C, color: 'var(--text4)', pctTxt: '—', phase: 'sleeping', remain: t('today.untilWake', { t: D.fmtMins((wake - hours) * 60) }) };
-    if (hours >= sleep) return { ...base, off: 0, color: 'rgb(226,93,122)', pctTxt: '100%', phase: 'pastBed', remain: t('today.sleepNow') };
+    if (hours < wake) return { ...base, pct: 0, off: RING_C, color: 'var(--text4)', pctTxt: '—', phase: 'sleeping', remain: t('today.untilWake', { t: D.fmtMins((wake - hours) * 60) }) };
+    if (hours >= sleep) return { ...base, pct: 100, off: 0, color: 'rgb(226,93,122)', pctTxt: '100%', phase: 'pastBed', remain: t('today.sleepNow') };
     const pct = D.clamp(((hours - wake) / (sleep - wake)) * 100, 0, 100);
     const phase = pct < 25 ? 'morning' : pct < 50 ? 'midday' : pct < 75 ? 'afternoon' : pct < 90 ? 'evening' : 'bedtime';
-    return { ...base, off: RING_C * (1 - pct / 100), color: lerpColor(pct), pctTxt: Math.floor(pct) + '%', phase, remain: t('today.awakeLeft', { t: D.fmtMins((sleep - hours) * 60) }) };
+    return { ...base, pct, off: RING_C * (1 - pct / 100), color: lerpColor(pct), pctTxt: Math.floor(pct) + '%', phase, remain: t('today.awakeLeft', { t: D.fmtMins((sleep - hours) * 60) }) };
   }
   function ringHtml() {
     const s = dayState();
@@ -310,16 +309,6 @@
         <div class="td-ring-remain num">${esc(s.remain)}</div>
         <div class="td-ring-hours num">${D.fmtTime(s.wake, 0)} – ${D.fmtTime(s.sleep, 0)}</div>
       </div>`;
-  }
-  function nextHtml() {
-    let nx = null;
-    try { nx = D.prayer ? D.prayer.next() : null; } catch (e) { nx = null; }
-    if (!nx) return '';
-    return `<div class="td-next">
-      <span class="td-next-ic">${D.ic('mosque', 16)}</span>
-      <div class="td-next-body"><div class="eyebrow">${esc(t('today.nextPrayer'))}</div>
-        <div class="td-next-name">${esc(t('prayer.' + nx.id))} <span class="num muted">${nx.time}</span></div></div>
-      <span class="pill good num">${esc(t('today.left', { t: D.fmtMins(nx.minsLeft) }))}</span></div>`;
   }
   function prayersHtml(k) {
     const pr = D.S.prayers[k] || {};
@@ -350,27 +339,115 @@
       <span class="td-qz-side num">${esc(t('qz.ofTarget', { n: done, t: tg }))}${D.ic('chevR', 13)}</span>
     </button>`;
   }
-  // WHOOP readiness — only for today, and only once the watch has actually reported a recovery score.
-  function readyHtml(k) {
-    if (k !== D.today() || !D.whoop || !D.whoop.readiness) return '';
-    const r = D.whoop.readiness();
-    if (!r) return '';
-    const live = D.whoop.live && D.whoop.live();
-    const f = D.whoop.freshness && D.whoop.freshness();
-    const side = [];
-    if (r.sleepH != null) side.push(`<span>${esc(t('wh.sleepH'))}<b>${r.sleepH}${esc(t('unit.h'))}</b></span>`);
-    const strain = live ? live.strain : r.strain;
-    if (strain != null) side.push(`<span>${esc(t('wh.strain'))}<b>${strain}${live ? '<i class="wh-dot"></i>' : ''}</b></span>`);
-    return `<button class="wh-ready ${r.zone}" data-act="go" data-view="health" data-sub="day">
-      <span class="wh-ready-num">${r.pct}<small>%</small></span>
-      <span class="wh-ready-body"><span class="wh-ready-label">WHOOP${f ? ` <span class="wh-ready-fresh ${f.stale ? 'stale' : ''}">${esc(f.label)}</span>` : ''}</span><span class="wh-ready-text">${esc(r.label)}</span></span>
-      ${side.length ? `<span class="wh-ready-side">${side.join('')}</span>` : ''}</button>`;
+  /* ---------------------------------------------------------------- */
+  /* HERO — "tanam bugun qanday?" bitta katta raqam bilan               */
+  /* Oura/WHOOP ikkalasi ham shu qoidaga quriladi: tepada bitta ball,    */
+  /* ostida bitta oddiy jumla, keyin uchtadan ko'p bo'lmagan ko'rsatkich */
+  /* va har birining yonida SHAXSIY o'rtachadan farqi — quruq raqam      */
+  /* hech narsa aytmaydi, farq aytadi.                                   */
+  /* ---------------------------------------------------------------- */
+  const ZONE_COLOR = { good: 'var(--success)', warn: 'var(--warning)', bad: 'var(--danger-text)' };
+  function kpiHtml(lab, val, delta, zone) {
+    return `<div class="td-kpi ${zone || ''}">
+      <span class="td-kpi-lab">${esc(lab)}</span>
+      <span class="td-kpi-val num">${val}</span>
+      <span class="td-kpi-d">${delta ? esc(delta) : esc(t('today.d.noData'))}</span></div>`;
   }
-  function dayCard(k) {
-    return `<div class="hero td-hero"><div class="td-day-grid">
-      <div class="td-dayring" id="tdDayRing">${ringHtml()}</div>
-      <div class="td-day-right"><div id="tdNext">${nextHtml()}</div>${prayersHtml(k)}</div>
-    </div></div>${readyHtml(k)}`;
+  /** Shu kunning WHOOP kesimi — bugun uchun ham, orqaga qaralgan kun uchun ham. */
+  function dayRec(k) {
+    if (!(D.S.whoop && D.S.whoop.connected && D.whoop && D.whoop.dayInsight)) return null;
+    const i = safeVal(() => D.whoop.dayInsight(k));
+    if (!i || i.recovery == null) return null;
+    i.zone = i.recovery >= 67 ? 'good' : i.recovery >= 34 ? 'warn' : 'bad';
+    return i;
+  }
+  function heroCard(k) {
+    // Tiklanish bali bor kun — WHOOP hero. Bugun bo'lsa-yu bal yo'q bo'lsa (soat
+    // ulanmagan yoki hali yubormagan) eski kun halqasi qaytadi, sahifa bo'sh qolmaydi.
+    const i = dayRec(k);
+    if (!i) return k === D.today() ? `<div class="hero td-hero"><div class="td-dayring" id="tdDayRing">${ringHtml()}</div></div>` : '';
+    const today = k === D.today();
+    const r = { pct: i.recovery, zone: i.zone, sleepH: i.sleepH, rhr: i.rhr, strain: i.strain,
+      label: t(i.zone === 'good' ? 'wh.ready.high' : i.zone === 'warn' ? 'wh.ready.mid' : 'wh.ready.low') };
+    const live = today ? safeVal(() => (D.whoop.live ? D.whoop.live() : null)) : null;
+    const f = today ? safeVal(() => (D.whoop.freshness ? D.whoop.freshness() : null)) : null;
+    const col = ZONE_COLOR[r.zone] || 'var(--line3)';
+    const tgt = i.strainTarget != null ? i.strainTarget : null;
+    const strain = live && live.strain != null ? live.strain : i.strain != null ? i.strain : r.strain;
+
+    // maslahat — bitta jumla: avval chegaradan oshgani, keyin zona bo'yicha
+    let adv;
+    if (i.load === 'over' && tgt != null) adv = t('today.adv.over', { s: strain, n: tgt });
+    else if (tgt != null) adv = t('today.adv.' + r.zone, { n: tgt });
+    else adv = r.label;
+
+    // 1) uyqu — kerakli miqdordan farqi
+    let sVal = '—', sD = '', sZ = '';
+    if (i.sleepH != null || r.sleepH != null) {
+      const h = i.sleepH != null ? i.sleepH : r.sleepH;
+      sVal = `${h}<small>${esc(t('unit.h'))}</small>`;
+      if (i.gapH != null) {
+        sD = i.gapH >= 0 ? t('today.d.over', { h: D.round(i.gapH, 1) }) : t('today.d.short', { h: D.round(-i.gapH, 1) });
+        sZ = i.gapH >= -0.5 ? 'z-good' : i.gapH >= -1.5 ? 'z-warn' : 'z-bad';
+      } else if (i.perf != null) { sD = i.perf + '%'; sZ = i.perf >= 85 ? 'z-good' : i.perf >= 70 ? 'z-warn' : 'z-bad'; }
+    }
+    // 2) zo'riqish — tiklanish ruxsat bergan chegaraga nisbatan
+    let tVal = '—', tD = '', tZ = '';
+    if (strain != null) {
+      tVal = `${strain}${live ? '<i class="wh-dot"></i>' : ''}`;
+      if (tgt != null) {
+        tD = t('today.d.target', { n: tgt });
+        tZ = i.load === 'over' ? 'z-bad' : i.load === 'under' ? 'z-warn' : i.load === 'ok' ? 'z-good' : '';
+      }
+    }
+    // 3) HRV — o'z 30 kunlik bazasidan og'ish; HRV yo'q bo'lsa tinch puls
+    let hLab = t('wh.hrv'), hVal = '—', hD = '', hZ = '';
+    if (i.hrv != null) {
+      hVal = `${i.hrv}<small>ms</small>`;
+      if (i.hrvPct !== undefined) { hD = t('today.d.base', { p: (i.hrvPct > 0 ? '+' : '') + i.hrvPct + '%' }); hZ = i.hrvPct >= -5 ? 'z-good' : i.hrvPct >= -15 ? 'z-warn' : 'z-bad'; }
+    } else if (i.rhr != null || r.rhr != null) {
+      hLab = t('wh.rhr'); hVal = `${i.rhr != null ? i.rhr : r.rhr}<small>bpm</small>`;
+      if (i.rhrDelta !== undefined) { hD = t('today.d.base', { p: (i.rhrDelta > 0 ? '+' : '') + i.rhrDelta }); hZ = i.rhrDelta <= 1 ? 'z-good' : i.rhrDelta <= 4 ? 'z-warn' : 'z-bad'; }
+    }
+    // uyqu qarzi ko'zga ko'rinmaydigan narsa — bugun va sezilarli bo'lgandagina bitta qator
+    const dbt = today && D.whoop.sleepDebt ? safeVal(() => D.whoop.sleepDebt(7)) : null;
+    const foot = dbt && dbt.h >= 2 ? `<div class="td-hero-foot">${D.ic('moon', 12)} ${esc(t('today.debt', { h: dbt.h }))}</div>` : '';
+
+    return `<div class="hero td-ready z-${r.zone}" data-act="go" data-view="health" data-sub="ready" role="button" tabindex="0">
+      <div class="td-ready-top">
+        ${D.chart.ring({ pct: r.pct, size: 104, stroke: 9, color: col, label: `${r.pct}<small>%</small>`, sub: esc(t('wh.recovery')) })}
+        <div class="td-ready-id">
+          <div class="eyebrow">WHOOP${f ? ` <span class="td-fresh ${f.stale ? 'stale' : ''}">${esc(f.label)}</span>` : ''}</div>
+          <div class="td-ready-state">${esc(t('today.state.' + r.zone))}</div>
+          <div class="td-ready-adv">${esc(adv)}</div>
+        </div>
+        <span class="td-ready-go">${D.ic('chevR', 16)}</span>
+      </div>
+      <div class="td-kpis">${kpiHtml(t('wh.sleepH'), sVal, sD, sZ)}${kpiHtml(t('wh.strain'), tVal, tD, tZ)}${kpiHtml(hLab, hVal, hD, hZ)}</div>
+      ${foot}</div>`;
+  }
+
+  /* Kun chizig'i — uyg'onishdan uyquga qadar bitta ingichka qator.       */
+  /* Katta halqa endi hero'da tiklanish uchun ishlaydi, vaqt uchun emas.  */
+  function stripHtml() {
+    const s = dayState();
+    return `<div class="td-strip-top">
+        <span class="td-strip-clock num">${esc(s.clock)}</span>
+        <span class="td-strip-phase">${esc(t('today.phase.' + s.phase))}</span>
+        <span class="td-strip-remain num">${esc(s.remain)}</span>
+      </div>
+      <div class="bar thin td-strip-bar"><i class="bar-fill" style="width:${(s.pct || 0).toFixed(1)}%;background:${s.color}"></i></div>
+      <div class="td-strip-foot num"><span>${D.fmtTime(s.wake, 0)}</span><span>${D.fmtTime(s.sleep, 0)}</span></div>`;
+  }
+  function dayStrip(k) {
+    // O'tgan kun uchun soat ma'nosiz; WHOOP yo'q kunda esa hero'ning o'zi kun halqasi —
+    // ikkalasi bir xil narsani aytmasligi kerak.
+    if (k !== D.today() || !dayRec(k)) return '';
+    return `<div class="td-strip" id="tdStrip">${stripHtml()}</div>`;
+  }
+
+  function prayerCard(k) {
+    return `<div class="card td-pray">${prayersHtml(k)}</div>`;
   }
   D.act.tdPrayer = (el) => {
     const k = key(), id = el.dataset.id;
@@ -407,73 +484,8 @@
       <div class="li-body"><div class="li-text">${name}</div></div>
       ${streak}${tag}</div>`;
   }
-  function habitsCard(k) {
-    const due = D.dueHabits(k), active = D.activeHabits();
-    const logs = new Set(D.S.logs[k] || []), counts = D.S.counts[k] || {};
-    const isDone = (h) => (h.target && h.target.n ? (+counts[h.id] || 0) >= +h.target.n : logs.has(h.id));
-    const sph = {};
-    let done = 0;
-    for (const h of due) {
-      const d = isDone(h), sp = sphereOf(h);
-      if (d) done++;
-      const s = sph[sp] || (sph[sp] = { t: 0, d: 0 });
-      s.t++; if (d) s.d++;
-    }
-    const total = due.length, pct = total ? Math.round((done / total) * 100) : 0;
-    const all = total > 0 && done === total;
-
-    const bars = D.SPHERE_IDS.filter((id) => sph[id]).map((id) => {
-      const s = sph[id], p = Math.round((s.d / s.t) * 100);
-      return `<div class="sph"><span class="nm">${esc(t('sphere.' + id))}</span><span class="bar"><i class="bar-fill" style="width:${p}%;background:var(--${id})"></i></span><span class="n">${s.d}/${s.t}</span></div>`;
-    }).join('');
-
-    let balance = null;
-    const ratios = CORE_SPHERES.filter((id) => sph[id]).map((id) => sph[id].d / sph[id].t);
-    if (ratios.length >= 2) {
-      const mean = D.avg(ratios);
-      if (mean > 0) { const sd = Math.sqrt(D.avg(ratios.map((r) => (r - mean) ** 2))); balance = Math.round(D.clamp(1 - sd / mean, 0, 1) * 100); }
-      else balance = 0;
-    }
-
-    // Research on habit apps is blunt: a wall of 28 rows is why people stop opening the app.
-    // Show what is still LEFT (capped), keep the finished ones and the overflow one tap away.
-    const CAP = 6;
-    const left = due.filter((h) => !isDone(h));
-    const finished = due.filter((h) => isDone(h));
-    const showAll = !!D.ui.collapsed.tdHabitsAll;
-    const showDone = !!D.ui.collapsed.tdHabitsDone;
-    const shown = showAll ? left : left.slice(0, CAP);
-    const hidden = left.length - shown.length;
-
-    let rows = '';
-    if (!due.length) rows = `<div class="empty">${esc(t('today.noHabits'))}</div>`;
-    else if (!left.length) rows = `<div class="td-alldone">${D.ic('check', 18)}<span>${esc(t('today.allDoneShort'))}</span></div>`;
-    else rows = shown.map((h) => habitRow(h, false, counts)).join('');
-
-    if (hidden > 0) rows += `<button class="td-more" data-act="tdHabitsAll">${D.ic('chevD', 15)} ${esc(t('today.left.n', { n: hidden }))}</button>`;
-    else if (showAll && left.length > CAP) rows += `<button class="td-more" data-act="tdHabitsAll">${D.ic('chevD', 15)} ${esc(t('today.showLess'))}</button>`;
-    if (finished.length) {
-      rows += `<button class="td-more done ${showDone ? 'open' : ''}" data-act="tdHabitsDone">${D.ic('chevD', 15)} ${esc(t('today.doneN', { n: finished.length }))}</button>`;
-      if (showDone) rows += finished.map((h) => habitRow(h, true, counts)).join('');
-    }
-    const notDue = active.length - due.length;
-
-    return `<div class="card td-habits ${all ? 'all-done' : ''}">
-      <div class="card-head">
-        <div><div class="eyebrow">${esc(t('today.habits'))}</div>
-          <div class="kpi"><span class="kpi-num num">${done}</span><span class="kpi-total">/ ${total}</span><span class="kpi-label">${esc(all ? t('today.habitsDone') : t('common.done'))}</span></div></div>
-        ${balance !== null ? `<span class="pill td-balance ${balance >= 70 ? 'good' : balance >= 40 ? 'on' : ''}">${D.ic('compass', 12)} ${esc(t('today.balance'))} <b class="num">${balance}</b></span>` : ''}
-      </div>
-      <div class="ring-row td-ring-row">
-        ${D.chart.ring({ pct, size: 96, stroke: 8, color: all ? 'var(--success)' : pct ? 'var(--success)' : 'var(--line3)', glow: pct > 0 })}
-        <div class="spheres">${bars || `<div class="small muted">—</div>`}</div>
-      </div>
-      <div class="list td-hab-list">${rows}</div>
-      ${notDue > 0 ? `<div class="td-notdue">${esc(t('today.notDue', { n: notDue }))}</div>` : ''}
-    </div>`;
-  }
-  D.act.tdHabitsAll = () => { D.ui.collapsed.tdHabitsAll = !D.ui.collapsed.tdHabitsAll; D.saveUi(); D.rerender(); };
-  D.act.tdHabitsDone = () => { D.ui.collapsed.tdHabitsDone = !D.ui.collapsed.tdHabitsDone; D.saveUi(); D.rerender(); };
+  D.act.tdFocusAll = () => { D.ui.collapsed.tdFocusAll = !D.ui.collapsed.tdFocusAll; D.saveUi(); D.rerender(); };
+  D.act.tdFocusDone = () => { D.ui.collapsed.tdFocusDone = !D.ui.collapsed.tdFocusDone; D.saveUi(); D.rerender(); };
   D.act.tdHabit = (el) => {
     const k = key(), id = el.dataset.id, h = findHabit(id);
     if (!h) return;
@@ -505,33 +517,71 @@
     return `<div class="input-row td-add"><input class="inp" data-enter="${act}" data-date="${date}" placeholder="${esc(ph)}" autocomplete="off" enterkeyhint="done">
       <button class="btn sq" data-act="${act}" aria-label="${esc(t('btn.add'))}">${D.ic('plus', 18)}</button></div>`;
   }
-  function tasksCard(k) {
-    const list = tasksFor(k), total = list.length, done = list.filter((x) => x.done).length;
-    const all = total > 0 && done === total;
-    const expanded = !!D.ui.collapsed.tdTasksOpen;
-    const visible = total > FOLD && !expanded ? list.slice(0, FOLD) : list;
-    const label = !total ? t('today.tasksNone') : all ? t('today.tasksAllDone') : t('common.done');
-    // One segment per task reads as noise past a dozen; beyond that show a plain bar.
+  /* ---------------------------------------------------------------- */
+  /* FOKUS — odatlar va vazifalar bitta ro'yxatda                       */
+  /* Ilgari ikkita karta, ikkita halqa, soha barlari va muvozanat pili   */
+  /* bor edi; ularning hammasi Vazifa bo'limida ham bor. Bugun'da esa    */
+  /* bitta savolga javob kerak: hozir nima qilishim kerak. Shu sabab     */
+  /* bu yerda faqat QOLGANLARI ko'rinadi, ustiga 4 tadan cheklov.        */
+  /* ---------------------------------------------------------------- */
+  const FOCUS_CAP = 4;
+  function habitDoneOn(k) {
+    const logs = new Set(D.S.logs[k] || []), counts = D.S.counts[k] || {};
+    return (h) => (h.target && h.target.n ? (+counts[h.id] || 0) >= +h.target.n : logs.has(h.id));
+  }
+  function dayTally(k) {
+    const due = D.dueHabits(k), isDone = habitDoneOn(k);
+    const tasks = tasksFor(k);
+    const hDone = due.filter(isDone).length, tDone = tasks.filter((x) => x.done).length;
+    return { due, isDone, tasks, hTotal: due.length, hDone, tTotal: tasks.length, tDone,
+      total: due.length + tasks.length, done: hDone + tDone };
+  }
+  function focusCard(k) {
+    const g = dayTally(k), counts = D.S.counts[k] || {};
+    const openT = g.tasks.filter((x) => !x.done), doneT = g.tasks.filter((x) => x.done);
+    const openH = g.due.filter((h) => !g.isDone(h)), doneH = g.due.filter(g.isDone);
+    // vazifalar tepada: ular kunga bog'langan va kechikishi mumkin, odat esa takrorlanadi
+    const open = openT.map((x) => taskRow(x, k, false)).concat(openH.map((h) => habitRow(h, false, counts)));
+    const closed = doneT.map((x) => taskRow(x, k, false)).concat(doneH.map((h) => habitRow(h, true, counts)));
+
+    const all = g.total > 0 && g.done === g.total;
+    const showAll = !!D.ui.collapsed.tdFocusAll, showDone = !!D.ui.collapsed.tdFocusDone;
+    const shown = showAll ? open : open.slice(0, FOCUS_CAP);
+    const hidden = open.length - shown.length;
+
+    let rows;
+    if (!g.total) rows = `<div class="empty">${esc(t('today.focusEmpty'))}</div>`;
+    else if (!open.length) rows = `<div class="td-alldone">${D.ic('check', 18)}<span>${esc(t('today.focusDone'))}</span></div>`;
+    else rows = shown.join('');
+    if (hidden > 0) rows += `<button class="td-more" data-act="tdFocusAll">${D.ic('chevD', 15)} ${esc(t('today.leftN', { n: hidden }))}</button>`;
+    else if (showAll && open.length > FOCUS_CAP) rows += `<button class="td-more open" data-act="tdFocusAll">${D.ic('chevD', 15)} ${esc(t('today.showLess'))}</button>`;
+    if (closed.length) {
+      rows += `<button class="td-more done ${showDone ? 'open' : ''}" data-act="tdFocusDone">${D.ic('chevD', 15)} ${esc(t('today.doneN2', { n: closed.length }))}</button>`;
+      if (showDone) rows += closed.join('');
+    }
+
+    // bitta bo'g'in bitta ish — o'n ikkitadan oshsa oddiy bar
     const SEG_MAX = 12;
-    const segs = total && total <= SEG_MAX
-      ? list.map((x) => `<i class="${x.done ? 'on' : ''}"></i>`).join('')
-      : total ? `<i class="on" style="flex:${done || 0.001}"></i><i style="flex:${Math.max(total - done, 0.001)}"></i>` : '';
-    const pending = total - done;
+    const bar = g.total
+      ? `<div class="segbar">${g.total <= SEG_MAX
+          ? Array.from({ length: g.total }, (_, n) => `<i class="${n < g.done ? 'on' : ''}"></i>`).join('')
+          : `<i class="on" style="flex:${g.done || 0.001}"></i><i style="flex:${Math.max(g.total - g.done, 0.001)}"></i>`}</div>`
+      : '';
 
     const tk = D.addDays(k, 1);
     const tm = D.S.tasks.filter((x) => x.date === tk);
     const tmState = D.ui.collapsed.tdTomorrow;
     const tmOpen = tmState === undefined ? tm.length > 0 : !tmState;
+    const pending = g.tTotal - g.tDone;
 
-    return `<div class="card td-tasks ${all ? 'all-done' : ''}">
+    return `<div class="card td-focus ${all ? 'all-done' : ''}">
       <div class="card-head">
-        <div><div class="eyebrow">${esc(t('today.tasks'))}</div>
-          <div class="kpi"><span class="kpi-num num">${done}</span><span class="kpi-total">/ ${total}</span><span class="kpi-label">${esc(label)}</span></div></div>
+        <div><div class="eyebrow">${esc(t('today.focus'))}</div>
+          <div class="kpi"><span class="kpi-num num">${g.done}</span><span class="kpi-total">/ ${g.total}</span><span class="kpi-label">${esc(all ? t('today.focusDone') : t('common.done'))}</span></div></div>
         ${pending > 0 ? `<button class="btn ghost sm" data-act="tdPushAll">${D.ic('chevR', 14)} ${esc(t('today.pushAll'))}</button>` : ''}
       </div>
-      <div class="segbar">${segs}</div>
-      <div class="list">${total ? visible.map((x) => taskRow(x, k, false)).join('') : `<div class="empty">${esc(t('today.tasksEmpty'))}</div>`}</div>
-      ${total > FOLD ? `<button class="dashed" data-act="tdMore">${esc(expanded ? t('today.showLess') : t('today.showMore', { n: total - FOLD }))} ${D.ic(expanded ? 'chevD' : 'chevR', 12)}</button>` : ''}
+      ${bar}
+      <div class="list td-focus-list">${rows}</div>
       ${addRow(k, t('today.addTask'), 'tdAddTask')}
       <div class="td-tomorrow">
         <button class="td-tomorrow-head ${tmOpen ? 'open' : ''}" data-act="tdToggleTomorrow" aria-expanded="${tmOpen ? 'true' : 'false'}">
@@ -569,7 +619,6 @@
     D.save(); D.rerender();
     D.toast(t('today.pushedN', { n: moved.length }), { undo: () => D.undo.pop() });
   };
-  D.act.tdMore = () => { D.ui.collapsed.tdTasksOpen = !D.ui.collapsed.tdTasksOpen; D.saveUi(); D.rerender(); };
   D.act.tdToggleTomorrow = (el) => { D.ui.collapsed.tdTomorrow = el.classList.contains('open'); D.saveUi(); D.rerender(); };
   D.act.tdAddTask = (el) => {
     const inp = el.matches('input') ? el : el.closest('.input-row').querySelector('input');
@@ -635,17 +684,34 @@
   }
   const waterBar = (w) => `<i class="bar-fill" style="width:${w.pct.toFixed(0)}%;background:var(--info)"></i>`;
   // water + the food tile (food.js owns the tile; without it the row is water only)
-  function quickStrip(k) {
-    const w = waterInfo(k);
+  /* ---------------------------------------------------------------- */
+  /* Xulosa plitkalari — to'rtta raqam, hammasi bosiladi                */
+  /* Vazifa va Odat ro'yxati Vazifa bo'limida to'liq turadi; bu yerda    */
+  /* faqat "qayerdaman" degan raqam va bitta bar qoladi.                 */
+  /* ---------------------------------------------------------------- */
+  function statTile(o) {
+    // `view` berilmasa plitka tugma bo'lmaydi — suv shunday: uni faqat shu yerda yuritamiz
+    const nav = o.view ? ` data-act="go" data-view="${o.view}"${o.sub ? ` data-sub="${o.sub}"` : ''} role="button" tabindex="0"` : '';
+    return `<div class="bento-tile td-tile ${o.cls || ''}"${nav}>
+      ${o.zone ? `<i class="zone ${o.zone}"></i>` : ''}
+      <div class="val"${o.valId ? ` id="${o.valId}"` : ''}>${o.val}</div>
+      <div class="lab">${o.ic} ${esc(o.lab)}</div>
+      <span class="bar thin td-tile-bar"${o.barId ? ` id="${o.barId}"` : ''}><i class="bar-fill" style="width:${D.clamp(o.pct, 0, 100).toFixed(0)}%;background:${o.color}"></i></span>
+      ${o.extra || ''}</div>`;
+  }
+  function statTiles(k) {
+    const g = dayTally(k), w = waterInfo(k);
     let food = '';
     try { food = D.food && D.food.tile ? D.food.tile(k) || '' : ''; } catch (e) { console.error('food tile', e); D.logError(e); food = ''; }
+    const of = (a, b) => `${a}<span class="td-tile-of">/${b}</span>`;
     return `<div class="bento td-quick">
-      <div class="bento-tile td-tile td-tile-water ${food ? '' : 'b-wide'}" data-act="go" data-view="health" data-sub="water" role="button" tabindex="0">
-        <div class="val"><span id="tdWaterNum">${w.water}</span><span class="td-tile-of">/${w.serv}</span></div>
-        <div class="lab">${D.ic('droplet', 12)} ${esc(t('today.water'))}</div>
-        <span class="bar thin td-tile-bar" id="tdWaterBar">${waterBar(w)}</span>
-        <button class="td-plus" data-act="tdWater" aria-label="+1 ${esc(t('unit.glass'))}">${D.ic('plus', 16)}</button>
-      </div>
+      ${statTile({ view: 'tasks', lab: t('today.tasks'), ic: D.ic('checkSq', 12), val: of(g.tDone, g.tTotal),
+        pct: g.tTotal ? (g.tDone / g.tTotal) * 100 : 0, color: 'var(--success)', zone: g.tTotal && g.tDone === g.tTotal ? 'z-good' : '' })}
+      ${statTile({ view: 'tasks', sub: 'week', lab: t('today.habits'), ic: D.ic('fire', 12), val: of(g.hDone, g.hTotal),
+        pct: g.hTotal ? (g.hDone / g.hTotal) * 100 : 0, color: 'var(--ruh)', zone: g.hTotal && g.hDone === g.hTotal ? 'z-good' : '' })}
+      ${statTile({ cls: 'td-tile-water', lab: t('today.water'), ic: D.ic('droplet', 12), val: of(w.water, w.serv),
+        valId: 'tdWaterNum', barId: 'tdWaterBar', pct: w.pct, color: 'var(--info)', zone: w.zone,
+        extra: `<button class="td-plus" data-act="tdWater" aria-label="+1 ${esc(t('unit.glass'))}">${D.ic('plus', 16)}</button>` })}
       ${food}
     </div>`;
   }
@@ -665,7 +731,7 @@
     h.water = (+h.water || 0) + 1;
     haptic(); D.save();
     const w = waterInfo(k);
-    D.patch('tdWaterNum', String(w.water));
+    D.patch('tdWaterNum', `${w.water}<span class="td-tile-of">/${w.serv}</span>`);
     D.patch('tdWaterBar', waterBar(w));
   };
 
@@ -673,13 +739,6 @@
   /* 7. daily note                                                       */
   /* ------------------------------------------------------------------ */
   const saveNote = D.debounce(() => D.save(), 300);
-  function noteCard(k) {
-    const note = D.S.notes[k] || '';
-    return `<div class="card td-note">
-      <div class="card-head"><div class="title">${D.ic('edit', 16)} ${esc(t('today.note'))}</div><span class="small muted num" id="tdNoteCount">${esc(t('today.words', { n: words(note) }))}</span></div>
-      <textarea class="ta" data-input="tdNote" data-key="${k}" placeholder="${esc(t('today.notePh'))}" rows="4">${esc(note)}</textarea>
-    </div>`;
-  }
   D.act.tdNote = (el) => {
     const k = el.dataset.key || key();
     const v = el.value || '';
@@ -691,13 +750,16 @@
   /* ------------------------------------------------------------------ */
   /* 8. gratitude                                                        */
   /* ------------------------------------------------------------------ */
-  function gratCard(k) {
+  /* ---------------------------------------------------------------- */
+  /* KUN YAKUNI — kunlik izoh va shukr bitta kartada                     */
+  /* ---------------------------------------------------------------- */
+  function gratBody(k) {
     const all = D.S.gratitude || [];
     const today = [];
     for (let i = all.length - 1; i >= 0; i--) if (all[i].date === k) today.push(all[i]);
     let insp = '';
     if (!today.length) {
-      // prefer "on this day" (same month-day, another year); else a stable-per-day pick from the rest
+      // avval "shu kuni" (boshqa yildagi o'sha oy-kun), bo'lmasa kunga bog'langan barqaror tanlov
       const md = k.slice(5);
       const older = [], same = [];
       for (const g of all) { if (!g.text || g.date === k) continue; older.push(g); if (g.date && g.date.slice(5) === md) same.push(g); }
@@ -707,12 +769,19 @@
         insp = `<div class="td-insp"><div class="eyebrow">${D.ic('sparkles', 11)} ${esc(t(same.length ? 'today.gratOnThisDay' : 'today.gratEarlier'))}${g.date ? ` · ${esc(D.fmtDate(g.date, 'long'))}` : ''}</div><div class="td-insp-text">${esc(g.text)}</div></div>`;
       }
     }
-    return `<div class="card td-grat">
-      <div class="card-head"><div class="title">${D.ic('hands', 16)} ${esc(t('today.gratitude'))}</div><span class="small muted num">${today.length}</span></div>
+    return `<div class="td-wrap-head"><div class="title">${D.ic('hands', 16)} ${esc(t('today.gratitude'))}</div><span class="small muted num">${today.length}</span></div>
       ${insp}
       <div class="list">${today.length ? today.map((g) => `<div class="li"><span class="td-grat-ic">${D.ic('heart', 14)}</span><div class="li-body"><div class="li-text">${esc(g.text)}</div></div>
         <button class="li-del" data-act="tdGratDel" data-id="${esc(g.id)}" aria-label="${esc(t('btn.delete'))}">${D.ic('x', 16)}</button></div>`).join('') : insp ? '' : `<div class="empty">${esc(t('today.gratEmpty'))}</div>`}</div>
-      ${addRow(k, t('today.gratPh'), 'tdAddGrat')}
+      ${addRow(k, t('today.gratPh'), 'tdAddGrat')}`;
+  }
+  function wrapCard(k) {
+    const note = D.S.notes[k] || '';
+    return `<div class="card td-wrap">
+      <div class="card-head"><div class="title">${D.ic('edit', 16)} ${esc(t('today.wrap'))}</div><span class="small muted num" id="tdNoteCount">${esc(t('today.words', { n: words(note) }))}</span></div>
+      <textarea class="ta" data-input="tdNote" data-key="${k}" placeholder="${esc(t('today.notePh'))}" rows="4">${esc(note)}</textarea>
+      <div class="td-wrap-sep"></div>
+      ${gratBody(k)}
     </div>`;
   }
   D.act.tdAddGrat = (el) => {
@@ -752,7 +821,7 @@
   /* ------------------------------------------------------------------ */
   D.on('tick', () => {
     if (D.current() !== 'today') return;
-    try { D.patch('tdDayRing', ringHtml()); D.patch('tdNext', nextHtml()); } catch (e) { console.error(e); }
+    try { D.patch('tdStrip', stripHtml()); D.patch('tdDayRing', ringHtml()); } catch (e) { console.error(e); }
   });
   D.on('day:changed', () => { D.ui.viewDate = null; D.saveUi(); if (D.current() === 'today') D.rerender(); });
   // a prayer habit ticked on the Vazifa board (or any other view) mirrors into S.prayers like a Bugun tick; the emitter saves afterwards
@@ -761,7 +830,7 @@
   document.addEventListener('keydown', (ev) => {
     if (D.current() !== 'today' || (ev.key !== 'Enter' && ev.key !== ' ')) return;
     const el = ev.target;
-    if (!el || !el.matches || !el.matches('.td-hab[data-act], .td-tile[data-act]')) return;
+    if (!el || !el.matches || !el.matches('.td-hab[data-act], .td-tile[data-act], .td-ready[data-act]')) return;
     ev.preventDefault();
     el.click();
   });
@@ -775,15 +844,12 @@
       const td = D.today();
       if (D.ui.viewDate && D.ui.viewDate >= td) { D.ui.viewDate = null; D.saveUi(); }
       const k = key(), today = k === td;
-      // AI advice sits under the day/habits summary — high enough to be read, below the things you act on first.
       const ai = today && D.ai ? safe(() => D.ai.card('today')) : '';
-      // Order follows the question "what do I do now?": time → what's left → today's tasks →
-      // a compact body row (water + food) → WHOOP workouts → AI → the end-of-day wrap-up.
-      return safe(() => dateNav(k, today)) + safe(() => ticker(k)) + safe(() => dayCard(k)) + safe(() => qazaHtml(k)) + safe(() => habitsCard(k)) +
-        safe(() => tasksCard(k)) + safe(() => quickStrip(k)) + safe(() => workoutsCard(k)) + ai +
-        `<div class="section-title">${esc(t('today.wrap'))}</div>` + safe(() => noteCard(k)) + safe(() => gratCard(k));
+      // Tartib bitta savolga qarab qurilgan: "tanam qanday?" → "kun qayerda?" →
+      // namoz → raqamlar → "hozir nima qilaman?" → tafsilot → kun yakuni.
+      return safe(() => dateNav(k, today)) + safe(() => heroCard(k)) + safe(() => dayStrip(k)) +
+        safe(() => prayerCard(k)) + safe(() => qazaHtml(k)) + safe(() => statTiles(k)) +
+        safe(() => focusCard(k)) + safe(() => workoutsCard(k)) + ai + safe(() => wrapCard(k));
     },
-    mount() { startTicker(); },
-    unmount() { stopTicker(); },
   });
 })();

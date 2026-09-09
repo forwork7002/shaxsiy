@@ -310,27 +310,8 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .sph .nm { width: 54px; flex: none; color: var(--text3); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sph .n { width: 36px; text-align: right; font-weight: 700; font-family: var(--mono); font-size: 11.5px; color: var(--text); flex: none; }
 
-/* ---------- ticker ---------- */
-.ticker { position: relative; overflow: hidden; display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: var(--r-sm); margin-bottom: 12px;
-  background: linear-gradient(180deg, rgba(0,0,0,.42), rgba(0,0,0,.30)), repeating-linear-gradient(0deg, rgba(255,255,255,.025) 0, rgba(255,255,255,.025) 1px, transparent 1px, transparent 3px);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.04); }
-[data-theme="light"] .ticker { background: linear-gradient(180deg, rgba(46,42,36,.9), rgba(46,42,36,.82)); color: #fff; }
-.ticker::after { content: ''; position: absolute; top: 0; bottom: 0; width: 30%; pointer-events: none; background: linear-gradient(90deg, transparent, rgba(255,255,255,.04), transparent); animation: sweep 8s linear infinite; }
-@keyframes sweep { 0% { left: -40%; } 100% { left: 110%; } }
-.ticker-led { width: 7px; height: 7px; border-radius: 50%; background: var(--success); box-shadow: 0 0 8px rgba(107,227,164,.7); animation: led 1.6s ease-in-out infinite; flex: none; }
-.ticker.urgent .ticker-led { background: var(--danger-text); box-shadow: 0 0 8px rgba(255,138,138,.7); }
+/* jonli nuqta puls: sync indikatori va Ibodat vaqt qatori ishlatadi */
 @keyframes led { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.85); } }
-.ticker-label { font-family: var(--mono); font-size: 9.5px; font-weight: 800; letter-spacing: .16em; color: var(--text3); flex: none; }
-[data-theme="light"] .ticker-label { color: rgba(255,255,255,.6); }
-.ticker-stage { position: relative; overflow: hidden; flex: 1; height: 22px; }
-.ticker-row { position: absolute; inset: 0; display: flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 12.5px; font-weight: 600; color: var(--text); white-space: nowrap; transition: opacity .22s ease; }
-[data-theme="light"] .ticker-row { color: #fff; }
-.ticker-row.fade { opacity: 0; }
-.ticker-status { width: 18px; display: inline-flex; justify-content: center; color: var(--text3); flex: none; }
-.ticker-status[data-s="done"] { color: var(--success); }
-.ticker-text { flex: 1; overflow: hidden; text-overflow: ellipsis; }
-.ticker-meta { font-family: var(--mono); font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: var(--r-pill); background: rgba(255,255,255,.06); color: var(--text2); flex: none; }
-[data-theme="light"] .ticker-meta { color: #fff; background: rgba(255,255,255,.15); }
 
 /* ---------- charts ---------- */
 .spark { width: 100%; display: block; }

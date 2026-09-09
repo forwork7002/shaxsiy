@@ -9,7 +9,7 @@ app/
   js/core.js        store, dates, i18n runtime, router, UI kit, icons, charts, undo, sync, migration
   js/i18n.js        string tables: uz (Latin), uzk (Cyrillic), ru
   js/prayer.js      prayer-time engine + hijri calendar (pure functions, no DOM)
-  js/today.js       Бугун: checklist (habits, tasks, prayers, water + food tile, WHOOP readiness + workouts, AI card, note, gratitude)
+  js/today.js       Бугун: kunlik tahlil (WHOOP tayyorlik hero + uyqu/zo'riqish/HRV, kun chizig'i, namoz, xulosa plitkalari, odat+vazifa fokus ro'yxati, WHOOP mashg'ulotlari, AI, kun yakuni)
   js/tasks.js       Вазифа + Мақсад
   js/health.js      Соғлиқ: WHOOP hub — day · sleep · strain · weight · water · body (age panel)
   js/food.js        Овқат: food logger (photo/text → /api/food/analyze → per-day meals, targets, WHOOP burn)
@@ -172,7 +172,6 @@ List: `.list`, `.li` (row), `.li.done`, `.chk` (custom checkbox `<input type=che
 Chips: `.pill`, `.pill.on`, `.tag` (+ `style="--c:var(--ruh)"`), `.streak`
 Controls: `.seg` > `button.on`, `.inp`, `.sel`, `.ta`, `.btn` (primary), `.btn.ghost`, `.btn.danger`, `.btn.sm`, `.btn.icon`, `.dashed`, `.slider`, `.stepper`, `.emoji-row`
 Progress: `.bar` > `.bar-fill`, `.segbar` > `.seg-on`, `.ring-wrap`
-Ticker: `.ticker`, `.ticker-led`, `.ticker-label`, `.ticker-stage`, `.ticker-row`, `.ticker-meta`
 Typography: `.num` (mono tabular), `.muted`, `.small`, `.title`
 Misc: `.hm` heatmap, `.spark`, `.tabs` (sub-nav pills, horizontally scrollable)
 

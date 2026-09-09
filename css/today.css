@@ -6,8 +6,6 @@
   background: color-mix(in srgb, var(--success) 12%, transparent); color: var(--success); font-size: 11px; font-weight: 700; }
 
 /* day card: ring + prayers */
-.td-day-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-@media (min-width: 640px) { .td-day-grid { grid-template-columns: auto 1fr; align-items: center; gap: 24px; } }
 .td-dayring { display: flex; align-items: center; gap: 18px; min-width: 0; }
 .td-ring { position: relative; width: 136px; height: 136px; flex: none; --c: var(--text4); }
 .td-ring svg { width: 100%; height: 100%; display: block; transform: rotate(-90deg); overflow: visible; }
@@ -23,13 +21,6 @@
 .td-ring-remain { font-size: 12px; color: var(--text2); }
 .td-ring-hours { font-size: 11px; color: var(--text3); }
 @media (max-width: 480px) { .td-ring { width: 120px; height: 120px; } .td-ring-pct { font-size: 26px; } .td-ring-status { font-size: 13px; } }
-.td-day-right { min-width: 0; }
-.td-next { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 12px; border-radius: var(--r-sm); background: var(--inset); border: 1px solid var(--line); }
-.td-next-ic { width: 34px; height: 34px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center; background: color-mix(in srgb, var(--success) 12%, transparent); color: var(--success); flex: none; }
-.td-next-body { flex: 1 1 150px; min-width: 0; }
-.td-next { flex-wrap: wrap; }
-.td-next > .pill { flex: 0 0 auto; margin-left: auto; }
-.td-next-name { font-size: 14px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .td-pr-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .td-prayers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .td-pr { --c: var(--text3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 50px; padding: 7px 3px; min-width: 0;
@@ -42,10 +33,6 @@
 .td-pr.on.s-jamaat { box-shadow: 0 0 10px var(--success-glow); }
 
 /* habits */
-.td-ring-row { margin-bottom: 14px; }
-.td-ring-row .sph .nm { width: 76px; } /* fits "Смешанное" / "Aralash" without ellipsis */
-.td-balance { gap: 5px; }
-.td-balance b { font-weight: 800; }
 .td-hab.done { opacity: .62; }
 .td-hab .li-text { font-weight: 600; }
 .td-hab-emoji { display: inline-block; width: 22px; margin-right: 4px; font-size: 15px; line-height: 1; text-align: center; vertical-align: -1px; }
@@ -58,15 +45,11 @@
 .td-step-btn:hover { background: var(--hover); }
 .td-step-val { min-width: 42px; text-align: center; font-weight: 700; color: var(--text); font-size: 13px; }
 .td-step-val small { color: var(--text3); font-weight: 600; font-size: 11px; }
-.td-notdue { font-size: 11.5px; color: var(--text3); text-align: center; margin-top: 8px; }
 
 /* tasks */
-.td-tasks .segbar { margin: 4px 0 12px; }
-.td-tasks .btn.sm { align-self: center; }
 .td-edit { cursor: text; border-radius: 4px; padding: 1px 3px; margin: -1px -3px; transition: background .15s; }
 .td-edit[contenteditable="true"] { outline: 1px solid var(--line3); background: var(--f-input); text-decoration: none; }
 .td-task .chk:disabled { opacity: .55; cursor: not-allowed; }
-.td-tasks .li-del, .td-grat .li-del { width: 40px; height: 40px; padding: 0; margin: -6px 0; } /* 40px touch targets without growing the row */
 .td-add { margin-top: 10px; }
 .td-add .btn.sq { width: 44px; height: 44px; }
 .td-tomorrow { margin-top: 14px; padding-top: 6px; border-top: 1px solid var(--line); }
@@ -77,7 +60,6 @@
 .td-tomorrow-head svg { transition: transform .2s; }
 .td-tomorrow-head.open svg { transform: rotate(180deg); }
 .td-tomorrow-sub { font-size: 12px; color: var(--text3); margin: 0 0 8px; }
-.td-tasks .dashed { margin: 2px 0 4px; }
 
 /* quick strip */
 .td-quick { grid-template-columns: repeat(2, 1fr); margin-bottom: 12px; } /* same rhythm as .card */
@@ -92,13 +74,13 @@
 @media (max-width: 480px) { .td-quick { gap: 8px; } .td-tile { padding: 10px 8px; } .td-tile .stat-num { font-size: 20px; } .td-tile .stat-label { font-size: 9px; letter-spacing: .01em; gap: 3px; } .td-tile .stat-label svg { width: 11px; height: 11px; } }
 
 /* note */
-.td-note .ta { min-height: 96px; }
+.td-wrap .ta { min-height: 92px; }
 
 /* gratitude */
 .td-insp { padding: 10px 12px; margin-bottom: 10px; border-radius: var(--r-sm); border: 1px dashed var(--line2); background: linear-gradient(135deg, color-mix(in srgb, var(--qalb) 10%, transparent), transparent 70%); }
 .td-insp .eyebrow { display: flex; align-items: center; gap: 4px; }
 .td-insp-text { font-size: 13.5px; color: var(--text2); margin-top: 4px; line-height: 1.45; overflow-wrap: anywhere; }
-.td-grat .li { align-items: flex-start; }
+.td-wrap .li { align-items: flex-start; }
 .td-grat-ic { color: var(--qalb); display: inline-flex; margin-top: 3px; flex: none; }
 
 /* ---- Bugun: fokus ro'yxati (28 ta odat devori o'rniga) ---- */
@@ -115,7 +97,6 @@
 
 /* hero uses the section accent, so the old flat card look goes away */
 .td-hero .td-ring { --c: var(--sec); }
-.td-hero .td-day-grid { gap: 14px; }
 .td-quick { margin-top: 2px; }
 .td-tile .td-tile-of { font-size: 11px; color: var(--text3); font-weight: 600; }
 .td-tile .td-plus { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 10px;
@@ -146,3 +127,74 @@
 .td-qz .bar-fill { background: linear-gradient(90deg, var(--warning), var(--success)); }
 .td-qz.met .bar-fill { background: var(--success); }
 .td-qz-side { display: inline-flex; align-items: center; gap: 3px; flex: none; font-size: 12px; font-weight: 800; color: var(--text3); }
+
+/* ==================================================================== */
+/* Bugun 2.0 — tepada bitta katta raqam, ostida uchta kontekstli KPI     */
+/* ==================================================================== */
+
+/* --- tayyorlik hero (WHOOP tiklanishi) --- */
+.td-ready { --z: var(--line3); cursor: pointer; padding: 16px 16px 14px; transition: border-color .2s, transform .1s; }
+.td-ready:active { transform: scale(.995); }
+.td-ready.z-good { --z: var(--success); }
+.td-ready.z-warn { --z: var(--warning); }
+.td-ready.z-bad  { --z: var(--danger-text); }
+.td-ready { border: 1px solid color-mix(in srgb, var(--z) 26%, transparent);
+  background: linear-gradient(140deg, color-mix(in srgb, var(--z) 11%, transparent), transparent 62%), var(--card-bg); }
+.td-ready:hover { border-color: color-mix(in srgb, var(--z) 42%, transparent); }
+.td-ready .ring-pct { font-size: 27px; }
+.td-ready .ring-pct small { font-size: 13px; color: var(--text3); font-weight: 700; }
+
+.td-ready-top { display: flex; align-items: center; gap: 16px; }
+.td-ready-id { flex: 1; min-width: 0; }
+.td-ready-state { font-size: 19px; font-weight: 800; letter-spacing: .04em; line-height: 1.1; margin-top: 5px; color: var(--z); }
+.td-ready-adv { font-size: 13.5px; font-weight: 600; color: var(--text); line-height: 1.4; margin-top: 5px; overflow-wrap: anywhere; }
+.td-ready-go { flex: none; align-self: center; color: var(--text4); }
+.td-fresh { font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--text4); margin-left: 5px; }
+.td-fresh.stale { color: var(--warning); }
+
+/* uch ustunli KPI qatori — har birida raqam va SHAXSIY o'rtachadan farq */
+.td-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--line); }
+.td-kpi { --c: var(--text3); display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.td-kpi.z-good { --c: var(--success); }
+.td-kpi.z-warn { --c: var(--warning); }
+.td-kpi.z-bad  { --c: var(--danger-text); }
+.td-kpi-lab { font-size: 9.5px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; color: var(--text3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-kpi-val { font-size: 20px; font-weight: 700; letter-spacing: -.03em; color: var(--text); line-height: 1.05; }
+.td-kpi-val small { font-size: 11px; color: var(--text3); font-weight: 600; margin-left: 1px; }
+.td-kpi-d { font-size: 11px; font-weight: 700; color: var(--c); line-height: 1.3; overflow-wrap: anywhere; }
+.td-hero-foot { display: flex; align-items: center; gap: 6px; margin-top: 11px; font-size: 11.5px; font-weight: 600; color: var(--text3); }
+.td-hero-foot .ic { color: var(--text4); }
+@media (max-width: 380px) {
+  .td-ready-top { gap: 12px; }
+  .td-ready-state { font-size: 17px; }
+  .td-kpi-val { font-size: 18px; }
+  .td-kpis { gap: 6px; }
+}
+
+/* --- kun chizig'i: uyg'onishdan uyquga bitta ingichka qator --- */
+.td-strip { padding: 11px 14px 10px; margin-bottom: 12px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--inset); }
+.td-strip-top { display: flex; align-items: baseline; gap: 8px; }
+.td-strip-clock { font-size: 16px; font-weight: 700; letter-spacing: -.02em; color: var(--text); }
+.td-strip-phase { font-size: 10.5px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); }
+.td-strip-remain { margin-left: auto; font-size: 11.5px; font-weight: 600; color: var(--text2); text-align: right; }
+.td-strip-bar { margin: 8px 0 5px; }
+.td-strip-foot { display: flex; justify-content: space-between; font-size: 10.5px; color: var(--text4); }
+
+/* --- namoz kartasi --- */
+.td-pray .td-pr-head { gap: 8px; }
+
+/* --- xulosa plitkalari: to'rtta, kengda bir qatorda --- */
+.td-quick { grid-template-columns: repeat(2, 1fr); }
+@media (min-width: 620px) { .td-quick { grid-template-columns: repeat(4, 1fr); } .td-quick .b-wide { grid-column: span 1; } }
+
+/* --- fokus ro'yxati: odat + vazifa bitta joyda --- */
+.td-focus-list { margin-top: 2px; }
+.td-focus .dashed { margin: 2px 0 4px; }
+.td-focus .li-del { width: 40px; height: 40px; padding: 0; margin: -6px 0; }
+
+/* --- kun yakuni: izoh + shukr --- */
+.td-wrap-sep { height: 1px; margin: 16px 0 14px; background: var(--line); }
+.td-wrap-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.td-wrap-head .title { flex: 1; min-width: 0; }
+.td-wrap .li-del { width: 40px; height: 40px; padding: 0; margin: -6px 0; }
