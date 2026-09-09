@@ -13,7 +13,7 @@ app/
   js/tasks.js       Вазифа + Мақсад
   js/health.js      Соғлиқ: WHOOP qobig'i — ready · sleep · strain (uchta bo'limcha, qo'lda kiritish yo'q)
   js/food.js        Овқат: food logger (photo/text → /api/food/analyze → per-day meals, targets, WHOOP burn)
-  js/finance.js     Молия
+  js/finance.js     Молия: ikki bo'lim — «Oy» (bugun sarflasa bo'ladigan summa, tez yozuv, kategoriyalar, yozuvlar) · «Hisob» (qoldiqlar + doimiy to'lovlar)
   js/ai.js          shared AI analysis engine — D.ai.card(section) insight cards
   js/whoop.js       WHOOP snapshot client, per-day store, trends, readiness, workouts, bioAge; Соғлиқ sahifalarini shu modul chizadi
   js/profile.js     account sheet (D.profile): avatar (photo → /api/me/avatar, or initials), display name, provider/e-mail, stats, export, logout — opened from the header avatar button
@@ -33,6 +33,11 @@ Script order in index.html: core.js → i18n.js → prayer.js → ai.js → whoo
 (`profile.js` reads the WHOOP profile name and is called by settings.js and app.js).
 `food.js` loads before `settings.js` (the food targets tab calls `D.food.recalcTargets`); `onboard.js` loads last so every view and `D.food` exist when it decides to open.
 No Telegram: there is no `telegram-web-app.js` in the shell; `D.tg` stays `null` and the few `D.tg && …` guards in core.js are dead but harmless.
+
+Молия was cut to two tabs on 2026-09-09: the wishlist, the per-category envelope budgets, the month-over-month movers card, the forecast card
+and the account-allocation donut are gone. The month limit is now one number (`budgets['YYYY-MM']._total`) that drives a single «bugun sarflasa bo'ladi»
+figure = (limit − spent before today − recurring payments still due this month) ÷ days left − spent today. `finance.wishlist` stays in the state model
+(defaultState / normalize / D.merge) so old blobs and the archive survive; nothing in the UI reads it.
 
 Removed on 2026-09-09 (files deleted, `<link>/<script>` and sw.js SHELL entries gone, i18n keys gone): `gym.js/css` (WHOOP workouts replace it),
 `learn.js/css`, `stats.js/css` (month/year stats live in Tarix), Health sub-tabs `caffeine` and `stack`, weekly `reviews`.
@@ -230,8 +235,9 @@ Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --
  stack:{ items:[…], taken:{…} },                                 // legacy — kept, no UI
  gym:{ … },                                                     // legacy — kept, no UI
  finance:{ tx:[{id,date,type:'in'|'out',amount,cat,note,accountId}], cats:[{id,name,icon}],
-           budgets:{ 'YYYY-MM':{catId:amount} }, accounts:[{id,name,type:'cash'|'bank'|'card'|'crypto'|'other',balance}],
-           subs:[{id,name,amount,period:'monthly'|'yearly'|'weekly',next,accountId,auto,last}], snapshots:[{t,v}], wishlist:[{id,name,amount}] },
+           budgets:{ 'YYYY-MM':{_total:amount} },   // one monthly limit; an old {catId:amount} map is still read as its sum, the first edit replaces it
+           accounts:[{id,name,type:'cash'|'bank'|'card'|'crypto'|'other',balance}],
+           subs:[{id,name,amount,period:'monthly'|'yearly'|'weekly',next,accountId,auto,last}], snapshots:[{t,v}], wishlist:[…] /* legacy — kept, no UI */ },
  learn:[ … ], reviews:[ … ],                                    // legacy — kept (legacy import may still fill learn), no UI
  nova:{ threads:[{id,ts,messages:[{role,content,ts}]}] },
  whoop:{ connected:false, lastSync, cache:{}, days:{ 'YYYY-MM-DD':{recovery,hrv,rhr,spo2,skin,sleepH,sleepPerf,sleepEff,sleepCons,resp,stages,bedTs,wakeTs,strain,kcal,hrAvg,hrMax} }, workouts:[{id,k,start,end,sport,strain,kcal,hrAvg,hrMax,meters,mins}], body:{heightCm,weightKg,maxHr} },

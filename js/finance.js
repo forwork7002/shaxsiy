@@ -1,6 +1,8 @@
 /* =====================================================================
-   Dash — Молия (finance): month ledger · accounts / net worth · subscriptions
-   (auto-deduct engine) · envelope budgets · wishlist
+   Dash — Молия (finance)
+   Ikki bo'lim, bitta savol: «bugun qancha sarflasam bo'ladi va pulim qayerga ketyapti?»
+     Oy    — kunlik me'yor · tez yozuv · kategoriyalar · yozuvlar
+     Hisob — qoldiqlar (sof boylik) · doimiy to'lovlar (avto-yechish)
    ===================================================================== */
 (function () {
   'use strict';
@@ -10,124 +12,131 @@
   /* ------------------------------------------------------------------ */
   D.i18n.add({
     uz: {
-      'fin.tab.month': 'Oy', 'fin.tab.accounts': 'Hisoblar', 'fin.tab.subs': 'Obunalar', 'fin.tab.budget': 'Byudjet', 'fin.tab.wishlist': 'Xohishlar',
-      'fin.net': 'Sof natija', 'fin.income': 'Kirim', 'fin.expense': 'Chiqim', 'fin.savings': "Jamg'arma", 'fin.savingsHint': 'sof ÷ kirim',
-      'fin.fc': 'Prognoz', 'fin.fc.pace': 'Kunlik tezlik', 'fin.fc.end': 'Oy oxirida', 'fin.fc.left': '{n} kun qoldi',
-      'fin.fc.budget': 'Kunlik me’yor', 'fin.fc.vsPrev': "O'tgan oyga nisbatan", 'fin.fc.same': "o'tgan oy bilan bir xil",
-      'fin.fc.up': '{p}% ko‘p', 'fin.fc.down': '{p}% kam', 'fin.fc.noPrev': "o'tgan oy ma'lumoti yo'q",
-      'fin.mv': "O'zgarishlar", 'fin.mv.sub': "o'tgan oy bilan solishtirganda", 'fin.mv.new': 'yangi', 'fin.mv.gone': 'to‘xtadi',
-      'fin.mv.none': "Solishtirish uchun ma'lumot yetarli emas", 'fin.fc.hint': 'Shu tezlikda davom etsangiz',
-      'fin.daily': 'Kunlik xarajat', 'fin.byCat': "Kategoriyalar bo'yicha", 'fin.noExpense': "Bu oyda chiqim yo'q",
-      'fin.add': 'Yangi yozuv', 'fin.out': 'Chiqim', 'fin.in': 'Kirim', 'fin.amount': 'Summa', 'fin.amountPh': '1 250 000 · 250k · 1.5m',
+      'fin.tab.month': 'Oy', 'fin.tab.accounts': 'Hisob',
+      'fin.today': 'Bugun sarflasa bo‘ladi', 'fin.todayOver': 'Bugun me’yordan oshdi',
+      'fin.net': 'Sof natija', 'fin.income': 'Kirim', 'fin.expense': 'Chiqim', 'fin.leftMonth': 'Oyda qoldi', 'fin.spentPct': '{p} sarflandi',
+      'fin.limit': 'Oylik me’yor', 'fin.limitSet': 'Me’yor belgilash', 'fin.limitHint': 'Bir oyda sarflamoqchi bo‘lgan summa',
+      'fin.limitWhy': 'Oylik me’yorni belgilang — har kuni qancha sarflash mumkinligini shu yerda ko‘rasiz.',
+      'fin.limitSug': 'O‘tgan oy: {v}', 'fin.limitOff': 'Me’yor o‘chirildi',
+      'fin.spentToday': 'Bugun {v}', 'fin.allow': 'kunlik me’yor {v}',
+      'fin.daysLeft': '{n} kun qoldi', 'fin.monthOver': 'Oy tugagan',
+      'fin.pace': 'Shu tezlikda oy oxirida ≈ {v}', 'fin.billsLeft': 'Doimiy to‘lovlar: {v}',
+      'fin.daily': 'Kunlik chiqim', 'fin.dailyMax': 'eng katta kun',
+      'fin.byCat': 'Pul qayerga ketdi', 'fin.noExpense': 'Bu oyda chiqim yo‘q',
+      'fin.add': 'Yozib qo‘yish', 'fin.out': 'Chiqim', 'fin.in': 'Kirim',
+      'fin.amount': 'Summa', 'fin.amountPh': '50 000 · 250k · 1.5m',
       'fin.cat': 'Kategoriya', 'fin.notePh': 'Izoh (ixtiyoriy)', 'fin.account': 'Hisob', 'fin.noAccount': 'Hisobsiz',
-      'fin.txs': 'Yozuvlar', 'fin.searchPh': 'Izoh yoki kategoriya…', 'fin.emptyMonth': "Bu oyda yozuv yo'q", 'fin.emptySearch': 'Topilmadi',
-      'fin.editTx': 'Yozuvni tahrirlash', 'fin.txDeleted': "Yozuv o'chirildi", 'fin.added': "Qo'shildi", 'fin.saved': 'Saqlandi',
-      'fin.badAmount': "Summani to'g'ri kiriting", 'fin.needName': 'Nom kiriting', 'fin.type': 'Turi',
-      'fin.hideAmounts': 'Summalarni yashirish', 'fin.showAmounts': "Summalarni ko'rsatish",
-      'fin.catsHint': "Kategoriyalar Sozlash bo'limida tahrirlanadi", 'fin.txCount': '{n} ta yozuv',
-      'fin.netWorth': 'Sof boylik', 'fin.sinceFirst': 'boshidan', 'fin.since30': '30 kun', 'fin.allocation': 'Taqsimot', 'fin.accounts': 'Hisoblar',
-      'fin.addAccount': "Hisob qo'shish", 'fin.editAccount': 'Hisobni tahrirlash', 'fin.accName': 'Hisob nomi', 'fin.accType': 'Turi', 'fin.balance': 'Qoldiq',
+      'fin.txs': 'Yozuvlar', 'fin.searchPh': 'Izoh yoki kategoriya…', 'fin.emptyMonth': 'Bu oyda yozuv yo‘q', 'fin.emptySearch': 'Topilmadi',
+      'fin.editTx': 'Yozuvni tahrirlash', 'fin.txDeleted': 'Yozuv o‘chirildi', 'fin.added': 'Qo‘shildi', 'fin.saved': 'Saqlandi',
+      'fin.badAmount': 'Summani to‘g‘ri kiriting', 'fin.needName': 'Nom kiriting', 'fin.type': 'Turi',
+      'fin.hideAmounts': 'Summalarni yashirish', 'fin.showAmounts': 'Summalarni ko‘rsatish',
+      'fin.catsHint': 'Kategoriyalarni Sozlashda tahrirlash', 'fin.txCount': '{n} ta yozuv',
+      'fin.netWorth': 'Jami qoldiq', 'fin.since30': '30 kun', 'fin.accounts': 'Hisoblar',
+      'fin.addAccount': 'Hisob qo‘shish', 'fin.editAccount': 'Hisobni tahrirlash', 'fin.accName': 'Hisob nomi', 'fin.accType': 'Turi', 'fin.balance': 'Qoldiq',
       'fin.balHint': '+50000 · -20000 · 1.5m', 'fin.type.cash': 'Naqd', 'fin.type.bank': 'Bank', 'fin.type.card': 'Karta', 'fin.type.crypto': 'Kripto', 'fin.type.other': 'Boshqa',
-      'fin.noAccounts': "Hali hisob yo'q — birinchi hisobni qo'shing", 'fin.accDeleted': "Hisob o'chirildi", 'fin.snapshots': 'nuqta', 'fin.balUpdated': 'Qoldiq yangilandi',
-      'fin.subs': 'Obunalar', 'fin.monthlyBurn': 'Oylik obunalar', 'fin.perYear': 'yiliga ≈ {v}', 'fin.subCount': '{n} ta obuna',
-      'fin.addSub': "Obuna qo'shish", 'fin.editSub': 'Obunani tahrirlash', 'fin.period': 'Davr', 'fin.per.monthly': 'Oylik', 'fin.per.yearly': 'Yillik', 'fin.per.weekly': 'Haftalik',
-      'fin.next': "Keyingi to'lov", 'fin.auto': 'Avto-yechish', 'fin.payNow': "To'lash", 'fin.paid': "To'landi: {name}",
-      'fin.autoDone': "{n} ta obuna avtomatik to'landi — {sum}", 'fin.dueToday': 'Bugun', 'fin.dueTomorrow': 'Ertaga', 'fin.inDays': '{n} kunda', 'fin.late': '{n} kun kechikdi',
-      'fin.noSubs': "Obunalar yo'q", 'fin.subCat': 'Obuna', 'fin.mo': '/oy', 'fin.noDate': "sana yo'q", 'fin.subDeleted': "Obuna o'chirildi",
-      'fin.budget': 'Byudjet', 'fin.spent': 'Sarflandi', 'fin.left': 'Qoldi', 'fin.perDay': 'kuniga', 'fin.copyLast': "O'tgan oydan nusxalash",
-      'fin.copied': 'Byudjet nusxalandi', 'fin.noLast': "O'tgan oyda byudjet yo'q", 'fin.budgetTotal': 'Jami byudjet', 'fin.budgetPh': 'Limit',
-      'fin.over': 'oshdi', 'fin.daysLeft': '{n} kun qoldi', 'fin.noBudget': 'Limit belgilanmagan', 'fin.monthOver': 'Oy tugagan',
-      'fin.wishlist': 'Xohishlar', 'fin.wishTotal': 'Xohishlar jami', 'fin.ofNw': 'sof boylikdan', 'fin.monthsToSave': "≈ {n} oy yig'ish",
-      'fin.addWish': "Xohish qo'shish", 'fin.wishName': 'Nomi', 'fin.noWish': "Hali xohish yo'q", 'fin.buy': 'Sotib olindi', 'fin.buyTitle': 'Sotib olish: {name}',
-      'fin.bought': 'Xarajat sifatida yozildi', 'fin.avgNet': "o'rtacha oylik sof (3 oy)", 'fin.wishDeleted': "Xohish o'chirildi", 'fin.searchSub': 'Moliya · {d}',
-      'fin.prevMonth': 'Oldingi oy', 'fin.nextMonth': 'Keyingi oy', 'fin.subNamePh': 'Netflix, Internet…', 'fin.balEditHint': 'Qoldiq: +/- bilan farq, aks holda yangi summa',
-      'fin.dailyMax': 'eng katta kun', 'fin.noSnaps': "Qoldiq o'zgarganda tarix shu yerda chiziladi",
+      'fin.noAccounts': 'Hali hisob yo‘q — birinchisini qo‘shing', 'fin.accDeleted': 'Hisob o‘chirildi', 'fin.balUpdated': 'Qoldiq yangilandi',
+      'fin.balEditHint': 'Qoldiq: +/- bilan farq, aks holda yangi summa', 'fin.noSnaps': 'Qoldiq o‘zgarganda tarix shu yerda chiziladi',
+      'fin.subs': 'Doimiy to‘lovlar', 'fin.perYear': 'yiliga ≈ {v}',
+      'fin.addSub': 'To‘lov qo‘shish', 'fin.editSub': 'To‘lovni tahrirlash', 'fin.period': 'Davr',
+      'fin.per.monthly': 'Oylik', 'fin.per.yearly': 'Yillik', 'fin.per.weekly': 'Haftalik',
+      'fin.next': 'Keyingi to‘lov', 'fin.auto': 'Avto-yechish', 'fin.payNow': 'To‘lash', 'fin.paid': 'To‘landi: {name}',
+      'fin.autoDone': '{n} ta to‘lov avtomatik yechildi — {sum}',
+      'fin.dueToday': 'Bugun', 'fin.dueTomorrow': 'Ertaga', 'fin.inDays': '{n} kunda', 'fin.late': '{n} kun kechikdi',
+      'fin.noSubs': 'Doimiy to‘lov yo‘q', 'fin.subCat': 'Doimiy to‘lov', 'fin.mo': '/oy', 'fin.noDate': 'sana yo‘q',
+      'fin.subDeleted': 'To‘lov o‘chirildi', 'fin.subNamePh': 'Internet, ijara, Netflix…',
+      'fin.prevMonth': 'Oldingi oy', 'fin.nextMonth': 'Keyingi oy', 'fin.searchSub': 'Moliya · {d}',
     },
     uzk: {
-      'fin.tab.month': 'Ой', 'fin.tab.accounts': 'Ҳисоб', 'fin.tab.subs': 'Обуна', 'fin.tab.budget': 'Бюджет', 'fin.tab.wishlist': 'Хоҳиш',
-      'fin.net': 'Соф натижа', 'fin.income': 'Кирим', 'fin.expense': 'Чиқим', 'fin.savings': 'Жамғарма', 'fin.savingsHint': 'соф ÷ кирим',
-      'fin.fc': 'Прогноз', 'fin.fc.pace': 'Кунлик тезлик', 'fin.fc.end': 'Ой охирида', 'fin.fc.left': '{n} кун қолди',
-      'fin.fc.budget': 'Кунлик меъёр', 'fin.fc.vsPrev': 'Ўтган ойга нисбатан', 'fin.fc.same': 'ўтган ой билан бир хил',
-      'fin.fc.up': '{p}% кўп', 'fin.fc.down': '{p}% кам', 'fin.fc.noPrev': 'ўтган ой маълумоти йўқ',
-      'fin.mv': 'Ўзгаришлар', 'fin.mv.sub': 'ўтган ой билан солиштирганда', 'fin.mv.new': 'янги', 'fin.mv.gone': 'тўхтади',
-      'fin.mv.none': 'Солиштириш учун маълумот етарли эмас', 'fin.fc.hint': 'Шу тезликда давом этсангиз',
-      'fin.daily': 'Кунлик харажат', 'fin.byCat': 'Категориялар бўйича', 'fin.noExpense': 'Бу ойда чиқим йўқ',
-      'fin.add': 'Янги ёзув', 'fin.out': 'Чиқим', 'fin.in': 'Кирим', 'fin.amount': 'Сумма', 'fin.amountPh': '1 250 000 · 250k · 1.5m',
+      'fin.tab.month': 'Ой', 'fin.tab.accounts': 'Ҳисоб',
+      'fin.today': 'Бугун сарфласа бўлади', 'fin.todayOver': 'Бугун меъёрдан ошди',
+      'fin.net': 'Соф натижа', 'fin.income': 'Кирим', 'fin.expense': 'Чиқим', 'fin.leftMonth': 'Ойда қолди', 'fin.spentPct': '{p} сарфланди',
+      'fin.limit': 'Ойлик меъёр', 'fin.limitSet': 'Меъёр белгилаш', 'fin.limitHint': 'Бир ойда сарфламоқчи бўлган сумма',
+      'fin.limitWhy': 'Ойлик меъёрни белгиланг — ҳар куни қанча сарфлаш мумкинлигини шу ерда кўрасиз.',
+      'fin.limitSug': 'Ўтган ой: {v}', 'fin.limitOff': 'Меъёр ўчирилди',
+      'fin.spentToday': 'Бугун {v}', 'fin.allow': 'кунлик меъёр {v}',
+      'fin.daysLeft': '{n} кун қолди', 'fin.monthOver': 'Ой тугаган',
+      'fin.pace': 'Шу тезликда ой охирида ≈ {v}', 'fin.billsLeft': 'Доимий тўловлар: {v}',
+      'fin.daily': 'Кунлик чиқим', 'fin.dailyMax': 'энг катта кун',
+      'fin.byCat': 'Пул қаерга кетди', 'fin.noExpense': 'Бу ойда чиқим йўқ',
+      'fin.add': 'Ёзиб қўйиш', 'fin.out': 'Чиқим', 'fin.in': 'Кирим',
+      'fin.amount': 'Сумма', 'fin.amountPh': '50 000 · 250k · 1.5m',
       'fin.cat': 'Категория', 'fin.notePh': 'Изоҳ (ихтиёрий)', 'fin.account': 'Ҳисоб', 'fin.noAccount': 'Ҳисобсиз',
       'fin.txs': 'Ёзувлар', 'fin.searchPh': 'Изоҳ ёки категория…', 'fin.emptyMonth': 'Бу ойда ёзув йўқ', 'fin.emptySearch': 'Топилмади',
       'fin.editTx': 'Ёзувни таҳрирлаш', 'fin.txDeleted': 'Ёзув ўчирилди', 'fin.added': 'Қўшилди', 'fin.saved': 'Сақланди',
       'fin.badAmount': 'Суммани тўғри киритинг', 'fin.needName': 'Ном киритинг', 'fin.type': 'Тури',
       'fin.hideAmounts': 'Суммаларни яшириш', 'fin.showAmounts': 'Суммаларни кўрсатиш',
-      'fin.catsHint': 'Категориялар Созлаш бўлимида таҳрирланади', 'fin.txCount': '{n} та ёзув',
-      'fin.netWorth': 'Соф бойлик', 'fin.sinceFirst': 'бошидан', 'fin.since30': '30 кун', 'fin.allocation': 'Тақсимот', 'fin.accounts': 'Ҳисоблар',
+      'fin.catsHint': 'Категорияларни Созлашда таҳрирлаш', 'fin.txCount': '{n} та ёзув',
+      'fin.netWorth': 'Жами қолдиқ', 'fin.since30': '30 кун', 'fin.accounts': 'Ҳисоблар',
       'fin.addAccount': 'Ҳисоб қўшиш', 'fin.editAccount': 'Ҳисобни таҳрирлаш', 'fin.accName': 'Ҳисоб номи', 'fin.accType': 'Тури', 'fin.balance': 'Қолдиқ',
       'fin.balHint': '+50000 · -20000 · 1.5m', 'fin.type.cash': 'Нақд', 'fin.type.bank': 'Банк', 'fin.type.card': 'Карта', 'fin.type.crypto': 'Крипто', 'fin.type.other': 'Бошқа',
-      'fin.noAccounts': 'Ҳали ҳисоб йўқ — биринчи ҳисобни қўшинг', 'fin.accDeleted': 'Ҳисоб ўчирилди', 'fin.snapshots': 'нуқта', 'fin.balUpdated': 'Қолдиқ янгиланди',
-      'fin.subs': 'Обуналар', 'fin.monthlyBurn': 'Ойлик обуналар', 'fin.perYear': 'йилига ≈ {v}', 'fin.subCount': '{n} та обуна',
-      'fin.addSub': 'Обуна қўшиш', 'fin.editSub': 'Обунани таҳрирлаш', 'fin.period': 'Давр', 'fin.per.monthly': 'Ойлик', 'fin.per.yearly': 'Йиллик', 'fin.per.weekly': 'Ҳафталик',
+      'fin.noAccounts': 'Ҳали ҳисоб йўқ — биринчисини қўшинг', 'fin.accDeleted': 'Ҳисоб ўчирилди', 'fin.balUpdated': 'Қолдиқ янгиланди',
+      'fin.balEditHint': 'Қолдиқ: +/- билан фарқ, акс ҳолда янги сумма', 'fin.noSnaps': 'Қолдиқ ўзгарганда тарих шу ерда чизилади',
+      'fin.subs': 'Доимий тўловлар', 'fin.perYear': 'йилига ≈ {v}',
+      'fin.addSub': 'Тўлов қўшиш', 'fin.editSub': 'Тўловни таҳрирлаш', 'fin.period': 'Давр',
+      'fin.per.monthly': 'Ойлик', 'fin.per.yearly': 'Йиллик', 'fin.per.weekly': 'Ҳафталик',
       'fin.next': 'Кейинги тўлов', 'fin.auto': 'Авто-ечиш', 'fin.payNow': 'Тўлаш', 'fin.paid': 'Тўланди: {name}',
-      'fin.autoDone': '{n} та обуна автоматик тўланди — {sum}', 'fin.dueToday': 'Бугун', 'fin.dueTomorrow': 'Эртага', 'fin.inDays': '{n} кунда', 'fin.late': '{n} кун кечикди',
-      'fin.noSubs': 'Обуналар йўқ', 'fin.subCat': 'Обуна', 'fin.mo': '/ой', 'fin.noDate': 'сана йўқ', 'fin.subDeleted': 'Обуна ўчирилди',
-      'fin.budget': 'Бюджет', 'fin.spent': 'Сарфланди', 'fin.left': 'Қолди', 'fin.perDay': 'кунига', 'fin.copyLast': 'Ўтган ойдан нусхалаш',
-      'fin.copied': 'Бюджет нусхаланди', 'fin.noLast': 'Ўтган ойда бюджет йўқ', 'fin.budgetTotal': 'Жами бюджет', 'fin.budgetPh': 'Лимит',
-      'fin.over': 'ошди', 'fin.daysLeft': '{n} кун қолди', 'fin.noBudget': 'Лимит белгиланмаган', 'fin.monthOver': 'Ой тугаган',
-      'fin.wishlist': 'Хоҳишлар', 'fin.wishTotal': 'Хоҳишлар жами', 'fin.ofNw': 'соф бойликдан', 'fin.monthsToSave': '≈ {n} ой йиғиш',
-      'fin.addWish': 'Хоҳиш қўшиш', 'fin.wishName': 'Номи', 'fin.noWish': 'Ҳали хоҳиш йўқ', 'fin.buy': 'Сотиб олинди', 'fin.buyTitle': 'Сотиб олиш: {name}',
-      'fin.bought': 'Харажат сифатида ёзилди', 'fin.avgNet': 'ўртача ойлик соф (3 ой)', 'fin.wishDeleted': 'Хоҳиш ўчирилди', 'fin.searchSub': 'Молия · {d}',
-      'fin.prevMonth': 'Олдинги ой', 'fin.nextMonth': 'Кейинги ой', 'fin.subNamePh': 'Netflix, Интернет…', 'fin.balEditHint': 'Қолдиқ: +/- билан фарқ, акс ҳолда янги сумма',
-      'fin.dailyMax': 'энг катта кун', 'fin.noSnaps': 'Қолдиқ ўзгарганда тарих шу ерда чизилади',
+      'fin.autoDone': '{n} та тўлов автоматик ечилди — {sum}',
+      'fin.dueToday': 'Бугун', 'fin.dueTomorrow': 'Эртага', 'fin.inDays': '{n} кунда', 'fin.late': '{n} кун кечикди',
+      'fin.noSubs': 'Доимий тўлов йўқ', 'fin.subCat': 'Доимий тўлов', 'fin.mo': '/ой', 'fin.noDate': 'сана йўқ',
+      'fin.subDeleted': 'Тўлов ўчирилди', 'fin.subNamePh': 'Интернет, ижара, Netflix…',
+      'fin.prevMonth': 'Олдинги ой', 'fin.nextMonth': 'Кейинги ой', 'fin.searchSub': 'Молия · {d}',
     },
     ru: {
-      'fin.tab.month': 'Месяц', 'fin.tab.accounts': 'Счета', 'fin.tab.subs': 'Подписки', 'fin.tab.budget': 'Бюджет', 'fin.tab.wishlist': 'Желания',
-      'fin.net': 'Чистый итог', 'fin.income': 'Доход', 'fin.expense': 'Расход', 'fin.savings': 'Сбережения', 'fin.savingsHint': 'итог ÷ доход',
-      'fin.fc': 'Прогноз', 'fin.fc.pace': 'Темп в день', 'fin.fc.end': 'К концу месяца', 'fin.fc.left': 'осталось {n} дн.',
-      'fin.fc.budget': 'Норма в день', 'fin.fc.vsPrev': 'К прошлому месяцу', 'fin.fc.same': 'как в прошлом месяце',
-      'fin.fc.up': 'на {p}% больше', 'fin.fc.down': 'на {p}% меньше', 'fin.fc.noPrev': 'нет данных за прошлый месяц',
-      'fin.mv': 'Изменения', 'fin.mv.sub': 'по сравнению с прошлым месяцем', 'fin.mv.new': 'новое', 'fin.mv.gone': 'прекратилось',
-      'fin.mv.none': 'Недостаточно данных для сравнения', 'fin.fc.hint': 'Если темп сохранится',
-      'fin.daily': 'Расходы по дням', 'fin.byCat': 'По категориям', 'fin.noExpense': 'В этом месяце нет расходов',
-      'fin.add': 'Новая запись', 'fin.out': 'Расход', 'fin.in': 'Доход', 'fin.amount': 'Сумма', 'fin.amountPh': '1 250 000 · 250k · 1.5m',
+      'fin.tab.month': 'Месяц', 'fin.tab.accounts': 'Счета',
+      'fin.today': 'Можно потратить сегодня', 'fin.todayOver': 'Сегодня превышено',
+      'fin.net': 'Чистый итог', 'fin.income': 'Доход', 'fin.expense': 'Расход', 'fin.leftMonth': 'Осталось в месяце', 'fin.spentPct': 'потрачено {p}',
+      'fin.limit': 'Лимит на месяц', 'fin.limitSet': 'Задать лимит', 'fin.limitHint': 'Сколько планируете потратить за месяц',
+      'fin.limitWhy': 'Задайте месячный лимит — и увидите, сколько можно тратить каждый день.',
+      'fin.limitSug': 'Прошлый месяц: {v}', 'fin.limitOff': 'Лимит снят',
+      'fin.spentToday': 'Сегодня {v}', 'fin.allow': 'норма в день {v}',
+      'fin.daysLeft': 'осталось {n} дн.', 'fin.monthOver': 'Месяц завершён',
+      'fin.pace': 'При таком темпе к концу месяца ≈ {v}', 'fin.billsLeft': 'Постоянные платежи: {v}',
+      'fin.daily': 'Расходы по дням', 'fin.dailyMax': 'пик за день',
+      'fin.byCat': 'Куда уходят деньги', 'fin.noExpense': 'В этом месяце нет расходов',
+      'fin.add': 'Записать', 'fin.out': 'Расход', 'fin.in': 'Доход',
+      'fin.amount': 'Сумма', 'fin.amountPh': '50 000 · 250k · 1.5m',
       'fin.cat': 'Категория', 'fin.notePh': 'Заметка', 'fin.account': 'Счёт', 'fin.noAccount': 'Без счёта',
       'fin.txs': 'Записи', 'fin.searchPh': 'Заметка или категория…', 'fin.emptyMonth': 'В этом месяце нет записей', 'fin.emptySearch': 'Ничего не найдено',
       'fin.editTx': 'Изменить запись', 'fin.txDeleted': 'Запись удалена', 'fin.added': 'Добавлено', 'fin.saved': 'Сохранено',
       'fin.badAmount': 'Введите корректную сумму', 'fin.needName': 'Введите название', 'fin.type': 'Тип',
       'fin.hideAmounts': 'Скрыть суммы', 'fin.showAmounts': 'Показать суммы',
-      'fin.catsHint': 'Категории редактируются в Настройках', 'fin.txCount': 'записей: {n}',
-      'fin.netWorth': 'Чистый капитал', 'fin.sinceFirst': 'с начала', 'fin.since30': '30 дней', 'fin.allocation': 'Распределение', 'fin.accounts': 'Счета',
+      'fin.catsHint': 'Категории — в Настройках', 'fin.txCount': 'записей: {n}',
+      'fin.netWorth': 'Всего на счетах', 'fin.since30': '30 дней', 'fin.accounts': 'Счета',
       'fin.addAccount': 'Добавить счёт', 'fin.editAccount': 'Изменить счёт', 'fin.accName': 'Название счёта', 'fin.accType': 'Тип', 'fin.balance': 'Баланс',
       'fin.balHint': '+50000 · -20000 · 1.5m', 'fin.type.cash': 'Наличные', 'fin.type.bank': 'Банк', 'fin.type.card': 'Карта', 'fin.type.crypto': 'Крипто', 'fin.type.other': 'Другое',
-      'fin.noAccounts': 'Счетов пока нет — добавьте первый', 'fin.accDeleted': 'Счёт удалён', 'fin.snapshots': 'точек', 'fin.balUpdated': 'Баланс обновлён',
-      'fin.subs': 'Подписки', 'fin.monthlyBurn': 'Подписки в месяц', 'fin.perYear': '≈ {v} в год', 'fin.subCount': 'подписок: {n}',
-      'fin.addSub': 'Добавить подписку', 'fin.editSub': 'Изменить подписку', 'fin.period': 'Период', 'fin.per.monthly': 'Ежемесячно', 'fin.per.yearly': 'Ежегодно', 'fin.per.weekly': 'Еженедельно',
+      'fin.noAccounts': 'Счетов пока нет — добавьте первый', 'fin.accDeleted': 'Счёт удалён', 'fin.balUpdated': 'Баланс обновлён',
+      'fin.balEditHint': 'Баланс: с +/- — изменение, иначе новая сумма', 'fin.noSnaps': 'История появится, когда изменится баланс',
+      'fin.subs': 'Постоянные платежи', 'fin.perYear': '≈ {v} в год',
+      'fin.addSub': 'Добавить платёж', 'fin.editSub': 'Изменить платёж', 'fin.period': 'Период',
+      'fin.per.monthly': 'Ежемесячно', 'fin.per.yearly': 'Ежегодно', 'fin.per.weekly': 'Еженедельно',
       'fin.next': 'Следующий платёж', 'fin.auto': 'Автосписание', 'fin.payNow': 'Оплатить', 'fin.paid': 'Оплачено: {name}',
-      'fin.autoDone': 'Автосписано подписок: {n} — {sum}', 'fin.dueToday': 'Сегодня', 'fin.dueTomorrow': 'Завтра', 'fin.inDays': 'через {n} дн.', 'fin.late': 'просрочено {n} дн.',
-      'fin.noSubs': 'Подписок нет', 'fin.subCat': 'Подписка', 'fin.mo': '/мес', 'fin.noDate': 'без даты', 'fin.subDeleted': 'Подписка удалена',
-      'fin.budget': 'Бюджет', 'fin.spent': 'Потрачено', 'fin.left': 'Осталось', 'fin.perDay': 'в день', 'fin.copyLast': 'Скопировать прошлый месяц',
-      'fin.copied': 'Бюджет скопирован', 'fin.noLast': 'В прошлом месяце нет бюджета', 'fin.budgetTotal': 'Общий бюджет', 'fin.budgetPh': 'Лимит',
-      'fin.over': 'превышен', 'fin.daysLeft': 'осталось {n} дн.', 'fin.noBudget': 'Лимит не задан', 'fin.monthOver': 'Месяц завершён',
-      'fin.wishlist': 'Список желаний', 'fin.wishTotal': 'Сумма желаний', 'fin.ofNw': 'от капитала', 'fin.monthsToSave': '≈ {n} мес. копить',
-      'fin.addWish': 'Добавить желание', 'fin.wishName': 'Название', 'fin.noWish': 'Пока нет желаний', 'fin.buy': 'Куплено', 'fin.buyTitle': 'Покупка: {name}',
-      'fin.bought': 'Записано как расход', 'fin.avgNet': 'средний чистый итог (3 мес.)', 'fin.wishDeleted': 'Желание удалено', 'fin.searchSub': 'Финансы · {d}',
-      'fin.prevMonth': 'Предыдущий месяц', 'fin.nextMonth': 'Следующий месяц', 'fin.subNamePh': 'Netflix, Интернет…', 'fin.balEditHint': 'Баланс: с +/- — изменение, иначе новая сумма',
-      'fin.dailyMax': 'пик за день', 'fin.noSnaps': 'История появится, когда изменится баланс',
+      'fin.autoDone': 'Автосписано платежей: {n} — {sum}',
+      'fin.dueToday': 'Сегодня', 'fin.dueTomorrow': 'Завтра', 'fin.inDays': 'через {n} дн.', 'fin.late': 'просрочено {n} дн.',
+      'fin.noSubs': 'Постоянных платежей нет', 'fin.subCat': 'Постоянный платёж', 'fin.mo': '/мес', 'fin.noDate': 'без даты',
+      'fin.subDeleted': 'Платёж удалён', 'fin.subNamePh': 'Интернет, аренда, Netflix…',
+      'fin.prevMonth': 'Предыдущий месяц', 'fin.nextMonth': 'Следующий месяц', 'fin.searchSub': 'Финансы · {d}',
     },
   });
 
   /* ------------------------------------------------------------------ */
   /* constants + helpers                                                 */
   /* ------------------------------------------------------------------ */
-  const TABS = ['month', 'accounts', 'subs', 'budget', 'wishlist'];
+  const TABS = ['month', 'accounts'];
   const ACC_TYPES = ['cash', 'bank', 'card', 'crypto', 'other'];
   const ACC_ICON = { cash: 'wallet', bank: 'layers', card: 'keyboard', crypto: 'globe', other: 'star' };
   const ACC_COLOR = { cash: 'var(--success)', bank: 'var(--info)', card: 'var(--violet)', crypto: 'var(--warning)', other: 'var(--boshqa)' };
   const PERIODS = ['monthly', 'yearly', 'weekly'];
   const CAT_PALETTE = ['var(--accent)', 'var(--info)', 'var(--violet)', 'var(--warning)', 'var(--qalb)', 'var(--aql)', 'var(--tana)', 'var(--ruh)', 'var(--boshqa)'];
+  const LIMIT_KEY = '_total'; // the month budget is one number now, kept inside the old budgets map
 
   const F = () => D.S.finance;
   const t = (k, p) => D.t(k, p);
   const esc = D.esc;
   const money = (n, o) => D.fmtMoney(n, o);
   const signed = (n) => (n > 0 ? '+' : '') + money(n);
+  // the hero tiles sit three-up on a phone: the currency word is dropped there (the big number above carries it)
+  const plain = (n) => (D.S.settings.showAmounts === false ? '•••' : D.fmtNum(Math.round(+n || 0)));
+  const plainSigned = (n) => (D.S.settings.showAmounts === false ? '•••' : (n > 0 ? '+' : n < 0 ? '−' : '') + D.fmtNum(Math.abs(Math.round(+n || 0))));
 
   // module-local UI state (device only, not persisted)
   let draftType = 'out';
@@ -139,7 +148,7 @@
   function parseAmount(raw) {
     let s = String(raw ?? '').trim().toLowerCase();
     if (!s) return NaN;
-    s = s.replace(/[\s _'’]/g, '').replace(/so'?m|сўм|сум|uzs|usd|eur|rub|kzt|[$€₽₸]/g, '');
+    s = s.replace(/[\s _'’]/g, '').replace(/so'?m|сўм|сум|uzs|usd|eur|rub|kzt|[$€₽₸]/g, '');
     if (/^[+-]?\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
     if (/^[+-]?\d{1,3}(,\d{3})+$/.test(s)) s = s.replace(/,/g, '');
     const m = s.match(/^([+-]?)(\d+(?:[.,]\d+)?|[.,]\d+)(k|к|ming|минг|m|м|mln|млн|b|mlrd|млрд)?$/);
@@ -181,6 +190,19 @@
   }
   const netWorth = () => D.sum(F().accounts, (a) => a.balance);
 
+  /* The month limit is ONE number. Old per-category envelopes are read as their sum
+     so nothing a user typed before is lost; the first edit replaces them. */
+  function limitOf(mk) {
+    const B = F().budgets[mk];
+    if (!B) return 0;
+    if (B[LIMIT_KEY] != null) return +B[LIMIT_KEY] || 0;
+    return D.sum(Object.keys(B), (k) => +B[k] || 0);
+  }
+  function setLimit(mk, v) {
+    if (v > 0) F().budgets[mk] = { [LIMIT_KEY]: Math.round(v) };
+    else delete F().budgets[mk];
+  }
+
   // push a snapshot when the total moved by ≥0.5 % (or first ever); cap 500
   function snap() {
     const s = F().snapshots, v = Math.round(netWorth());
@@ -220,12 +242,6 @@
     list.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : idx.get(b) - idx.get(a)));
     return (aggCache[mk] = { list, inc, out, net: inc - out, byCat, byDay });
   }
-  function avgNet3() { // average monthly net of the last 3 full months (incl. current)
-    const now = D.monthKey();
-    let s = 0, n = 0;
-    for (let i = 0; i < 3; i++) { const a = monthAgg(addMonths(now, -i)); if (a.list.length) { s += a.net; n++; } }
-    return n ? s / n : 0;
-  }
   function daysLeftIn(mk) {
     const now = D.monthKey(), dim = D.daysInMonth(mk);
     if (mk < now) return 0;
@@ -235,7 +251,7 @@
   const daysUntil = (key) => (key ? D.daysBetween(D.today(), key) : null);
   function duePill(n) {
     if (n === null) return `<span class="pill">${t('fin.noDate')}</span>`;
-    const cls = n < 0 ? 'bad' : n <= 3 ? 'bad' : n <= 7 ? 'on' : '';
+    const cls = n < 0 || n <= 3 ? 'bad' : n <= 7 ? 'on' : '';
     const txt = n < 0 ? t('fin.late', { n: -n }) : n === 0 ? t('fin.dueToday') : n === 1 ? t('fin.dueTomorrow') : t('fin.inDays', { n });
     return `<span class="pill ${cls}">${esc(txt)}</span>`;
   }
@@ -244,9 +260,30 @@
     if (!c) { c = { id: 'obuna', name: t('fin.subCat'), icon: '🔁' }; F().cats.push(c); }
     return c.id;
   }
+  /** what the recurring payments will still take out of the current month */
+  function billsLeft(mk) {
+    if (mk !== D.monthKey()) return 0;
+    const today = D.today(), end = mk + '-' + D.pad2(D.daysInMonth(mk));
+    let s = 0;
+    for (const b of F().subs) {
+      let k = b.next, g = 0;
+      const day = Math.max(+b.day || 0, k ? D.parseKey(k).d : 0);
+      while (k && k <= end && g++ < 12) { if (k >= today) s += +b.amount || 0; k = advance(k, b.period, day); }
+    }
+    return s;
+  }
+  /** the one number this page exists for: how much is safe to spend today */
+  function safeToday(mk, A) {
+    const limit = limitOf(mk);
+    if (!(limit > 0) || mk !== D.monthKey()) return null;
+    const spentToday = A.byDay[D.today()] || 0;
+    const days = Math.max(1, daysLeftIn(mk));
+    const allow = (limit - (A.out - spentToday) - billsLeft(mk)) / days;
+    return { limit, allow, spentToday, left: allow - spentToday, days };
+  }
 
   /* ------------------------------------------------------------------ */
-  /* subscription auto-deduct engine                                     */
+  /* recurring-payment auto-deduct engine                                */
   /* ------------------------------------------------------------------ */
   function paySub(s, date, note) {
     const tx = { id: D.uid('f'), date, type: 'out', amount: +s.amount || 0, cat: ensureSubCat(), note: note || s.name || '', accountId: s.accountId || null };
@@ -296,20 +333,20 @@
       <button class="btn icon sq" data-act="finMonthNext" aria-label="${esc(t('fin.nextMonth'))}" title="${esc(t('fin.nextMonth'))}">${D.ic('chevR', 20)}</button>
     </div>`;
   }
-  const catOptions = (sel) => F().cats.map((c) => `<option value="${esc(c.id)}" ${c.id === sel ? 'selected' : ''}>${esc((c.icon ? c.icon + ' ' : '') + c.name)}</option>`).join('');
   const accOptions = (sel, none) => `<option value="">${esc(none || t('fin.noAccount'))}</option>` + F().accounts.map((a) => `<option value="${esc(a.id)}" ${a.id === sel ? 'selected' : ''}>${esc(a.name)} · ${esc(money(a.balance))}</option>`).join('');
+  const catOptions = (sel) => F().cats.map((c) => `<option value="${esc(c.id)}" ${c.id === sel ? 'selected' : ''}>${esc((c.icon ? c.icon + ' ' : '') + c.name)}</option>`).join('');
   const field = (label, inner) => `<div class="field"><label class="field-label">${esc(label)}</label>${inner}</div>`;
 
   /* ------------------------------------------------------------------ */
-  /* MONTH                                                               */
+  /* OY — hero (safe to spend) · quick add · categories · list           */
   /* ------------------------------------------------------------------ */
-  function renderMonth() {
-    const mk = curMonth(), A = monthAgg(mk);
-    const rate = A.inc > 0 ? (A.net / A.inc) * 100 : null;
-    const netCls = A.net > 0 ? 'good' : A.net < 0 ? 'bad' : '';
-    const rateCls = rate === null ? '' : rate >= 20 ? 'good' : rate >= 0 ? 'on' : 'bad';
+  function heroCard(mk, A) {
+    const S = safeToday(mk, A);
+    const limit = limitOf(mk);
+    const left = daysLeftIn(mk);
+    const limitPill = `<button class="pill fin-limit ${limit ? 'on' : ''}" data-act="finLimit">${D.ic('target', 13)} ${esc(limit ? money(limit) : t('fin.limitSet'))}</button>`;
 
-    // daily spend bars
+    // daily spend bars — the flow of the month at a glance
     const dim = D.daysInMonth(mk), today = D.today();
     const vals = [], labels = [], colors = [];
     for (let d = 1; d <= dim; d++) {
@@ -318,115 +355,81 @@
       labels.push(d === 1 || d % 5 === 0 ? String(d) : '');
       colors.push(k === today ? 'var(--text)' : k > today ? 'var(--line3)' : 'var(--accent)');
     }
-
     const maxDay = vals.length ? Math.max(...vals) : 0;
+    const bars = `<div class="fin-spark mt"><div class="row between mb-s"><div class="eyebrow">${esc(t('fin.daily'))}</div>${maxDay ? `<span class="small muted num">${esc(t('fin.dailyMax'))} ${esc(money(maxDay))}</span>` : ''}</div>${D.chart.bars({ values: vals, labels, colors, height: 56 })}</div>`;
 
-    // categories
-    const cats = Object.entries(A.byCat).sort((a, b) => b[1] - a[1]);
-    const maxCat = cats.length ? cats[0][1] : 0;
+    // headline: today's allowance when a limit exists, otherwise the plain month result
+    let eyebrow, num, cls, meta;
+    if (S) {
+      const over = S.left < 0;
+      eyebrow = t(over ? 'fin.todayOver' : 'fin.today');
+      num = money(Math.abs(Math.round(S.left)));
+      cls = over ? 'bad' : S.allow > 0 && S.left < S.allow * 0.25 ? 'warn' : 'good';
+      const p = S.allow > 0 ? D.clamp((S.spentToday / S.allow) * 100, 0, 100) : 100;
+      meta = `<span class="bar thick mt-s"><i class="bar-fill" style="width:${p.toFixed(1)}%;background:${over ? 'var(--danger-text)' : 'var(--accent)'}"></i></span>
+        <div class="row between mt-s small muted"><span class="num">${esc(t('fin.spentToday', { v: money(S.spentToday) }))}</span><span class="num">${esc(t('fin.allow', { v: money(Math.round(S.allow)) }))}</span></div>`;
+    } else {
+      eyebrow = t('fin.net');
+      num = signed(A.net);
+      cls = A.net > 0 ? 'good' : A.net < 0 ? 'bad' : '';
+      meta = limit ? '' : `<div class="fin-why">${esc(t('fin.limitWhy'))}</div>`;
+    }
 
-    let h = monthNav(mk);
-    h += `<div class="card fin-kpi">
-      <div class="card-head"><div class="eyebrow">${esc(t('fin.net'))}</div>
-        <span class="pill ${rateCls}" title="${esc(t('fin.savingsHint'))}">${esc(t('fin.savings'))} ${rate === null ? '—' : D.fmtPct(rate)}</span></div>
-      <div class="kpi"><div class="kpi-num num ${netCls}">${esc(signed(A.net))}</div></div>
-      <div class="grid2 mt">
-        <div class="stat"><div class="stat-num num good">${esc(money(A.inc))}</div><div class="stat-label">${esc(t('fin.income'))}</div></div>
-        <div class="stat"><div class="stat-num num">${esc(money(A.out))}</div><div class="stat-label">${esc(t('fin.expense'))}</div></div>
-      </div>
-      <div class="fin-spark mt"><div class="row between mb-s"><div class="eyebrow">${esc(t('fin.daily'))}</div>${maxDay ? `<span class="small muted num">${esc(t('fin.dailyMax'))} ${esc(money(maxDay))}</span>` : ''}</div>${D.chart.bars({ values: vals, labels, colors, height: 56 })}</div>
+    // three numbers that describe the whole month
+    const spentPct = limit ? D.clamp((A.out / limit) * 100, 0, 999) : 0;
+    const stats = `<div class="stat-grid mt">
+      <div class="stat"><div class="stat-num num money good">${esc(plain(A.inc))}</div><div class="stat-label">${esc(t('fin.income'))}</div></div>
+      <div class="stat"><div class="stat-num num money">${esc(plain(A.out))}</div><div class="stat-label">${esc(t('fin.expense'))}</div></div>
+      <div class="stat"><div class="stat-num num money ${limit ? (limit - A.out < 0 ? 'bad' : 'good') : ''}">${esc(limit ? plain(limit - A.out) : plainSigned(A.net))}</div><div class="stat-label">${esc(limit ? t('fin.leftMonth') : t('fin.net'))}</div>${limit ? `<div class="stat-sub num">${esc(t('fin.spentPct', { p: D.fmtPct(spentPct) }))}</div>` : ''}</div>
     </div>`;
 
-    h += `<div class="card"><div class="card-head"><div class="title">${D.ic('chart', 16)} ${esc(t('fin.byCat'))}</div><span class="small muted num">${esc(money(A.out))}</span></div>`;
-    if (!cats.length) h += `<div class="empty">${esc(t('fin.noExpense'))}</div>`;
-    else h += cats.map(([id, v], i) => D.chart.hbar({ label: catLabel(id), value: v, max: maxCat, color: CAT_PALETTE[i % CAT_PALETTE.length], right: `${esc(money(v))} <span class="muted">${D.fmtPct(A.out ? (v / A.out) * 100 : 0)}</span>` })).join('');
-    h += `<div class="fin-hint"><button class="fin-link" data-act="go" data-view="settings">${D.ic('gear', 13)} ${esc(t('fin.catsHint'))}</button></div></div>`;
+    // one honest forecast line instead of a whole card
+    const elapsed = mk === D.monthKey() ? D.parseKey(D.today()).d : mk < D.monthKey() ? dim : 0;
+    const bills = billsLeft(mk);
+    const notes = [];
+    if (elapsed && A.out > 0) notes.push(t('fin.pace', { v: money(Math.round((A.out / elapsed) * dim)) }));
+    if (bills > 0) notes.push(t('fin.billsLeft', { v: money(bills) }));
 
-    h += forecastCard(mk, A);
-    h += moversCard(mk, A);
+    return `<div class="card fin-hero">
+      <div class="card-head"><div class="eyebrow">${esc(eyebrow)}</div>
+        <div class="row" style="gap:6px">${left ? `<span class="pill">${esc(t('fin.daysLeft', { n: left }))}</span>` : `<span class="pill on">${esc(t('fin.monthOver'))}</span>`}${limitPill}</div></div>
+      <div class="kpi"><div class="kpi-num num ${cls}">${esc(num)}</div></div>
+      ${meta}${stats}
+      ${notes.length ? `<div class="fin-notes">${notes.map((x) => `<span class="num">${esc(x)}</span>`).join('')}</div>` : ''}
+      ${bars}
+    </div>`;
+  }
 
-    // AI reads the whole month (categories, budgets, forecast) — keep it above the long transaction list.
-    if (D.ai) h += D.ai.card('finance');
-
-    // add form
+  /* the fastest possible entry: amount → category chip → done */
+  function addCard() {
+    const sel = D.ui.filters.finCat || (F().cats[0] || {}).id;
     const hasAcc = F().accounts.length > 0;
-    h += `<div class="card fin-form">
+    return `<div class="card fin-add">
       <div class="card-head"><div class="title">${D.ic('plus', 16)} ${esc(t('fin.add'))}</div>
         <div class="seg compact" id="finTypeSeg">
           <button class="${draftType === 'out' ? 'on' : ''}" data-act="finType" data-type="out">${esc(t('fin.out'))}</button>
           <button class="${draftType === 'in' ? 'on' : ''}" data-act="finType" data-type="in">${esc(t('fin.in'))}</button></div></div>
-      <div class="fin-form-grid">
-        <input class="inp num" id="finAmount" inputmode="decimal" autocomplete="off" placeholder="${esc(t('fin.amountPh'))}" aria-label="${esc(t('fin.amount'))}" data-enter="finAdd">
-        <select class="sel" id="finCat" aria-label="${esc(t('fin.cat'))}">${catOptions(D.ui.filters.finCat)}</select>
+      <input class="inp num fin-amount" id="finAmount" inputmode="decimal" autocomplete="off" placeholder="${esc(t('fin.amountPh'))}" aria-label="${esc(t('fin.amount'))}" data-enter="finAdd">
+      <div class="fin-chips" id="finChips" role="radiogroup" aria-label="${esc(t('fin.cat'))}">
+        ${F().cats.map((c) => `<button class="fin-chip ${c.id === sel ? 'on' : ''}" data-act="finChip" data-cat="${esc(c.id)}" role="radio" aria-checked="${c.id === sel}"><span>${esc(c.icon || '📦')}</span>${esc(c.name)}</button>`).join('')}
+      </div>
+      <div class="fin-add-row">
         <input class="inp" id="finNote" placeholder="${esc(t('fin.notePh'))}" aria-label="${esc(t('common.note'))}" data-enter="finAdd">
         <input class="inp" type="date" id="finDate" value="${esc(draftDate || D.today())}" aria-label="${esc(t('common.date'))}">
         ${hasAcc ? `<select class="sel" id="finAcc" aria-label="${esc(t('fin.account'))}">${accOptions(D.ui.filters.finAcc)}</select>` : ''}
-        <button class="btn" data-act="finAdd">${D.ic('plus', 16)} ${esc(t('btn.add'))}</button>
-      </div></div>`;
-
-    // list
-    h += `<div class="section-title">${esc(t('fin.txs'))}<span class="right num">${esc(t('fin.txCount', { n: A.list.length }))}</span></div>
-      <div class="fin-search"><span class="fin-search-ic">${D.ic('search', 16)}</span><input class="inp" id="finSearch" value="${esc(searchQ)}" placeholder="${esc(t('fin.searchPh'))}" data-input="finSearch" autocomplete="off"></div>
-      <div id="finTxList">${renderTxList(A)}</div>`;
-    return h;
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* forecast + month-over-month movers                                  */
-  /* ------------------------------------------------------------------ */
-  function forecastCard(mk, A) {
-    const days = D.daysInMonth(mk);
-    const cur = D.monthKey();
-    // For a past month the whole month is known; for the current one only the days so far count.
-    const elapsed = mk === cur ? Math.min(days, +D.today().slice(8) || 1) : mk < cur ? days : 0;
-    if (!elapsed || A.out <= 0) return '';
-    const pace = A.out / elapsed;
-    const projected = Math.round(pace * days);
-    const left = Math.max(0, days - elapsed);
-    const prev = monthAgg(addMonths(mk, -1));
-    const cmp = prev.out > 0 ? Math.round(((projected - prev.out) / prev.out) * 100) : null;
-    const cmpTxt = cmp === null ? t('fin.fc.noPrev') : cmp === 0 ? t('fin.fc.same') : cmp > 0 ? t('fin.fc.up', { p: cmp }) : t('fin.fc.down', { p: -cmp });
-    const cmpCls = cmp === null ? 'muted' : cmp > 5 ? 'bad' : cmp < -5 ? 'good' : 'muted';
-    // How much per remaining day would keep the month at last month's level?
-    const room = prev.out > 0 && left > 0 ? Math.max(0, Math.round((prev.out - A.out) / left)) : null;
-    return `<div class="card fin-fc">
-      <div class="card-head"><div class="title">${D.ic('trend', 16)} ${esc(t('fin.fc'))}</div>
-        ${left ? `<span class="pill">${esc(t('fin.fc.left', { n: left }))}</span>` : ''}</div>
-      <div class="fin-fc-main">
-        <div class="fin-fc-num"><span class="eyebrow">${esc(t('fin.fc.end'))}</span><span class="num">${esc(money(projected))}</span>
-          <span class="tiny ${cmpCls}">${esc(t('fin.fc.hint'))} · ${esc(cmpTxt)}</span></div>
       </div>
-      <div class="stat-grid mt">
-        <div class="stat"><div class="stat-num num">${esc(money(Math.round(pace)))}</div><div class="stat-label">${esc(t('fin.fc.pace'))}</div></div>
-        ${room !== null ? `<div class="stat"><div class="stat-num num">${esc(money(room))}</div><div class="stat-label">${esc(t('fin.fc.budget'))}</div><div class="stat-sub">${esc(t('fin.fc.vsPrev'))}</div></div>` : ''}
-        ${prev.out > 0 ? `<div class="stat"><div class="stat-num num">${esc(money(prev.out))}</div><div class="stat-label">${esc(D.fmtDate(addMonths(mk, -1) + '-01', 'month'))}</div></div>` : ''}
-      </div></div>`;
+      <button class="btn fin-add-btn" data-act="finAdd">${D.ic('plus', 16)} ${esc(t('btn.add'))}</button>
+    </div>`;
   }
 
-  function moversCard(mk, A) {
-    const prev = monthAgg(addMonths(mk, -1));
-    const ids = new Set([...Object.keys(A.byCat), ...Object.keys(prev.byCat)]);
-    if (!ids.size || (!prev.out && !A.out)) return '';
-    const rows = [];
-    for (const id of ids) {
-      const now = A.byCat[id] || 0, was = prev.byCat[id] || 0, d = now - was;
-      if (!d) continue;
-      rows.push({ id, now, was, d, pct: was > 0 ? Math.round((d / was) * 100) : null });
-    }
-    if (!rows.length) return `<div class="card"><div class="card-head"><div class="title">${D.ic('layers', 16)} ${esc(t('fin.mv'))}</div></div><div class="empty">${esc(t('fin.mv.none'))}</div></div>`;
-    rows.sort((a, b) => Math.abs(b.d) - Math.abs(a.d));
-    const max = Math.max(...rows.map((r) => Math.abs(r.d))) || 1;
-    const body = rows.slice(0, 6).map((r) => {
-      const up = r.d > 0;
-      const tag = r.was === 0 ? t('fin.mv.new') : r.now === 0 ? t('fin.mv.gone') : (up ? '+' : '−') + Math.abs(r.pct) + '%';
-      return `<div class="fin-mv-row">
-        <span class="fin-mv-name">${esc(catLabel(r.id))}</span>
-        <span class="fin-mv-bar"><i class="${up ? 'up' : 'down'}" style="width:${((Math.abs(r.d) / max) * 100).toFixed(1)}%"></i></span>
-        <span class="fin-mv-val num ${up ? 'bad' : 'good'}">${up ? '+' : '−'}${esc(money(Math.abs(r.d)))}</span>
-        <span class="fin-mv-tag ${up ? 'bad' : 'good'}">${esc(tag)}</span></div>`;
-    }).join('');
-    return `<div class="card fin-mv"><div class="card-head"><div class="title">${D.ic('layers', 16)} ${esc(t('fin.mv'))}</div>
-      <span class="small muted">${esc(t('fin.mv.sub'))}</span></div>${body}</div>`;
+  function catsCard(A) {
+    const cats = Object.entries(A.byCat).sort((a, b) => b[1] - a[1]);
+    const max = cats.length ? cats[0][1] : 0;
+    let h = `<div class="card"><div class="card-head"><div class="title">${D.ic('chart', 16)} ${esc(t('fin.byCat'))}</div><span class="small muted num">${esc(money(A.out))}</span></div>`;
+    if (!cats.length) h += `<div class="empty">${esc(t('fin.noExpense'))}</div>`;
+    else h += cats.map(([id, v], i) => D.chart.hbar({ label: catLabel(id), value: v, max, color: CAT_PALETTE[i % CAT_PALETTE.length], right: `${esc(money(v))} <span class="muted">${D.fmtPct(A.out ? (v / A.out) * 100 : 0)}</span>` })).join('');
+    h += `<div class="fin-hint"><button class="fin-link" data-act="go" data-view="settings" data-sub="finance">${D.ic('gear', 13)} ${esc(t('fin.catsHint'))}</button></div></div>`;
+    return h;
   }
 
   function renderTxList(A) {
@@ -450,68 +453,52 @@
     return h;
   }
 
-  /* ------------------------------------------------------------------ */
-  /* ACCOUNTS                                                            */
-  /* ------------------------------------------------------------------ */
-  function accRow(a, ty) {
-    ty = ty || (ACC_TYPES.includes(a.type) ? a.type : 'other');
-    const nw = netWorth(), share = nw > 0 && +a.balance > 0 ? D.fmtPct((+a.balance / nw) * 100) : '';
-    return `<span class="fin-acc-ic" style="--c:${ACC_COLOR[ty]}">${D.ic(ACC_ICON[ty], 18)}</span>
-      <div class="li-body fin-acc-body" role="button" tabindex="0" data-act="finAccEdit" data-id="${esc(a.id)}" title="${esc(t('btn.edit'))}"><div class="li-text">${esc(a.name)}</div><div class="li-meta"><span>${esc(t('fin.type.' + ty))}</span>${share ? `<span class="num">· ${share}</span>` : ''}</div></div>
-      <button class="fin-bal num ${+a.balance < 0 ? 'bad' : ''}" data-act="finBalEdit" data-id="${esc(a.id)}" title="${esc(t('fin.balEditHint'))}" aria-label="${esc(t('fin.balance'))}: ${esc(money(a.balance, { force: true }))}">${esc(money(a.balance))}</button>
-      <button class="li-del" data-act="finAccDel" data-id="${esc(a.id)}" aria-label="${esc(t('btn.delete'))}">${D.ic('x', 16)}</button>`;
-  }
-  function renderAccounts() {
-    const accs = F().accounts, total = netWorth(), snaps = F().snapshots;
-    const first = snaps[0];
-    const cut = Date.now() - 30 * 86400000;
-    let ref30 = null;
-    for (const s of snaps) { if (s.t <= cut) ref30 = s; else break; }
-    const dPill = (label, v) => v === null ? '' : `<span class="pill ${v > 0 ? 'good' : v < 0 ? 'bad' : ''}">${esc(label)} ${esc(signed(v))}</span>`;
-    let h = `<div class="card fin-kpi">
-      <div class="card-head"><div class="eyebrow">${esc(t('fin.netWorth'))}</div>${snaps.length > 1 ? `<span class="small muted num">${snaps.length} ${esc(t('fin.snapshots'))}</span>` : ''}</div>
-      <div class="kpi"><div class="kpi-num num ${total < 0 ? 'bad' : ''}">${esc(money(total))}</div></div>
-      <div class="row wrap mt-s">${dPill(t('fin.sinceFirst'), first ? total - first.v : null)}${dPill(t('fin.since30'), ref30 ? total - ref30.v : null)}</div>
-      <div class="fin-spark mt">${snaps.length > 1 ? D.chart.spark({ values: snaps.map((s) => s.v), color: total >= (first ? first.v : 0) ? 'var(--success)' : 'var(--danger-text)', height: 64 }) : `<div class="fin-nosnap">${D.ic('chart', 14)} ${esc(t('fin.noSnaps'))}</div>`}</div>
-    </div>`;
-
-    // allocation donut by type
-    const byType = {};
-    for (const a of accs) if (+a.balance > 0) byType[a.type] = (byType[a.type] || 0) + +a.balance;
-    const parts = ACC_TYPES.filter((k) => byType[k]).map((k) => ({ v: byType[k], color: ACC_COLOR[k], label: t('fin.type.' + k) }));
-    const pos = D.sum(parts, (p) => p.v);
-    if (parts.length) {
-      h += `<div class="card"><div class="card-head"><div class="title">${D.ic('target', 16)} ${esc(t('fin.allocation'))}</div></div>
-        <div class="ring-row">${D.chart.donut({ parts, size: 116, stroke: 14, center: `<span class="small">${parts.length}</span>` })}
-        <div class="spheres">${parts.map((p) => `<div class="sph"><span class="dot" style="--c:${p.color}"></span><span class="nm">${esc(p.label)}</span><span class="bar thin"><i class="bar-fill" style="width:${((p.v / pos) * 100).toFixed(1)}%;background:${p.color}"></i></span><span class="n">${D.fmtPct((p.v / pos) * 100)}</span></div>`).join('')}</div></div></div>`;
-    }
-
-    // accounts grouped by type
-    h += `<div class="section-title">${esc(t('fin.accounts'))}<span class="right num">${accs.length}</span></div>`;
-    if (!accs.length) h += `<div class="card flat"><div class="empty">${esc(t('fin.noAccounts'))}</div></div>`;
-    for (const ty of ACC_TYPES) {
-      const g = accs.filter((a) => (a.type || 'other') === ty);
-      if (!g.length) continue;
-      h += `<div class="fin-typehead" style="--c:${ACC_COLOR[ty]}"><span class="dot"></span>${esc(t('fin.type.' + ty))}<span class="num">${esc(money(D.sum(g, (a) => a.balance)))}</span></div><ul class="list">`;
-      for (const a of g) {
-        h += `<li class="li" id="finAccRow_${esc(a.id)}">${accRow(a, ty)}</li>`;
-      }
-      h += '</ul>';
-    }
-    h += `<button class="dashed mt" data-act="finAccEdit">${D.ic('plus', 14)} ${esc(t('fin.addAccount'))}</button>`;
+  function renderMonth() {
+    const mk = curMonth(), A = monthAgg(mk);
+    let h = monthNav(mk);
+    h += heroCard(mk, A);
+    h += addCard();
+    h += catsCard(A);
+    h += `<div class="section-title">${esc(t('fin.txs'))}<span class="right num">${esc(t('fin.txCount', { n: A.list.length }))}</span></div>
+      <div class="fin-search"><span class="fin-search-ic">${D.ic('search', 16)}</span><input class="inp" id="finSearch" value="${esc(searchQ)}" placeholder="${esc(t('fin.searchPh'))}" data-input="finSearch" autocomplete="off"></div>
+      <div id="finTxList">${renderTxList(A)}</div>`;
     return h;
   }
 
   /* ------------------------------------------------------------------ */
-  /* SUBS                                                                */
+  /* HISOB — balances + recurring payments                               */
   /* ------------------------------------------------------------------ */
-  function renderSubs() {
+  function accRow(a, ty) {
+    ty = ty || (ACC_TYPES.includes(a.type) ? a.type : 'other');
+    return `<span class="fin-acc-ic" style="--c:${ACC_COLOR[ty]}">${D.ic(ACC_ICON[ty], 18)}</span>
+      <div class="li-body fin-acc-body" role="button" tabindex="0" data-act="finAccEdit" data-id="${esc(a.id)}" title="${esc(t('btn.edit'))}"><div class="li-text">${esc(a.name)}</div><div class="li-meta"><span>${esc(t('fin.type.' + ty))}</span></div></div>
+      <button class="fin-bal num ${+a.balance < 0 ? 'bad' : ''}" data-act="finBalEdit" data-id="${esc(a.id)}" title="${esc(t('fin.balEditHint'))}" aria-label="${esc(t('fin.balance'))}: ${esc(money(a.balance, { force: true }))}">${esc(money(a.balance))}</button>
+      <button class="li-del" data-act="finAccDel" data-id="${esc(a.id)}" aria-label="${esc(t('btn.delete'))}">${D.ic('x', 16)}</button>`;
+  }
+
+  function renderAccounts() {
+    const accs = F().accounts, total = netWorth(), snaps = F().snapshots;
+    const cut = Date.now() - 30 * 86400000;
+    let ref30 = null;
+    for (const s of snaps) { if (s.t <= cut) ref30 = s; else break; }
+    const d30 = ref30 ? total - ref30.v : null;
+
+    let h = `<div class="card fin-hero">
+      <div class="card-head"><div class="eyebrow">${esc(t('fin.netWorth'))}</div>
+        ${d30 === null ? '' : `<span class="pill ${d30 > 0 ? 'good' : d30 < 0 ? 'bad' : ''}">${esc(t('fin.since30'))} ${esc(signed(d30))}</span>`}</div>
+      <div class="kpi"><div class="kpi-num num ${total < 0 ? 'bad' : ''}">${esc(money(total))}</div></div>
+      <div class="fin-spark mt">${snaps.length > 1 ? D.chart.spark({ values: snaps.map((s) => s.v), color: total >= snaps[0].v ? 'var(--success)' : 'var(--danger-text)', height: 64 }) : `<div class="fin-nosnap">${D.ic('chart', 14)} ${esc(t('fin.noSnaps'))}</div>`}</div>
+    </div>`;
+
+    h += `<div class="section-title">${esc(t('fin.accounts'))}<span class="right num">${accs.length}</span></div>`;
+    if (!accs.length) h += `<div class="card flat"><div class="empty">${esc(t('fin.noAccounts'))}</div></div>`;
+    else h += `<ul class="list">${accs.map((a) => `<li class="li" id="finAccRow_${esc(a.id)}">${accRow(a)}</li>`).join('')}</ul>`;
+    h += `<button class="dashed mt" data-act="finAccEdit">${D.ic('plus', 14)} ${esc(t('fin.addAccount'))}</button>`;
+
+    // recurring payments live here: they are what leaves the balance on its own
     const subs = F().subs.slice().sort((a, b) => ((a.next || '9') < (b.next || '9') ? -1 : 1));
     const mo = D.sum(subs, monthlyEq);
-    let h = `<div class="card fin-kpi">
-      <div class="card-head"><div class="eyebrow">${esc(t('fin.monthlyBurn'))}</div><span class="small muted">${esc(t('fin.subCount', { n: subs.length }))}</span></div>
-      <div class="kpi"><div class="kpi-num num">${esc(money(mo))}</div><span class="kpi-total">${esc(t('fin.mo'))}</span></div>
-      <div class="small muted mt-s">${esc(t('fin.perYear', { v: money(mo * 12) }))}</div></div>`;
+    h += `<div class="section-title">${esc(t('fin.subs'))}<span class="right num">${esc(subs.length ? money(mo) + t('fin.mo') : '')}</span></div>`;
     if (!subs.length) h += `<div class="card flat"><div class="empty">${esc(t('fin.noSubs'))}</div></div>`;
     else {
       h += '<ul class="list">';
@@ -520,8 +507,8 @@
         h += `<li class="li fin-sub ${n !== null && n <= 3 ? 'due' : ''}">
           <div class="li-body" role="button" tabindex="0" data-act="finSubEdit" data-id="${esc(s.id)}">
             <div class="li-text">${esc(s.name)}</div>
-            <div class="li-meta"><span class="num">${esc(money(s.amount))}</span><span>· ${esc(t('fin.per.' + (PERIODS.includes(s.period) ? s.period : 'monthly')))}</span>${a ? `<span>· ${esc(a.name)}</span>` : ''}${s.next ? `<span>· ${esc(D.fmtDate(s.next))}</span>` : ''}</div>
-            <div class="row wrap mt-s">${duePill(n)}<span class="pill"><span class="num">${esc(money(monthlyEq(s)))}</span>${esc(t('fin.mo'))}</span></div>
+            <div class="li-meta"><span class="num">${esc(money(s.amount))}</span><span>· ${esc(t('fin.per.' + (PERIODS.includes(s.period) ? s.period : 'monthly')))}</span>${a ? `<span>· ${esc(a.name)}</span>` : ''}</div>
+            <div class="row wrap mt-s">${duePill(n)}</div>
           </div>
           <div class="fin-side">
             <button class="toggle ${s.auto ? 'on' : ''}" data-act="finSubAuto" data-id="${esc(s.id)}" aria-label="${esc(t('fin.auto'))}" title="${esc(t('fin.auto'))}"></button>
@@ -529,82 +516,9 @@
             <button class="li-del" data-act="finSubDel" data-id="${esc(s.id)}" aria-label="${esc(t('btn.delete'))}">${D.ic('x', 16)}</button>
           </div></li>`;
       }
-      h += '</ul>';
+      h += `</ul><div class="fin-notes"><span class="num">${esc(t('fin.perYear', { v: money(mo * 12) }))}</span></div>`;
     }
     h += `<button class="dashed mt" data-act="finSubEdit">${D.ic('plus', 14)} ${esc(t('fin.addSub'))}</button>`;
-    return h;
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* BUDGET                                                              */
-  /* ------------------------------------------------------------------ */
-  function renderBudget() {
-    const mk = curMonth(), A = monthAgg(mk), B = F().budgets[mk] || {};
-    const left = daysLeftIn(mk);
-    const cats = F().cats.filter((c) => c.id !== 'maosh');
-    cats.sort((a, b) => (B[b.id] ? 1 : 0) - (B[a.id] ? 1 : 0) || (A.byCat[b.id] || 0) - (A.byCat[a.id] || 0));
-    const totalB = D.sum(Object.values(B)), spentB = D.sum(cats.filter((c) => B[c.id]), (c) => A.byCat[c.id] || 0);
-    const pct = totalB ? (spentB / totalB) * 100 : 0;
-    const state = (p) => (p > 100 ? 'bad' : p >= 80 ? 'warn' : 'good');
-    const stateColor = { good: 'var(--success)', warn: 'var(--warning)', bad: 'var(--danger-text)' };
-    let h = monthNav(mk);
-    h += `<div class="card fin-kpi">
-      <div class="card-head"><div class="eyebrow">${esc(t('fin.budgetTotal'))}</div><span class="pill ${left ? '' : 'on'}">${esc(left ? t('fin.daysLeft', { n: left }) : t('fin.monthOver'))}</span></div>
-      <div class="kpi"><div class="kpi-num num ${totalB ? state(pct) : ''}">${esc(money(spentB))}</div><span class="kpi-total">/ ${esc(money(totalB))}</span></div>
-      <span class="bar thick mt-s"><i class="bar-fill" style="width:${D.clamp(pct, 0, 100).toFixed(1)}%;background:${stateColor[state(pct)]}"></i></span>
-      <div class="row between mt-s small muted"><span>${esc(t('fin.spent'))} ${D.fmtPct(pct)}</span><span class="num">${esc(t('fin.left'))} ${esc(money(totalB - spentB))}</span></div>
-    </div>`;
-    h += `<div class="card"><div class="card-head"><div class="title">${D.ic('flag', 16)} ${esc(t('fin.budget'))}</div><span class="small muted num">${cats.filter((c) => B[c.id]).length}/${cats.length}</span></div>`;
-    for (const c of cats) {
-      const b = +B[c.id] || 0, sp = A.byCat[c.id] || 0, p = b ? (sp / b) * 100 : 0, st = state(p);
-      const rem = b - sp, perDay = b && left > 0 ? rem / left : null;
-      h += `<div class="fin-bud">
-        <div class="fin-bud-row"><span class="fin-ico">${esc(c.icon || '📦')}</span><span class="fin-bud-name">${esc(c.name)}</span>
-          <input class="inp sm num fin-bud-inp" inputmode="decimal" placeholder="${esc(t('fin.budgetPh'))}" value="${b ? esc(D.fmtNum(b)) : ''}" data-change="finBudgetSet" data-cat="${esc(c.id)}" data-month="${esc(mk)}" aria-label="${esc(c.name)}"></div>
-        ${b ? `<span class="bar thin"><i class="bar-fill" style="width:${D.clamp(p, 0, 100).toFixed(1)}%;background:${stateColor[st]}"></i></span>
-        <div class="fin-bud-meta"><span class="num">${esc(money(sp))} · ${D.fmtPct(p)}</span><span class="num ${st === 'bad' ? 'bad' : st === 'warn' ? 'warn' : 'good'}">${rem < 0 ? esc(t('fin.over')) + ' ' + esc(money(-rem)) : esc(t('fin.left')) + ' ' + esc(money(rem))}${perDay !== null && rem > 0 ? ` · ${esc(money(perDay))} ${esc(t('fin.perDay'))}` : ''}</span></div>`
-        : `<div class="fin-bud-meta"><span class="num">${sp ? esc(money(sp)) : ''}</span><span class="muted">${esc(t('fin.noBudget'))}</span></div>`}
-      </div>`;
-    }
-    h += `<button class="dashed mt" data-act="finBudgetCopy">${D.ic('undo', 14)} ${esc(t('fin.copyLast'))}</button>
-      <div class="fin-hint"><button class="fin-link" data-act="go" data-view="settings">${D.ic('gear', 13)} ${esc(t('fin.catsHint'))}</button></div></div>`;
-    return h;
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* WISHLIST                                                            */
-  /* ------------------------------------------------------------------ */
-  function renderWishlist() {
-    const W = F().wishlist.slice().sort((a, b) => (+b.amount || 0) - (+a.amount || 0));
-    const nw = netWorth(), total = D.sum(W, (w) => w.amount), avg = avgNet3();
-    const pctOf = (v) => (nw > 0 ? (v / nw) * 100 : null);
-    const pctCls = (p) => (p === null ? '' : p < 5 ? 'good' : p < 25 ? 'warn' : 'bad');
-    const tp = pctOf(total);
-    let h = `<div class="card fin-kpi fin-wish-hero">
-      <div class="card-head"><div class="eyebrow">${esc(t('fin.wishTotal'))}</div><span class="pill ${pctCls(tp)}">${tp === null ? '—' : D.fmtPct(tp, 1)} ${esc(t('fin.ofNw'))}</span></div>
-      <div class="kpi"><div class="kpi-num num">${esc(money(total))}</div></div>
-      <span class="bar mt-s"><i class="bar-fill" style="width:${D.clamp(tp || 0, 0, 100).toFixed(1)}%;background:var(--violet)"></i></span>
-      <div class="small muted mt-s">${esc(t('fin.avgNet'))}: <span class="num ${avg > 0 ? 'good' : avg < 0 ? 'bad' : ''}">${esc(signed(avg))}</span></div></div>`;
-    h += `<div class="card fin-form"><div class="card-head"><div class="title">${D.ic('star', 16)} ${esc(t('fin.addWish'))}</div></div>
-      <div class="fin-form-grid two">
-        <input class="inp" id="finWishName" placeholder="${esc(t('fin.wishName'))}" data-enter="finWishAdd" autocomplete="off">
-        <input class="inp num" id="finWishAmount" inputmode="decimal" placeholder="${esc(t('fin.amount'))}" aria-label="${esc(t('fin.amount'))}" data-enter="finWishAdd" autocomplete="off">
-        <button class="btn" data-act="finWishAdd">${D.ic('plus', 16)} ${esc(t('btn.add'))}</button></div></div>`;
-    if (!W.length) h += `<div class="card flat"><div class="empty">${esc(t('fin.noWish'))}</div></div>`;
-    else {
-      h += '<ul class="list">';
-      for (const w of W) {
-        const p = pctOf(+w.amount || 0);
-        const months = avg > 0 && +w.amount > 0 ? Math.ceil(+w.amount / avg) : null;
-        h += `<li class="li fin-wish">
-          <div class="li-body"><div class="li-text">${esc(w.name)}</div>
-            <div class="li-meta"><span class="num">${esc(money(w.amount))}</span>${p !== null ? `<span class="${pctCls(p)}">· ${D.fmtPct(p, 1)} ${esc(t('fin.ofNw'))}</span>` : ''}${months !== null ? `<span>· ${esc(t('fin.monthsToSave', { n: months }))}</span>` : ''}</div>
-            <span class="bar thin mt-s"><i class="bar-fill" style="width:${D.clamp(p || 0, 0, 100).toFixed(1)}%;background:var(--violet)"></i></span></div>
-          <div class="fin-side"><button class="btn ghost sm" data-act="finWishBuy" data-id="${esc(w.id)}">${D.ic('check', 14)} ${esc(t('fin.buy'))}</button>
-          <button class="li-del" data-act="finWishDel" data-id="${esc(w.id)}" aria-label="${esc(t('btn.delete'))}">${D.ic('x', 16)}</button></div></li>`;
-      }
-      h += '</ul>';
-    }
     return h;
   }
 
@@ -616,9 +530,7 @@
     render() {
       let sub = D.sub('finance', 'month');
       if (!TABS.includes(sub)) sub = 'month';
-      const body = sub === 'accounts' ? renderAccounts() : sub === 'subs' ? renderSubs() : sub === 'budget' ? renderBudget() : sub === 'wishlist' ? renderWishlist() : renderMonth();
-      const ai = D.ai && sub === 'budget' ? D.ai.card('finance') : '';
-      return `<div class="fin">${topBar(sub)}${body}${ai}</div>`;
+      return `<div class="fin">${topBar(sub)}${sub === 'accounts' ? renderAccounts() : renderMonth()}</div>`;
     },
     mount() {
       clearTimeout(mountTimer);
@@ -638,16 +550,42 @@
     draftType = el.dataset.type === 'in' ? 'in' : 'out';
     D.$$('#finTypeSeg button').forEach((b) => b.classList.toggle('on', b.dataset.type === draftType));
   };
+  D.act.finChip = (el) => {
+    D.ui.filters.finCat = el.dataset.cat; D.saveUi();
+    D.$$('#finChips .fin-chip').forEach((b) => { const on = b.dataset.cat === el.dataset.cat; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+  };
   D.act.finSearch = (el) => {
     searchQ = el.value || '';
     D.patch('finTxList', renderTxList(monthAgg(curMonth())));
+  };
+
+  /* ---- the month limit (the only budget knob left) ---- */
+  D.act.finLimit = () => {
+    const mk = curMonth(), cur = limitOf(mk);
+    const prev = limitOf(addMonths(mk, -1)) || monthAgg(addMonths(mk, -1)).out;
+    D.modal({
+      title: t('fin.limit'),
+      body: `${field(t('fin.limitHint'), `<input class="inp num" id="finL_val" inputmode="decimal" value="${cur ? esc(D.fmtNum(cur)) : ''}" placeholder="${esc(t('fin.amountPh'))}" data-enter="finLimitSave">`)}
+        ${prev > 0 ? `<button class="pill" data-act="finLimitSug" data-v="${Math.round(prev)}">${esc(t('fin.limitSug', { v: money(prev) }))}</button>` : ''}`,
+      actions: [{ label: t('btn.cancel'), act: 'closeModal' }, { label: t('btn.save'), act: 'finLimitSave', primary: true }],
+      onOpen: () => { const i = D.$('#finL_val'); if (i) { i.focus(); i.select && i.select(); } },
+    });
+  };
+  D.act.finLimitSug = (el) => { const i = D.$('#finL_val'); if (i) { i.value = D.fmtNum(+el.dataset.v || 0); i.focus(); } };
+  D.act.finLimitSave = () => {
+    const raw = (D.$('#finL_val') || {}).value;
+    const v = parseAmount(raw);
+    if (String(raw || '').trim() && isNaN(v)) { D.toast(t('fin.badAmount')); return; }
+    setLimit(curMonth(), v > 0 ? v : 0);
+    D.closeModal(); D.save(); D.rerender();
+    D.toast(t(v > 0 ? 'fin.saved' : 'fin.limitOff'));
   };
 
   /* ---- transactions ---- */
   D.act.finAdd = () => {
     const amount = parseAmount((D.$('#finAmount') || {}).value);
     if (!(amount > 0)) { D.toast(t('fin.badAmount')); const a = D.$('#finAmount'); if (a) a.focus(); return; }
-    const catId = (D.$('#finCat') || {}).value || 'boshqa';
+    const catId = D.ui.filters.finCat || (F().cats[0] || {}).id || 'boshqa';
     const accId = (D.$('#finAcc') || {}).value || null;
     const date = (D.$('#finDate') || {}).value || D.today();
     draftDate = date === D.today() ? null : date;
@@ -655,7 +593,7 @@
     F().tx.push(tx);
     applyTx(tx, 1);
     if (accId) snap();
-    D.ui.filters.finCat = catId; D.ui.filters.finAcc = accId; D.saveUi();
+    D.ui.filters.finAcc = accId; D.saveUi();
     if (D.monthKey(date) !== curMonth()) setMonth(D.monthKey(date));
     D.save(); D.rerender();
     D.toast(t('fin.added'));
@@ -759,7 +697,7 @@
     removeUndo(F().accounts, el.dataset.id, t('fin.accDeleted'), () => snap(), () => snap());
   };
 
-  /* ---- subscriptions ---- */
+  /* ---- recurring payments ---- */
   D.act.finSubEdit = (el) => {
     const s = F().subs.find((x) => x.id === el.dataset.id);
     const idAttr = s ? `data-id="${esc(s.id)}"` : '';
@@ -807,60 +745,6 @@
     D.toast(t('fin.paid', { name: s.name }));
   };
   D.act.finSubDel = (el) => { D.remove(F().subs, el.dataset.id, { label: t('fin.subDeleted') }); };
-
-  /* ---- budget ---- */
-  D.act.finBudgetSet = (el) => {
-    const mk = el.dataset.month || curMonth(), c = el.dataset.cat;
-    const v = parseAmount(el.value);
-    const B = (F().budgets[mk] = F().budgets[mk] || {});
-    if (v > 0) B[c] = Math.round(v); else delete B[c];
-    if (!Object.keys(B).length) delete F().budgets[mk];
-    D.save(); D.rerender();
-  };
-  D.act.finBudgetCopy = () => {
-    const mk = curMonth(), prev = F().budgets[addMonths(mk, -1)];
-    if (!prev || !Object.keys(prev).length) { D.toast(t('fin.noLast')); return; }
-    F().budgets[mk] = { ...(F().budgets[mk] || {}), ...prev };
-    D.save(); D.rerender();
-    D.toast(t('fin.copied'));
-  };
-
-  /* ---- wishlist ---- */
-  D.act.finWishAdd = () => {
-    const name = ((D.$('#finWishName') || {}).value || '').trim();
-    if (!name) { D.toast(t('fin.needName')); return; }
-    const amount = parseAmount((D.$('#finWishAmount') || {}).value);
-    if (!(amount > 0)) { D.toast(t('fin.badAmount')); return; }
-    F().wishlist.push({ id: D.uid('w'), name, amount });
-    D.save(); D.rerender();
-    D.toast(t('fin.added'));
-  };
-  D.act.finWishDel = (el) => { D.remove(F().wishlist, el.dataset.id, { label: t('fin.wishDeleted') }); };
-  D.act.finWishBuy = (el) => {
-    const w = F().wishlist.find((x) => x.id === el.dataset.id);
-    if (!w) return;
-    D.modal({
-      title: t('fin.buyTitle', { name: w.name }),
-      body: `<div class="kpi mb"><div class="kpi-num num" style="font-size:26px">${esc(money(w.amount))}</div></div>
-        ${field(t('fin.account'), `<select class="sel" id="finB_acc">${accOptions(D.ui.filters.finAcc)}</select>`)}
-        ${field(t('fin.cat'), `<select class="sel" id="finB_cat">${catOptions(D.ui.filters.finCat || 'boshqa')}</select>`)}
-        ${field(t('common.date'), `<input class="inp" type="date" id="finB_date" value="${D.today()}">`)}`,
-      actions: [{ label: t('btn.cancel'), act: 'closeModal' }, { label: t('fin.buy'), act: 'finWishBuyOk', primary: true, data: { id: w.id } }],
-    });
-  };
-  D.act.finWishBuyOk = (el) => {
-    const i = F().wishlist.findIndex((x) => x.id === el.dataset.id);
-    if (i < 0) return;
-    const w = F().wishlist[i];
-    const tx = { id: D.uid('f'), date: (D.$('#finB_date') || {}).value || D.today(), type: 'out', amount: +w.amount || 0, cat: (D.$('#finB_cat') || {}).value || 'boshqa', note: w.name, accountId: (D.$('#finB_acc') || {}).value || null };
-    F().tx.push(tx);
-    applyTx(tx, 1);
-    F().wishlist.splice(i, 1);
-    snap();
-    D.undo.push({ label: t('fin.bought'), undo: () => { const j = F().tx.findIndex((x) => x.id === tx.id); if (j >= 0) { applyTx(tx, -1); F().tx.splice(j, 1); } F().wishlist.splice(Math.min(i, F().wishlist.length), 0, w); snap(); } });
-    D.closeModal(); D.save(); D.rerender();
-    D.toast(t('fin.bought'), { undo: () => D.undo.pop() });
-  };
 
   /* ------------------------------------------------------------------ */
   /* search provider: transactions → month view                          */
