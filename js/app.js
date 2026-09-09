@@ -40,11 +40,21 @@
     }
     const tb = D.$('#themeBtn');
     if (tb) tb.innerHTML = D.ic(document.documentElement.getAttribute('data-theme') === 'dark' ? 'sun' : 'moon', 20);
+    // profil tugmasi: faqat server va kirgan odam bo'lganda; rasm yoki bosh harflar (profile.js)
+    const av = D.$('#hAvatar');
+    if (av) {
+      const on = !!(D.serverEnabled() && D.me && D.profile);
+      av.hidden = !on;
+      const h = on ? D.profile.avatarHtml(40, 'h-avatar') : '';
+      if (av._h !== h) { av.innerHTML = h; av._h = h; }
+      if (on) av.title = D.t('pf.title');
+    }
     const pi = D.$('#paletteInp');
     if (pi) pi.placeholder = D.t('search.placeholder');
   }
 
   D.on('boot', renderHeader);
+  D.on('me:changed', renderHeader);
   D.on('tick', renderHeader);
   D.on('day:changed', renderHeader);
   D.on('view:changed', renderHeader);

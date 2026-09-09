@@ -319,6 +319,24 @@
     return r.json();
   };
 
+  // Kim kirgan: /api/me → D.me {uid,name,email,provider,avatar,since}; null — noma'lum yoki chiqilgan.
+  // Xom fetch, D.api emas: bu yerdagi 401 kirish oynasini ochmasligi kerak.
+  D.me = null;
+  D.meRefresh = async () => {
+    if (!D.serverEnabled()) return null;
+    try {
+      const r = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' });
+      if (r.status === 401) { const had = !!D.me; D.me = null; if (had) D.emit('me:changed'); return null; }
+      if (!r.ok) return D.me;
+      const j = await r.json();
+      if (!j || !j.uid) return D.me;
+      D.me = j;
+      D.device.uid = j.uid; D.device.name = j.name || ''; D.saveDevice();
+      D.emit('me:changed');
+    } catch (e) { console.warn('me', e); }
+    return D.me;
+  };
+
   // Pull from server at boot; server wins if newer, else push local.
   D.pull = async () => {
     if (!D.serverEnabled()) return false;
@@ -339,8 +357,8 @@
       if (owner) {
         D.S.meta.owner = owner;
         if (D.device.uid !== owner) { D.device.uid = owner; D.device.name = ''; D.saveDevice(); }
-        if (!D.device.name) D.api('/api/me').then((m) => { if (m && m.name) { D.device.name = m.name; D.saveDevice(); if (D.current() === 'settings') D.rerender(); } }).catch(() => {});
       }
+      await D.meRefresh();   // header avatari, Sozlash «Hisob», onboarding ismi — 'pull:ok' dan oldin
       const localEmpty = !Object.keys(D.S.logs).length && !D.S.habits.length && !D.S.tasks.length;
       if (remote && D.isOldFormat(remote)) {
         // server still holds the old Шахсий data.json → migrate once, keep local additions, push new format
@@ -1080,9 +1098,31 @@
           name_taken: 'auth.e.taken', weak_pass: 'auth.e.weak', bad_name: 'auth.e.name', mismatch: 'auth.e.mismatch',
           bad_invite: 'auth.e.invite', closed: 'auth.e.closed', too_many: 'auth.e.many', bad_pass: 'auth.bad',
         })[code] || (status === 401 ? 'auth.bad' : 'auth.err');
+        // Google oqimi boshqa tabda yoki iOS ichki brauzerida tugagan, sahifa bfcache'dan qaytgan
+        // bo'lishi mumkin — oyna ochiq turganda sessiyani o'zi tekshirib turadi (5 s, 10 daqiqagacha)
+        let finished = false, checking = false;
+        const check = async () => {
+          if (finished || checking) return;
+          checking = true;
+          try { const r = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' }); if (r.ok) done(await r.json()); } catch (e) {}
+          checking = false;
+        };
+        const onVis = () => { if (!document.hidden) check(); };
+        document.addEventListener('visibilitychange', onVis);
+        window.addEventListener('focus', check);
+        window.addEventListener('pageshow', check);
+        const t0 = Date.now();
+        const timer = setInterval(() => { if (Date.now() - t0 > 10 * 60e3) clearInterval(timer); else if (!document.hidden) check(); }, 5000);
         const done = (j) => {
-          if (j && j.uid) { D.device.uid = j.uid; D.device.name = j.name || ''; D.device.lastUser = j.name || name; D.saveDevice(); }
+          if (finished) return;
+          finished = true;
+          clearInterval(timer);
+          document.removeEventListener('visibilitychange', onVis); window.removeEventListener('focus', check); window.removeEventListener('pageshow', check);
+          // lastUser = kirish ismi (users.json), ko'rsatiladigan ism emas — aks holda profilda
+          // ism o'zgartirilgach kirish oynasi serverga notanish ismni taklif qiladi
+          if (j && j.uid) { D.device.uid = j.uid; D.device.name = j.name || ''; if (name) D.device.lastUser = name; D.saveDevice(); }
           box.remove(); authPending = null; resolve(true);
+          D.meRefresh();
         };
         const draw = () => {
           const reg = mode === 'register', goog = mode === 'google';
@@ -1165,6 +1205,7 @@
       try { await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }); } catch (e) {}
       try { localStorage.removeItem(LS_KEY); localStorage.removeItem(UI_KEY); } catch (e) {}
       D.device.uid = ''; D.device.name = ''; D.saveDevice();
+      D.me = null;
       location.reload();
     },
   };

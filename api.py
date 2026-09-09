@@ -5,6 +5,7 @@ Shaxsiy Dashboard — backend API (Flask).
 Nima qiladi:
   • Telegram Mini App autentifikatsiyasi (initData imzosi tekshiriladi, faqat ruxsat etilgan ID lar)
   • Har bir foydalanuvchi uchun data/<id>.json  (+ kunlik zaxira nusxalar data/backups/)
+  • Profil: data/<id>.who.json (ism, email, provayder, sana) + data/<id>.avatar (surat) — /api/me, /api/me/avatar
   • WHOOP OAuth — tokenlar SERVERDA saqlanadi, brauzerga chiqmaydi; /api/whoop/data proksi
   • AI (Nova) — Anthropic API ga proksi, kalit faqat serverda
   • Statik fayllarni (index.html, app.css, js/, css/) tarqatadi
@@ -137,6 +138,14 @@ def _clean_name(raw) -> str:
     if not any(c.isalpha() for c in name):
         return ""
     return name
+
+
+def _clean_display(raw) -> str:
+    """Ko'rsatiladigan ism (profil): 1–40 belgi, harf/raqam/bo'sh joy/'-. — kirish ismidan farqli, bitta harf ham bo'ladi."""
+    name = " ".join(str(raw or "").split())
+    if not (1 <= len(name) <= NAME_MAX) or not any(c.isalnum() for c in name):
+        return ""
+    return "" if any(not (c.isalnum() or c in " '’ʼʻ‘-.") for c in name) else name
 
 
 def _name_taken(name: str) -> bool:
@@ -302,6 +311,7 @@ def login():
     if not uid:
         log.warning("Noto'g'ri parol (%s): %s", name or "-", request.headers.get("X-Forwarded-For", request.remote_addr))
         return jsonify({"error": "bad_pass"}), 401
+    who_touch(uid, lastLogin=datetime.now(TZ).isoformat())
     _archive(db.touch_user, uid, display_name(uid), None, "password", what="arxiv user")
     return _set_session(jsonify({"ok": True, "uid": uid, "name": display_name(uid)}), uid)
 
@@ -338,14 +348,11 @@ def register():
         uid = "u_" + secrets.token_hex(6)
         while uid in {u["uid"] for u in USERS} or any(r.get("uid") == uid for r in reg.values()):
             uid = "u_" + secrets.token_hex(6)
-        salt = secrets.token_hex(16)
+        salt, ts = secrets.token_hex(16), datetime.now(TZ).isoformat()
         reg[name.casefold()] = {"name": name, "uid": uid, "salt": salt, "hash": _pw_hash(pw, salt),
-                                "iter": PW_ITER, "createdAt": datetime.now(TZ).isoformat()}
+                                "iter": PW_ITER, "createdAt": ts}
         _reg_save(reg)
-        try:
-            who_file(uid).write_text(json.dumps({"name": name}, ensure_ascii=False), encoding="utf-8")
-        except OSError:
-            pass
+        who_touch(uid, name=name, provider="password", createdAt=ts, lastLogin=ts)
     _reg_recent[ip] = hits + [now]
     log.info("Yangi hisob: %s (%s)", name, uid)
     _archive(db.touch_user, uid, name, None, "register", what="arxiv user")
@@ -354,10 +361,80 @@ def register():
 
 @app.get("/api/me")
 def me():
+    """Kim kirgan: uid, ko'rsatiladigan ism, email, provayder, surat versiyasi (mtime) va hisob ochilgan sana."""
     uid, err = current_user()
     if err:
         return err
-    return jsonify({"uid": uid, "name": display_name(uid)})
+    return jsonify(me_json(uid))
+
+
+@app.post("/api/me")
+def me_rename():
+    """Ko'rsatiladigan ismni o'zgartiradi (who.json). Kirish ismi (users.json) o'zgarmaydi."""
+    uid, err = current_user()
+    if err:
+        return err
+    name = _clean_display((request.get_json(silent=True) or {}).get("name"))
+    if not name:
+        return jsonify({"error": "bad_name"}), 400
+    who_touch(uid, name=name, nameSet=True)   # o'zi qo'ygan ism — Google keyingi kirishda ustidan yozmaydi
+    return jsonify(me_json(uid))
+
+
+@app.get("/api/me/avatar")
+def me_avatar():
+    """Profil surati — faqat egasiga, yo'l so'rovdan emas (avatar_file). ETag = mtime; mos kelsa 304."""
+    uid, err = current_user()
+    if err:
+        return err
+    f = avatar_file(uid)
+    if not f.is_file():
+        return jsonify({"error": "not_found"}), 404
+    raw = f.read_bytes()
+    etag = f'"{int(f.stat().st_mtime)}"'
+    if etag in request.headers.get("If-None-Match", ""):
+        r = Response(status=304)
+    else:
+        r = Response(raw, mimetype=sniff_image(raw) or "application/octet-stream")
+    r.headers["ETag"] = etag
+    r.headers["Cache-Control"] = "private, max-age=86400"
+    return r
+
+
+@app.post("/api/me/avatar")
+def me_avatar_set():
+    """JSON {image: data URL yoki yalang'och base64} → <uid>.avatar. ≤ AVATAR_MAX, faqat JPEG/PNG/WebP (magic bytes)."""
+    uid, err = current_user()
+    if err:
+        return err
+    if request.content_length and request.content_length > AVATAR_MAX * 4 // 3 + 8192:
+        return jsonify({"error": "too_large"}), 413     # katta tanani JSON'ga o'girishdan oldin qirqamiz
+    img = str((request.get_json(silent=True) or {}).get("image") or "")
+    b64 = img.partition(",")[2] if img.startswith("data:") else img   # vergulsiz "data:…" → bo'sh → bad_image
+    if len(b64) > AVATAR_MAX * 4 // 3 + 4096:          # dekodlashdan oldin ham qirqamiz — xotira uchun
+        return jsonify({"error": "too_large"}), 413
+    try:
+        raw = base64.b64decode(b64.strip(), validate=True)
+    except Exception:  # noqa: BLE001
+        return jsonify({"error": "bad_image"}), 400
+    if len(raw) > AVATAR_MAX:
+        return jsonify({"error": "too_large"}), 413
+    if not raw or not sniff_image(raw):
+        return jsonify({"error": "bad_image"}), 400
+    ver = _avatar_write(uid, raw)
+    who_touch(uid, avatar="custom")
+    return jsonify({"ok": True, "avatar": ver})
+
+
+@app.delete("/api/me/avatar")
+def me_avatar_del():
+    """Suratni olib tashlaydi; avatar:'none' — Google keyingi kirishda o'z suratini qaytarmaydi."""
+    uid, err = current_user()
+    if err:
+        return err
+    avatar_file(uid).unlink(missing_ok=True)
+    who_touch(uid, avatar="none")
+    return jsonify({"ok": True})
 
 
 # ── Google bilan kirish (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET qo'yilganda faollashadi) ──
@@ -394,49 +471,79 @@ def google_login():
     return r
 
 
+def _page(title: str, text: str, status: int = 400):
+    """Google callback xatolari: kichik sahifa — sarlavha, bir jumla, «Ilovaga qaytish». So'rovdan kelgan
+    matnni chaqiruvchi html.escape qiladi."""
+    return (f"<meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>{title}</title>"
+            "<body style='font:15px/1.6 system-ui;max-width:34em;margin:12vh auto;padding:0 20px'>"
+            f"<h2>{title}</h2><p>{text}</p><p><a href='/'>Ilovaga qaytish</a></p></body>", status)
+
+
 @app.get("/api/auth/google/callback")
 def google_callback():
     if not GOOGLE_ON:
-        return "Google kirish sozlanmagan", 501
-    if request.args.get("error"):
-        return f"Google xato: {html.escape(request.args.get('error', '')[:200])}", 400
+        return _page("Google kirish sozlanmagan", "Serverda GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET berilmagan.", 501)
+    gerr = str(request.args.get("error") or "")[:200]
+    if gerr == "access_denied":
+        return _page("Google ruxsat bermadi", "Google bu hisob bilan kirishni rad etdi. Ilova Google Cloud'da «Testing» rejimida "
+                     "turganida faqat test users ro'yxatiga kiritilgan hisoblar kira oladi — egasi emailingizni ro'yxatga qo'shishi kerak.")
+    if gerr:
+        return _page("Google xato qaytardi", f"Google javobi: <code>{html.escape(gerr)}</code>. Qaytadan urinib ko'ring.")
     code, state = request.args.get("code", ""), request.args.get("state", "")
     try:
         nonce, flag, sig = state.split(".")
-    except ValueError:
-        return "state noto'g'ri", 400
-    if not hmac.compare_digest(sig, sign("g:" + nonce + "." + flag)):
-        return "state imzosi noto'g'ri", 400
-    if not hmac.compare_digest(request.cookies.get("g_st", ""), nonce):
-        return "kirish shu brauzerda boshlanmagan — qaytadan urinib ko'ring", 400
+        ok = hmac.compare_digest(sig, sign("g:" + nonce + "." + flag))
+        mine = hmac.compare_digest(request.cookies.get("g_st", ""), nonce)
+    except (ValueError, TypeError):
+        ok = mine = False
+    if not ok:
+        return _page("Kirish holati noto'g'ri", "Google qaytargan «state» buzilgan yoki eskirgan. Ilovaga qaytib, qaytadan urinib ko'ring.")
+    if not mine:
+        return _page("Kirish shu brauzerda boshlanmagan", "Google oynasi boshqa brauzerda ochilgan yoki 10 daqiqadan oshib ketgan. "
+                     "Ilovaga qaytib, «Google bilan kirish»ni shu yerda bosing.")
     status, tok = http_json(GOOGLE_TOKEN, {
         "grant_type": "authorization_code", "code": code, "redirect_uri": base_url() + "/api/auth/google/callback",
         "client_id": GOOGLE_ID, "client_secret": GOOGLE_SECRET,
     })
     if status != 200 or not tok.get("id_token"):
         log.error("Google token xato %s: %s", status, str(tok)[:200])
-        return "Google bilan kirish muvaffaqiyatsiz", 502
+        return _page("Google bilan kirish muvaffaqiyatsiz", "Google kirish kodini qabul qilmadi — kod eskirgan yoki ilova "
+                     "sozlamasi (redirect URI) noto'g'ri. Qaytadan urinib ko'ring.", 502)
     st2, info = http_json(GOOGLE_INFO + "?" + urllib.parse.urlencode({"id_token": tok["id_token"]}))
     if st2 != 200 or info.get("aud") != GOOGLE_ID or str(info.get("email_verified", "")).lower() != "true" or not info.get("sub"):
-        return "Google hisobini tekshirib bo'lmadi", 401
+        return _page("Google hisobini tekshirib bo'lmadi", "Google hisob ma'lumotini tasdiqlamadi (email tasdiqlanmagan yoki "
+                     "javob buzilgan). Qaytadan urinib ko'ring.", 401)
     email = str(info.get("email", "")).lower()
     if not email or (ALLOWED_EMAILS and email not in ALLOWED_EMAILS):   # ro'yxat bo'sh = ochiq eshik
         log.warning("Google: ruxsatsiz email %s", email)
-        return "Bu Google hisobiga ruxsat berilmagan", 403
+        return _page("Bu Google hisobiga ruxsat berilmagan", f"<b>{html.escape(email or '?')}</b> ruxsat ro'yxatida yo'q — "
+                     "egasi qo'shishi kerak.", 403)
     uid = "g_" + hashlib.sha256(str(info["sub"]).encode()).hexdigest()[:20]
     is_new = not who_file(uid).exists() and not user_file(uid).exists()
     if is_new and GOOGLE_INVITE and INVITE and not ALLOWED_EMAILS and flag != "1":
         log.warning("Google: yangi profil kodsiz rad etildi (%s)", email)
-        return ("<meta charset='utf-8'><body style='font:15px/1.6 system-ui;max-width:34em;margin:12vh auto;padding:0 20px'>"
-                "<h2>Taklif kodi kerak</h2><p>Bu Google hisobi uchun hali profil yo'q. Kirish oynasida «Google bilan kirish» "
-                "bosilganda taklif kodini kiriting.</p><p><a href='/'>Ilovaga qaytish</a></p></body>", 403)
+        return _page("Taklif kodi kerak", "Bu Google hisobi uchun hali profil yo'q. Kirish oynasida «Google bilan kirish» "
+                     "bosilganda taklif kodini kiriting.", 403)
     if is_new:
         log.info("Yangi hisob (Google): %s (%s)", email, uid)
+    name, pic = info.get("name") or email.split("@")[0], str(info.get("picture") or "")
     try:
-        who_file(uid).write_text(json.dumps({"name": info.get("name") or email.split("@")[0], "email": email}), encoding="utf-8")
-    except OSError:
-        pass
-    _archive(db.touch_user, uid, info.get("name") or email.split("@")[0], email, "google", what="arxiv user")
+        now = datetime.now(TZ).isoformat()
+        who = who_load(uid)
+        # surat: o'zi qo'ymagan/olib tashlamagan bo'lsa va Google URL'i yangi (yoki fayl yo'q) bo'lsa — yuklaymiz
+        fresh = pic and who.get("avatar") in (None, "google") and (who.get("picture") != pic or not avatar_file(uid).is_file())
+        got = bool(fresh and google_picture_fetch(uid, pic))
+        who = who_load(uid)   # yuklash 10 s gacha ketishi mumkin — shu orada boshqa qurilma yozgan bo'lsa, uni bosmaymiz
+        if not who.get("nameSet"):
+            who["name"] = name          # o'zi qo'ygan ism Google ismidan ustun
+        who.update({"email": email, "picture": pic, "provider": "google", "lastLogin": now})
+        who.setdefault("createdAt", now)
+        if got and who.get("avatar") in (None, "google"):
+            who["avatar"] = "google"
+        who_save(uid, who)
+    except Exception as e:  # noqa: BLE001
+        log.warning("who.json yozilmadi (%s): %s", uid, e)
+    _archive(db.touch_user, uid, name, email, "google", what="arxiv user")
     r = _set_session(redirect("/#today"), uid)
     r.delete_cookie("g_st")
     # bu brauzer Google bilan kirgan: keyingi safar taklif kodi so'ralmaydi (yangi profil baribir ochilmaydi)
@@ -507,17 +614,131 @@ def who_file(uid: str) -> Path:
 
 
 def display_name(uid: str) -> str:
+    name = who_load(uid).get("name")   # who.json birinchi — o'zi qo'ygan ism MA_USERS ismidan ham ustun
+    if name:
+        return str(name)
     for u in USERS:
         if u["uid"] == uid:
             return u["name"]
+    return (_reg_rec(uid) or {}).get("name") or uid
+
+
+def who_load(uid: str) -> dict:
+    """data/<uid>.who.json → dict; yo'q yoki buzilgan bo'lsa {}."""
     try:
-        return (json.loads(who_file(uid).read_text(encoding="utf-8")) or {}).get("name") or uid
-    except Exception:  # noqa: BLE001
+        d = json.loads(who_file(uid).read_text(encoding="utf-8"))
+        return d if isinstance(d, dict) else {}
+    except FileNotFoundError:
+        return {}
+    except Exception as e:  # noqa: BLE001
+        log.warning("%s o'qilmadi: %s", who_file(uid).name, e)
+        return {}
+
+
+def who_save(uid: str, who: dict):
+    f = who_file(uid)
+    tmp = f.with_name(f.name + ".tmp")
+    tmp.write_text(json.dumps(who, ensure_ascii=False), encoding="utf-8")
+    tmp.replace(f)
+
+
+def who_touch(uid: str, **fields):
+    """who.json ga maydon(lar) yozadi (lastLogin, avatar, ism…). Fayl yo'q/eski bo'lsa ism, provayder va
+    createdAt to'ldiriladi. Hech qachon kirishni buzmaydi — xato faqat logda."""
+    try:
+        who = who_load(uid)
+        if not who.get("provider"):
+            who.setdefault("name", display_name(uid))
+            who["provider"] = _provider_guess(uid)
+            who.setdefault("createdAt", (_reg_rec(uid) or {}).get("createdAt") or datetime.now(TZ).isoformat())
+        who.update(fields)
+        who_save(uid, who)
+    except Exception as e:  # noqa: BLE001
+        log.warning("who.json yozilmadi (%s): %s", uid, e)
+
+
+def _reg_rec(uid: str):
+    """users.json dagi yozuv (uid bo'yicha) yoki None."""
+    return next((r for r in _reg_load().values() if isinstance(r, dict) and r.get("uid") == uid), None)
+
+
+def _provider_guess(uid: str):
+    """who.json'da provayder yo'q eski hisoblar: env (MA_USERS) · owner (me) · google (g_…) · password (users.json)."""
+    if any(u["uid"] == uid for u in USERS):
+        return "env"
+    if uid == "me":
+        return "owner"
+    if uid.startswith("g_"):
+        return "google"
+    return "password" if _reg_rec(uid) else None
+
+
+def me_json(uid: str) -> dict:
+    """/api/me javobi. avatar = surat faylining mtime'i (versiya sifatida), yo'q bo'lsa null."""
+    who, f = who_load(uid), avatar_file(uid)
+    return {"uid": uid, "name": display_name(uid), "email": who.get("email") or None,
+            "provider": who.get("provider") or _provider_guess(uid),
+            "avatar": int(f.stat().st_mtime) if f.is_file() else None,
+            "since": who.get("createdAt") or (_reg_rec(uid) or {}).get("createdAt") or None}
+
+
+# ── Profil surati: data/<uid>.avatar — yo'l hech qachon so'rovdan kelmaydi ──
+AVATAR_MAX = 1_500_000         # yuklangan surat (dekodlangan) chegarasi
+AVATAR_FETCH_MAX = 2_000_000   # Google'dan olinadigan surat chegarasi
+
+
+def avatar_file(uid: str) -> Path:
+    return user_file(uid).with_name(user_file(uid).stem + ".avatar")
+
+
+def sniff_image(raw: bytes):
+    """Magic bytes → mime (JPEG/PNG/WebP) yoki None — kengaytmaga emas, baytlarga ishonamiz."""
+    if raw[:3] == b"\xff\xd8\xff":
+        return "image/jpeg"
+    if raw[:8] == b"\x89PNG\r\n\x1a\n":
+        return "image/png"
+    if raw[:4] == b"RIFF" and raw[8:12] == b"WEBP":
+        return "image/webp"
+    return None
+
+
+def _avatar_write(uid: str, raw: bytes) -> int:
+    """Atomar yozadi (tmp + replace); mtime (soniya) = versiya, oldingisidan albatta katta (ETag / ?v= uchun)."""
+    f = avatar_file(uid)
+    prev = int(f.stat().st_mtime) if f.is_file() else 0
+    tmp = f.with_name(f.name + ".tmp")
+    tmp.write_bytes(raw)
+    try:
+        os.chmod(tmp, 0o600)
+    except OSError:
         pass
-    for rec in _reg_load().values():
-        if rec.get("uid") == uid:
-            return rec.get("name") or uid
-    return uid
+    tmp.replace(f)
+    if int(f.stat().st_mtime) <= prev:
+        os.utime(f, (prev + 1, prev + 1))
+    return int(f.stat().st_mtime)
+
+
+def google_picture_fetch(uid: str, url: str) -> bool:
+    """Google profil suratini <uid>.avatar ga yuklaydi — eng yaxshi urinish: xato bo'lsa log, kirish davom etadi."""
+    try:
+        if not url.startswith("https://"):
+            return False
+        if url.endswith("=s96-c"):
+            url = url[:-6] + "=s256-c"       # kattaroq nusxa
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            raw = r.read(AVATAR_FETCH_MAX + 1)
+        if len(raw) > AVATAR_FETCH_MAX or not sniff_image(raw):
+            log.warning("Google surat yaroqsiz (%s): %d bayt", uid, len(raw))
+            return False
+        if who_load(uid).get("avatar") not in (None, "google"):
+            log.info("Google surat bekor qilindi (%s): avatar shu orada o'zgardi", uid)
+            return False
+        _avatar_write(uid, raw)
+        return True
+    except Exception as e:  # noqa: BLE001
+        log.warning("Google surat yuklanmadi (%s): %s", uid, e)
+        return False
 
 
 # ═══════════════════════ Ma'lumot ═══════════════════════
@@ -1796,9 +2017,23 @@ def index():
     return r
 
 
+# Faqat ilova qobig'i beriladi. Ilgari faqat "data/" prefiksi tekshirilardi — /./data/.secret, /.env, /db.py
+# kabi yo'llar o'tib ketardi (2026-09-09 da topildi). Endi ro'yxatda yo'q narsa — 404, nuqtali segment ham.
+STATIC_OK = re.compile(r"^(index\.html|app\.css|sw\.js|manifest\.json|css/[\w-]+\.css|js/[\w-]+\.js|icons/[\w-]+\.(?:svg|png|ico|webp))$")
+
+
+@app.get("/index.html")
+def index_html():
+    """PWA start_url — bayroq shu yerda ham kerak, aks holda o'rnatilgan ilova serversiz ishlaydi."""
+    return index()
+
+
 @app.get("/<path:fname>")
 def static_file(fname):
-    if fname.startswith("data/") or fname.startswith("api"):
+    if not STATIC_OK.match(fname):
+        return jsonify({"error": "not_found"}), 404
+    p = STATIC_DIR / fname
+    if not p.is_file() or STATIC_DIR.resolve() not in p.resolve().parents:
         return jsonify({"error": "not_found"}), 404
     r = send_from_directory(STATIC_DIR, fname)
     if fname.endswith((".js", ".css", ".html", "sw.js", "manifest.json")):

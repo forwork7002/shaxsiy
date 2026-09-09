@@ -249,6 +249,22 @@
     return `<div class="set-days">${DOW_ORDER.map((d) => `<button type="button" class="set-day ${days.includes(d) ? 'on' : ''}" data-act="${act}" data-d="${d}" aria-pressed="${days.includes(d)}">${esc(W[d])}</button>`).join('')}</div>`;
   }
 
+  /* «Hisob»: avatar (profile.js), ism, e-mail yoki hisob turi + uid, Profil va Chiqish */
+  function accountCard() {
+    const me = D.me || {}, uid = me.uid || D.device.uid || '';
+    const name = D.S.profile.name || (me.name && me.name !== me.uid ? me.name : '') || D.device.name || uid;
+    const prov = ['google', 'password', 'owner', 'env'].includes(me.provider) ? me.provider : null;
+    const line = me.provider === 'google' && me.email ? me.email : [prov && D.profile ? t('pf.prov.' + prov) : '', uid].filter(Boolean).join(' · ');
+    return `<div class="card flat set-account"><div class="row between wrap">
+      ${D.profile ? D.profile.avatarHtml(40, 'pf-av') : ''}
+      <div class="grow"><div class="eyebrow">${t('set.account')}</div><div class="small"><b>${esc(name)}</b></div>
+        <div class="tiny muted ${me.email ? '' : 'num'}">${esc(line)}</div></div>
+      <div class="row">${D.profile ? `<button class="btn ghost sm" data-act="openProfile">${D.ic('user', 14)} ${t('set.profile')}</button>` : ''}
+        <button class="btn ghost sm" data-act="setLogout">${D.ic('logout', 14)} ${t('set.logout')}</button></div>
+    </div></div>`;
+  }
+  D.on('me:changed', () => { if (D.current() === 'settings') D.rerender(); });
+
   /* ------------------------------------------------------------------ */
   /* GENERAL                                                             */
   /* ------------------------------------------------------------------ */
@@ -300,11 +316,7 @@
       <button class="btn ghost sm mt-s" data-act="go" data-view="health" data-sub="body">${D.ic('chevR', 14)} ${t('set.whoopAgeGo')}</button>
     </div>
 
-    ${D.serverEnabled() && (D.device.uid || D.device.name) ? `<div class="card flat set-account"><div class="row between wrap">
-      <div class="grow"><div class="eyebrow">${t('set.account')}</div><div class="small"><b>${esc(D.device.name || D.device.uid)}</b></div>
-        <div class="tiny muted num">${esc(D.device.uid)}</div></div>
-      <button class="btn ghost sm" data-act="setLogout">${D.ic('logout', 14)} ${t('set.logout')}</button>
-    </div></div>` : ''}
+    ${D.serverEnabled() && (D.me || D.device.uid) ? accountCard() : ''}
 
     <div class="card">
       <div class="card-head"><div class="title">${D.ic('clock')} ${t('set.day')}</div></div>

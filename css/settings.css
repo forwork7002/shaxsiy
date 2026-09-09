@@ -133,3 +133,7 @@
 .set-ok .zone { position: static; }
 .set-danger { border: 1px solid color-mix(in srgb, var(--danger) 28%, transparent); }
 .set-danger .row .btn { min-height: 44px; }
+
+/* «Hisob» kartasi — avatar profile.js dan (.pf-av-*) */
+.set-account .pf-av-img, .set-account .pf-av-ini { margin-right: 2px; }
+.set-account .row > .row { flex: none; }

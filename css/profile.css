@@ -1,0 +1,41 @@
+/* ==== profil varag'i — Play Store hisob varag'i uslubida ==== */
+.pf { display: flex; flex-direction: column; gap: 14px; }
+.pf-head { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+
+/* avatar: <img> yoki bosh harflar; --s o'lchami (header 40, varaq 84, Sozlash 40), --h uid rangi */
+.pf-avatar { position: relative; width: 84px; height: 84px; margin-bottom: 6px; }
+.pf-av-img, .pf-av-ini { width: var(--s, 40px); height: var(--s, 40px); border-radius: 50%; flex: none; display: block; }
+.pf-av-img { object-fit: cover; background: var(--inset); border: 1px solid var(--line); }
+.pf-av-ini { display: grid; place-items: center; background: hsl(var(--h, 200) 58% 38%); color: #fff; font-family: var(--font-display);
+  font-weight: 700; font-size: calc(var(--s, 40px) * .38); letter-spacing: .02em; line-height: 1; user-select: none; }
+.pf-cam { position: absolute; right: -4px; bottom: -2px; width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 2px solid var(--bg3);
+  background: var(--btn-grad); color: var(--ink-on-light); display: grid; place-items: center; box-shadow: var(--sh-btn); transition: transform .1s, filter .15s; }
+.pf-cam::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; }   /* 44 px bosish maydoni */
+.pf-cam:hover { filter: brightness(1.06); }
+.pf-cam:active { transform: scale(.94); }
+.pf-cam:disabled { opacity: .5; cursor: progress; }
+
+/* ism — bosilsa tahrir; tahrirda inline input + Saqlash */
+.pf-name-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; max-width: 100%; min-height: 40px; padding: 4px 12px;
+  border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text); font: inherit; }
+button.pf-name-btn:hover { background: var(--hover); }
+.pf-name-btn svg { color: var(--text3); flex: none; }
+.pf-name { font-family: var(--font-display); font-size: 20px; font-weight: 700; line-height: 1.2; color: var(--text); overflow-wrap: anywhere; }
+.pf-name.muted { color: var(--text3); font-weight: 600; }
+.pf-edit { display: flex; gap: 8px; width: 100%; max-width: 320px; margin: 2px auto; }
+.pf-edit .inp { flex: 1; text-align: center; min-height: 40px; }
+.pf-sub { font-size: 13px; color: var(--text2); overflow-wrap: anywhere; }
+.pf-uid { font-size: 11px; }
+.pf-since { margin-top: 1px; }
+
+/* uch plitka: kunlar · odatlar · WHOOP */
+.pf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.pf-stats .stat { text-align: center; padding: 10px 8px; }
+.pf-stat-text { font-size: 14px; }
+.pf-stats .stat-label { text-align: center; }
+
+.pf-actions { display: flex; flex-direction: column; gap: 8px; }
+.pf-actions .btn { min-height: 44px; }
+.pf-actions .pf-rm { align-self: center; min-height: 40px; padding: 0 14px; margin-top: 2px; }
+.pf-private { text-align: center; margin: 0; }
+

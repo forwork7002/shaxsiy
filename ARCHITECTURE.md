@@ -16,6 +16,7 @@ app/
   js/finance.js     Молия
   js/ai.js          shared AI analysis engine — D.ai.card(section) insight cards
   js/whoop.js       WHOOP snapshot client, per-day store, trends, readiness, workouts, bioAge/bodyPanel
+  js/profile.js     account sheet (D.profile): avatar (photo → /api/me/avatar, or initials), display name, provider/e-mail, stats, export, logout — opened from the header avatar button
   js/nova.js        AI mentor chat (uses D.ai.ask)
   js/settings.js    Созлаш: general (profile incl. birth year / goal / WHOOP Age) · habits · food targets · prayer · finance · data
   js/history.js     Тарих: read-only archive browser over /api/history/* (month grid · year · chats · cards)
@@ -27,8 +28,9 @@ app/
   legacy.py         one-off import of the old Шахсий export (Python port of D.migrateOld + existing-wins merge); deploy/import-legacy.sh runs it on the server
 ```
 
-Script order in index.html: core.js → i18n.js → prayer.js → ai.js → whoop.js → today · tasks · health · finance · ibodat · nova → food.js → settings.js → history.js → onboard.js → app.js.
-`ai.js` and `whoop.js` are libraries, not views: they register no `D.view` and must load before the views that call them.
+Script order in index.html: core.js → i18n.js → prayer.js → ai.js → whoop.js → profile.js → today · tasks · health · finance · ibodat · nova → food.js → settings.js → history.js → onboard.js → app.js.
+`ai.js`, `whoop.js` and `profile.js` are libraries, not views: they register no `D.view` and must load before the views that call them
+(`profile.js` reads the WHOOP profile name and is called by settings.js and app.js).
 `food.js` loads before `settings.js` (the food targets tab calls `D.food.recalcTargets`); `onboard.js` loads last so every view and `D.food` exist when it decides to open.
 No Telegram: there is no `telegram-web-app.js` in the shell; `D.tg` stays `null` and the few `D.tg && …` guards in core.js are dead but harmless.
 
@@ -56,7 +58,7 @@ Bottom bar = the first four `primary` views by order: today 10 · health 20 · f
 8. **Deletion** → `D.remove(list, id, {label})` pushes an undo entry and shows a toast with «Bekor qilish». Habit-with-history deletion uses `D.confirm()` (promise → boolean). No native `confirm()/alert()`.
 9. **i18n**: all UI text via `D.t('key')` or `D.t('key', {n:3})`. Modules register their own keys with
    `D.i18n.add({ uz:{...}, uzk:{...}, ru:{...} })` at top of the IIFE. Key style: `today.title`, `tasks.empty`. Plural helper `D.t('x.count', {n})` where the string uses `{n}`.
-10. **CSS**: class prefix per module (`td-`, `tk-`, `hl-`, `wh-`, `fd-`, `fin-`, `ib-`, `nv-`, `set-`, `hs-`, `ob-`). Use tokens, never raw colors. Reuse the kit classes below before inventing new ones. Module CSS lives in `css/<module>.css` (linked from index.html and listed in sw.js SHELL); `app.css` holds the design system.
+10. **CSS**: class prefix per module (`td-`, `tk-`, `hl-`, `wh-`, `pf-`, `fd-`, `fin-`, `ib-`, `nv-`, `set-`, `hs-`, `ob-`). Use tokens, never raw colors. Reuse the kit classes below before inventing new ones. Module CSS lives in `css/<module>.css` (linked from index.html and listed in sw.js SHELL); `app.css` holds the design system.
 11. **Numbers**: `D.fmtNum(n)`, `D.fmtMoney(n)` (uses `S.settings.currency`), `D.fmtPct`. Mono font for numbers: class `num`.
 12. **Never throw from render** — wrap risky parts; core catches and shows an error card for that view.
 
@@ -103,6 +105,10 @@ D.spheres                   // ordered list
 D.tg                        // always null now (no Telegram script) — guards stay null-safe
 D.api(path, opts)           // fetch (same-origin session cookie), JSON
 D.serverEnabled()           // true when served by api.py (window.DASH_SERVER) or ?server=1
+D.me                        // {uid, name, email, provider:'google'|'password'|'owner'|'env'|null, avatar:mtime|null, since} from /api/me; null until known / after logout
+D.meRefresh()               // raw fetch of /api/me (a 401 must NOT open the login window) → sets D.me, D.device.uid/name, emits 'me:changed'; awaited inside D.pull() before 'pull:ok'
+D.profile.open()            // account sheet (js/profile.js); D.profile.avatarHtml(px, cls) img-or-initials, D.profile.initials(name), D.profile.hue(uid)
+D.auth.ask() / D.auth.logout()  // login window (polls /api/me while open: visibility, focus, pageshow, every 5 s ≤ 10 min — a Google flow finished elsewhere lets it through); logout clears localStorage + D.me and reloads
 D.emit(name, data) D.on(name, fn)   // simple event bus ('state:changed', 'view:changed', 'day:changed', 'habit:toggled' {habit,day,on} — today.js mirrors prayer habits into S.prayers, 'pull:ok' — a D.pull() that read the server copy; D.pulled stays true after the first)
 D.theme.set('dark'|'light'|'auto')
 D.search.register(fn)       // fn(query) → [{label, sub, go:()=>{}}] for Ctrl+K palette
@@ -228,6 +234,8 @@ Prayer habits (names ПЕШИН/АСР/ШОМ/БОМДОД/ХУФТОН) stay as
 
 - `GET /api/data` → full state; `POST /api/data` body = full state (server merges per top-level key using `meta.updatedAt`; returns `{ok, updated}`)
 - `GET /api/health`
+- `GET /api/me` → `{uid, name, email, provider, avatar, since}` (401 `{error:'auth_failed', passcode:true}` when signed out); `POST /api/me {name}` → display name (who.json only, the login name is untouched; 400 `bad_name`)
+- `GET /api/me/avatar` → image bytes (private, ETag = mtime, 304, 404 `not_found`); `POST /api/me/avatar {image: dataURL|base64}` ≤ 1.5 MB JPEG/PNG/WebP (413 `too_large`, 400 `bad_image`) → `{ok, avatar:mtime}`; `DELETE` → `{ok}` and a later Google login does not bring the Google picture back
 - `GET /api/whoop/login` → redirect to WHOOP; `GET /api/whoop/callback` → stores tokens server-side keyed by uid → redirect `/#health`
 - `GET /api/whoop/data?path=/recovery&limit=1` → proxied with server-held token (auto-refresh)
 - `POST /api/ai` `{messages, system, max_tokens?, kind?}` → AI proxy (Anthropic or OpenAI, key from env), returns `{text, model, usage}`; `kind` = `chat` (Nova) | `card:<section>` (D.ai.advise) is only logged to `ai_calls`
