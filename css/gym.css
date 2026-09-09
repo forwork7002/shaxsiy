@@ -108,3 +108,9 @@
 .gym-past-l .small { display: flex; gap: 4px; min-width: 0; overflow: hidden; white-space: nowrap; }
 .gym-past-l .ellipsis { display: inline-block; max-width: 100%; }
 .gym-past .list { padding: 0 12px 12px; margin-top: 0; }
+
+/* the watch's record of today, under the set counter */
+.gym-wh { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
+.gym-wh .eyebrow { margin-bottom: 8px; }
+/* a long run of sport names on a WHOOP-only day truncates instead of pushing the pill off the card */
+.gym-wh-sports { display: block; max-width: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: capitalize; }

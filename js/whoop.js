@@ -79,6 +79,64 @@
     },
   });
 
+
+  D.i18n.add({
+    uz: {
+      'wh.justNow': 'hozirgina', 'wh.minAgo': '{n} daqiqa oldin', 'wh.live': 'jonli', 'wh.stale': 'eskirgan',
+      'wh.connectedAs': 'WHOOP ulangan: {name}', 'wh.updated': 'yangilangan {t}', 'wh.refreshNow': 'Hozir yangilash',
+      'wh.strainLive': 'Zo‘riqish', 'wh.sinceStart': '{t} dan beri', 'wh.hr': 'puls', 'wh.hrMaxShort': 'maks',
+      'wh.calibrating': 'WHOOP hali kalibrlanmoqda — birinchi haftada raqamlar o‘zgaradi',
+      'wh.err.rate_limited': 'WHOOP limiti — bir daqiqadan so‘ng yangilanadi', 'wh.err.http': 'WHOOP javob bermadi ({e})', 'wh.err.not_connected': 'WHOOP ulanmagan',
+      'wh.sl.title': 'Uyqu', 'wh.sl.got': 'uxlandi', 'wh.sl.need': 'kerak edi', 'wh.sl.inBed': 'yotoqda', 'wh.sl.awake': 'uyg‘oq',
+      'wh.sl.cycles': '{n} sikl', 'wh.sl.dist': '{n} marta uyg‘onish', 'wh.sl.perf': 'sifat', 'wh.sl.eff': 'samaradorlik', 'wh.sl.cons': 'izchillik',
+      'wh.sl.debt7': '7 kunlik uyqu qarzi', 'wh.sl.naps': 'kunduzgi uyqu: {n} marta, {h} soat', 'wh.sl.14': 'So‘nggi 14 kecha', 'wh.sl.needLine': 'chiziq — o‘sha kecha kerak bo‘lgan uyqu',
+      'wh.sl.none': 'Bu kecha uchun uyqu yozuvi yo‘q', 'wh.sl.stagesTitle': 'Uyqu bosqichlari', 'wh.sl.light': 'yengil', 'wh.sl.deep': 'chuqur', 'wh.sl.rem': 'REM',
+      'wh.sl.consHint': 'Har kuni bir xil vaqtda yotish izchillikni ko‘taradi', 'wh.sl.effHint': 'Yotoqdagi vaqtning qanchasi uyquga ketgani',
+      'wh.st.today': 'Bugungi yuk', 'wh.st.none': 'Bugun hali zo‘riqish o‘lchanmadi', 'wh.st.14': 'Zo‘riqish, 14 kun', 'wh.st.legend': 'ustun rangi — o‘sha kungi tiklanish',
+      'wh.st.target': 'bugungi me‘yor {m}', 'wh.st.room': 'yana {n} gacha joy bor', 'wh.st.over': 'me‘yordan {n} yuqori', 'wh.st.kcal': '{k} kkal sarflandi', 'wh.st.tdee': 'taxminiy kunlik me‘yor {t}',
+      'wh.zones': 'Puls zonalari', 'wh.z.0': 'tinch', 'wh.z.1': 'yengil', 'wh.z.2': 'o‘rtacha', 'wh.z.3': 'kuchli', 'wh.z.4': 'og‘ir', 'wh.z.5': 'maksimal',
+      'wh.wo.today': 'Bugungi mashg‘ulotlar', 'wh.wo.none': 'Bugun WHOOP mashg‘ulot yozmagan', 'wh.wo.min': '{n} daqiqa',
+      'wh.disconnect': 'Uzish', 'wh.connect': 'WHOOP’ni ulash', 'wh.intro': 'Soatingizdagi tiklanish, uyqu, zo‘riqish va mashg‘ulotlar shu yerga o‘zi keladi — har daqiqa.',
+      'wh.needServer': 'Bu qurilmada server yo‘q — WHOOP faqat jonli saytda ishlaydi', 'wh.pending': 'WHOOP’dan birinchi ma’lumot olinmoqda…',
+    },
+    uzk: {
+      'wh.justNow': 'ҳозиргина', 'wh.minAgo': '{n} дақиқа олдин', 'wh.live': 'жонли', 'wh.stale': 'эскирган',
+      'wh.connectedAs': 'WHOOP уланган: {name}', 'wh.updated': 'янгиланган {t}', 'wh.refreshNow': 'Ҳозир янгилаш',
+      'wh.strainLive': 'Зўриқиш', 'wh.sinceStart': '{t} дан бери', 'wh.hr': 'пульс', 'wh.hrMaxShort': 'макс',
+      'wh.calibrating': 'WHOOP ҳали калибрланмоқда — биринчи ҳафтада рақамлар ўзгаради',
+      'wh.err.rate_limited': 'WHOOP лимити — бир дақиқадан сўнг янгиланади', 'wh.err.http': 'WHOOP жавоб бермади ({e})', 'wh.err.not_connected': 'WHOOP уланмаган',
+      'wh.sl.title': 'Уйқу', 'wh.sl.got': 'ухланди', 'wh.sl.need': 'керак эди', 'wh.sl.inBed': 'ётоқда', 'wh.sl.awake': 'уйғоқ',
+      'wh.sl.cycles': '{n} цикл', 'wh.sl.dist': '{n} марта уйғониш', 'wh.sl.perf': 'сифат', 'wh.sl.eff': 'самарадорлик', 'wh.sl.cons': 'изчиллик',
+      'wh.sl.debt7': '7 кунлик уйқу қарзи', 'wh.sl.naps': 'кундузги уйқу: {n} марта, {h} соат', 'wh.sl.14': 'Сўнгги 14 кеча', 'wh.sl.needLine': 'чизиқ — ўша кеча керак бўлган уйқу',
+      'wh.sl.none': 'Бу кеча учун уйқу ёзуви йўқ', 'wh.sl.stagesTitle': 'Уйқу босқичлари', 'wh.sl.light': 'енгил', 'wh.sl.deep': 'чуқур', 'wh.sl.rem': 'REM',
+      'wh.sl.consHint': 'Ҳар куни бир хил вақтда ётиш изчилликни кўтаради', 'wh.sl.effHint': 'Ётоқдаги вақтнинг қанчаси уйқуга кетгани',
+      'wh.st.today': 'Бугунги юк', 'wh.st.none': 'Бугун ҳали зўриқиш ўлчанмади', 'wh.st.14': 'Зўриқиш, 14 кун', 'wh.st.legend': 'устун ранги — ўша кунги тикланиш',
+      'wh.st.target': 'бугунги меъёр {m}', 'wh.st.room': 'яна {n} гача жой бор', 'wh.st.over': 'меъёрдан {n} юқори', 'wh.st.kcal': '{k} ккал сарфланди', 'wh.st.tdee': 'тахминий кунлик меъёр {t}',
+      'wh.zones': 'Пульс зоналари', 'wh.z.0': 'тинч', 'wh.z.1': 'енгил', 'wh.z.2': 'ўртача', 'wh.z.3': 'кучли', 'wh.z.4': 'оғир', 'wh.z.5': 'максимал',
+      'wh.wo.today': 'Бугунги машғулотлар', 'wh.wo.none': 'Бугун WHOOP машғулот ёзмаган', 'wh.wo.min': '{n} дақиқа',
+      'wh.disconnect': 'Узиш', 'wh.connect': 'WHOOP’ни улаш', 'wh.intro': 'Соатингиздаги тикланиш, уйқу, зўриқиш ва машғулотлар шу ерга ўзи келади — ҳар дақиқа.',
+      'wh.needServer': 'Бу қурилмада сервер йўқ — WHOOP фақат жонли сайтда ишлайди', 'wh.pending': 'WHOOP’дан биринчи маълумот олинмоқда…',
+    },
+    ru: {
+      'wh.justNow': 'только что', 'wh.minAgo': '{n} мин назад', 'wh.live': 'live', 'wh.stale': 'устарело',
+      'wh.connectedAs': 'WHOOP подключён: {name}', 'wh.updated': 'обновлено {t}', 'wh.refreshNow': 'Обновить сейчас',
+      'wh.strainLive': 'Нагрузка', 'wh.sinceStart': 'с {t}', 'wh.hr': 'пульс', 'wh.hrMaxShort': 'макс',
+      'wh.calibrating': 'WHOOP ещё калибруется — в первую неделю цифры будут меняться',
+      'wh.err.rate_limited': 'Лимит WHOOP — обновится через минуту', 'wh.err.http': 'WHOOP не ответил ({e})', 'wh.err.not_connected': 'WHOOP не подключён',
+      'wh.sl.title': 'Сон', 'wh.sl.got': 'проспали', 'wh.sl.need': 'нужно было', 'wh.sl.inBed': 'в постели', 'wh.sl.awake': 'бодрствование',
+      'wh.sl.cycles': '{n} цикл.', 'wh.sl.dist': 'пробуждений: {n}', 'wh.sl.perf': 'качество', 'wh.sl.eff': 'эффективность', 'wh.sl.cons': 'регулярность',
+      'wh.sl.debt7': 'Долг сна за 7 дней', 'wh.sl.naps': 'дневной сон: {n} раз, {h} ч', 'wh.sl.14': 'Последние 14 ночей', 'wh.sl.needLine': 'линия — сколько сна требовалось в ту ночь',
+      'wh.sl.none': 'За эту ночь записи сна нет', 'wh.sl.stagesTitle': 'Фазы сна', 'wh.sl.light': 'лёгкий', 'wh.sl.deep': 'глубокий', 'wh.sl.rem': 'REM',
+      'wh.sl.consHint': 'Ложиться в одно и то же время — главное для регулярности', 'wh.sl.effHint': 'Какая часть времени в постели ушла на сон',
+      'wh.st.today': 'Нагрузка сегодня', 'wh.st.none': 'Сегодня нагрузка ещё не измерена', 'wh.st.14': 'Нагрузка, 14 дней', 'wh.st.legend': 'цвет столбца — восстановление в тот день',
+      'wh.st.target': 'норма на сегодня {m}', 'wh.st.room': 'есть запас до {n}', 'wh.st.over': 'выше нормы на {n}', 'wh.st.kcal': 'потрачено {k} ккал', 'wh.st.tdee': 'примерная дневная норма {t}',
+      'wh.zones': 'Пульсовые зоны', 'wh.z.0': 'покой', 'wh.z.1': 'лёгкая', 'wh.z.2': 'средняя', 'wh.z.3': 'высокая', 'wh.z.4': 'тяжёлая', 'wh.z.5': 'максимум',
+      'wh.wo.today': 'Тренировки сегодня', 'wh.wo.none': 'WHOOP не записал тренировок сегодня', 'wh.wo.min': '{n} мин',
+      'wh.disconnect': 'Отключить', 'wh.connect': 'Подключить WHOOP', 'wh.intro': 'Восстановление, сон, нагрузка и тренировки с часов приходят сюда сами — каждую минуту.',
+      'wh.needServer': 'На этом устройстве нет сервера — WHOOP работает только на живом сайте', 'wh.pending': 'Получаем первые данные от WHOOP…',
+    },
+  });
+
   /* ------------------------------------------------------------------ */
   /* state                                                               */
   /* ------------------------------------------------------------------ */
@@ -93,104 +151,22 @@
   const num = (v) => (v === null || v === undefined || v === '' || isNaN(+v) ? null : +v);
   const dayOfTs = (ts) => { try { return D.dayKey(new Date(ts)); } catch (e) { return null; } };
 
-  /* ------------------------------------------------------------------ */
-  /* parsing — one record → { key, fields }                              */
-  /* ------------------------------------------------------------------ */
-  function recRecovery(r) {
-    if (!r || !r.score) return null;
-    const k = dayOfTs(r.created_at || r.updated_at);
-    if (!k) return null;
-    const s = r.score, o = {};
-    if (num(s.recovery_score) !== null) o.recovery = Math.round(+s.recovery_score);
-    if (num(s.hrv_rmssd_milli) !== null) o.hrv = Math.round(+s.hrv_rmssd_milli);
-    if (num(s.resting_heart_rate) !== null) o.rhr = Math.round(+s.resting_heart_rate);
-    if (num(s.spo2_percentage) !== null) o.spo2 = D.round(+s.spo2_percentage, 1);
-    if (num(s.skin_temp_celsius) !== null) o.skin = D.round(+s.skin_temp_celsius, 1);
-    return Object.keys(o).length ? { k, o } : null;
-  }
-  function recSleep(r) {
-    if (!r || !r.score) return null;
-    if (r.nap) return null;                       // naps do not define the night
-    const k = dayOfTs(r.end || r.start);          // the day you woke up on
-    if (!k) return null;
-    const s = r.score, st = s.stage_summary || {}, o = {};
-    const rem = +st.total_rem_sleep_time_milli || 0, deep = +st.total_slow_wave_sleep_time_milli || 0,
-      light = +st.total_light_sleep_time_milli || 0, awake = +st.total_awake_time_milli || 0,
-      inBed = +st.total_in_bed_time_milli || 0;
-    if (rem || deep || light || inBed) {
-      o.stages = { rem, deep, light, awake };
-      o.sleepH = D.round((inBed ? inBed - awake : rem + deep + light) / 3.6e6, 1);
-    }
-    // WHOOP's own sleep-need model beats a flat 7.5h target: baseline + debt + strain + naps
-    const need = s.sleep_needed || {};
-    const needMs = (+need.baseline_milli || 0) + (+need.need_from_sleep_debt_milli || 0) + (+need.need_from_recent_strain_milli || 0) - (+need.need_from_recent_nap_milli || 0);
-    if (needMs > 0) o.sleepNeedH = D.round(needMs / 3.6e6, 1);
-    if (+need.need_from_sleep_debt_milli) o.debtH = D.round(+need.need_from_sleep_debt_milli / 3.6e6, 1);
-    if (num(s.sleep_performance_percentage) !== null) o.sleepPerf = Math.round(+s.sleep_performance_percentage);
-    if (num(s.sleep_efficiency_percentage) !== null) o.sleepEff = Math.round(+s.sleep_efficiency_percentage);
-    if (num(s.sleep_consistency_percentage) !== null) o.sleepCons = Math.round(+s.sleep_consistency_percentage);
-    if (num(s.respiratory_rate) !== null) o.resp = D.round(+s.respiratory_rate, 1);
-    if (r.start) o.bedTs = r.start;
-    if (r.end) o.wakeTs = r.end;
-    return Object.keys(o).length ? { k, o } : null;
-  }
-  function recCycle(r) {
-    if (!r || !r.score) return null;
-    const k = dayOfTs(r.start);
-    if (!k) return null;
-    const s = r.score, o = {};
-    if (num(s.strain) !== null) o.strain = D.round(+s.strain, 1);
-    if (num(s.kilojoule) !== null) o.kcal = Math.round(+s.kilojoule / 4.184);
-    if (num(s.average_heart_rate) !== null) o.hrAvg = Math.round(+s.average_heart_rate);
-    if (num(s.max_heart_rate) !== null) o.hrMax = Math.round(+s.max_heart_rate);
-    return Object.keys(o).length ? { k, o } : null;
-  }
-  function recWorkout(r) {
-    if (!r) return null;
-    const k = dayOfTs(r.start);
-    if (!k) return null;
-    const s = r.score || {};
-    return {
-      id: String(r.id || r.start), k, start: r.start, end: r.end,
-      sport: r.sport_name || (r.sport_id != null ? 'ID ' + r.sport_id : ''),
-      strain: num(s.strain) !== null ? D.round(+s.strain, 1) : null,
-      kcal: num(s.kilojoule) !== null ? Math.round(+s.kilojoule / 4.184) : null,
-      hrAvg: num(s.average_heart_rate) !== null ? Math.round(+s.average_heart_rate) : null,
-      hrMax: num(s.max_heart_rate) !== null ? Math.round(+s.max_heart_rate) : null,
-      meters: num(s.distance_meter) !== null ? Math.round(+s.distance_meter) : null,
-      mins: r.start && r.end ? Math.round((new Date(r.end) - new Date(r.start)) / 60000) : null,
-    };
-  }
   D.whoop = D.whoop || {};
 
   /* ------------------------------------------------------------------ */
-  /* fetch                                                               */
+  /* snapshot poller                                                     */
+  /* The server pulls WHOOP on its own clock and keeps a normalised      */
+  /* snapshot; we ask for it once a minute with an ETag, so a minute in  */
+  /* which nothing changed costs one 304 and no work at all. Day keys    */
+  /* are assigned here, where the user's timezone and day-start live.   */
   /* ------------------------------------------------------------------ */
-  async function page(path, params) {
-    const q = new URLSearchParams(Object.assign({ path }, params || {}));
-    const r = await D.api('/api/whoop/data?' + q.toString());
-    return r && typeof r === 'object' ? r : {};
-  }
-  // Pull `pages` pages of a collection, following WHOOP's next_token.
-  async function collect(path, pages, limit) {
-    const out = [];
-    let token = null;
-    for (let i = 0; i < pages; i++) {
-      const p = { limit: limit || 25 };
-      if (token) p.nextToken = token;
-      const r = await page(path, p);
-      const recs = Array.isArray(r.records) ? r.records : [];
-      out.push(...recs);
-      token = r.next_token || null;
-      if (!token || !recs.length) break;
-    }
-    return out;
-  }
+  const POLL_MS = 60 * 1000;
+  let etag = null, polling = false, pollTimer = null, lastPollAt = 0, pendingTries = 0;
 
-  function merge(days, hit) {
-    if (!hit) return;
-    const d = (days[hit.k] = days[hit.k] || {});
-    Object.assign(d, hit.o);
+  function merge(days, k, o) {
+    if (!k || !o) return;
+    const d = (days[k] = days[k] || {});
+    Object.assign(d, o);
   }
   function prune(w) {
     const keys = Object.keys(w.days).sort();
@@ -199,67 +175,150 @@
     if (w.workouts.length > KEEP_WORKOUTS) w.workouts.length = KEEP_WORKOUTS;
   }
 
+  /** Fold a server snapshot into S.whoop. Returns true when anything changed. */
+  function applySnapshot(snap) {
+    const w = W();
+    const before = JSON.stringify([w.days, w.workouts, w.live, w.body, w.profile, w.naps]);
+    const days = w.days, naps = {};
+    for (const r of snap.recovery || []) {
+      const k = dayOfTs(r.ts); if (!k) continue;
+      merge(days, k, { recovery: r.recovery, hrv: r.hrv, rhr: r.rhr, spo2: r.spo2, skin: r.skin, calibrating: !!r.calibrating });
+    }
+    for (const r of snap.sleep || []) {
+      const k = dayOfTs(r.end || r.start); if (!k) continue;
+      if (r.nap) { const n = (naps[k] = naps[k] || { n: 0, h: 0 }); n.n++; n.h = D.round(n.h + (+r.sleepH || 0), 1); continue; }
+      const h1 = (v) => (v == null ? v : D.round(+v, 1));
+      merge(days, k, {
+        sleepH: h1(r.sleepH), inBedH: h1(r.inBedH), awakeH: h1(r.awakeH), stages: r.stages, cycles: r.cycles, disturbances: r.disturbances,
+        sleepNeedH: h1(r.sleepNeedH), needBaseH: h1(r.needBaseH), debtH: h1(r.debtH), sleepPerf: r.sleepPerf, sleepEff: r.sleepEff,
+        sleepCons: r.sleepCons, resp: r.resp, bedTs: r.start, wakeTs: r.end,
+      });
+    }
+    let live = null;
+    for (const c of snap.cycle || []) {
+      const k = c.start ? dayOfTs(new Date(new Date(c.start).getTime() + 12 * 3600e3)) : null; if (!k) continue;
+      merge(days, k, { strain: c.strain, kcal: c.kcal, hrAvg: c.hrAvg, hrMax: c.hrMax });
+      if (!c.end) live = { k, strain: c.strain, kcal: c.kcal, hrAvg: c.hrAvg, hrMax: c.hrMax, since: c.start, updatedAt: c.updatedAt };
+    }
+    const byId = new Map();
+    for (const x of snap.workout || []) { const k = dayOfTs(x.start); if (k) byId.set(x.id, Object.assign({}, x, { k })); }
+    if (byId.size) w.workouts = Array.from(byId.values());
+    w.naps = naps;
+    w.live = live;
+    if (snap.body && typeof snap.body === 'object') w.body = snap.body;
+    if (snap.profile && typeof snap.profile === 'object') w.profile = snap.profile;
+    w.rl = snap.rl || null;
+    w.err = snap.err || null;
+    w.fetchedAt = snap.fetchedAt || Date.now();
+    w.snapAt = snap.updatedAt || 0;
+    w.connected = true;
+    w.lastSync = Date.now();
+    prune(w);
+    const today = D.today();
+    w.cache = Object.assign({}, days[today] || days[D.addDays(today, -1)] || {});
+    const changed = before !== JSON.stringify([w.days, w.workouts, w.live, w.body, w.profile, w.naps]);
+    if (changed) D.whoop.fillSleep();
+    return changed;
+  }
+
+  // Is it safe to redraw under the user's fingers right now?
+  function quiet() {
+    if (document.hidden) return false;
+    const a = document.activeElement;
+    if (a && a.matches && a.matches('input,textarea,select')) return false;
+    const bg = D.$('#modalBg'); if (bg && bg.classList.contains('show')) return false;
+    return true;
+  }
+  const LIVE_VIEWS = new Set(['today', 'health', 'gym', 'stats']);
+
+  async function fetchSnapshot() {
+    const h = {};
+    if (D.tg && D.tg.initData) h['X-Telegram-Init-Data'] = D.tg.initData;
+    if (etag) h['If-None-Match'] = etag;
+    const r = await fetch('/api/whoop/snapshot', { credentials: 'same-origin', headers: h, cache: 'no-store' });
+    if (r.status === 304) return { same: true };
+    if (r.status === 401) { const j = await r.json().catch(() => null); if (j && j.passcode && D.auth) { if (await D.auth.ask()) return fetchSnapshot(); } return null; }
+    if (!r.ok) return null;
+    const j = await r.json();
+    etag = r.headers.get('ETag') || etag;
+    return j;
+  }
+
+  /** One poll. Cheap on purpose: a 304 does nothing, new data morphs only the views that show it. */
+  D.whoop.poll = async (opts = {}) => {
+    if (polling || !D.serverEnabled()) return false;
+    polling = true; lastPollAt = Date.now();
+    try {
+      const snap = await fetchSnapshot();
+      if (!snap) return false;
+      if (snap.same) return false;
+      const w = W();
+      if (snap.connected === false) {
+        if (w.connected) { w.connected = false; D.saveQuiet(); if (LIVE_VIEWS.has(D.current()) && quiet()) D.rerender(); }
+        return false;
+      }
+      if (snap.pending) {
+        // first pull still running on the server — look again shortly, a few times
+        if (pendingTries++ < 6) setTimeout(() => D.whoop.poll(), 6000);
+        return false;
+      }
+      pendingTries = 0;
+      const changed = applySnapshot(snap);
+      // the server owns this data; persist locally without bumping updatedAt (no push, no 409 churn)
+      D.saveQuiet();
+      D.emit('whoop:updated', { changed });
+      if ((changed || opts.force) && LIVE_VIEWS.has(D.current()) && quiet()) D.rerender();
+      return changed;
+    } catch (e) {
+      return false;
+    } finally { polling = false; }
+  };
+
+  /** Manual «refresh now»: ask the server to pull immediately, then wait for the snapshot to move. */
   let syncing = false;
   D.whoop.syncing = () => syncing;
-  /**
-   * Pull WHOOP data into S.whoop.days / .workouts / .body.
-   * deep=true fetches more pages (manual refresh); the auto path stays cheap.
-   */
-  D.whoop.sync = async (opts = {}) => {
+  D.whoop.sync = async () => {
     if (syncing) return null;
     if (!D.serverEnabled()) throw new Error('need_server');
     syncing = true;
-    const pages = opts.deep ? 3 : 1;
     try {
-      const soft = (p) => collect(p, pages).catch((e) => ({ __err: e }));
-      const [rec, slp, cyc, wko] = await Promise.all([
-        soft('/recovery'), soft('/activity/sleep'), soft('/cycle'), soft('/activity/workout'),
-      ]);
-      const errs = [rec, slp, cyc, wko].filter((x) => x && x.__err);
-      if (errs.length === 4) throw errs[0].__err;
-      const w = W();
-      const days = w.days;
-      if (Array.isArray(rec)) for (const r of rec) merge(days, recRecovery(r));
-      if (Array.isArray(slp)) for (const r of slp) merge(days, recSleep(r));
-      if (Array.isArray(cyc)) for (const r of cyc) merge(days, recCycle(r));
-      if (Array.isArray(wko)) {
-        const byId = new Map(w.workouts.map((x) => [x.id, x]));
-        for (const r of wko) { const x = recWorkout(r); if (x) byId.set(x.id, x); }
-        w.workouts = Array.from(byId.values());
+      const w = W(), was = w.snapAt || 0, wasFetched = w.fetchedAt || 0;
+      await D.api('/api/whoop/refresh', { method: 'POST', body: '{}' });
+      for (let i = 0; i < 6; i++) {
+        await new Promise((r) => setTimeout(r, 2500));
+        await D.whoop.poll({ force: i === 5 });
+        if ((w.snapAt || 0) !== was || (w.fetchedAt || 0) !== wasFetched) break;
       }
-      if (opts.deep) {
-        try {
-          const b = await page('/user/measurement/body');
-          if (b && (b.height_meter || b.weight_kilogram)) {
-            w.body = { heightCm: b.height_meter ? Math.round(+b.height_meter * 100) : null, weightKg: b.weight_kilogram ? D.round(+b.weight_kilogram, 1) : null, maxHr: b.max_heart_rate || null };
-          }
-        } catch (e) { /* optional */ }
-      }
-      // today's snapshot keeps feeding the existing hero card
-      const today = D.today();
-      const latest = days[today] || days[D.addDays(today, -1)] || {};
-      w.cache = Object.assign({}, w.cache, latest);
-      w.connected = true;
-      w.lastSync = Date.now();
-      prune(w);
-      const filled = D.whoop.fillSleep();
-      D.save();
-      return { days: Object.keys(days).length, workouts: w.workouts.length, filled };
+      const days = Object.keys(w.days).length;
+      return { days, workouts: w.workouts.length, filled: D.whoop.fillSleep() };
     } finally { syncing = false; }
   };
+  // kept for older callers
+  D.whoop.autoSync = () => { D.whoop.poll(); };
 
-  /* auto-sync: on boot and when the health view opens, at most every AUTO_MS */
-  D.whoop.autoSync = () => {
-    const w = W();
-    if (!w.connected || !D.serverEnabled() || syncing) return;
-    if (w.lastSync && Date.now() - w.lastSync < AUTO_MS) return;
-    D.whoop.sync().then((r) => { if (r) D.rerender(); }).catch(() => {});
-  };
+  function schedule() {
+    clearInterval(pollTimer);
+    pollTimer = setInterval(() => { if (!document.hidden) D.whoop.poll(); }, POLL_MS);
+  }
 
   /* ------------------------------------------------------------------ */
   /* reading                                                             */
   /* ------------------------------------------------------------------ */
   D.whoop.day = (k) => (W().days[k] || null);
+  D.whoop.live = () => { const l = W().live; if (!l || !l.since) return null; return Date.now() - new Date(l.since).getTime() < 36 * 3600e3 ? l : null; };
+  D.whoop.naps = (k) => ((W().naps || {})[k] || null);
+  D.whoop.profile = () => W().profile || null;
+  /** How old is what we are showing? {min, label, stale} — stale after 3 minutes. */
+  D.whoop.freshness = () => {
+    const at = +W().fetchedAt || 0;
+    if (!at) return null;
+    const min = Math.max(0, Math.round((Date.now() - at) / 60000));
+    return { min, stale: min >= 3, label: min < 1 ? t('wh.justNow') : t('wh.minAgo', { n: min }) };
+  };
+  D.whoop.workoutsOn = (k) => W().workouts.filter((x) => x.k === k);
+  D.whoop.workoutDays = (n) => { const set = new Set(); for (const x of W().workouts) if (x.k) set.add(x.k); return D.lastDays(n || 28).filter((k) => set.has(k)); };
+  /** Minutes in each of WHOOP's six HR zones (0 = below 50% max) for one workout. */
+  D.whoop.zoneMins = (x) => (x && Array.isArray(x.zones) ? x.zones.map((ms) => Math.round((+ms || 0) / 60000)) : null);
   D.whoop.has = () => Object.keys(W().days).length > 0;
   D.whoop.trend = (field, n) => {
     const days = W().days;
@@ -365,45 +424,188 @@
   };
 
   /* ------------------------------------------------------------------ */
-  /* the WHOOP day card rendered inside Sog'liq                          */
+  /* Health surfaces                                                     */
+  /* The hero is the one bold thing: a body state, read at a glance.     */
+  /* Everything after it is quiet and proportional — bars that are the   */
+  /* data, not decoration.                                               */
   /* ------------------------------------------------------------------ */
-  D.whoop.dayCard = (key) => {
+  const ZONE_C = ['var(--text4)', 'var(--info)', 'var(--success)', 'var(--warning)', 'var(--accent)', 'var(--danger-text)'];
+  const STAGE_C = { deep: 'var(--violet)', rem: 'var(--info)', light: 'var(--success)', awake: 'var(--line3)' };
+  const zRec = (v) => (v >= 67 ? 'good' : v >= 34 ? 'warn' : 'bad');
+  const recColor = (z) => (z === 'good' ? 'var(--success)' : z === 'warn' ? 'var(--warning)' : 'var(--danger-text)');
+  const hm = (iso) => { if (!iso) return ''; const p = D.nowTz(new Date(iso)); return D.fmtTime(p.h, p.min); };
+  const fmtH = (h) => (h == null ? '—' : `${D.round(h, 1)}<small>${esc(t('unit.h'))}</small>`);
+  const fmtMs = (ms) => { const m = Math.round((+ms || 0) / 60000); return m >= 60 ? `${Math.floor(m / 60)}${t('unit.h')} ${D.pad2(m % 60)}${t('unit.m')}` : `${m}${t('unit.m')}`; };
+  const strip = (h) => h.replace(/^<p>/, '').replace(/<\/p>$/, '');
+  const md = (txt) => (D.ai ? strip(D.ai.md(txt)) : esc(txt));
+
+  /** Freshness line: a breathing dot while the reading is under 3 minutes old. */
+  function freshHtml() {
+    const f = D.whoop.freshness();
+    if (!f) return '';
+    return `<span class="wh-fresh ${f.stale ? 'stale' : 'live'}"><i></i>${esc(f.label)}</span>`;
+  }
+  /** A horizontal gauge: value against a target marker, colour by load. */
+  function gauge(val, target, max, color) {
+    const p = D.clamp((val / max) * 100, 0, 100), tp = D.clamp((target / max) * 100, 0, 100);
+    return `<div class="wh-gauge"><i class="wh-gauge-fill" style="width:${p.toFixed(1)}%;background:${color}"></i><b class="wh-gauge-target" style="left:${tp.toFixed(1)}%"></b></div>`;
+  }
+
+  D.whoop.hero = (key) => {
     const w = W();
     if (!w.connected) return '';
-    const i = D.whoop.dayInsight(key);
-    if (!i) return '';
-    const zRec = i.recovery >= 67 ? 'good' : i.recovery >= 34 ? 'warn' : 'bad';
-    const ringColor = zRec === 'good' ? 'var(--success)' : zRec === 'warn' ? 'var(--warning)' : 'var(--danger-text)';
+    key = key || D.today();
+    const i = D.whoop.dayInsight(key) || { key };
+    const live = key === D.today() ? D.whoop.live() : null;
+    const strain = live ? live.strain : i.strain, kcal = live ? live.kcal : i.kcal;
+    const hasRec = i.recovery != null;
+    const z = hasRec ? zRec(i.recovery) : '';
+    const ring = D.chart.ring({ pct: hasRec ? i.recovery : 0, size: 112, stroke: 10, color: hasRec ? recColor(z) : 'var(--line3)', label: hasRec ? i.recovery + '%' : '—', sub: t('wh.recovery') });
+    const verdict = hasRec ? t(z === 'good' ? 'wh.ready.high' : z === 'warn' ? 'wh.ready.mid' : 'wh.ready.low') : t('hl.wh.noData');
+    const sub = i.recDelta !== undefined ? md(t('wh.i.vsBase', { n: (i.recDelta > 0 ? '+' : '') + i.recDelta, b: i.recBase })) : (w.days[key] && w.days[key].calibrating ? esc(t('wh.calibrating')) : '');
+    const target = i.strainTarget || null;
+    const load = strain != null && target ? (strain - target > 3 ? 'over' : strain - target < -4 ? 'under' : 'ok') : '';
+    const gColor = load === 'over' ? 'var(--danger-text)' : load === 'ok' ? 'var(--success)' : 'var(--sec, var(--success))';
+    const strainRow = strain != null ? `<div class="wh-strain ${live ? 'live' : ''}">
+        <div class="wh-strain-head"><span class="wh-strain-lab">${esc(t('wh.strainLive'))}${live ? `<em>${esc(t('wh.live'))}</em>` : ''}</span><span class="wh-strain-val num">${strain}</span></div>
+        ${gauge(strain, target || 21, 21, gColor)}
+        <div class="wh-strain-foot">${target ? `<span>${esc(t('wh.st.target', { m: target }))}</span>` : ''}${kcal != null ? `<span>${esc(t('wh.st.kcal', { k: D.fmtNum(kcal) }))}</span>` : ''}${live && live.hrAvg ? `<span>${esc(t('wh.hr'))} <b class="num">${live.hrAvg}</b>${live.hrMax ? `, ${esc(t('wh.hrMaxShort'))} <b class="num">${live.hrMax}</b>` : ''}</span>` : ''}</div>
+      </div>` : `<div class="wh-strain"><div class="small muted">${esc(t('wh.st.none'))}</div></div>`;
+    const tile = (v, l, zone, sub) => `<div class="bento-tile">${zone ? `<i class="zone z-${zone}"></i>` : ''}<div class="val">${v}</div><div class="lab">${esc(l)}</div>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}</div>`;
+    const tiles = `<div class="bento wh-day-grid">
+        ${tile(fmtH(i.sleepH), t('wh.sleepH'), i.metPct == null ? '' : i.metPct >= 90 ? 'good' : i.metPct >= 75 ? 'warn' : 'bad', i.needH ? t('wh.i.need', { h: i.needH }) : '')}
+        ${tile(i.hrv != null ? `${i.hrv}<small>ms</small>` : '—', t('wh.hrv'), i.hrvPct === undefined ? '' : i.hrvPct >= -5 ? 'good' : i.hrvPct >= -15 ? 'warn' : 'bad', i.hrvBase ? t('wh.i.base', { b: i.hrvBase }) : '')}
+        ${tile(i.rhr != null ? `${i.rhr}<small>bpm</small>` : '—', t('wh.rhr'), i.rhrDelta === undefined ? '' : i.rhrDelta <= 1 ? 'good' : i.rhrDelta <= 4 ? 'warn' : 'bad', i.rhrBase ? t('wh.i.base', { b: i.rhrBase }) : '')}
+        ${tile(i.spo2 != null ? `${D.round(i.spo2, 1)}<small>%</small>` : i.resp != null ? `${D.round(i.resp, 1)}` : '—', i.spo2 != null ? 'SpO₂' : t('hl.wh.resp'), i.spo2 != null ? (i.spo2 >= 95 ? 'good' : i.spo2 >= 92 ? 'warn' : 'bad') : '', i.skin != null ? `${D.round(i.skin, 1)} °C` : '')}
+      </div>`;
     const rows = [];
-    if (i.gapH !== null && i.gapH !== undefined) {
-      const good = i.gapH >= -0.5;
-      rows.push({ good, txt: t(good ? 'wh.i.sleepOk' : 'wh.i.sleepShort', { h: Math.abs(i.gapH), need: i.needH }) });
-    }
+    if (i.gapH !== null && i.gapH !== undefined) { const good = i.gapH >= -0.5; rows.push({ good, txt: t(good ? 'wh.i.sleepOk' : 'wh.i.sleepShort', { h: Math.abs(i.gapH), need: i.needH }) }); }
     if (i.hrvPct !== undefined && Math.abs(i.hrvPct) >= 8) rows.push({ good: i.hrvPct > 0, txt: t(i.hrvPct > 0 ? 'wh.i.hrvUp' : 'wh.i.hrvDown', { p: Math.abs(i.hrvPct), b: i.hrvBase }) });
     if (i.rhrDelta !== undefined && Math.abs(i.rhrDelta) >= 3) rows.push({ good: i.rhrDelta < 0, txt: t(i.rhrDelta > 0 ? 'wh.i.rhrUp' : 'wh.i.rhrDown', { n: Math.abs(i.rhrDelta), b: i.rhrBase }) });
-    if (i.load === 'over') rows.push({ good: false, txt: t('wh.i.over', { s: i.strain, m: i.strainTarget }) });
-    else if (i.load === 'under') rows.push({ good: true, txt: t('wh.i.room', { m: i.strainTarget }) });
-    if (i.kcalDelta !== undefined && i.tdee) rows.push({ good: true, txt: t('wh.i.kcal', { k: D.fmtNum(i.kcal), t: D.fmtNum(i.tdee) }) });
+    if (load === 'over') rows.push({ good: false, txt: t('wh.i.over', { s: strain, m: target }) });
+    else if (load === 'under' && target) rows.push({ good: true, txt: t('wh.i.room', { m: target }) });
+    const notes = rows.length ? `<div class="wh-notes">${rows.map((r) => `<div class="wh-note ${r.good ? 'good' : 'warn'}">${D.ic(r.good ? 'check' : 'alert', 14)}<span>${md(r.txt)}</span></div>`).join('')}</div>` : '';
+    const err = w.err ? `<div class="wh-err">${D.ic('alert', 13)} ${esc(t('wh.err.' + w.err, { e: w.err }) === 'wh.err.' + w.err ? t('wh.err.http', { e: w.err }) : t('wh.err.' + w.err, { e: w.err }))}</div>` : '';
+    return `<div class="hero wh-hero">
+      <div class="wh-hero-top"><span class="wh-brand">${D.ic('bolt', 12)} WHOOP${key !== D.today() ? ` <span class="num">${esc(D.fmtDate(key, 'dm'))}</span>` : ''}</span>${key === D.today() ? freshHtml() : ''}</div>
+      <div class="hero-main wh-hero-main">${ring}<div class="hero-body"><div class="hero-title">${esc(verdict)}</div>${sub ? `<div class="hero-sub">${sub}</div>` : ''}</div></div>
+      ${strainRow}${tiles}${notes}${err}
+    </div>`;
+  };
+  D.whoop.dayCard = D.whoop.hero;   // older name
 
-    const strip = (h) => h.replace(/^<p>/, '').replace(/<\/p>$/, '');
-    const tile = (v, l, zone, sub) => `<div class="bento-tile">${zone ? `<i class="zone z-${zone}"></i>` : ''}<div class="val">${v}</div><div class="lab">${esc(l)}</div>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}</div>`;
-    return `<div class="hero wh-day">
-        <div class="hero-eyebrow">${D.ic('bolt', 12)} WHOOP · ${esc(D.fmtDate(i.key))}</div>
-        <div class="hero-main">
-          ${D.chart.ring({ pct: i.recovery || 0, size: 104, stroke: 9, color: ringColor, label: i.recovery != null ? i.recovery + '%' : '—', sub: t('wh.recovery') })}
-          <div class="hero-body">
-            <div class="hero-title">${esc(i.recovery == null ? t('hl.wh.noData') : t(zRec === 'good' ? 'wh.ready.high' : zRec === 'warn' ? 'wh.ready.mid' : 'wh.ready.low'))}</div>
-            ${i.recDelta !== undefined ? `<div class="hero-sub">${strip(D.ai ? D.ai.md(t('wh.i.vsBase', { n: (i.recDelta > 0 ? '+' : '') + i.recDelta, b: i.recBase })) : esc(t('wh.i.vsBase', { n: (i.recDelta > 0 ? '+' : '') + i.recDelta, b: i.recBase })))}</div>` : ''}
-          </div>
-        </div>
-        <div class="bento wh-day-grid">
-          ${tile(i.sleepH != null ? `${i.sleepH}<small>${t('unit.h')}</small>` : '—', t('wh.sleepH'), i.metPct == null ? '' : i.metPct >= 90 ? 'good' : i.metPct >= 75 ? 'warn' : 'bad', i.needH ? t('wh.i.need', { h: i.needH }) : '')}
-          ${tile(i.strain != null ? i.strain : '—', t('wh.strain'), i.load === 'over' ? 'bad' : i.load === 'ok' ? 'good' : '', i.strainTarget ? t('wh.i.target', { m: i.strainTarget }) : '')}
-          ${tile(i.hrv != null ? `${i.hrv}<small>ms</small>` : '—', t('wh.hrv'), i.hrvPct === undefined ? '' : i.hrvPct >= -5 ? 'good' : i.hrvPct >= -15 ? 'warn' : 'bad', i.hrvBase ? t('wh.i.base', { b: i.hrvBase }) : '')}
-          ${tile(i.rhr != null ? `${i.rhr}<small>bpm</small>` : '—', t('wh.rhr'), i.rhrDelta === undefined ? '' : i.rhrDelta <= 1 ? 'good' : i.rhrDelta <= 4 ? 'warn' : 'bad', i.rhrBase ? t('wh.i.base', { b: i.rhrBase }) : '')}
-        </div>
-        ${rows.length ? `<div class="wh-notes">${rows.map((r) => `<div class="wh-note ${r.good ? 'good' : 'warn'}">${D.ic(r.good ? 'check' : 'alert', 14)}<span>${strip(D.ai ? D.ai.md(r.txt) : esc(r.txt))}</span></div>`).join('')}</div>` : ''}
-      </div>`;
+  /** Proportional stage bar with the minutes hanging under each segment. */
+  function stagesHtml(st) {
+    if (!st) return '';
+    const tot = (+st.deep || 0) + (+st.rem || 0) + (+st.light || 0) + (+st.awake || 0);
+    if (!tot) return '';
+    const order = ['deep', 'rem', 'light', 'awake'];
+    const bar = order.map((k) => `<i style="width:${(((+st[k] || 0) / tot) * 100).toFixed(1)}%;background:${STAGE_C[k]}"></i>`).join('');
+    const legs = order.map((k) => `<span class="wh-stg"><i style="background:${STAGE_C[k]}"></i><b class="num">${fmtMs(st[k])}</b>${esc(t(k === 'awake' ? 'wh.sl.awake' : 'wh.sl.' + k))}</span>`).join('');
+    return `<div class="wh-stages">${bar}</div><div class="wh-stg-row">${legs}</div>`;
+  }
+
+  D.whoop.sleepPage = (key) => {
+    const w = W();
+    if (!w.connected) return '';
+    key = key || D.today();
+    const d = w.days[key] || {};
+    const i = D.whoop.dayInsight(key) || {};
+    if (d.sleepH == null) return `<div class="card"><div class="empty">${esc(t('wh.sl.none'))}</div></div>` + D.whoop.trendCard();
+    const metPct = i.metPct != null ? i.metPct : null;
+    const z = metPct == null ? '' : metPct >= 90 ? 'good' : metPct >= 75 ? 'warn' : 'bad';
+    const head = `<div class="card wh-sl">
+      <div class="wh-sl-top">
+        <div><div class="wh-sl-big num">${D.round(d.sleepH, 1)}<small>${esc(t('unit.h'))}</small></div><div class="small muted">${esc(t('wh.sl.got'))}${d.sleepNeedH ? `, ${esc(t('wh.sl.need'))} <b class="num">${D.round(d.sleepNeedH, 1)}</b>` : ''}</div></div>
+        ${d.bedTs && d.wakeTs ? `<div class="wh-sl-when num">${hm(d.bedTs)} <span>→</span> ${hm(d.wakeTs)}</div>` : ''}
+      </div>
+      ${metPct != null ? `<span class="bar thick mt-s"><i class="bar-fill" style="width:${D.clamp(metPct, 0, 100)}%;background:${recColor(z)}"></i></span>` : ''}
+      <div class="wh-sl-meta">${d.inBedH != null ? `<span>${esc(t('wh.sl.inBed'))} <b class="num">${D.round(d.inBedH, 1)}${esc(t('unit.h'))}</b></span>` : ''}${d.awakeH != null ? `<span>${esc(t('wh.sl.awake'))} <b class="num">${fmtMs(d.stages && d.stages.awake != null ? d.stages.awake : d.awakeH * 3.6e6)}</b></span>` : ''}${d.cycles != null ? `<span>${esc(t('wh.sl.cycles', { n: d.cycles }))}</span>` : ''}${d.disturbances != null ? `<span>${esc(t('wh.sl.dist', { n: d.disturbances }))}</span>` : ''}</div>
+      ${d.stages ? `<div class="mt">${stagesHtml(d.stages)}</div>` : ''}
+    </div>`;
+    const ringRow = (d.sleepPerf != null || d.sleepEff != null || d.sleepCons != null) ? `<div class="card"><div class="wh-rings">
+        ${d.sleepPerf != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepPerf, size: 84, stroke: 7, color: recColor(d.sleepPerf >= 85 ? 'good' : d.sleepPerf >= 70 ? 'warn' : 'bad'), glow: false })}<span>${esc(t('wh.sl.perf'))}</span></div>` : ''}
+        ${d.sleepEff != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepEff, size: 84, stroke: 7, color: 'var(--info)', glow: false })}<span>${esc(t('wh.sl.eff'))}</span></div>` : ''}
+        ${d.sleepCons != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepCons, size: 84, stroke: 7, color: 'var(--violet)', glow: false })}<span>${esc(t('wh.sl.cons'))}</span></div>` : ''}
+      </div><div class="help mt-s">${esc(d.sleepCons != null && d.sleepCons < 60 ? t('wh.sl.consHint') : t('wh.sl.effHint'))}</div></div>` : '';
+    // 14 nights: what you got, with what you needed as the target line
+    const days = D.lastDays(14, key);
+    const got = days.map((k) => num(w.days[k] && w.days[k].sleepH) || 0);
+    const needs = days.map((k) => num(w.days[k] && w.days[k].sleepNeedH)).filter((v) => v !== null);
+    const need = needs.length ? D.round(D.avg(needs), 1) : null;
+    const colors = days.map((k) => { const x = w.days[k] || {}; if (x.sleepH == null) return 'var(--line)'; const p = x.sleepNeedH ? (x.sleepH / x.sleepNeedH) * 100 : null; return p == null ? 'var(--info)' : recColor(p >= 90 ? 'good' : p >= 75 ? 'warn' : 'bad'); });
+    const axis = `<div class="ib-mx-axis wh-axis"><span>${esc(D.fmtDate(days[0], 'dm'))}</span><span>${esc(D.fmtDate(days[13], 'dm'))}</span></div>`;
+    const debt = D.whoop.sleepDebt(7);
+    const naps = D.whoop.naps(key);
+    const hist = `<div class="card"><div class="card-head"><div class="title">${D.ic('moon', 16)} ${esc(t('wh.sl.14'))}</div>${debt ? `<span class="pill ${debt.h >= 3 ? 'bad' : debt.h >= 1 ? '' : 'good'}">${esc(t('wh.sl.debt7'))}: <b class="num">${debt.h}${esc(t('unit.h'))}</b></span>` : ''}</div>
+      ${D.chart.bars({ values: got, colors, height: 72, target: need, max: Math.max(10, ...got, need || 0) })}${axis}
+      <div class="help mt-s">${need ? esc(t('wh.sl.needLine')) : ''}${naps ? `${need ? ' · ' : ''}${esc(t('wh.sl.naps', { n: naps.n, h: naps.h }))}` : ''}</div>
+    </div>`;
+    return head + ringRow + hist;
+  };
+
+  /** Today's workouts with their HR-zone bars; used by Health (strain) and Sport. */
+  D.whoop.workoutRows = (key, opts = {}) => {
+    const list = D.whoop.workoutsOn(key || D.today());
+    if (!list.length) return opts.empty === false ? '' : `<div class="empty">${esc(t('wh.wo.none'))}</div>`;
+    return `<div class="wh-wos">${list.map((x) => {
+      const zm = D.whoop.zoneMins(x);
+      const tot = zm ? D.sum(zm) : 0;
+      const zones = zm && tot ? `<div class="wh-zones">${zm.map((m, i) => (m ? `<i style="width:${((m / tot) * 100).toFixed(1)}%;background:${ZONE_C[i]}" title="${esc(t('wh.z.' + i))}: ${m} ${esc(t('unit.m'))}"></i>` : '')).join('')}</div>
+        <div class="wh-zone-row">${zm.map((m, i) => (m ? `<span><i style="background:${ZONE_C[i]}"></i>${esc(t('wh.z.' + i))} <b class="num">${m}</b></span>` : '')).join('')}</div>` : '';
+      const bits = [];
+      if (x.mins) bits.push(t('wh.wo.min', { n: x.mins }));
+      if (x.hrAvg) bits.push(`${t('wh.hr')} ${x.hrAvg}${x.hrMax ? `–${x.hrMax}` : ''}`);
+      if (x.kcal) bits.push(`${D.fmtNum(x.kcal)} ${t('wh.kcal')}`);
+      if (x.meters) bits.push(`${D.round(x.meters / 1000, 2)} km`);
+      return `<div class="wh-wo"><div class="wh-wo-head"><span class="wh-wo-ic">${D.ic('dumbbell', 15)}</span><div class="grow"><div class="wh-wo-name">${esc(x.sport || t('wh.sport'))}<span class="num muted"> ${hm(x.start)}</span></div><div class="small muted">${esc(bits.join(', '))}</div></div>${x.strain != null ? `<span class="wh-wo-strain num">${x.strain}</span>` : ''}</div>${zones}</div>`;
+    }).join('')}</div>`;
+  };
+
+  D.whoop.strainPage = (key) => {
+    const w = W();
+    if (!w.connected) return '';
+    key = key || D.today();
+    const i = D.whoop.dayInsight(key) || {};
+    const live = key === D.today() ? D.whoop.live() : null;
+    const strain = live ? live.strain : i.strain, kcal = live ? live.kcal : i.kcal;
+    const target = i.strainTarget || null;
+    const load = strain != null && target ? (strain - target > 3 ? 'over' : strain - target < -4 ? 'under' : 'ok') : '';
+    const gColor = load === 'over' ? 'var(--danger-text)' : load === 'ok' ? 'var(--success)' : 'var(--sec, var(--success))';
+    const tdee = D.whoop.tdee();
+    const top = strain == null ? `<div class="card"><div class="empty">${esc(t('wh.st.none'))}</div></div>` : `<div class="card wh-st">
+      <div class="wh-sl-top"><div><div class="wh-sl-big num">${strain}</div><div class="small muted">${esc(t('wh.st.today'))}${live ? ` · <span class="wh-live-tag">${esc(t('wh.live'))}</span>` : ''}</div></div>
+        ${live && live.since ? `<div class="wh-sl-when num">${esc(t('wh.sinceStart', { t: hm(live.since) }))}</div>` : ''}</div>
+      <div class="mt-s">${gauge(strain, target || 21, 21, gColor)}</div>
+      <div class="wh-sl-meta">${target ? `<span>${esc(t('wh.st.target', { m: target }))}</span>` : ''}${target && load === 'under' ? `<span class="good">${esc(t('wh.st.room', { n: target }))}</span>` : ''}${target && load === 'over' ? `<span class="bad">${esc(t('wh.st.over', { n: D.round(strain - target, 1) }))}</span>` : ''}</div>
+      <div class="wh-sl-meta">${kcal != null ? `<span>${esc(t('wh.st.kcal', { k: D.fmtNum(kcal) }))}</span>` : ''}${tdee ? `<span>${esc(t('wh.st.tdee', { t: D.fmtNum(tdee) }))}</span>` : ''}${(live || {}).hrAvg || i.hrAvg ? `<span>${esc(t('wh.hr'))} <b class="num">${(live || {}).hrAvg || i.hrAvg}</b>${(live || {}).hrMax || i.hrMax ? `, ${esc(t('wh.hrMaxShort'))} <b class="num">${(live || {}).hrMax || i.hrMax}</b>` : ''}</span>` : ''}</div>
+    </div>`;
+    const wos = `<div class="card"><div class="card-head"><div class="title">${D.ic('dumbbell', 16)} ${esc(t('wh.wo.today'))}</div></div>${D.whoop.workoutRows(key)}</div>`;
+    // 14 days of strain, each bar coloured by that day's recovery
+    const days = D.lastDays(14, key);
+    const vals = days.map((k) => num(w.days[k] && w.days[k].strain) || 0);
+    const colors = days.map((k) => { const r = num(w.days[k] && w.days[k].recovery); return r == null ? 'var(--info)' : recColor(zRec(r)); });
+    const axis = `<div class="ib-mx-axis wh-axis"><span>${esc(D.fmtDate(days[0], 'dm'))}</span><span>${esc(D.fmtDate(days[13], 'dm'))}</span></div>`;
+    const hist = `<div class="card"><div class="card-head"><div class="title">${D.ic('bolt', 16)} ${esc(t('wh.st.14'))}</div></div>
+      ${D.chart.bars({ values: vals, colors, height: 72, target: target, max: 21 })}${axis}<div class="help mt-s">${esc(t('wh.st.legend'))}</div></div>`;
+    return top + wos + hist + D.whoop.trendCard();
+  };
+
+  /** Connection card: who is connected, how fresh, refresh, disconnect — or the invitation to connect. */
+  D.whoop.footer = () => {
+    const w = W();
+    if (!w.connected) {
+      return `<div class="card wh-intro"><div class="wh-intro-logo">${D.ic('bolt', 26)}</div><div class="title">WHOOP</div><p class="help">${esc(t('wh.intro'))}</p>
+        ${D.serverEnabled() ? '' : `<div class="banner">${D.ic('info', 16)}<span>${esc(t('wh.needServer'))}</span></div>`}
+        <div class="row wrap"><button class="btn" data-act="hlWhoopConnect">${D.ic('link', 16)} ${esc(t('wh.connect'))}</button><button class="btn ghost" data-act="hlWhoopCheck">${D.ic('refresh', 16)} ${esc(t('hl.wh.check'))}</button></div></div>`;
+    }
+    const p = w.profile || {};
+    const name = [p.first, p.last].filter(Boolean).join(' ') || 'WHOOP';
+    const f = D.whoop.freshness();
+    return `<div class="card flat wh-foot"><div class="row between wrap">
+      <div class="grow"><div class="small"><b>${esc(t('wh.connectedAs', { name }))}</b></div><div class="tiny muted">${f ? esc(t('wh.updated', { t: f.label })) : esc(t('wh.pending'))}${w.rl && w.rl.remaining != null ? ` · ${w.rl.remaining}/${w.rl.limit}` : ''}</div></div>
+      <div class="row"><button class="btn ghost sm" data-act="hlWhoopRefresh" id="hlWhRefresh" ${syncing ? 'disabled' : ''}>${D.ic('refresh', 14)} ${esc(t('wh.refreshNow'))}</button><button class="btn icon" data-act="hlWhoopDisconnect" aria-label="${esc(t('wh.disconnect'))}" title="${esc(t('wh.disconnect'))}">${D.ic('logout', 16)}</button></div>
+    </div></div>`;
   };
 
   /* ------------------------------------------------------------------ */
@@ -444,33 +646,9 @@
     return `<div class="card wh-trend"><div class="card-head"><div class="title">${D.ic('trend', 16)} ${esc(t('wh.trend'))}</div>${seg}</div>${rows}</div>`;
   };
 
-  D.whoop.workoutsCard = () => {
-    const w = W();
-    if (!w.connected) return '';
-    const list = w.workouts.slice(0, 10);
-    const body = list.length ? `<ul class="list wh-wo">${list.map((x) => {
-      const bits = [];
-      if (x.mins) bits.push(`${x.mins} ${t('unit.m')}`);
-      if (x.hrAvg) bits.push(`${x.hrAvg} ${t('wh.hrAvg')}`);
-      if (x.kcal) bits.push(`${D.fmtNum(x.kcal)} ${t('wh.kcal')}`);
-      if (x.meters) bits.push(`${D.round(x.meters / 1000, 2)} km`);
-      return `<li class="li"><span class="wh-wo-ic">${D.ic('dumbbell', 16)}</span>
-        <div class="li-body"><div class="li-text">${esc(x.sport || t('wh.sport'))}</div>
-          <div class="li-meta"><span class="num">${esc(D.fmtDate(x.k))}</span>${bits.length ? `<span>${esc(bits.join(' · '))}</span>` : ''}</div></div>
-        ${x.strain != null ? `<span class="li-right num wh-wo-strain">${x.strain}</span>` : ''}</li>`;
-    }).join('')}</ul>` : `<div class="empty">${esc(t('wh.noWorkouts'))}</div>`;
-    return `<div class="card"><div class="card-head"><div class="title">${D.ic('dumbbell', 16)} ${esc(t('wh.workouts'))}</div>${list.length ? `<span class="small muted num">${list.length}</span>` : ''}</div>${body}</div>`;
-  };
-
-  D.whoop.bodyCard = () => {
-    const b = W().body || {};
-    if (!b.heightCm && !b.weightKg && !b.maxHr) return '';
-    const cell = (v, l) => `<div class="stat"><div class="stat-num num">${v}</div><div class="stat-label">${esc(l)}</div></div>`;
-    return `<div class="card"><div class="card-head"><div class="title">${D.ic('user', 16)} ${esc(t('wh.body'))}</div></div>
-      <div class="stat-grid">${b.heightCm ? cell(`${b.heightCm}<small>cm</small>`, t('wh.height')) : ''}${b.weightKg ? cell(`${b.weightKg}<small>kg</small>`, t('wh.weight')) : ''}${b.maxHr ? cell(`${b.maxHr}<small>bpm</small>`, t('wh.maxHr')) : ''}</div></div>`;
-  };
-
-  /* boot + day rollover */
-  D.on('boot', () => { setTimeout(() => { try { D.whoop.autoSync(); } catch (e) {} }, 2500); });
-  D.on('day:changed', () => { try { D.whoop.autoSync(); } catch (e) {} });
+  /* boot · every minute · when the app comes back to the foreground · day rollover */
+  D.on('boot', () => { setTimeout(() => D.whoop.poll(), 1500); schedule(); });
+  D.on('day:changed', () => D.whoop.poll({ force: true }));
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - lastPollAt > 15000) D.whoop.poll(); });
+  window.addEventListener('focus', () => { if (Date.now() - lastPollAt > 15000) D.whoop.poll(); });
 })();

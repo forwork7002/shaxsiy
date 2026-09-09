@@ -62,7 +62,7 @@ User=$APP_USER
 Group=$APP_USER
 WorkingDirectory=$APP_DIR
 EnvironmentFile=$APP_DIR/.env
-ExecStart=$APP_DIR/.venv/bin/gunicorn -w 2 -b 127.0.0.1:8081 --timeout 120 --access-logfile - api:app
+ExecStart=$APP_DIR/.venv/bin/gunicorn -w 2 -b 127.0.0.1:8081 --no-control-socket --timeout 120 --access-logfile - api:app
 Restart=always
 RestartSec=3
 # ilova faqat o'z papkasiga yozadi

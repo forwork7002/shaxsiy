@@ -233,6 +233,9 @@
     out.gym.logs = Object.assign({}, r.gym.logs);
     for (const k of Object.keys(l.gym.logs || {})) out.gym.logs[k] = unionById(l.gym.logs[k], r.gym.logs[k]);
     out.nova.threads = unionById(l.nova.threads, r.nova.threads);
+    out.whoop.days = Object.assign({}, r.whoop.days, l.whoop.days);
+    out.whoop.workouts = unionById(l.whoop.workouts, r.whoop.workouts);
+    out.whoop.connected = !!(l.whoop.connected || r.whoop.connected);
     out.meta.deviceId = l.meta.deviceId;
     out.meta.updatedAt = Math.max(+r.meta.updatedAt || 0, +l.meta.updatedAt || 0, Date.now());
     return out;

@@ -13,11 +13,6 @@
 .wh-trend-foot b { color: var(--text2); font-weight: 700; }
 .wh-trend-foot span:last-child { margin-left: auto; }
 
-.wh-wo .li { align-items: center; }
-.wh-wo-ic { width: 34px; height: 34px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px;
-  background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); }
-.wh-wo-strain { color: var(--accent); font-size: 15px; }
-
 /* Bugun bo'limidagi tayyorlik chizig'i */
 .wh-ready { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r-sm); margin-bottom: 12px;
   background: var(--inset); border: 1px solid var(--line); }
@@ -30,11 +25,11 @@
 .wh-ready.bad .wh-ready-num { color: var(--danger-text); }
 .wh-ready-num small { font-size: 12px; margin-left: 1px; }
 .wh-ready-body { flex: 1; min-width: 0; }
-.wh-ready-label { font-size: 10.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); }
-.wh-ready-text { font-size: 13px; color: var(--text); line-height: 1.35; margin-top: 2px; }
+.wh-ready-label { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); }
+.wh-ready-text { display: block; font-size: 13px; color: var(--text); line-height: 1.35; margin-top: 2px; }
 .wh-ready-side { display: flex; gap: 10px; flex: none; font-size: 11px; color: var(--text3); text-align: right; }
 .wh-ready-side b { display: block; font-family: var(--mono); font-size: 13px; color: var(--text2); font-weight: 700; }
-@media (max-width: 400px) { .wh-ready-side { display: none; } }
+@media (max-width: 400px) { .wh-ready-side { gap: 0; } .wh-ready-side span:first-child:not(:last-child) { display: none; } }
 
 .wh-auto { font-size: 11px; color: var(--info); display: inline-flex; align-items: center; gap: 4px; }
 
@@ -51,3 +46,94 @@
 .wh-note.warn { border-color: color-mix(in srgb, var(--warning) 26%, transparent); }
 .wh-note.warn .ic { color: var(--warning); }
 .wh-note strong { color: var(--text); font-weight: 700; }
+
+/* ===================================================================== */
+/* WHOOP hero — the body's state, read in one glance                      */
+/* One bold thing: the recovery ring and a live strain gauge. Everything  */
+/* else on the page stays quiet and proportional.                         */
+/* ===================================================================== */
+.wh-hero { padding-top: 16px; }
+.wh-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
+.wh-brand { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 800; letter-spacing: .02em; color: color-mix(in srgb, var(--sec, var(--success)) 80%, var(--text3)); }
+.wh-brand .num { font-weight: 600; color: var(--text3); }
+.wh-hero-main { margin-top: 6px; }
+.wh-hero .hero-title { font-family: var(--font-display); font-size: 17px; }
+
+/* freshness: a breathing dot while the reading is under three minutes old */
+.wh-fresh { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text3); white-space: nowrap; }
+.wh-fresh i { width: 7px; height: 7px; border-radius: 50%; background: var(--text4); flex: none; }
+.wh-fresh.live i { background: var(--success); box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 45%, transparent); animation: whBreathe 2.4s ease-out infinite; }
+.wh-fresh.stale { color: var(--warning); }
+.wh-fresh.stale i { background: var(--warning); }
+@keyframes whBreathe { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 45%, transparent); } 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
+@media (prefers-reduced-motion: reduce) { .wh-fresh.live i { animation: none; } }
+
+/* live strain row inside the hero */
+.wh-strain { margin-top: 16px; padding: 12px 13px; border-radius: 14px; background: var(--glass); border: 1px solid var(--line); }
+.wh-strain-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.wh-strain-lab { font-size: 12.5px; font-weight: 700; color: var(--text2); display: inline-flex; align-items: center; gap: 7px; }
+.wh-strain-lab em { font-style: normal; font-size: 10px; font-weight: 800; letter-spacing: .06em; padding: 2px 7px; border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success); }
+.wh-strain-val { font-size: 26px; font-weight: 800; letter-spacing: -.03em; color: var(--text); line-height: 1; }
+.wh-strain-foot { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; font-size: 11.5px; color: var(--text3); }
+.wh-strain-foot b { color: var(--text2); }
+
+/* gauge: value against a target tick */
+.wh-gauge { position: relative; height: 10px; margin-top: 10px; border-radius: 6px; background: var(--line); overflow: visible; }
+.wh-gauge-fill { display: block; height: 100%; border-radius: 6px; transition: width .6s var(--ease-out), background .3s; }
+.wh-gauge-target { position: absolute; top: -4px; width: 2px; height: 18px; margin-left: -1px; border-radius: 1px; background: var(--text); opacity: .7; transition: left .6s var(--ease-out); }
+
+.wh-err { margin-top: 12px; display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--warning); }
+
+/* ---------- sleep + strain pages ---------- */
+.wh-sl-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.wh-sl-big { font-family: var(--font-display); font-size: 40px; font-weight: 700; letter-spacing: -.04em; line-height: 1; color: var(--text); }
+.wh-sl-big small { font-size: 15px; font-weight: 700; letter-spacing: 0; margin-left: 2px; color: var(--text3); }
+.wh-sl-when { font-size: 14px; font-weight: 700; color: var(--text2); white-space: nowrap; }
+.wh-sl-when span { color: var(--text4); margin: 0 3px; }
+.wh-sl-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; font-size: 11.5px; color: var(--text3); }
+.wh-sl-meta b { color: var(--text2); }
+.wh-sl-meta .good { color: var(--success); } .wh-sl-meta .bad { color: var(--danger-text); }
+.wh-live-tag { font-size: 10px; font-weight: 800; letter-spacing: .06em; padding: 1px 7px; border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success); }
+
+/* stage bar with the minutes hanging under each segment */
+.wh-stages { display: flex; gap: 2px; height: 14px; border-radius: 7px; overflow: hidden; background: var(--line); }
+.wh-stages i { display: block; height: 100%; min-width: 2px; transition: width .6s var(--ease-out); }
+.wh-stg-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 10px; }
+.wh-stg { display: flex; flex-direction: column; gap: 2px; font-size: 10.5px; color: var(--text3); min-width: 0; }
+.wh-stg i { width: 18px; height: 3px; border-radius: 2px; display: block; }
+.wh-stg b { font-size: 13px; color: var(--text); }
+
+.wh-rings { display: flex; justify-content: space-around; gap: 8px; }
+.wh-ring { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text3); }
+.wh-ring .ring-pct { font-size: 17px; }
+.wh-axis { margin-left: 0; }
+
+/* workouts with HR-zone bars (Health strain page and Sport) */
+.wh-wos { display: flex; flex-direction: column; gap: 10px; }
+.wh-wo { padding: 10px 12px; border-radius: 13px; background: var(--row-bg); border: 1px solid var(--row-line); }
+.wh-wo-head { display: flex; align-items: center; gap: 10px; }
+.wh-wo-ic { width: 32px; height: 32px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px;
+  background: color-mix(in srgb, var(--sec, var(--accent)) 14%, transparent); color: var(--sec, var(--accent)); }
+.wh-wo-name { font-size: 13.5px; font-weight: 700; color: var(--text); text-transform: capitalize; }
+.wh-wo-strain { font-size: 17px; font-weight: 800; color: var(--sec, var(--accent)); flex: none; }
+.wh-zones { display: flex; gap: 2px; height: 8px; margin-top: 10px; border-radius: 4px; overflow: hidden; background: var(--line); }
+.wh-zones i { display: block; height: 100%; min-width: 2px; }
+.wh-zone-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; font-size: 10.5px; color: var(--text3); }
+.wh-zone-row i { display: inline-block; width: 7px; height: 7px; border-radius: 2px; margin-right: 4px; vertical-align: -1px; }
+.wh-zone-row b { color: var(--text2); }
+
+/* connection card */
+.wh-intro { text-align: center; padding: 26px 18px; }
+.wh-intro .title { justify-content: center; font-size: 18px; margin-bottom: 6px; }
+.wh-intro .help { max-width: 380px; margin: 0 auto 14px; }
+.wh-intro .row { justify-content: center; }
+.wh-intro-logo { width: 54px; height: 54px; margin: 0 auto 12px; border-radius: 16px; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--sec, var(--success)) 14%, transparent); color: var(--sec, var(--success)); }
+.wh-foot .tiny { margin-top: 2px; }
+
+/* Bugun strip additions */
+.wh-ready-fresh { font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--text4); margin-left: 6px; }
+.wh-ready-fresh.stale { color: var(--warning); }
+.wh-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--success); margin-left: 4px; vertical-align: 2px; animation: whBreathe 2.4s ease-out infinite; }

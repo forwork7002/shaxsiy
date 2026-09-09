@@ -20,6 +20,8 @@ Env (start.sh):
   AI_MODEL           default: claude-opus-5
   PORT               default 8081
 """
+import base64
+import fcntl
 import hashlib
 import hmac
 import html
@@ -414,7 +416,9 @@ def whoop_status():
     uid, err = current_user()
     if err:
         return err
-    return jsonify({"connected": whoop_tokens(uid) is not None, "configured": bool(WHOOP_ID and WHOOP_SECRET)})
+    snap = _snap_read(uid) if whoop_tokens(uid) is not None else None
+    return jsonify({"connected": whoop_tokens(uid) is not None, "configured": bool(WHOOP_ID and WHOOP_SECRET),
+                    "polling": WHOOP_POLL, "fetchedAt": (snap or {}).get("fetchedAt"), "err": (snap or {}).get("err")})
 
 
 @app.post("/api/whoop/disconnect")
@@ -442,6 +446,410 @@ def whoop_data():
     url = base + path + ("?" + urllib.parse.urlencode(fwd) if fwd else "")
     status, body = http_json(url, headers={"Authorization": f"Bearer {token}"})
     return jsonify(body), status
+
+
+# ═══════════════════════ WHOOP: fon yangilash + snapshot + webhook ═══════════════════════
+#
+# Mijoz WHOOP'ni hech qachon kutmaydi. Bitta fon oqimi (ikki gunicorn jarayoni
+# orasida flock bilan yagona) WHOOP'dan o'zi tortadi, normallashtiradi va kichik
+# snapshot faylga yozadi; mijoz har daqiqa shu faylni ETag bilan so'raydi —
+# o'zgarish bo'lmasa 304, ya'ni deyarli bepul.
+#
+# Byudjet (limit 100/daq, 10 000/kun): /cycle har 60 s (jonli zo'riqish) = 1 440,
+# recovery+sleep+workout har 5 daq = 864, body+profile soatiga = 48 → ≈ 2 350/kun.
+
+WHOOP_POLL = os.environ.get("MA_WHOOP_POLL", "1") != "0"
+WH_FAST, WH_SLOW, WH_BODY = 60, 300, 3600
+WH_KEEP_DAYS, WH_KEEP_WORKOUTS = 120, 60
+WH_FORCE_GAP = 20            # webhook/qo'lda yangilashlar orasidagi eng kam oraliq
+_wh_state: dict = {}          # uid → {"snap", "t_fast", "t_slow", "t_body", "forced"}
+_wh_mem: dict = {}            # uid → (mtime, snap) — fayl keshi, boshqa jarayon uchun ham
+
+
+def whoop_cache_file(uid: str) -> Path:
+    return user_file(uid).with_name(user_file(uid).stem + ".whoop.cache.json")
+
+
+def whoop_flag_file(uid: str) -> Path:
+    return user_file(uid).with_name(user_file(uid).stem + ".whoop.refresh")
+
+
+def _wh_get(url: str, token: str):
+    """(status, body, headers) — rate-limit sarlavhalari kerak bo'lgani uchun http_json'dan alohida."""
+    req = urllib.request.Request(url, headers={
+        "Authorization": f"Bearer {token}", "Accept": "application/json", "User-Agent": USER_AGENT,
+    })
+    try:
+        with urllib.request.urlopen(req, timeout=25) as r:
+            raw = r.read().decode("utf-8")
+            return r.status, (json.loads(raw) if raw else {}), dict(r.headers)
+    except urllib.error.HTTPError as e:
+        try:
+            body = json.loads(e.read().decode("utf-8") or "{}")
+        except Exception:  # noqa: BLE001
+            body = {}
+        return e.code, body, dict(e.headers)
+    except Exception as e:  # noqa: BLE001
+        return 0, {"error": str(e)[:200]}, {}
+
+
+def _num(v):
+    try:
+        return None if v is None else float(v)
+    except (TypeError, ValueError):
+        return None
+
+
+def _rnd(v, d=0):
+    v = _num(v)
+    return None if v is None else (round(v) if d == 0 else round(v, d))
+
+
+def _h(ms):
+    v = _num(ms)
+    return None if v is None else round(v / 3.6e6, 2)
+
+
+# ── normallashtirish: bitta WHOOP yozuvi → kichik, tekis dict ──
+def _n_recovery(r):
+    s = (r or {}).get("score")
+    if not s:
+        return None
+    return {
+        "id": r.get("sleep_id") or str(r.get("cycle_id")), "cycleId": r.get("cycle_id"), "ts": r.get("created_at") or r.get("updated_at"),
+        "recovery": _rnd(s.get("recovery_score")), "hrv": _rnd(s.get("hrv_rmssd_milli")), "rhr": _rnd(s.get("resting_heart_rate")),
+        "spo2": _rnd(s.get("spo2_percentage"), 1), "skin": _rnd(s.get("skin_temp_celsius"), 1),
+        "calibrating": bool(s.get("user_calibrating")), "state": r.get("score_state"),
+    }
+
+
+def _n_sleep(r):
+    s = (r or {}).get("score")
+    if not s or not r.get("id"):
+        return None
+    st, need = s.get("stage_summary") or {}, s.get("sleep_needed") or {}
+    rem, deep, light = _num(st.get("total_rem_sleep_time_milli")) or 0, _num(st.get("total_slow_wave_sleep_time_milli")) or 0, _num(st.get("total_light_sleep_time_milli")) or 0
+    awake, in_bed, nodata = _num(st.get("total_awake_time_milli")) or 0, _num(st.get("total_in_bed_time_milli")) or 0, _num(st.get("total_no_data_time_milli")) or 0
+    asleep = (in_bed - awake) if in_bed else (rem + deep + light)
+    need_ms = (_num(need.get("baseline_milli")) or 0) + (_num(need.get("need_from_sleep_debt_milli")) or 0) \
+        + (_num(need.get("need_from_recent_strain_milli")) or 0) - (_num(need.get("need_from_recent_nap_milli")) or 0)
+    return {
+        "id": r["id"], "cycleId": r.get("cycle_id"), "start": r.get("start"), "end": r.get("end"), "nap": bool(r.get("nap")),
+        "sleepH": round(asleep / 3.6e6, 2) if asleep else None, "inBedH": _h(in_bed), "awakeH": _h(awake), "noDataH": _h(nodata),
+        "stages": {"rem": rem, "deep": deep, "light": light, "awake": awake},
+        "cycles": st.get("sleep_cycle_count"), "disturbances": st.get("disturbance_count"),
+        "sleepNeedH": round(need_ms / 3.6e6, 2) if need_ms > 0 else None,
+        "needBaseH": _h(need.get("baseline_milli")), "debtH": _h(need.get("need_from_sleep_debt_milli")),
+        "needStrainH": _h(need.get("need_from_recent_strain_milli")),
+        "sleepPerf": _rnd(s.get("sleep_performance_percentage")), "sleepEff": _rnd(s.get("sleep_efficiency_percentage")),
+        "sleepCons": _rnd(s.get("sleep_consistency_percentage")), "resp": _rnd(s.get("respiratory_rate"), 1),
+        "state": r.get("score_state"),
+    }
+
+
+def _n_cycle(r):
+    s = (r or {}).get("score")
+    if not s or r.get("id") is None:
+        return None
+    kj = _num(s.get("kilojoule"))
+    return {
+        "id": r["id"], "start": r.get("start"), "end": r.get("end"), "updatedAt": r.get("updated_at"),
+        "strain": _rnd(s.get("strain"), 1), "kcal": round(kj / 4.184) if kj is not None else None,
+        "hrAvg": _rnd(s.get("average_heart_rate")), "hrMax": _rnd(s.get("max_heart_rate")), "state": r.get("score_state"),
+    }
+
+
+def _n_workout(r):
+    if not r or not r.get("id"):
+        return None
+    s = r.get("score") or {}
+    z = s.get("zone_durations") or {}
+    zones = [(_num(z.get(k)) or 0) for k in ("zone_zero_milli", "zone_one_milli", "zone_two_milli", "zone_three_milli", "zone_four_milli", "zone_five_milli")]
+    kj = _num(s.get("kilojoule"))
+    mins = None
+    try:
+        a = datetime.fromisoformat(r["start"].replace("Z", "+00:00")); b = datetime.fromisoformat(r["end"].replace("Z", "+00:00"))
+        mins = round((b - a).total_seconds() / 60)
+    except Exception:  # noqa: BLE001
+        pass
+    return {
+        "id": r["id"], "start": r.get("start"), "end": r.get("end"), "sport": r.get("sport_name") or "", "sportId": r.get("sport_id"),
+        "strain": _rnd(s.get("strain"), 1), "kcal": round(kj / 4.184) if kj is not None else None,
+        "hrAvg": _rnd(s.get("average_heart_rate")), "hrMax": _rnd(s.get("max_heart_rate")),
+        "meters": _rnd(s.get("distance_meter")), "altGain": _rnd(s.get("altitude_gain_meter")),
+        "pctRecorded": _rnd((_num(s.get("percent_recorded")) or 0) * 100), "zones": zones if any(zones) else None,
+        "mins": mins, "state": r.get("score_state"),
+    }
+
+
+def _wh_collect(token: str, path: str, pages: int, limit: int = 25):
+    """(records, status, headers) — next_token bo'ylab `pages` sahifa."""
+    out, tok, status, hdr = [], None, 0, {}
+    for _ in range(max(1, pages)):
+        q = {"limit": limit}
+        if tok:
+            q["nextToken"] = tok
+        status, body, hdr = _wh_get(WHOOP_API_V2 + path + "?" + urllib.parse.urlencode(q), token)
+        if status != 200 or not isinstance(body, dict):
+            break
+        recs = body.get("records") or []
+        out.extend(recs)
+        tok = body.get("next_token")
+        if not tok or not recs:
+            break
+    return out, status, hdr
+
+
+def _wh_rl(hdr: dict):
+    def first(v):
+        try:
+            return int(str(v).split(",")[0].split(";")[0].strip())
+        except (TypeError, ValueError):
+            return None
+    keys = {k.lower(): v for k, v in (hdr or {}).items()}
+    return {"limit": first(keys.get("x-ratelimit-limit")), "remaining": first(keys.get("x-ratelimit-remaining")), "reset": first(keys.get("x-ratelimit-reset"))}
+
+
+def _wh_merge(existing: list, fresh: list, ts_key: str, keep_days: int, cap: int = 0):
+    by = {x["id"]: x for x in (existing or []) if isinstance(x, dict) and x.get("id") is not None}
+    changed = False
+    for x in fresh:
+        if not x:
+            continue
+        if by.get(x["id"]) != x:
+            by[x["id"]] = x
+            changed = True
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=keep_days)).isoformat()
+    lst = [x for x in by.values() if str(x.get(ts_key) or "") >= cutoff[:19]]
+    if len(lst) != len(by):
+        changed = True
+    lst.sort(key=lambda x: str(x.get(ts_key) or ""), reverse=True)
+    if cap and len(lst) > cap:
+        lst = lst[:cap]
+    return lst, changed
+
+
+def _snap_read(uid: str):
+    f = whoop_cache_file(uid)
+    try:
+        m = f.stat().st_mtime
+    except OSError:
+        return None
+    hit = _wh_mem.get(uid)
+    if hit and hit[0] == m:
+        return hit[1]
+    try:
+        snap = json.loads(f.read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001
+        return None
+    _wh_mem[uid] = (m, snap)
+    return snap
+
+
+def _snap_write(uid: str, snap: dict):
+    f = whoop_cache_file(uid)
+    tmp = f.with_suffix(".tmp")
+    tmp.write_text(json.dumps(snap, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    tmp.replace(f)
+    _wh_mem[uid] = (f.stat().st_mtime, snap)
+
+
+def _wh_tick(uid: str, now: float):
+    """Bitta foydalanuvchi uchun navbatdagi tortishlar. Hech qanday so'rovni kutmay xato qaytarmaydi."""
+    st = _wh_state.setdefault(uid, {"t_fast": 0, "t_slow": 0, "t_body": 0, "forced": 0, "backfilled": False})
+    snap = _snap_read(uid) or {"recovery": [], "sleep": [], "cycle": [], "workout": [], "body": {}, "profile": {}, "updatedAt": 0}
+    if not st["backfilled"]:
+        st["backfilled"] = bool(snap.get("backfilled"))
+    forced = False
+    flag = whoop_flag_file(uid)
+    if flag.exists() and now - st["forced"] >= WH_FORCE_GAP:
+        forced = True
+        st["forced"] = now
+        try:
+            flag.unlink()
+        except OSError:
+            pass
+    do_fast = forced or now - st["t_fast"] >= WH_FAST
+    do_slow = forced or now - st["t_slow"] >= WH_SLOW or not st["backfilled"]
+    do_body = now - st["t_body"] >= WH_BODY or not snap.get("profile")
+    if not (do_fast or do_slow or do_body):
+        return
+    token = whoop_access(uid)
+    if not token:
+        snap["err"] = "not_connected"
+        snap["fetchedAt"] = int(now * 1000)
+        _snap_write(uid, snap)
+        return
+    changed, err, rl = False, None, snap.get("rl")
+    first = not st["backfilled"]
+    pages = 4 if first else 1
+
+    def pull(path, norm, key, ts_key, keep, cap=0, limit=25):
+        nonlocal changed, err, rl
+        recs, status, hdr = _wh_collect(token, path, pages, limit)
+        if hdr:
+            rl = _wh_rl(hdr)
+        if status == 429:
+            err = "rate_limited"
+            return False
+        if status != 200:
+            err = f"http_{status}"
+            return False
+        lst, ch = _wh_merge(snap.get(key) or [], [norm(r) for r in recs], ts_key, keep, cap)
+        snap[key] = lst
+        changed = changed or ch
+        return True
+
+    if do_fast:
+        st["t_fast"] = now
+        pull("/cycle", _n_cycle, "cycle", "start", WH_KEEP_DAYS, limit=3 if not first else 25)
+    if do_slow and err != "rate_limited":
+        st["t_slow"] = now
+        ok = pull("/recovery", _n_recovery, "recovery", "ts", WH_KEEP_DAYS, limit=5 if not first else 25)
+        ok = pull("/activity/sleep", _n_sleep, "sleep", "end", WH_KEEP_DAYS, limit=5 if not first else 25) and ok
+        ok = pull("/activity/workout", _n_workout, "workout", "start", WH_KEEP_DAYS, WH_KEEP_WORKOUTS, limit=10 if not first else 25) and ok
+        if first and ok:
+            st["backfilled"] = True
+            snap["backfilled"] = True
+            changed = True
+    if do_body and err != "rate_limited":
+        st["t_body"] = now
+        s1, b, h1 = _wh_get(WHOOP_API_V2 + "/user/measurement/body", token)
+        if s1 == 200 and isinstance(b, dict):
+            body = {"heightCm": round(_num(b.get("height_meter")) * 100) if _num(b.get("height_meter")) else None,
+                    "weightKg": _rnd(b.get("weight_kilogram"), 1), "maxHr": _rnd(b.get("max_heart_rate"))}
+            if snap.get("body") != body:
+                snap["body"] = body
+                changed = True
+        s2, p, h2 = _wh_get(WHOOP_API_V2 + "/user/profile/basic", token)
+        if s2 == 200 and isinstance(p, dict):
+            prof = {"userId": p.get("user_id"), "first": p.get("first_name") or "", "last": p.get("last_name") or ""}
+            if snap.get("profile") != prof:
+                snap["profile"] = prof
+                changed = True
+        if h2 or h1:
+            rl = _wh_rl(h2 or h1)
+    snap["fetchedAt"] = int(now * 1000)
+    if rl:
+        snap["rl"] = rl
+    if err != snap.get("err"):
+        snap["err"] = err
+        changed = True
+    if changed:
+        snap["updatedAt"] = int(now * 1000)
+    _snap_write(uid, snap)
+    if err:
+        log.warning("WHOOP %s: %s (rl=%s)", uid, err, rl)
+
+
+def _wh_uids():
+    return sorted(f.name[:-len(".whoop.json")] for f in DATA_DIR.glob("*.whoop.json"))
+
+
+def _wh_loop():
+    lock_path = DATA_DIR / "whoop.lock"
+    fd = None
+    while True:
+        try:
+            if fd is None:
+                fd = os.open(lock_path, os.O_RDWR | os.O_CREAT, 0o600)
+            try:
+                fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except OSError:
+                time.sleep(30)   # boshqa jarayon tortmoqda; u o'lsa qulf bo'shaydi
+                continue
+            log.info("WHOOP fon yangilash boshlandi (pid %s)", os.getpid())
+            while True:
+                now = time.time()
+                for uid in _wh_uids():
+                    try:
+                        _wh_tick(uid, now)
+                    except Exception as e:  # noqa: BLE001
+                        log.exception("WHOOP tick %s: %s", uid, e)
+                # keyingi tekshiruvgacha: 5 s — bayroq (webhook) tez ilinishi uchun
+                time.sleep(5)
+        except Exception as e:  # noqa: BLE001
+            log.exception("WHOOP loop: %s", e)
+            time.sleep(15)
+
+
+def _whoop_poll_start():
+    if not WHOOP_POLL or not (WHOOP_ID and WHOOP_SECRET):
+        return
+    t = threading.Thread(target=_wh_loop, name="whoop-poll", daemon=True)
+    t.start()
+
+
+@app.get("/api/whoop/snapshot")
+def whoop_snapshot():
+    """Normallashtirilgan WHOOP ma'lumoti — mijoz har daqiqa shuni so'raydi. ETag: o'zgarmasa 304."""
+    uid, err = current_user()
+    if err:
+        return err
+    if whoop_tokens(uid) is None:
+        return jsonify({"connected": False})
+    snap = _snap_read(uid)
+    if not snap:
+        # birinchi tortish hali bo'lmagan — oqim keyingi 5 soniyada oladi
+        whoop_flag_file(uid).touch()
+        r = jsonify({"connected": True, "pending": True})
+        r.headers["Cache-Control"] = "no-store"
+        return r
+    etag = '"%s-%s"' % (snap.get("updatedAt", 0), snap.get("fetchedAt", 0) // 60000)
+    if request.headers.get("If-None-Match") == etag:
+        return Response(status=304, headers={"ETag": etag, "Cache-Control": "no-cache"})
+    out = dict(snap)
+    out["connected"] = True
+    r = jsonify(out)
+    r.headers["ETag"] = etag
+    r.headers["Cache-Control"] = "no-cache"
+    return r
+
+
+@app.post("/api/whoop/refresh")
+def whoop_refresh():
+    """Qo'lda «hozir yangila»: bayroq qo'yadi, oqim 5 s ichida tortadi. So'rov hech narsani kutmaydi."""
+    uid, err = current_user()
+    if err:
+        return err
+    if whoop_tokens(uid) is None:
+        return jsonify({"error": "not_connected"}), 401
+    whoop_flag_file(uid).touch()
+    return jsonify({"ok": True})
+
+
+@app.post("/api/whoop/webhook")
+def whoop_webhook():
+    """WHOOP yangilanish bergan zahoti chaqiradi. Imzo: base64(HMAC-SHA256(timestamp + body, client_secret))."""
+    if not WHOOP_SECRET:
+        return jsonify({"error": "whoop_not_configured"}), 501
+    raw = request.get_data() or b""
+    ts = request.headers.get("X-WHOOP-Signature-Timestamp", "")
+    sig = request.headers.get("X-WHOOP-Signature", "")
+    calc = base64.b64encode(hmac.new(WHOOP_SECRET.encode(), ts.encode() + raw, hashlib.sha256).digest()).decode()
+    if not ts or not sig or not hmac.compare_digest(calc, sig):
+        log.warning("WHOOP webhook: imzo noto'g'ri (%s)", request.headers.get("X-Forwarded-For", request.remote_addr))
+        return jsonify({"error": "bad_signature"}), 401
+    try:
+        ev = json.loads(raw.decode("utf-8") or "{}")
+    except Exception:  # noqa: BLE001
+        ev = {}
+    who = ev.get("user_id")
+    uids = _wh_uids()
+    target = []
+    for uid in uids:
+        snap = _snap_read(uid) or {}
+        if who is not None and (snap.get("profile") or {}).get("userId") == who:
+            target.append(uid)
+    if not target and len(uids) == 1:
+        target = uids
+    for uid in target:
+        whoop_flag_file(uid).touch()
+    log.info("WHOOP webhook %s → %s", ev.get("type"), target or "hech kim")
+    return jsonify({"ok": True})
+
+
+_whoop_poll_start()
 
 
 # ═══════════════════════ AI (Nova) ═══════════════════════

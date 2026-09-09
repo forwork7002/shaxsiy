@@ -364,12 +364,15 @@
     if (k !== D.today() || !D.whoop || !D.whoop.readiness) return '';
     const r = D.whoop.readiness();
     if (!r) return '';
+    const live = D.whoop.live && D.whoop.live();
+    const f = D.whoop.freshness && D.whoop.freshness();
     const side = [];
     if (r.sleepH != null) side.push(`<span>${esc(t('wh.sleepH'))}<b>${r.sleepH}${esc(t('unit.h'))}</b></span>`);
-    if (r.strain != null) side.push(`<span>${esc(t('wh.strain'))}<b>${r.strain}</b></span>`);
-    return `<button class="wh-ready ${r.zone}" data-act="go" data-view="health" data-sub="whoop">
+    const strain = live ? live.strain : r.strain;
+    if (strain != null) side.push(`<span>${esc(t('wh.strain'))}<b>${strain}${live ? '<i class="wh-dot"></i>' : ''}</b></span>`);
+    return `<button class="wh-ready ${r.zone}" data-act="go" data-view="health" data-sub="day">
       <span class="wh-ready-num">${r.pct}<small>%</small></span>
-      <span class="wh-ready-body"><span class="wh-ready-label">${esc(t('wh.ready'))} · WHOOP</span><span class="wh-ready-text">${esc(r.label)}</span></span>
+      <span class="wh-ready-body"><span class="wh-ready-label">WHOOP${f ? ` <span class="wh-ready-fresh ${f.stale ? 'stale' : ''}">${esc(f.label)}</span>` : ''}</span><span class="wh-ready-text">${esc(r.label)}</span></span>
       ${side.length ? `<span class="wh-ready-side">${side.join('')}</span>` : ''}</button>`;
   }
   function dayCard(k) {

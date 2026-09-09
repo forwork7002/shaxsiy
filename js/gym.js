@@ -111,6 +111,7 @@
 
   const t = (k, p) => D.t(k, p);
   const esc = (s) => D.esc(s);
+  D.i18n.add({ uz: { 'gym.wh.title': 'WHOOP yozgan mashg‘ulot' }, uzk: { 'gym.wh.title': 'WHOOP ёзган машғулот' }, ru: { 'gym.wh.title': 'Тренировка по WHOOP' } });
   const G = () => D.S.gym;
   const UI = () => (D.ui.filters = D.ui.filters || {});
   const REST_RE = /^(rest|dam|дам|отдых)/i;
@@ -248,7 +249,7 @@
     return { sessions: days.size, best, bestLog, vol7, count: logs.length };
   }
   function weekStreak() {
-    const set = new Set(Object.keys(G().done || {}).map((k) => D.weekKey(k)));
+    const set = new Set([...Object.keys(G().done || {}), ...whoopDays()].map((k) => D.weekKey(k)));
     let cur = D.today(), n = 0, guard = 0;
     if (!set.has(D.weekKey(cur))) cur = D.addDays(cur, -7);
     while (set.has(D.weekKey(cur)) && guard++ < 520) { n++; cur = D.addDays(cur, -7); }
@@ -359,8 +360,9 @@
     return h;
   }
 
+  const whoopDays = () => new Set(D.whoop && D.S.whoop && D.S.whoop.connected ? D.whoop.workoutDays(400) : []);
   function renderToday(gym, day) {
-    const g = G(), today = D.today();
+    const g = G(), today = D.today(), whDays = whoopDays();
     const plan = filtered(gym, day);
     const sum = daySummary(today);
     const loggedIds = new Set(sum.groups.map((x) => x.ex.id));
@@ -377,15 +379,16 @@
       <div class="card-head"><div><div class="eyebrow">${t('gym.todayWorkout')}</div><div class="small muted">${esc(D.fmtDate(today, 'weekday'))}${day ? ' · ' + esc(day.name) : ''}</div></div>
         ${done ? `<span class="pill good">${D.ic('check', 12)} ${t('gym.doneMark')}</span>` : ''}</div>
       <div class="kpi"><span class="kpi-num num">${sum.sets}</span><span class="kpi-label">${t('gym.setsLabel')}</span>${sum.vol ? `<span class="kpi-total">· ${fmtVol(sum.vol)} ${t('gym.lifted')}</span>` : ''}</div>
+      ${D.whoop && D.S.whoop && D.S.whoop.connected ? (() => { const r = D.whoop.workoutRows(today, { empty: false }); return r ? `<div class="gym-wh"><div class="eyebrow">${t('gym.wh.title')}</div>${r}</div>` : ''; })() : ''}
       ${plan.length || extra.length ? `<ul class="list mt">${plan.map((ex) => row(ex, loggedIds.has(ex.id) ? sum.groups.find((x) => x.ex.id === ex.id).sets : [], true)).join('')}
         ${extra.length ? `<li class="eyebrow gym-extra">${t('gym.extra')}</li>` + extra.map((x) => row(x.ex, x.sets, false)).join('') : ''}</ul>` : `<div class="empty">${t('gym.noneToday')}</div>`}
       <div class="form-foot"><button class="btn ${done ? 'ghost' : ''} block" data-act="gymToggleDone">${D.ic('check', 16)} ${done ? t('gym.doneMark') : t('gym.markDone')}</button></div>
     </div>`;
     h += `<div class="grid2 gym-streakgrid">
       <div class="stat"><div class="stat-num num">${D.ic('fire', 18)} ${streak}</div><div class="stat-label">${t('gym.streak')}</div><div class="stat-sub">${t('gym.weeks', { n: streak })}</div></div>
-      <div class="stat"><div class="stat-num num">${Object.keys(g.done || {}).filter((k) => k >= D.addDays(today, -27)).length}</div><div class="stat-label">${t('gym.doneDays')}</div><div class="stat-sub">${t('gym.heat')}</div></div>
+      <div class="stat"><div class="stat-num num">${new Set([...Object.keys(g.done || {}), ...whDays].filter((k) => k >= D.addDays(today, -27) && k <= today)).size}</div><div class="stat-label">${t('gym.doneDays')}</div><div class="stat-sub">${t('gym.heat')}</div></div>
     </div>
-    <div class="card gym-heat"><div class="eyebrow mb-s">${t('gym.heat')}</div>${D.chart.heat({ days: D.lastDays(28), valueFn: (k) => (g.done && g.done[k] ? 4 : idx().byDay[k] ? 2 : 0) })}</div>`;
+    <div class="card gym-heat"><div class="eyebrow mb-s">${t('gym.heat')}</div>${D.chart.heat({ days: D.lastDays(28), valueFn: (k) => (g.done && g.done[k] ? 4 : idx().byDay[k] ? 2 : whDays.has(k) ? 3 : 0) })}</div>`;
     // split card
     const sp = todaySplit(), names = (g.split && g.split.names) || [];
     h += `<div class="card"><div class="card-head"><div class="eyebrow">${t('gym.split')}</div><button class="btn ghost sm" data-act="gymSplitEdit">${D.ic('edit', 14)} ${t('btn.edit')}</button></div>
@@ -397,8 +400,8 @@
   }
 
   function renderHistory() {
-    const g = G(), today = D.today();
-    const days = idx().days.filter((k) => k !== today).reverse().slice(0, 10);
+    const g = G(), today = D.today(), whDays = whoopDays();
+    const days = [...new Set([...idx().days, ...whDays])].filter((k) => k !== today).sort().reverse().slice(0, 12);
     let h = `<div class="section-title">${t('gym.past')}<span class="right num">${days.length}</span></div>`;
     if (!days.length) return h + `<div class="card"><div class="empty">${t('gym.noPast')}</div></div>`;
     for (const k of days) {
@@ -406,9 +409,9 @@
       h += `<div class="card gym-past ${open ? 'open' : ''}">
         <button class="gym-past-head" data-act="gymPastToggle" data-k="${esc(k)}" aria-expanded="${open}">
           <span class="gym-past-l"><span class="title">${esc(D.fmtDate(k, 'weekday'))}</span>
-            <span class="small muted num">${t('gym.sets', { n: s.sets })}${s.vol ? ` · ${fmtVol(s.vol)}` : ''}${open ? '' : ` · <span class="ellipsis">${esc(s.groups.slice(0, 3).map((x) => x.ex.name).join(', '))}${s.groups.length > 3 ? '…' : ''}</span>`}</span></span>
+            <span class="small muted num">${s.sets ? t('gym.sets', { n: s.sets }) : `<span class="gym-wh-sports">${esc(D.whoop.workoutsOn(k).map((x) => x.sport).filter(Boolean).join(', ') || t('gym.wh.title'))}</span>`}${s.vol ? ` · ${fmtVol(s.vol)}` : ''}${open || !s.sets ? '' : ` · <span class="ellipsis">${esc(s.groups.slice(0, 3).map((x) => x.ex.name).join(', '))}${s.groups.length > 3 ? '…' : ''}</span>`}</span></span>
           ${g.done && g.done[k] ? `<span class="pill good">${t('gym.doneMark')}</span>` : ''}${D.ic('chevD', 16)}</button>
-        ${open ? `<ul class="list mt">${s.groups.map((x) => `<li class="li"><span class="li-body"><span class="li-text">${esc(x.ex.name)}</span><span class="li-meta">${x.sets.map((l) => `<span class="num">${fmtSet(x.ex, l)}${l.pr ? ' ★' : ''}</span>`).join(' · ')}</span></span></li>`).join('')}</ul>` : ''}
+        ${open ? `${s.groups.length ? `<ul class="list mt">${s.groups.map((x) => `<li class="li"><span class="li-body"><span class="li-text">${esc(x.ex.name)}</span><span class="li-meta">${x.sets.map((l) => `<span class="num">${fmtSet(x.ex, l)}${l.pr ? ' ★' : ''}</span>`).join(' · ')}</span></span></li>`).join('')}</ul>` : ''}${whDays.has(k) ? `<div class="gym-wh mt">${D.whoop.workoutRows(k, { empty: false })}</div>` : ''}` : ''}
       </div>`;
     }
     return h;

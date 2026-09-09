@@ -216,7 +216,8 @@
   /* ------------------------------------------------------------------ */
   /* static data                                                         */
   /* ------------------------------------------------------------------ */
-  const SUBS = ['day', 'weight', 'water', 'caffeine', 'stack', 'whoop'];
+  D.i18n.add({ uz: { 'hl.sub.sleep': 'Uyqu', 'hl.sub.strain': "Zo'riqish" }, uzk: { 'hl.sub.sleep': 'Уйқу', 'hl.sub.strain': 'Зўриқиш' }, ru: { 'hl.sub.sleep': 'Сон', 'hl.sub.strain': 'Нагрузка' } });
+  const SUBS = ['day', 'sleep', 'strain', 'weight', 'water', 'caffeine', 'stack'];
   const TAGS = ['uyqusiz', 'ish', 'oila', 'ibodat', 'kasal', 'safar'];
   const MOODS = ['😔', '😐', '🙂', '😄', '🤩'];
   const WINDOWS = ['morning', 'noon', 'evening', 'any'];
@@ -370,23 +371,37 @@
   function render() {
     const sub = SUBS.includes(D.sub('health', 'day')) ? D.sub('health', 'day') : 'day';
     const seg = `<div class="seg hl-seg">${SUBS.map((s) => `<button class="${sub === s ? 'on' : ''}" data-act="sub" data-view="health" data-sub="${s}">${esc(D.t('hl.sub.' + s))}</button>`).join('')}</div>`;
-    const body = { day: renderDay, weight: renderWeight, water: renderWater, caffeine: renderCaffeine, stack: renderStack, whoop: renderWhoop }[sub]();
+    const body = { day: renderDay, sleep: renderSleep, strain: renderStrain, weight: renderWeight, water: renderWater, caffeine: renderCaffeine, stack: renderStack }[sub]();
     // AI reads sleep, recovery, weight, water, caffeine and the stack together — only worth showing on the overview tabs.
-    const ai = D.ai && (sub === 'day' || sub === 'whoop') ? D.ai.card('health') : '';
+    const ai = D.ai && (sub === 'day' || sub === 'sleep' || sub === 'strain') ? D.ai.card('health') : '';
     return `<div class="hl">${seg}${body}${ai}</div>`;
   }
 
   /* ------------------------------------------------------------------ */
   /* DAY                                                                 */
   /* ------------------------------------------------------------------ */
-  function renderDay() {
-    const k = viewKey(), today = D.today(), h = hGet(k) || {};
-    const ago = D.daysBetween(k, today);
+  function dayNav(k) {
+    const today = D.today(), ago = D.daysBetween(k, today);
     const subLabel = ago === 0 ? D.t('common.today') : ago === 1 ? D.t('common.yesterday') : D.t('hl.ago', { n: ago });
-    const nav = `<div class="date-nav">
+    return `<div class="date-nav">
       <button class="btn ghost sq" data-act="hlDate" data-n="-1" aria-label="${esc(D.t('hl.day.prev'))}">${D.ic('chevL', 20)}</button>
       <div class="label">${esc(D.fmtDate(k, 'weekday'))}<span class="sub">${esc(subLabel)}${ago ? ` · <button class="hl-link" data-act="hlDateToday">${esc(D.t('btn.today'))}</button>` : ''}</span></div>
       <button class="btn ghost sq" data-act="hlDate" data-n="1" ${ago === 0 ? 'disabled' : ''} aria-label="${esc(D.t('hl.day.next'))}">${D.ic('chevR', 20)}</button></div>`;
+  }
+  // The watch reads the night and the day better than a form can; when it is connected its
+  // pages lead, and the manual fields sit under them for what the watch cannot know.
+  const whoopOn = () => !!(D.whoop && D.S.whoop && D.S.whoop.connected);
+  function renderSleep() {
+    const k = viewKey();
+    return dayNav(k) + (whoopOn() ? D.whoop.sleepPage(k) : sleepInsight()) + D.whoop.footer();
+  }
+  function renderStrain() {
+    const k = viewKey();
+    return dayNav(k) + (whoopOn() ? D.whoop.strainPage(k) : '') + D.whoop.footer();
+  }
+  function renderDay() {
+    const k = viewKey(), today = D.today(), h = hGet(k) || {};
+    const nav = dayNav(k);
 
     // summary tiles
     const lw = lastWeight();
@@ -433,10 +448,9 @@
     const noteBlock = `<div class="hl-field"><div class="hl-lab"><span class="eyebrow">${esc(D.t('common.note'))}</span></div>
       <textarea class="ta" rows="3" maxlength="2000" placeholder="${esc(D.t('hl.day.notePh'))}" data-input="hlNote" data-key="${esc(k)}" aria-label="${esc(D.t('common.note'))}">${esc(h.note || '')}</textarea></div>`;
 
-    // The watch measures the day better than a form can — when it is connected its card leads.
-    const wh = D.whoop && D.whoop.dayCard ? D.whoop.dayCard(k) : '';
+    const wh = whoopOn() ? D.whoop.hero(k) : '';
     return `${nav}${wh}${tiles}<div class="card hl-daycard"><div class="card-head"><div class="title">${D.ic('heart')} ${esc(D.t('hl.day.log'))}</div></div>
-      <div class="hl-form">${weightBlock}${sleepBlock}${waterBlock}${moodBlock}${noteBlock}</div></div>${sleepInsight()}`;
+      <div class="hl-form">${weightBlock}${sleepBlock}${waterBlock}${moodBlock}${noteBlock}</div></div>${whoopOn() ? '' : sleepInsight()}${D.whoop.footer()}`;
   }
 
   D.act.hlDate = (el) => { const k = D.addDays(viewKey(), +el.dataset.n || 0); D.ui.viewDate = k >= D.today() ? null : k; D.saveUi(); D.rerender(); };
@@ -793,50 +807,6 @@
   /* ------------------------------------------------------------------ */
   /* WHOOP                                                               */
   /* ------------------------------------------------------------------ */
-  function renderWhoop() {
-    const W = D.S.whoop;
-    // js/whoop.js keeps the per-day history; `cache` is only the legacy latest-snapshot.
-    // Prefer today's (or yesterday's) real day record so the tab reflects the same data as everywhere else.
-    const today = D.today();
-    const day = (D.whoop && D.whoop.day) ? (D.whoop.day(today) || D.whoop.day(D.addDays(today, -1))) : null;
-    const c = Object.assign({}, W.cache || {}, day || {});
-    if (!W.connected) {
-      return `<div class="card hl-wh-intro"><div class="hl-wh-logo">${D.ic('bolt', 28)}</div><div class="title">WHOOP</div><p class="help">${esc(D.t('hl.wh.intro'))}</p>
-        ${D.serverEnabled() ? '' : `<div class="banner">${D.ic('info', 16)}<span>${esc(D.t('hl.wh.needServer'))}</span></div>`}
-        <div class="row wrap"><button class="btn" data-act="hlWhoopConnect">${D.ic('link', 16)} ${esc(D.t('hl.wh.connect'))}</button><button class="btn ghost" data-act="hlWhoopCheck">${D.ic('refresh', 16)} ${esc(D.t('hl.wh.check'))}</button></div></div>`;
-    }
-    const has = c.recovery != null || c.hrv != null || c.strain != null || c.sleepH != null;
-    const rz = c.recovery != null ? zRec(c.recovery) : '';
-    const ringColor = rz === 'good' ? 'var(--success)' : rz === 'warn' ? 'var(--warning)' : 'var(--danger)';
-    const verdict = c.recovery == null ? '' : `<div class="hl-verdict ${rz}">${D.ic(rz === 'good' ? 'bolt' : rz === 'warn' ? 'info' : 'moon', 16)}<span>${esc(D.t(rz === 'good' ? 'hl.wh.green' : rz === 'warn' ? 'hl.wh.yellow' : 'hl.wh.red'))}</span></div>`;
-    const hero = `<div class="card"><div class="card-head"><div class="title">${D.ic('bolt')} WHOOP <span class="pill good">${esc(D.t('hl.wh.connected'))}</span></div>
-        <div class="row"><button class="btn ghost sm" data-act="hlWhoopRefresh" id="hlWhRefresh">${D.ic('refresh', 14)} ${esc(D.t('hl.wh.refresh'))}</button><button class="btn icon" data-act="hlWhoopDisconnect" aria-label="${esc(D.t('hl.wh.disconnect'))}" title="${esc(D.t('hl.wh.disconnect'))}">${D.ic('logout', 16)}</button></div></div>
-      ${has ? `<div class="row hl-water-row">${D.chart.ring({ pct: c.recovery || 0, size: 150, stroke: 11, color: ringColor, label: c.recovery != null ? c.recovery + '%' : '—', sub: D.t('hl.wh.recovery') })}<div class="grow stack">${verdict}<div class="tiny muted">${esc(D.t('hl.wh.lastSync'))}: <span class="num">${W.lastSync ? esc(D.fmtTs(W.lastSync)) : esc(D.t('hl.wh.never'))}</span></div></div></div>` : `<div class="empty">${esc(D.t('hl.wh.noData'))}</div>`}</div>`;
-    if (!has) return hero;
-    const tiles = `<div class="stat-grid hl-tiles">
-      ${stat(c.sleepH != null ? `${c.sleepH}<small>${D.t('unit.h')}</small>` : '—', D.t('hl.wh.sleep'), { zone: c.sleepPerf != null ? zSleep(c.sleepPerf) : '', sub: c.sleepPerf != null ? c.sleepPerf + '%' : '' })}
-      ${stat(c.strain != null ? c.strain : '—', D.t('hl.wh.strain'), { zone: c.strain != null ? zStrain(c.strain) : '', sub: c.kcal ? `${D.fmtNum(c.kcal)} ${D.t('hl.wh.kcal')}` : '' })}
-      ${stat(c.hrv != null ? `${c.hrv}<small>ms</small>` : '—', D.t('hl.wh.hrv'), { zone: c.hrv != null ? zHrv(c.hrv) : '' })}
-      ${stat(c.rhr != null ? `${c.rhr}<small>bpm</small>` : '—', D.t('hl.wh.rhr'), { zone: c.rhr != null ? zRhr(c.rhr) : '' })}
-    </div>`;
-    const bio = c.skin != null || c.spo2 != null || c.resp != null ? `<div class="stat-grid mt">
-      ${c.skin != null ? stat(`${D.round(c.skin, 1)}<small>°C</small>`, D.t('hl.wh.skin'), { zone: zTemp(c.skin) }) : ''}
-      ${c.spo2 != null ? stat(`${D.round(c.spo2, 1)}<small>%</small>`, D.t('hl.wh.spo2'), { zone: zSpo2(c.spo2) }) : ''}
-      ${c.resp != null ? stat(D.round(c.resp, 1), D.t('hl.wh.resp'), { zone: zResp(c.resp) }) : ''}</div>` : '';
-    let stages = '';
-    if (c.stages) {
-      const st = c.stages, tot = st.rem + st.deep + st.light + st.awake;
-      if (tot > 0) {
-        const seg = [['deep', 'var(--violet)'], ['rem', 'var(--info)'], ['light', 'var(--success)'], ['awake', 'var(--line3)']];
-        stages = `<div class="card"><div class="card-head"><div class="title">${D.ic('moon')} ${esc(D.t('hl.wh.stages'))}</div><span class="num small muted">${fmtMs(tot)}</span></div>
-          <div class="hl-stages">${seg.map(([k, col]) => `<i style="width:${((st[k] / tot) * 100).toFixed(1)}%;background:${col}" title="${esc(D.t('hl.wh.' + k))}"></i>`).join('')}</div>
-          <div class="legend">${seg.map(([k, col]) => `<span><i class="hl-leg" style="background:${col}"></i>${esc(D.t('hl.wh.' + k))} <b class="num">${fmtMs(st[k])}</b></span>`).join('')}</div></div>`;
-      }
-    }
-    const extra = D.whoop ? (D.whoop.trendCard() + D.whoop.workoutsCard() + D.whoop.bodyCard()) : '';
-    const legend = `<div class="legend hl-zones"><span><i class="zone z-good hl-zone-i"></i>${esc(D.t('hl.wh.zoneGood'))}</span><span><i class="zone z-warn hl-zone-i"></i>${esc(D.t('hl.wh.zoneWarn'))}</span><span><i class="zone z-bad hl-zone-i"></i>${esc(D.t('hl.wh.zoneBad'))}</span></div>`;
-    return `${hero}${tiles}${bio}${legend}${stages}${extra}`;
-  }
   D.act.hlWhoopConnect = () => {
     if (!D.serverEnabled()) { D.toast(D.t('hl.wh.needServer'), { ms: 3500 }); return; }
     // Browser navigation carries no Telegram header, so pass initData as a query param; inside Telegram open
@@ -873,8 +843,8 @@
     syncing = true;
     const btn = D.$('#hlWhRefresh'); if (btn) btn.disabled = true;
     try {
-      // js/whoop.js pulls recovery / sleep / cycle / workout history and fills the daily records
-      const r = await D.whoop.sync({ deep: true });
+      // the server pulls WHOOP on its own clock; this asks it to go now and waits for the snapshot to move
+      const r = await D.whoop.sync();
       D.rerender();
       D.toast(r && r.days ? D.t('wh.pulled', { n: r.days }) : D.t('hl.wh.noData'), { ms: 3000 });
     } catch (e) {
