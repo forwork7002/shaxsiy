@@ -69,3 +69,9 @@ Ovqat: rasm yoki matn → `/api/food/analyze` → kkal / oqsil / uglevod / yog' 
 - `deploy/set-register.sh` — hisob ochish eshigi (ochiq / taklif kodi / yopiq), `list`, `pass Ism` (parolni almashtirish). Har kim kirish oynasida o'ziga hisob ochadi (`data/users.json`, parollar xeshlangan), o'z WHOOP'ini o'zi ulaydi.
 - `deploy/set-google.sh` — Google bilan kirish (Google Cloud OAuth mijoz ID + secret; redirect URI `https://<domen>/api/auth/google/callback`). Emaillar ro'yxati bo'lmasa Google eshigi «Hisob ochish» bilan bir xil: taklif kodi bo'lsa yangi Google hisobi ham kodni so'raydi; kirish oynasida Google birinchi turadi.
 - `deploy/_remote.sh` — skriptlar uchun umumiy `remote_bash` (qiymatlar stdin orqali; `ssh 'bash -s' <<EOF` bilan quvur yo'qolardi).
+- `deploy/set-secret.sh` — sessiya kalitini almashtirish (cookie imzosi sizib ketgan bo'lsa; hamma qaytadan kiradi).
+
+## Xavfsizlik sinovi
+`.venv/bin/python tests/test_security.py` — 71 ta tekshiruv: statik yo'l oq ro'yxati, CSP/HSTS sarlavhalari,
+kirmasdan 401, sessiya imzosi, zaxira yo'llari, fayl ruxsatlari (0600/0700), manzil bo'yicha cheklov,
+Google eshigi. Serverga yuborilmaydi (`push.sh` ro'yxatida yo'q). 2026-09-09 tekshiruvidan keyin yozildi.
