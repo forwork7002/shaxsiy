@@ -9,24 +9,23 @@
   /* ------------------------------------------------------------------ */
   D.i18n.add({
     uz: {
-      'set.tab.general': 'Umumiy', 'set.tab.habits': 'Odatlar', 'set.tab.food': 'Ovqat', 'set.tab.prayer': 'Ibodat', 'set.tab.finance': 'Moliya', 'set.tab.data': "Ma'lumot",
+      'set.tab.profile': 'Profil', 'set.tab.lists': "Ro'yxatlar", 'set.tab.prayer': 'Namoz', 'set.tab.data': "Ma'lumot",
       'set.lang': 'Til', 'set.lang.uz': "O'zbek lotin", 'set.lang.uzk': 'Ўзбек кирилл', 'set.lang.ru': 'Русский', 'set.theme': 'Mavzu',
       'set.profile': 'Profil', 'set.name': 'Ism', 'set.namePh': 'Ismingiz', 'set.height': "Bo'y", 'set.weight': 'Vazn', 'set.age': 'Yosh',
       'set.sex': 'Jins', 'set.sex.m': 'Erkak', 'set.sex.f': 'Ayol', 'set.activity': 'Faollik',
       'set.act.0': 'Harakatsiz', 'set.act.1': 'Kam harakat', 'set.act.2': 'Yengil', 'set.act.3': "O'rtacha", 'set.act.4': 'Faol', 'set.act.5': 'Juda faol',
-      'set.bmi': 'BMI', 'set.bmiHint': "bo'y va vazndan",
+      'set.bmi': 'BMI', 
       'set.birthYear': "Tug'ilgan yil", 'set.ageN': '{n} yosh', 'set.goal': 'Maqsad', 'set.goal.lose': 'Vazn tashlash', 'set.goal.keep': 'Saqlash', 'set.goal.gain': 'Vazn olish',
       'set.whoopAgeTitle': 'WHOOP yoshi', 'set.whoopAge': 'WHOOP Age', 'set.paceOfAging': 'Pace of Aging', 'set.whoopAgeHint': 'WHOOP ilovasidan ko‘chiring (Healthspan sahifasi)',
-      'set.whoopAgeAt': '{d} holatiga', 'set.whoopAgeGo': "Sog'liq → Tana", 'set.whoopAgeNone': "Hali kiritilmagan", 'set.onboard': "Savol-javob bilan to'ldirish",
+      'set.whoopAgeAt': '{d} holatiga', 'set.whoopAgeGo': "Sog'liq → Tayyorlik", 'set.whoopAgeNone': "Hali kiritilmagan", 'set.onboard': "Savol-javob bilan to'ldirish",
       'set.fd.title': 'Kunlik maqsadlar', 'set.fd.auto': 'Avto', 'set.fd.autoHint': "Profil bo'yicha: Mifflin-St Jeor × faollik ± maqsad; oqsil 1,6 g/kg (olishda 2,0), yog' 25 %",
       'set.fd.manualHint': "Qo'lda kiritilgan — «Avto» yoqilsa profil bo'yicha qayta hisoblanadi",
       'set.fd.kcal': 'Kaloriya', 'set.fd.p': 'Oqsil', 'set.fd.c': 'Uglevod', 'set.fd.f': "Yog'", 'set.fd.recalc': 'Qayta hisoblash', 'set.fd.goFood': "Ovqat bo'limiga o'tish",
       'set.fd.needProfile': "Avto hisob uchun profilda bo'y, vazn va tug'ilgan yil kerak",
-      'set.day': 'Kun sozlamalari', 'set.tz': 'Vaqt mintaqasi', 'set.tz.browser': 'brauzer', 'set.dayStart': 'Kun boshlanishi',
-      'set.dayStartHint': 'Shu soatgacha qilingan yozuvlar kechagi kunga tegishli', 'set.midnight': 'Yarim tun (00:00)', 'set.wake': "Uyg'onish soati", 'set.sleep': 'Uyqu soati',
-      'set.units': 'Birliklar', 'set.weightUnit': 'Vazn birligi', 'set.waterMl': 'Stakan hajmi', 'set.waterTarget': 'Kunlik suv maqsadi',
+      'set.tz': 'Vaqt mintaqasi', 'set.tz.browser': 'brauzer', 
+      'set.units': 'Birliklar va vaqt', 'set.waterMl': 'Stakan hajmi', 'set.waterTarget': 'Kunlik suv maqsadi',
       'set.waterAuto': "avto (vazn bo'yicha)", 'set.currency': 'Valyuta',
-      'set.shortcuts': 'Tezkor tugmalar', 'set.sc.search': 'Qidiruv / buyruqlar', 'set.sc.undo': 'Bekor qilish', 'set.sc.esc': 'Yopish',
+      
       'set.about': 'Dastur haqida', 'set.version': 'Versiya', 'set.device': 'Qurilma ID', 'set.storage': "Ma'lumot hajmi",
       'set.h.title': 'Odatlar', 'set.h.count': '{n} faol / {total}',
       'set.h.help': "Belgini bosib faol/nofaol qiling. Nofaol odat Bugunda ko'rinmaydi, lekin tarixi saqlanadi.",
@@ -63,24 +62,24 @@
       'set.auto': 'avto', 'set.f.icon': 'Belgi',
     },
     uzk: {
-      'set.tab.general': 'Умумий', 'set.tab.habits': 'Одатлар', 'set.tab.food': 'Овқат', 'set.tab.prayer': 'Ибодат', 'set.tab.finance': 'Молия', 'set.tab.data': 'Маълумот',
+      'set.tab.profile': 'Профил', 'set.tab.lists': 'Рўйхатлар', 'set.tab.prayer': 'Намоз', 'set.tab.data': 'Маълумот',
       'set.lang': 'Тил', 'set.lang.uz': "O'zbek lotin", 'set.lang.uzk': 'Ўзбек кирилл', 'set.lang.ru': 'Русский', 'set.theme': 'Мавзу',
       'set.profile': 'Профил', 'set.name': 'Исм', 'set.namePh': 'Исмингиз', 'set.height': 'Бўй', 'set.weight': 'Вазн', 'set.age': 'Ёш',
       'set.sex': 'Жинс', 'set.sex.m': 'Эркак', 'set.sex.f': 'Аёл', 'set.activity': 'Фаоллик',
       'set.act.0': 'Ҳаракатсиз', 'set.act.1': 'Кам ҳаракат', 'set.act.2': 'Енгил', 'set.act.3': 'Ўртача', 'set.act.4': 'Фаол', 'set.act.5': 'Жуда фаол',
-      'set.bmi': 'BMI', 'set.bmiHint': 'бўй ва вазндан',
+      'set.bmi': 'BMI', 
       'set.birthYear': 'Туғилган йил', 'set.ageN': '{n} ёш', 'set.goal': 'Мақсад', 'set.goal.lose': 'Вазн ташлаш', 'set.goal.keep': 'Сақлаш', 'set.goal.gain': 'Вазн олиш',
       'set.whoopAgeTitle': 'WHOOP ёши', 'set.whoopAge': 'WHOOP Age', 'set.paceOfAging': 'Pace of Aging', 'set.whoopAgeHint': 'WHOOP иловасидан кўчиринг (Healthspan саҳифаси)',
-      'set.whoopAgeAt': '{d} ҳолатига', 'set.whoopAgeGo': 'Соғлиқ → Тана', 'set.whoopAgeNone': 'Ҳали киритилмаган', 'set.onboard': 'Савол-жавоб билан тўлдириш',
+      'set.whoopAgeAt': '{d} ҳолатига', 'set.whoopAgeGo': 'Соғлиқ → Тайёрлик', 'set.whoopAgeNone': 'Ҳали киритилмаган', 'set.onboard': 'Савол-жавоб билан тўлдириш',
       'set.fd.title': 'Кунлик мақсадлар', 'set.fd.auto': 'Авто', 'set.fd.autoHint': 'Профил бўйича: Mifflin-St Jeor × фаоллик ± мақсад; оқсил 1,6 г/кг (олишда 2,0), ёғ 25 %',
       'set.fd.manualHint': 'Қўлда киритилган — «Авто» ёқилса профил бўйича қайта ҳисобланади',
       'set.fd.kcal': 'Калория', 'set.fd.p': 'Оқсил', 'set.fd.c': 'Углевод', 'set.fd.f': 'Ёғ', 'set.fd.recalc': 'Қайта ҳисоблаш', 'set.fd.goFood': 'Овқат бўлимига ўтиш',
       'set.fd.needProfile': 'Авто ҳисоб учун профилда бўй, вазн ва туғилган йил керак',
-      'set.day': 'Кун созламалари', 'set.tz': 'Вақт минтақаси', 'set.tz.browser': 'браузер', 'set.dayStart': 'Кун бошланиши',
-      'set.dayStartHint': 'Шу соатгача қилинган ёзувлар кечаги кунга тегишли', 'set.midnight': 'Ярим тун (00:00)', 'set.wake': 'Уйғониш соати', 'set.sleep': 'Уйқу соати',
-      'set.units': 'Бирликлар', 'set.weightUnit': 'Вазн бирлиги', 'set.waterMl': 'Стакан ҳажми', 'set.waterTarget': 'Кунлик сув мақсади',
+      'set.tz': 'Вақт минтақаси', 'set.tz.browser': 'браузер', 
+      
+      'set.units': 'Бирликлар ва вақт', 'set.waterMl': 'Стакан ҳажми', 'set.waterTarget': 'Кунлик сув мақсади',
       'set.waterAuto': 'авто (вазн бўйича)', 'set.currency': 'Валюта',
-      'set.shortcuts': 'Тезкор тугмалар', 'set.sc.search': 'Қидирув / буйруқлар', 'set.sc.undo': 'Бекор қилиш', 'set.sc.esc': 'Ёпиш',
+      
       'set.about': 'Дастур ҳақида', 'set.version': 'Версия', 'set.device': 'Қурилма ID', 'set.storage': 'Маълумот ҳажми',
       'set.h.title': 'Одатлар', 'set.h.count': '{n} фаол / {total}',
       'set.h.help': 'Белгини босиб фаол/нофаол қилинг. Нофаол одат «Бугун»да кўринмайди, лекин тарихи сақланади.',
@@ -117,24 +116,24 @@
       'set.auto': 'авто', 'set.f.icon': 'Белги',
     },
     ru: {
-      'set.tab.general': 'Общие', 'set.tab.habits': 'Привычки', 'set.tab.food': 'Питание', 'set.tab.prayer': 'Намаз', 'set.tab.finance': 'Финансы', 'set.tab.data': 'Данные',
+      'set.tab.profile': 'Профиль', 'set.tab.lists': 'Списки', 'set.tab.prayer': 'Намаз', 'set.tab.data': 'Данные',
       'set.lang': 'Язык', 'set.lang.uz': "O'zbek lotin", 'set.lang.uzk': 'Ўзбек кирилл', 'set.lang.ru': 'Русский', 'set.theme': 'Тема',
       'set.profile': 'Профиль', 'set.name': 'Имя', 'set.namePh': 'Ваше имя', 'set.height': 'Рост', 'set.weight': 'Вес', 'set.age': 'Возраст',
       'set.sex': 'Пол', 'set.sex.m': 'Муж.', 'set.sex.f': 'Жен.', 'set.activity': 'Активность',
       'set.act.0': 'Минимальная', 'set.act.1': 'Низкая', 'set.act.2': 'Лёгкая', 'set.act.3': 'Средняя', 'set.act.4': 'Высокая', 'set.act.5': 'Очень высокая',
-      'set.bmi': 'ИМТ', 'set.bmiHint': 'по росту и весу',
+      'set.bmi': 'ИМТ', 
       'set.birthYear': 'Год рождения', 'set.ageN': '{n} лет', 'set.goal': 'Цель', 'set.goal.lose': 'Похудеть', 'set.goal.keep': 'Сохранить', 'set.goal.gain': 'Набрать',
       'set.whoopAgeTitle': 'Возраст WHOOP', 'set.whoopAge': 'WHOOP Age', 'set.paceOfAging': 'Pace of Aging', 'set.whoopAgeHint': 'Скопируйте из приложения WHOOP (страница Healthspan)',
-      'set.whoopAgeAt': 'на {d}', 'set.whoopAgeGo': 'Здоровье → Тело', 'set.whoopAgeNone': 'Ещё не введено', 'set.onboard': 'Заполнить пошагово',
+      'set.whoopAgeAt': 'на {d}', 'set.whoopAgeGo': 'Здоровье → Готовность', 'set.whoopAgeNone': 'Ещё не введено', 'set.onboard': 'Заполнить пошагово',
       'set.fd.title': 'Дневные цели', 'set.fd.auto': 'Авто', 'set.fd.autoHint': 'По профилю: Mifflin-St Jeor × активность ± цель; белок 1,6 г/кг (при наборе 2,0), жиры 25 %',
       'set.fd.manualHint': 'Введено вручную — при включении «Авто» пересчитается по профилю',
       'set.fd.kcal': 'Калории', 'set.fd.p': 'Белки', 'set.fd.c': 'Углеводы', 'set.fd.f': 'Жиры', 'set.fd.recalc': 'Пересчитать', 'set.fd.goFood': 'Перейти в Питание',
       'set.fd.needProfile': 'Для авторасчёта нужны рост, вес и год рождения в профиле',
-      'set.day': 'Настройки дня', 'set.tz': 'Часовой пояс', 'set.tz.browser': 'браузер', 'set.dayStart': 'Начало дня',
-      'set.dayStartHint': 'Записи до этого часа относятся к предыдущему дню', 'set.midnight': 'Полночь (00:00)', 'set.wake': 'Время подъёма', 'set.sleep': 'Время отхода ко сну',
-      'set.units': 'Единицы', 'set.weightUnit': 'Единица веса', 'set.waterMl': 'Объём стакана', 'set.waterTarget': 'Дневная норма воды',
+      'set.tz': 'Часовой пояс', 'set.tz.browser': 'браузер', 
+      
+      'set.units': 'Единицы и время', 'set.waterMl': 'Объём стакана', 'set.waterTarget': 'Дневная норма воды',
       'set.waterAuto': 'авто (по весу)', 'set.currency': 'Валюта',
-      'set.shortcuts': 'Горячие клавиши', 'set.sc.search': 'Поиск / команды', 'set.sc.undo': 'Отменить', 'set.sc.esc': 'Закрыть',
+      
       'set.about': 'О приложении', 'set.version': 'Версия', 'set.device': 'ID устройства', 'set.storage': 'Объём данных',
       'set.h.title': 'Привычки', 'set.h.count': '{n} активных / {total}',
       'set.h.help': 'Нажмите на галочку, чтобы включить/выключить. Неактивная привычка не показывается в «Сегодня», но её история сохраняется.',
@@ -175,7 +174,13 @@
   /* ------------------------------------------------------------------ */
   /* constants + helpers                                                 */
   /* ------------------------------------------------------------------ */
-  const TABS = ['general', 'habits', 'food', 'prayer', 'finance', 'data'];
+  // Oltita bo'limcha to'rttaga: men kimman · tahrirlanadigan ro'yxatlar · namoz · ma'lumot.
+  // «Ovqat» me'yorlari Profil ichiga kirdi (ular ayni shu profil raqamlaridan hisoblanadi),
+  // moliya kategoriyalari odatlar bilan bir sahifada — ikkalasi ham shunchaki ro'yxat.
+  // Namoz sozlamalari Ibodat bo'limiga tegishli va `D.settings.prayerCard()` orqali
+  // o'sha yerdan ham chaqirilishi mumkin; ko'chirish o'sha fayl bo'shaganda bo'ladi.
+  const TABS = ['profile', 'lists', 'prayer', 'data'];
+  const MOVED = { general: 'profile', food: 'profile', habits: 'lists', finance: 'lists' };
   const GOALS = ['lose', 'keep', 'gain'];
   const TZS = ['Asia/Tashkent', 'Asia/Almaty', 'Europe/Moscow', 'Asia/Dubai', 'Europe/Istanbul', 'UTC'];
   const CURS = ['UZS', 'USD', 'EUR', 'RUB', 'KZT'];
@@ -268,15 +273,12 @@
   /* ------------------------------------------------------------------ */
   /* GENERAL                                                             */
   /* ------------------------------------------------------------------ */
-  function renderGeneral() {
+  function renderProfile() {
     const s = S(), p = D.S.profile;
-    const lb = s.weightUnit === 'lb';
-    const wShown = p.weightKg == null ? null : lb ? D.round(p.weightKg * 2.20462, 1) : p.weightKg;
     const bmi = p.heightCm && p.weightKg ? D.round(p.weightKg / Math.pow(p.heightCm / 100, 2), 1) : null;
     const bmiZone = bmi == null ? '' : bmi < 18.5 ? 'z-warn' : bmi < 25 ? 'z-good' : bmi < 30 ? 'z-warn' : 'z-bad';
     const act = D.clamp(+p.activity || 0, 0, 5);
     const age = ageOf(), goal = GOALS.includes(p.goal) ? p.goal : 'keep';
-    const hours = Array.from({ length: 24 }, (_, i) => ({ v: i, l: D.fmtTime(i, 0) }));
     return `
     <div class="card">
       <div class="eyebrow mb-s">${t('set.lang')}</div>
@@ -292,7 +294,7 @@
         <input class="inp" maxlength="40" value="${esc(p.name || '')}" placeholder="${esc(t('set.namePh'))}" data-input="setProfileText" data-k="name" autocomplete="off"></div>
       <div class="set-grid3">
         <div class="field"><label class="field-label">${t('set.height')} <span class="set-unit">cm</span></label>${numInp(p.heightCm, 'setProfileNum', 'data-k="heightCm" min="100" max="250" step="1" placeholder="—"')}</div>
-        <div class="field"><label class="field-label">${t('set.weight')} <span class="set-unit">${lb ? 'lb' : 'kg'}</span></label>${numInp(wShown, 'setProfileNum', 'data-k="weightKg" min="20" max="500" step="0.1" placeholder="—"')}</div>
+        <div class="field"><label class="field-label">${t('set.weight')} <span class="set-unit">kg</span></label>${numInp(p.weightKg, 'setProfileNum', 'data-k="weightKg" min="20" max="500" step="0.1" placeholder="—"')}</div>
         <div class="field"><label class="field-label">${t('set.birthYear')}${age != null ? ` <span class="set-unit num">${esc(t('set.ageN', { n: age }))}</span>` : ''}</label>${numInp(p.birthYear, 'setProfileNum', `data-k="birthYear" min="1900" max="${D.nowTz().y - 1}" step="1" placeholder="${p.birthYear ? '' : esc(String(D.nowTz().y - (age || 30)))}"`)}</div>
       </div>
       <div class="set-grid2">
@@ -319,36 +321,22 @@
     ${D.serverEnabled() && (D.me || D.device.uid) ? accountCard() : ''}
 
     <div class="card">
-      <div class="card-head"><div class="title">${D.ic('clock')} ${t('set.day')}</div></div>
-      ${row(t('set.tz'), sel(tzOptions(), s.tz, 'setTz'))}
-      ${row(t('set.dayStart'), sel(Array.from({ length: 7 }, (_, i) => ({ v: i, l: i === 0 ? t('set.midnight') : D.fmtTime(i, 0) })), +s.dayStart || 0, 'setDayStart'), t('set.dayStartHint'))}
-      ${row(t('set.wake'), sel(hours, +s.wakeHour || 0, 'setHour', 'data-k="wakeHour"'))}
-      ${row(t('set.sleep'), sel(hours, +s.sleepHour || 0, 'setHour', 'data-k="sleepHour"'))}
-    </div>
-
-    <div class="card">
       <div class="card-head"><div class="title">${D.ic('scale')} ${t('set.units')}</div></div>
-      ${row(t('set.weightUnit'), seg([{ v: 'kg', l: 'kg' }, { v: 'lb', l: 'lb' }], lb ? 'lb' : 'kg', 'setWeightUnit', 'compact'))}
+      ${row(t('set.tz'), sel(tzOptions(), s.tz, 'setTz'))}
       ${row(t('set.waterMl'), `<div class="set-inp-unit">${numInp(s.waterMl, 'setNum', 'data-k="waterMl" min="50" max="2000" step="10"')}<span>${t('unit.ml')}</span></div>`)}
       ${row(t('set.waterTarget'), `<div class="set-inp-unit">${numInp(s.waterTargetMl, 'setNum', `data-k="waterTargetMl" min="500" max="8000" step="50" placeholder="${esc(t('set.auto'))}"`)}<span>${t('unit.ml')}</span></div>`, t('set.waterAuto'))}
       ${row(t('set.currency'), sel(CURS.map((c) => ({ v: c, l: c })), s.currency || 'UZS', 'setCurrency'))}
     </div>
 
-    <div class="set-grid2 set-grid2-cards">
-      <div class="card">
-        <div class="card-head"><div class="title">${D.ic('keyboard')} ${t('set.shortcuts')}</div></div>
-        <div class="set-kv"><span>${t('set.sc.search')}</span><span><kbd class="kbd">Ctrl</kbd> <kbd class="kbd">K</kbd></span></div>
-        <div class="set-kv"><span>${t('set.sc.undo')}</span><span><kbd class="kbd">Ctrl</kbd> <kbd class="kbd">Z</kbd></span></div>
-        <div class="set-kv"><span>${t('set.sc.esc')}</span><span><kbd class="kbd">Esc</kbd></span></div>
-      </div>
-      <div class="card">
-        <div class="card-head"><div class="title">${D.ic('info')} ${t('set.about')}</div></div>
-        <div class="set-kv"><span>${t('set.version')}</span><span class="num">v${esc(D.VERSION)}</span></div>
-        <div class="set-kv"><span>${t('set.device')}</span><span class="num set-mono-sm">${esc(D.S.meta.deviceId || '—')}</span></div>
-        <div class="set-kv"><span>${t('set.storage')}</span><span class="num">${D.fmtNum(storageKb(), 1)} KB</span></div>
-      </div>
-    </div>`;
+    ${renderFood()}`;
   }
+  /** Ilova haqida — Ma'lumot bo'limchasining oxirida. */
+  const aboutCard = () => `<div class="card">
+      <div class="card-head"><div class="title">${D.ic('info')} ${t('set.about')}</div></div>
+      <div class="set-kv"><span>${t('set.version')}</span><span class="num">v${esc(D.VERSION)}</span></div>
+      <div class="set-kv"><span>${t('set.device')}</span><span class="num set-mono-sm">${esc(D.S.meta.deviceId || '—')}</span></div>
+      <div class="set-kv"><span>${t('set.storage')}</span><span class="num">${D.fmtNum(storageKb(), 1)} KB</span></div>
+    </div>`;
   const actLabel = (a) => `<span>${esc(t('set.act.' + a))}</span><span class="num muted">${a}/5</span>`;
 
   D.act.setLang = (el) => { if (el.dataset.val !== D.lang()) D.setLang(el.dataset.val); };
@@ -385,9 +373,6 @@
     D.save(); D.rerender();
   };
   D.act.setTz = (el) => { S().tz = el.value; D.save(); D.renderNav(); D.rerender(); D.emit('day:changed', D.today()); };
-  D.act.setDayStart = (el) => { S().dayStart = D.clamp(+el.value || 0, 0, 6); D.save(); D.rerender(); D.emit('day:changed', D.today()); };
-  D.act.setHour = (el) => { S()[el.dataset.k] = D.clamp(+el.value || 0, 0, 23); D.save(); D.rerender(); };
-  D.act.setWeightUnit = (el) => { S().weightUnit = el.dataset.val === 'lb' ? 'lb' : 'kg'; D.save(); D.rerender(); };
   D.act.setNum = (el) => { const v = num(el.value); S()[el.dataset.k] = v == null ? (el.dataset.k === 'waterTargetMl' ? null : S()[el.dataset.k]) : Math.max(0, v); D.save(); D.rerender(); };
   D.act.setCurrency = (el) => { S().currency = CURS.includes(el.value) ? el.value : 'UZS'; D.save(); D.rerender(); };
 
@@ -395,6 +380,9 @@
   /* HABITS                                                              */
   /* ------------------------------------------------------------------ */
   const draft = { name: '', sphere: 'ruh', type: 'daily', days: [1, 2, 3, 4, 5], n: 3, tn: '', unit: '', remind: '', emoji: '', doneLabel: '' };
+
+  /** Ro'yxatlar — ilovadagi ikkita tahrirlanadigan ro'yxat bir sahifada. */
+  const renderLists = () => renderHabits() + renderFinance();
 
   function renderHabits() {
     const list = sortedHabits(), cnt = doneCounts();
@@ -688,9 +676,15 @@
   D.on('day:changed', scheduleReminders);
   D.on('state:changed', D.debounce(scheduleReminders, 1500)); // state may be replaced by pull/import/undo
 
+  /** Namoz sozlamalari Sozlashda emas, o'z bo'limida: Ibodat › Vaqtlar shuni chaqiradi. */
+  D.settings = D.settings || {};
+  D.settings.prayerCard = () => { try { return renderPrayer(); } catch (e) { console.error('prayer settings', e); D.logError(e); return ''; } };
+
   function renderPrayer() {
     const pr = S().prayer || {};
     const off = pr.offsets || {};
+    // blank fields would read as "no method"; show what prayer.js is actually using
+    const eff = (() => { try { return D.prayer.conf(); } catch (e) { return { lat: 41.3009, lng: 69.2418, fajr: 15.5, isha: 15.5, asr: 'hanafi' }; } })();
     let times = [], nextId = null, qibla = null, hijri = '';
     const np = D.nowTz(), calKey = D.keyOf(np.y, np.m, np.d);
     try { times = D.prayer.list(calKey); const nx = D.prayer.next(); nextId = nx && nx.key === calKey ? nx.id : null; qibla = Math.round(D.prayer.qibla()); hijri = D.hijri.fmt(calKey); } catch (e) { console.warn(e); }
@@ -705,17 +699,17 @@
     <div class="card">
       <div class="card-head"><div class="title">${D.ic('compass')} ${t('set.pr.location')}</div>${qibla != null ? `<span class="pill">${t('set.pr.qibla')} <b class="num">${qibla}°</b></span>` : ''}</div>
       <div class="set-grid2">
-        <div class="field"><label class="field-label">${t('set.pr.lat')}</label>${numInp(pr.lat, 'setPrNum', 'data-k="lat" min="-90" max="90" step="0.0001"')}</div>
-        <div class="field"><label class="field-label">${t('set.pr.lng')}</label>${numInp(pr.lng, 'setPrNum', 'data-k="lng" min="-180" max="180" step="0.0001"')}</div>
+        <div class="field"><label class="field-label">${t('set.pr.lat')}</label>${numInp(pr.lat == null ? eff.lat : pr.lat, 'setPrNum', 'data-k="lat" min="-90" max="90" step="0.0001"')}</div>
+        <div class="field"><label class="field-label">${t('set.pr.lng')}</label>${numInp(pr.lng == null ? eff.lng : pr.lng, 'setPrNum', 'data-k="lng" min="-180" max="180" step="0.0001"')}</div>
       </div>
       <button class="btn ghost block" data-act="setGeo">${D.ic('compass', 16)} ${t('set.pr.useGeo')}</button>
     </div>
 
     <div class="card">
       <div class="card-head"><div class="title">${D.ic('sun')} ${t('set.pr.method')}</div></div>
-      ${row(t('set.pr.fajr'), `<div class="set-inp-unit">${numInp(pr.fajr, 'setPrNum', 'data-k="fajr" min="10" max="20" step="0.5"')}<span>°</span></div>`)}
-      ${row(t('set.pr.isha'), `<div class="set-inp-unit">${numInp(pr.isha, 'setPrNum', 'data-k="isha" min="10" max="20" step="0.5"')}<span>°</span></div>`)}
-      ${row(t('set.pr.asr'), seg([{ v: 'hanafi', l: t('set.pr.hanafi') }, { v: 'shafi', l: t('set.pr.shafi') }], pr.asr === 'shafi' ? 'shafi' : 'hanafi', 'setAsr', 'compact'))}
+      ${row(t('set.pr.fajr'), `<div class="set-inp-unit">${numInp(pr.fajr == null ? eff.fajr : pr.fajr, 'setPrNum', 'data-k="fajr" min="10" max="20" step="0.5"')}<span>°</span></div>`)}
+      ${row(t('set.pr.isha'), `<div class="set-inp-unit">${numInp(pr.isha == null ? eff.isha : pr.isha, 'setPrNum', 'data-k="isha" min="10" max="20" step="0.5"')}<span>°</span></div>`)}
+      ${row(t('set.pr.asr'), seg([{ v: 'hanafi', l: t('set.pr.hanafi') }, { v: 'shafi', l: t('set.pr.shafi') }], eff.asr, 'setAsr', 'compact'))}
       <div class="eyebrow set-sub-eyebrow">${t('set.pr.offsets')}</div>
       <div class="help mb-s">${esc(t('set.pr.offsetsHint'))}</div>
       <div class="set-off-grid">${OFFSET_IDS.map((id) => `<label class="set-off"><span class="tiny muted">${esc(t('prayer.' + id))}</span>${numInp(+off[id] || 0, 'setPrOffset', `data-id="${id}" min="-60" max="60" step="1"`)}</label>`).join('')}</div>
@@ -735,7 +729,7 @@
   D.act.setPrNum = (el) => {
     const k = el.dataset.k, v = num(el.value);
     if (v == null) { D.rerender(); return; }
-    const lim = { lat: [-90, 90], lng: [-180, 180], fajr: [10, 20], isha: [10, 20] }[k] || [-1e9, 1e9];
+    const lim = { lat: [-90, 90], lng: [-180, 180], fajr: [8, 21], isha: [8, 21] }[k] || [-1e9, 1e9];
     S().prayer[k] = D.clamp(v, lim[0], lim[1]);
     D.save(); D.rerender(); scheduleReminders();
   };
@@ -877,8 +871,9 @@
       <div class="row wrap">
         <button class="btn danger" data-act="setReset">${D.ic('trash', 16)} ${t('set.d.reset')}</button>
       </div>
-    </div>`;
+    </div>` + aboutCard();
   }
+
   D.act.setLogout = async () => {
     if (!(await D.confirm({ text: t('set.logoutQ'), ok: t('set.logout') }))) return;
     D.auth.logout();
@@ -927,8 +922,9 @@
   /* view                                                                */
   /* ------------------------------------------------------------------ */
   function render() {
-    const sub = TABS.includes(D.sub('settings', 'general')) ? D.sub('settings', 'general') : 'general';
-    const body = { general: renderGeneral, habits: renderHabits, food: renderFood, prayer: renderPrayer, finance: renderFinance, data: renderData }[sub];
+    let sub = D.sub('settings', 'profile');
+    sub = MOVED[sub] || (TABS.includes(sub) ? sub : 'profile');
+    const body = { profile: renderProfile, lists: renderLists, prayer: renderPrayer, data: renderData }[sub];
     return `<div class="set-page">
       <div class="seg set-tabs">${TABS.map((x) => `<button type="button" class="${x === sub ? 'on' : ''}" data-act="sub" data-view="settings" data-sub="${x}">${esc(t('set.tab.' + x))}</button>`).join('')}</div>
       ${body()}
@@ -938,7 +934,7 @@
   D.search.register((q) => {
     if (!q || q.length < 2) return [];
     const items = TABS.map((x) => ({ label: `${t('nav.settings')} › ${t('set.tab.' + x)}`, sub: t('search.view'), icon: 'gear', go: () => D.go('settings', x) }));
-    const deep = [['set.lang', 'general'], ['set.theme', 'general'], ['set.profile', 'general'], ['set.goal', 'general'], ['set.whoopAgeTitle', 'general'], ['set.tz', 'general'], ['set.currency', 'general'], ['set.waterTarget', 'general'], ['set.h.add', 'habits'], ['set.fd.title', 'food'], ['set.pr.location', 'prayer'], ['set.pr.notify', 'prayer'], ['set.f.cats', 'finance'], ['set.d.export', 'data'], ['set.d.import', 'data']];
+    const deep = [['set.lang', 'profile'], ['set.theme', 'profile'], ['set.profile', 'profile'], ['set.goal', 'profile'], ['set.whoopAgeTitle', 'profile'], ['set.tz', 'profile'], ['set.currency', 'profile'], ['set.waterTarget', 'profile'], ['set.fd.title', 'profile'], ['set.h.add', 'lists'], ['set.f.cats', 'lists'], ['set.pr.location', 'prayer'], ['set.pr.notify', 'prayer'], ['set.d.export', 'data'], ['set.d.import', 'data']];
     for (const [k, tab] of deep) items.push({ label: `${t('nav.settings')} › ${t(k)}`, sub: t('set.search.sub'), icon: 'gear', go: () => D.go('settings', tab) });
     return items;
   });

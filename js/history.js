@@ -11,9 +11,10 @@
   const esc = D.esc;
   const t = (k, p) => D.t(k, p);
   const VIEW = 'history';
-  const SUBS = ['month', 'year', 'chats', 'cards'];
-  const SECTIONS = ['today', 'health', 'sleep', 'strain', 'food', 'finance', 'prayer']; // ai.js SECTIONS bilan bir xil
-  // eski arxivdagi `age` kartalari «Hammasi» ro'yxatida qoladi — `hs.sec.age` kaliti shuning uchun saqlanadi
+  const SUBS = ['month', 'year'];
+  // Suhbatlar Nova bo'limida, AI kartalari esa o'z sahifasida turadi — Tarix faqat kunlar arxivi.
+  // Server uchlari (/api/history/chats, /cards) joyida qoladi, faqat bu yerdagi ko'zgu olib tashlandi.
+  const MOVED = { chats: 'month', cards: 'month' };
   const MOODS = ['😔', '😐', '🙂', '😄', '🤩'];
   const DOW_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Dushanbadan boshlanadi
   const FRESH_MS = 120000;                  // bugunga tegib turgan oraliq shuncha vaqtdan keyin qayta so'raladi
@@ -25,8 +26,6 @@
     'nav.history': ['Tarix', 'Тарих', 'История'],
     'hs.sub.month': ['Oy', 'Ой', 'Месяц'],
     'hs.sub.year': ['Yil', 'Йил', 'Год'],
-    'hs.sub.chats': ['Chatlar', 'Чатлар', 'Чаты'],
-    'hs.sub.cards': ['Kartalar', 'Карталар', 'Карточки'],
     'hs.loading': ['Arxiv yuklanmoqda…', 'Архив юкланмоқда…', 'Загружаю архив…'],
     'hs.offline': ["Server bilan aloqa yo'q", 'Сервер билан алоқа йўқ', 'Нет связи с сервером'],
     'hs.offlineSub': ["Tarix faqat serverdagi arxivdan o'qiladi. Internetni tekshirib, qayta urinib ko'ring.", 'Тарих фақат сервердаги архивдан ўқилади. Интернетни текшириб, қайта уриниб кўринг.', 'История читается только из архива на сервере. Проверьте интернет и попробуйте снова.'],
@@ -71,7 +70,6 @@
     'hs.w.strain': ['Strain', 'Strain', 'Нагрузка'],
     'hs.w.kcal': ['kkal', 'ккал', 'ккал'],
     'hs.m.eaten': ['Yeyilgan kkal (kunlik o\'rtacha)', 'Ейилган ккал (кунлик ўртача)', 'Съедено ккал (в среднем за день)'],
-    'hs.w.wo': ["Mashg'ulotlar", 'Машғулотлар', 'Тренировки'],
 
     'hs.y.months': ['Oylar', 'Ойлар', 'Месяцы'],
     'hs.y.habits': ['Odatlar xaritasi', 'Одатлар харитаси', 'Карта привычек'],
@@ -84,31 +82,9 @@
     'hs.y.noMonths': ["Bu yil uchun ma'lumot yo'q", 'Бу йил учун маълумот йўқ', 'За этот год данных нет'],
     'hs.y.days': ['{n} kun', '{n} кун', '{n} дн.'],
     'hs.y.notes': ['{n} yozuv', '{n} ёзув', '{n} зап.'],
-    'hs.y.wo': ["{n} mashg'.", '{n} машғ.', '{n} трен.'],
     'hs.y.habitPct': ['odatlar', 'одатлар', 'привычки'],
 
-    'hs.c.search': ['Suhbatlarni qidirish…', 'Суҳбатларни қидириш…', 'Поиск по беседам…'],
-    'hs.c.empty': ['Suhbat topilmadi', 'Суҳбат топилмади', 'Беседы не найдены'],
-    'hs.c.deleted': ["o'chirilgan", 'ўчирилган', 'удалена'],
-    'hs.c.msgs': ['{n} xabar', '{n} хабар', '{n} сообщ.'],
-    'hs.c.back': ["Ro'yxatga", 'Рўйхатга', 'К списку'],
-    'hs.c.continue': ['Nova’da davom ettirish', 'Nova’да давом эттириш', 'Продолжить в Nova'],
-    'hs.c.restored': ['Suhbat Nova’ga qaytarildi', 'Суҳбат Nova’га қайтарилди', 'Беседа возвращена в Nova'],
-    'hs.c.restoreFail': ["Qaytarib bo'lmadi: {msg}", 'Қайтариб бўлмади: {msg}', 'Не удалось вернуть: {msg}'],
-    'hs.c.you': ['Siz', 'Сиз', 'Вы'],
-    'hs.c.total': ['Arxivda {n} suhbat', 'Архивда {n} суҳбат', 'В архиве {n} бесед'],
 
-    'hs.k.all': ['Hammasi', 'Ҳаммаси', 'Все'],
-    'hs.k.empty': ['Karta topilmadi', 'Карта топилмади', 'Карточек нет'],
-    'hs.k.more': ["Yana ko'rsatish ({n})", 'Яна кўрсатиш ({n})', 'Показать ещё ({n})'],
-    'hs.sec.today': ['Bugun', 'Бугун', 'Сегодня'],
-    'hs.sec.health': ["Sog'liq", 'Соғлиқ', 'Здоровье'],
-    'hs.sec.sleep': ['Uyqu', 'Уйқу', 'Сон'],
-    'hs.sec.strain': ['Strain', 'Strain', 'Нагрузка'],
-    'hs.sec.food': ['Ovqat', 'Овқат', 'Питание'],
-    'hs.sec.age': ['Yosh', 'Ёш', 'Возраст'],
-    'hs.sec.finance': ['Moliya', 'Молия', 'Финансы'],
-    'hs.sec.prayer': ['Ibodat', 'Ибодат', 'Ибадат'],
 
     'hs.search.ago': ['Bir yil oldin', 'Бир йил олдин', 'Год назад'],
     'hs.search.sub': ['Tarix', 'Тарих', 'История'],
@@ -442,122 +418,22 @@
   }
 
   /* ------------------------------------------------------------------ */
-  /* CHATLAR                                                             */
-  /* ------------------------------------------------------------------ */
-  let chatQ = '', openThread = null;
-  const chatParams = () => ({ q: chatQ, limit: 100 });
-  function chatList(e) {
-    const g = gate([e]);
-    if (g) return g;
-    const th = Array.isArray(e.data.threads) ? e.data.threads : [];
-    if (!th.length) return `<div class="empty">${esc(t('hs.c.empty'))}</div>`;
-    return `<div class="list">${th.map((x) => `<button type="button" class="li hs-th ${x.deleted ? 'hs-del' : ''}" data-k="th-${esc(String(x.id))}" data-act="hsChatOpen" data-id="${esc(String(x.id))}">
-        <span class="li-text"><span class="hs-th-title">${esc(txt(x.title) || '…')}</span><span class="li-meta">${esc(fmtTsY(+x.ts || 0))} · ${esc(t('hs.c.msgs', { n: num(x.count) || 0 }))}${x.deleted ? ` · <em class="hs-del-badge">${esc(t('hs.c.deleted'))}</em>` : ''}</span></span>${D.ic('chevR', 16)}</button>`).join('')}</div>`;
-  }
-  function patchChatList() { D.patch('hsChatList', chatList(req('chats', chatParams(), patchChatList))); }
-  function transcript(id) {
-    const e = req('chats/' + encodeURIComponent(id));
-    const back = `<button class="btn ghost sm" data-act="hsChatBack">${D.ic('chevL', 14)} ${esc(t('hs.c.back'))}</button>`;
-    const g = gate([e]);
-    if (g) return `<div class="row mb">${back}</div>${g}`;
-    const d = e.data, msgs = Array.isArray(d.messages) ? d.messages : [];
-    const md = D.novaMd || (D.ai && D.ai.md) || ((s) => `<p>${esc(s)}</p>`);
-    const clock = (ts) => { if (!ts) return ''; const p = D.nowTz(new Date(+ts)); return D.fmtTime(p.h, p.min); };
-    return `<div class="row mb hs-th-head">${back}<button class="btn sm" data-act="hsChatRestore" data-id="${esc(String(id))}">${D.ic('sparkles', 14)} ${esc(t('hs.c.continue'))}</button></div>
-      <div class="card hs-tr" data-k="tr-${esc(String(id))}">
-        <div class="card-head"><div><div class="title">${esc(txt(d.title) || '…')}</div><div class="small muted num">${esc(fmtTsY(+d.ts || 0))} · ${esc(t('hs.c.msgs', { n: msgs.length }))}</div></div></div>
-        <div class="hs-feed">${msgs.map((m) => { const ai = m.role === 'assistant'; return `<div class="hs-msg ${ai ? 'ai' : 'user'}" data-k="m-${esc(String(m.idx ?? m.ts))}">
-            <div class="hs-role"><span>${ai ? 'NOVA' : esc(t('hs.c.you'))}</span><span class="num">${esc(clock(m.ts))}</span></div>
-            <div class="hs-bubble">${ai ? md(String(m.content || '')) : esc(String(m.content || '')).replace(/\n/g, '<br>')}</div></div>`; }).join('')}</div>
-      </div>`;
-  }
-  function renderChats() {
-    if (openThread) return transcript(openThread);
-    const r = rangeInfo();
-    return `<div class="hs-search"><input class="inp" id="hsChatQ" data-input="hsChatQ" value="${esc(chatQ)}" placeholder="${esc(t('hs.c.search'))}" autocomplete="off"></div>
-      ${r && r.threads != null ? `<div class="small muted mb-s">${esc(t('hs.c.total', { n: r.threads }))}</div>` : ''}
-      <div id="hsChatList">${chatList(req('chats', chatParams(), patchChatList))}</div>`;
-  }
-  const chatSearch = D.debounce(patchChatList, 300);
-
-  /* ------------------------------------------------------------------ */
-  /* KARTALAR                                                            */
-  /* ------------------------------------------------------------------ */
-  let cardSec = '', cardPage = 1;
-  const CARD_PAGE = 40; // bir yilda yuzlab karta bo'ladi — sahifalab ko'rsatamiz
-  function renderCards() {
-    const f = F(), yr = yearRange(f.y);
-    const e = req('cards', { section: cardSec, from: yr.from, to: yr.to });
-    const chips = `<div class="tabs hs-secs" data-k="secs"><button type="button" class="${cardSec ? '' : 'on'}" data-act="hsSec" data-sec="">${esc(t('hs.k.all'))}</button>${SECTIONS.map((s) => `<button type="button" class="${cardSec === s ? 'on' : ''}" data-act="hsSec" data-sec="${s}">${esc(t('hs.sec.' + s))}</button>`).join('')}</div>`;
-    const g = gate([e]);
-    if (g) return yearChips(f) + chips + g;
-    const all = (Array.isArray(e.data.cards) ? e.data.cards : []).slice().sort((a, b) => (+b.ts || 0) - (+a.ts || 0));
-    if (!all.length) return yearChips(f) + chips + `<div class="card"><div class="empty">${esc(t('hs.k.empty'))}</div></div>`;
-    const cards = all.slice(0, CARD_PAGE * cardPage);
-    const md = (D.ai && D.ai.md) || D.novaMd || ((s) => `<p>${esc(s)}</p>`);
-    const byDay = new Map();
-    for (const c of cards) { const k = String(c.day || D.dayKey(new Date(+c.ts || 0))); if (!byDay.has(k)) byDay.set(k, []); byDay.get(k).push(c); }
-    let out = '';
-    for (const [k, list] of byDay) {
-      out += `<div class="hs-cday" data-k="cd-${k}"><div class="section-title">${esc(D.fmtDate(k, 'weekday'))}</div>${list.map((c, i) => `<div class="card hs-card" data-k="c-${k}-${esc(String(c.ts || i))}">
-          <div class="card-head"><span class="pill">${D.ic('sparkles', 12)} ${esc(t('hs.sec.' + c.section) === 'hs.sec.' + c.section ? String(c.section || '') : t('hs.sec.' + c.section))}</span><span class="small muted num">${esc(c.ts ? fmtTsY(+c.ts) : '')}</span></div>
-          <div class="ai-body hs-md">${md(String(c.text || ''))}</div></div>`).join('')}</div>`;
-    }
-    if (all.length > cards.length) out += `<button class="dashed mb" data-act="hsMoreCards">${esc(t('hs.k.more', { n: all.length - cards.length }))}</button>`;
-    return yearChips(f) + chips + out;
-  }
-
-  /* ------------------------------------------------------------------ */
   /* harakatlar                                                          */
   /* ------------------------------------------------------------------ */
   D.act.hsRetry = () => { for (const [k, e] of cache) if (e.state === 'err') cache.delete(k); D.rerender(); };
-  D.act.hsYear = (el) => { F().y = +el.dataset.y; F(); cardPage = 1; D.saveUi(); D.rerender(); };
+  D.act.hsYear = (el) => { F().y = +el.dataset.y; F(); D.saveUi(); D.rerender(); };
   D.act.hsMonth = (el) => { F().m = +el.dataset.m; F(); D.saveUi(); D.rerender(); };
   D.act.hsGoMonth = (el) => { const f = F(); f.y = +el.dataset.y; f.m = +el.dataset.m; F(); D.saveUi(); D.go(VIEW, 'month'); };
   D.act.hsDay = (el) => openDay(el.dataset.day);
   D.act.hsOpenDay = (el) => { const k = el.dataset.day; D.closeModal(); D.ui.viewDate = k >= D.today() ? null : k; D.saveUi(); D.go('today'); };
-  D.act.hsChatQ = (el) => { chatQ = String(el.value || '').trim(); chatSearch(); };
-  D.act.hsChatOpen = (el) => { openThread = el.dataset.id; D.rerender(); window.scrollTo(0, 0); };
-  D.act.hsChatBack = () => { openThread = null; D.rerender(); };
-  D.act.hsChatRestore = async (el) => {
-    const id = el.dataset.id;
-    el.disabled = true;
-    try {
-      const r = await D.api('/api/history/restore-thread', { method: 'POST', body: JSON.stringify({ id }) });
-      // Nova D.S.nova.threads dan o'qiydi — serverdagi blobga qaytgan suhbatni lokalga ham qo'yamiz
-      // (server `thread` qaytarmasa, ochiq transkriptdan yig'amiz), keyingi pull ikkalasini id bo'yicha birlashtiradi.
-      if (!D.S.nova) D.S.nova = { threads: [] };
-      if (!Array.isArray(D.S.nova.threads)) D.S.nova.threads = [];
-      if (!D.S.nova.threads.some((x) => x.id === id)) {
-        let th = r && r.thread && r.thread.id ? r.thread : null;
-        if (!th) {
-          const e = peek('chats/' + encodeURIComponent(id));
-          const msgs = ok(e) && Array.isArray(e.data.messages) ? e.data.messages : [];
-          th = { id, ts: (ok(e) && +e.data.ts) || Date.now(), messages: msgs.map((m) => ({ role: m.role, content: String(m.content || ''), ts: +m.ts || 0 })) };
-        }
-        D.S.nova.threads.push({ id: th.id, ts: +th.ts || Date.now(), messages: Array.isArray(th.messages) ? th.messages : [] });
-        D.save();
-      }
-      for (const k of Array.from(cache.keys())) if (k.includes('|/api/history/chats')) cache.delete(k);
-      D.ui.sub.nova = id; D.saveUi();
-      D.toast(t('hs.c.restored'));
-      openThread = null;
-      D.go('nova');
-    } catch (e) {
-      el.disabled = false;
-      D.toast(t('hs.c.restoreFail', { msg: (e && e.message) || e }), { ms: 4000 });
-    }
-  };
-  D.act.hsSec = (el) => { cardSec = el.dataset.sec || ''; cardPage = 1; D.rerender(); };
-  D.act.hsMoreCards = () => { cardPage++; D.rerender(); };
-
   /* ------------------------------------------------------------------ */
   /* view                                                                */
   /* ------------------------------------------------------------------ */
   const safe = (fn) => { try { return fn(); } catch (e) { console.error('history', e); D.logError(e); return `<div class="card hs-off"><div class="title">${D.ic('alert')} ${esc(t('error.view'))}</div><pre class="small muted">${esc(e && e.message || e)}</pre></div>`; } };
   function render() {
-    const sub = SUBS.includes(D.sub(VIEW, 'month')) ? D.sub(VIEW, 'month') : 'month';
-    const body = { month: renderMonth, year: renderYear, chats: renderChats, cards: renderCards }[sub];
+    let sub = D.sub(VIEW, 'month');
+    sub = MOVED[sub] || (SUBS.includes(sub) ? sub : 'month');
+    const body = { month: renderMonth, year: renderYear }[sub];
     return `<div class="hs">
       <div class="seg hs-seg">${SUBS.map((x) => `<button type="button" class="${x === sub ? 'on' : ''}" data-act="sub" data-view="${VIEW}" data-sub="${x}">${esc(t('hs.sub.' + x))}</button>`).join('')}</div>
       ${safe(body)}
