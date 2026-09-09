@@ -313,7 +313,7 @@
         <div class="field"><label class="field-label">${t('set.paceOfAging')}</label>${numInp(p.paceOfAging, 'setWhoopAge', 'data-k="paceOfAging" min="0.3" max="2.5" step="0.01" placeholder="1.00"')}</div>
       </div>
       <div class="help">${esc(t('set.whoopAgeHint'))}</div>
-      <button class="btn ghost sm mt-s" data-act="go" data-view="health" data-sub="body">${D.ic('chevR', 14)} ${t('set.whoopAgeGo')}</button>
+      <button class="btn ghost sm mt-s" data-act="go" data-view="health" data-sub="ready">${D.ic('chevR', 14)} ${t('set.whoopAgeGo')}</button>
     </div>
 
     ${D.serverEnabled() && (D.me || D.device.uid) ? accountCard() : ''}

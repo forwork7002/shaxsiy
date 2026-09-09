@@ -1,89 +1,13 @@
-/* ==== health ==== (prefix hl-) */
+/* ==== health ==== (prefix hl-)
+   Sog'liq uchta bo'limchadan iborat va sahifalarni whoop.js chizadi,
+   shuning uchun bu yerda faqat qobiq: bo'limchalar, sana chizig'i,
+   soat ulanmagan holatdagi karta. Qolgan hamma qoida whoop.css'da. */
 .hl-seg button { padding: 8px 8px; font-size: 12px; min-height: 40px; }
-/* summary tiles: 4-up on desktop, an even 2×2 on phones (auto-fit left a 3+1 orphan) */
-.hl-tiles { grid-template-columns: repeat(4, 1fr); }
-.hl-wtiles { grid-template-columns: repeat(5, 1fr); }
-.hl-delta { white-space: nowrap; }
-.hl-delta small { color: inherit; opacity: .7; }
-@media (max-width: 600px) {
-  .hl-tiles { grid-template-columns: 1fr 1fr; }
-  .hl-wtiles { grid-template-columns: 1fr 1fr; }
-  .hl-wtiles .stat:first-child { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
-  .hl-wtiles .stat:first-child .stat-num { font-size: 26px; }
-  .hl-wtiles .stat:first-child .stat-label { margin-top: 0; }
-  .hl-wtiles .stat:first-child .stat-sub { margin: 0 0 0 auto; }
-}
-.hl-tiles .stat-num small, .stat-num small { font-size: 12px; font-weight: 600; color: var(--text3); margin-left: 2px; letter-spacing: 0; }
 .hl-link { border: 0; background: transparent; padding: 4px 6px; margin: -4px -2px; color: var(--info); font-size: 11px; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; border-radius: 6px; }
 .hl-link:hover { background: var(--hover); }
-.hl-form { display: flex; flex-direction: column; gap: 16px; }
-.hl-field { display: flex; flex-direction: column; gap: 8px; }
-.hl-lab { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.hl-val { font-size: 14px; font-weight: 700; color: var(--text); }
-.hl-unit { font-family: var(--mono); font-size: 12px; color: var(--text3); font-weight: 600; padding: 0 4px; flex: none; }
-.hl-times { margin-top: 2px; }
-.hl-time { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
-.hl-tags { margin-top: 8px; }
-.hl-tags .pill { min-height: 38px; padding: 6px 12px; cursor: pointer; }
-.hl .emoji-row button { min-height: 44px; }
-.hl .stepper .btn.sq { width: 44px; height: 44px; }
-.hl .stepper .val small { font-size: 13px; font-weight: 600; }
-
-/* charts */
-.hl-chart { position: relative; width: 100%; overflow: hidden; border-radius: var(--r-xs); }
-.hl-layer { position: absolute; inset: 0; }
-.hl-layer .spark { height: 100% !important; }
-.hl-trend .spark path { stroke-dasharray: 5 4; stroke-width: 1.8; }
-.hl-minmax { position: absolute; right: 4px; font-size: 10px; font-weight: 700; color: var(--text3); background: color-mix(in srgb, var(--bg3) 75%, transparent); padding: 1px 5px; border-radius: 5px; pointer-events: none; }
-.hl-max { top: 4px; } .hl-min { bottom: 4px; }
-.hl-leg { display: inline-block; width: 14px; height: 3px; border-radius: 2px; }
-.hl-rate { display: flex; align-items: center; gap: 8px; margin-top: 12px; padding: 9px 12px; border-radius: var(--r-sm); font-size: 12.5px; background: var(--inset); border: 1px solid var(--line); color: var(--text2); }
-.hl-rate.bad { color: var(--danger-text); border-color: color-mix(in srgb, var(--danger) 30%, transparent); background: color-mix(in srgb, var(--danger) 8%, transparent); }
-.hl-rate.good svg { color: var(--success); }
-.hl-rate b { color: var(--text); }
-.hl-range { margin: 0; padding-bottom: 0; }
-.hl-leg-dash { background: none; border-top: 1px dashed var(--text3); height: 0; }
-.hl-axis span:first-child { text-align: left; } .hl-axis span:last-child { text-align: right; }
-
-/* water hero */
-.hl-water-row { gap: 18px; }
-.hl-water-row .stack { gap: 4px; }
-.hl-ring-of { font-size: 13px; font-weight: 600; color: var(--text3); margin-left: 2px; letter-spacing: 0; }
-.hl-water-btns { display: grid; grid-template-columns: 44px 1fr auto; gap: 8px; margin-top: 16px; }
-.hl-water-btns .btn { min-height: 44px; }
-@media (max-width: 360px) { .hl-water-btns { grid-template-columns: 44px 1fr; } .hl-water-btns .btn:last-child { grid-column: 1 / -1; } }
-.hl-plus { font-size: 14px; }
-.hl-why-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--line2); border-radius: var(--r-sm); background: transparent; color: var(--text2); font-size: 12px; font-weight: 600; letter-spacing: .04em; min-height: 40px; transition: background .15s, color .15s; }
-.hl-why-toggle:hover { background: var(--hover); color: var(--text); }
-.hl-why-toggle svg { transition: transform .2s; }
-.hl-why-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
-.hl-why-body { margin-top: 8px; padding: 10px 14px; background: var(--recess); border: 1px solid var(--line); border-radius: var(--r-sm); }
-.hl-why-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 4px 0; font-size: 12.5px; color: var(--text2); }
-.hl-why-row b { color: var(--text); font-weight: 600; }
-.hl-why-row.total { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 9px; }
-.hl-why-row.total span, .hl-why-row.total b { color: var(--success); font-weight: 700; }
-.hl-hist { display: grid; grid-template-columns: 62px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 12.5px; }
-.hl-hist:last-child { border-bottom: 0; }
-.hl-hist-d { font-family: var(--mono); font-size: 11px; color: var(--text3); }
-.hl-hist-n { font-size: 12px; color: var(--text2); min-width: 40px; text-align: right; }
-/* uyqu va tiklanish tahlili */
-.hl-corrs { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
-.hl-corr { display: flex; align-items: flex-start; gap: 9px; padding: 9px 11px; margin-bottom: 6px; border-radius: var(--r-sm);
-  background: var(--inset); border: 1px solid var(--line); font-size: 13px; line-height: 1.45; color: var(--text2); }
-.hl-corr:last-child { margin-bottom: 0; }
-.hl-corr .ic { flex: none; margin-top: 1px; }
-.hl-corr.good { border-color: color-mix(in srgb, var(--success) 26%, transparent); background: color-mix(in srgb, var(--success) 7%, transparent); }
-.hl-corr.good .ic { color: var(--success); }
-.hl-corr.warn { border-color: color-mix(in srgb, var(--warning) 26%, transparent); background: color-mix(in srgb, var(--warning) 7%, transparent); }
-.hl-corr.warn .ic { color: var(--warning); }
-.hl-corr strong { color: var(--text); font-weight: 700; }
-.hl-corr .tiny { flex: none; white-space: nowrap; align-self: center; }
-@media (max-width: 430px) { .hl-corr { flex-wrap: wrap; } .hl-corr .tiny { width: 100%; padding-left: 24px; } }
-
-/* Kun bo'limi bento — .stat markup ichida ham to'g'ri ko'rinishi uchun */
-.hl-tiles.bento .stat { background: transparent; border: 0; padding: 0; }
-.hl-tiles.bento .bento-tile { justify-content: center; }
-.hl-tiles.bento .stat-num { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -.03em; line-height: 1.05; }
-.hl-tiles.bento .b-wide .stat-num { font-size: 28px; }
-.hl-tiles.bento .stat-label { margin-top: 5px; font-size: 10px; letter-spacing: .12em; }
-.hl-tiles.bento .zone { top: 10px; right: 10px; }
+/* raqam yonidagi birlik ("7 soat 32 daq" dagi «soat»/«daq») — butun ilova bo'ylab bir xil */
+.stat-num small { font-size: 12px; font-weight: 600; color: var(--text3); margin-left: 2px; letter-spacing: 0; }
+/* WHOOP ulanmaganda: bo'limcha nima ko'rsatishini bir jumlada aytadi */
+.hl-off { text-align: center; }
+.hl-off .title { justify-content: center; margin-bottom: 6px; }
+.hl-off .help { max-width: 42ch; margin: 0 auto; }

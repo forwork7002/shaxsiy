@@ -47,11 +47,16 @@ ovqat rasmlari `data/<uid>.food/`. Eski `data/data.json` bo'lsa birinchi so'rovd
 developer.whoop.com → ilova → Redirect URI `https://sizning-domen/api/whoop/callback` → `.env` ga `WHOOP_CLIENT_ID/SECRET`.
 Sog'liq → «Ulash» (yoki onboardingdagi «WHOOP'ni ulash»). Tokenlar faqat serverda saqlanadi; server har daqiqa
 so'rab turadi, mijoz snapshot'ni ETag bilan oladi. API bermaydigan WHOOP Age / Pace of Aging'ni
-Sozlash → Profil'ga WHOOP ilovasidan ko'chirib yozasiz; Sog'liq → Tana sahifasi taxminiy biologik yoshni ham ko'rsatadi.
+Sozlash → Profil'ga WHOOP ilovasidan ko'chirib yozasiz; Sog'liq → Tayyorlik sahifasining pastidagi «Tana» kartasi
+taxminiy biologik yoshni ham ko'rsatadi.
+
+Sog'liq bo'limida qo'lda kiritish yo'q: uchta bo'limcha (Tayyorlik · Uyqu · Zo'riqish) va har bir raqam WHOOP'dan,
+yaxlitlanmagan holda — vaqt soat va daqiqada, masofa metrda, puls zonalari aniq davomiylikda.
+Suv Bugun sahifasida yuritiladi.
 
 ## AI (OpenAI)
 `.env` ga `AI_PROVIDER=openai`, `AI_API_KEY`, `OPENAI_MODEL`. Kalit brauzerga chiqmaydi.
-Har sahifada o'z «murabbiy» kartasi (`today, health, sleep, strain, food, age, finance, prayer`), Nova — chat.
+Har sahifada o'z «murabbiy» kartasi (`today, health, sleep, strain, food, finance, prayer`), Nova — chat.
 Ovqat: rasm yoki matn → `/api/food/analyze` → kkal / oqsil / uglevod / yog' → kun jurnaliga.
 
 ## Klaviatura

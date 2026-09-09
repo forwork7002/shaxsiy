@@ -11,11 +11,11 @@ app/
   js/prayer.js      prayer-time engine + hijri calendar (pure functions, no DOM)
   js/today.js       Бугун: kunlik tahlil (WHOOP tayyorlik hero + uyqu/zo'riqish/HRV, kun chizig'i, namoz, xulosa plitkalari, odat+vazifa fokus ro'yxati, WHOOP mashg'ulotlari, AI, kun yakuni)
   js/tasks.js       Вазифа + Мақсад
-  js/health.js      Соғлиқ: WHOOP hub — day · sleep · strain · weight · water · body (age panel)
+  js/health.js      Соғлиқ: WHOOP qobig'i — ready · sleep · strain (uchta bo'limcha, qo'lda kiritish yo'q)
   js/food.js        Овқат: food logger (photo/text → /api/food/analyze → per-day meals, targets, WHOOP burn)
   js/finance.js     Молия
   js/ai.js          shared AI analysis engine — D.ai.card(section) insight cards
-  js/whoop.js       WHOOP snapshot client, per-day store, trends, readiness, workouts, bioAge/bodyPanel
+  js/whoop.js       WHOOP snapshot client, per-day store, trends, readiness, workouts, bioAge; Соғлиқ sahifalarini shu modul chizadi
   js/profile.js     account sheet (D.profile): avatar (photo → /api/me/avatar, or initials), display name, provider/e-mail, stats, export, logout — opened from the header avatar button
   js/nova.js        AI mentor chat (uses D.ai.ask)
   js/settings.js    Созлаш: general (profile incl. birth year / goal / WHOOP Age) · habits · food targets · prayer · finance · data
@@ -36,6 +36,12 @@ No Telegram: there is no `telegram-web-app.js` in the shell; `D.tg` stays `null`
 
 Removed on 2026-09-09 (files deleted, `<link>/<script>` and sw.js SHELL entries gone, i18n keys gone): `gym.js/css` (WHOOP workouts replace it),
 `learn.js/css`, `stats.js/css` (month/year stats live in Tarix), Health sub-tabs `caffeine` and `stack`, weekly `reviews`.
+
+Соғлиқ rescope, 2026-09-09 — olti bo'limcha uchtaga, to'qqiz qo'lda maydon nolga:
+sub-tabs `day` · `weight` · `water` · `body` → `ready` · `sleep` · `strain` (eski qiymatlar `ready` ga ko'chadi);
+o'chirilgan kiritishlar — vazn inputi, uyqu slideri, `bed`/`wake`, suv stepperi, kayfiyat, teglar, izoh;
+`renderWeight` / `renderWater` / `sleepInsight` / `linksHtml` va `D.act.hl{Weight,Sleep,Bed,Wake,Water,Mood,Tag,Note,Why,WaterCustom,WeightDel,Range}` yo'q.
+Suv faqat Бугун sahifasida yuritiladi; vazn WHOOP `body.weight_kilogram` dan keladi (qo'lda tuzatish — Созлаш → Profil).
 Data safety: `defaultState` / `normalize` / `D.merge` keep the `gym`, `learn`, `caffeine`, `stack`, `reviews` keys so old blobs and the archive stay intact — nothing in the UI reads them
 (Tarix still shows archived stack/caffeine facts on a past day's sheet, read-only).
 
@@ -80,7 +86,9 @@ D.esc(s)  D.uid(p)  D.clamp(n,a,b)  D.debounce(fn,ms)  D.sum(arr, fn)
 D.dayKey(date?)  D.today()  D.addDays(k,n)  D.daysBetween(a,b)  D.fmtDate(k,style)  D.monthKey(k)  D.weekKey(k)
 D.nowTz()                   // Date-like {y,m,d,h,min,s,dow} in settings tz
 D.profileAge()              // age from profile.birthYear (self-updating), else legacy profile.age; the ONLY age rule (food, whoop, ai, settings)
-D.fmtNum(n)  D.fmtMoney(n)  D.fmtPct(x)  D.fmtTime(h,m)
+D.fmtNum(n[,dec])  D.fmtMoney(n)  D.fmtPct(x)  D.fmtTime(h,m)  D.fmtSigned(v[,dec])
+D.fmtHm(hours[,{sign}])  D.fmtMsH(ms)   // aniq davomiylik: «7 soat 32 daqiqa» — kasr soat hech qayerda ko'rsatilmaydi
+D.fmtMsS(ms)                            // soniyagacha: «12 daq 34 s» — puls zonalari va mashg'ulot davomiyligi
 D.toast(msg, {undo?:fn, ms?})  D.confirm({title,text,ok,danger}) → Promise<bool>
 D.modal({title, body, actions:[{label,act,primary,danger}], onOpen})  D.closeModal()
 D.sheet(html)               // bottom sheet (mobile) / modal (desktop)
@@ -126,7 +134,8 @@ D.ai.systemFor(section)        // section prompt built from the snapshot
 D.ai.mode()                    // 'server' | 'key' | 'none'
 D.ai.enoughData(section)  D.ai.isFresh(section)  D.ai.md(text)
 ```
-Sections: `today`, `health`, `sleep`, `strain`, `food`, `age`, `finance`, `prayer` — one coach card per page
+Sections: `today`, `health`, `sleep`, `strain`, `food`, `finance`, `prayer` — one coach card per page
+(the old `age` section was folded into `health`; `hs.sec.age` stays so archived cards still render a label)
 (`history.js` SECTIONS mirrors this list for the Tarix «Kartalar» filter). Add one by extending `SECTIONS`, `QUESTION`,
 the `sectionLines()` builder and the three `ai.hint.<section>` strings.
 
@@ -135,16 +144,29 @@ the `sectionLines()` builder and the three `ai.hint.<section>` strings.
 ```js
 D.whoop.sync({deep})     // recovery/sleep/cycle/workout(+body when deep) → S.whoop.days
 D.whoop.autoSync()       // throttled to 30 min; runs on boot and when Health opens
-D.whoop.day(key)  D.whoop.trend(field, n)  D.whoop.stats(field, n)
+D.whoop.day(key)  D.whoop.trend(field, n)  D.whoop.stats(field, n)   // stats returns RAW means — the caller formats
 D.whoop.readiness()      // {pct, zone, sleepH, strain, label} for the Today strip
-D.whoop.fillSleep()      // writes health[date].sleep when the user left it empty
+D.whoop.fillSleep()      // writes health[date].sleep (archive/Tarix read it; nothing in the UI edits it any more)
 D.whoop.workoutsOn(key)  D.whoop.workoutRows(key, {empty:false})   // Today's WHOOP workouts card + Health › strain
 D.whoop.bioAge()         // {est, chrono, delta, inputs:[{k,v,effect}]} | null — transparent 30-day estimate
-D.whoop.bodyPanel()      // Health › body: profile, body, last sync, WHOOP Age / Pace of Aging (typed in), estimate
-D.whoop.trendCard()  D.whoop.footer()
+
+// Соғлиқ sahifalari — health.js faqat shularni yig'adi:
+D.whoop.hero(key)        // recovery ring + verdict + strain gauge + plain-language notes
+D.whoop.vitals(key)      // Tayyorlik jadvali: recovery · HRV · RHR · sleep · resp · SpO₂ · skin · strain · kcal,
+                         //   har biri 30 kunlik shaxsiy me'yorga (uyqu — o'sha kechaning ehtiyojiga) nisbatan
+D.whoop.sleepPage(key)  D.whoop.strainPage(key)
+D.whoop.trendCard()      // 14/30/90 kunlik tendensiya — faqat Tayyorlik sahifasida
+D.whoop.bodyCard()       // Tana: bo'y/vazn/maks. puls/BMI (WHOOP profilidan) + vazn trendi (read-only) + yosh
+D.whoop.footer()         // ulanish kartasi yoki ulanishga taklif
 ```
 Day mapping: recovery → `created_at`, sleep → `end` (the morning you woke), cycle/workout → `start`.
-Naps are skipped. `health[k].sleepFromWhoop` marks an auto-filled value; a manual edit clears it.
+Naps are skipped.
+
+**Raqamlar yaxlitlanmaydi.** `applySnapshot` WHOOP bergan aniqlikni saqlaydi (server ham: `_n_recovery` HRV va
+tinch pulsni bir kasr bilan yozadi). Yaxlitlash faqat ekranga chiqishda va faqat formatlagich orqali bo'ladi:
+vaqt `D.fmtHm` / `D.fmtMsH` bilan **soat + daqiqa**da, qisqa davomiylik `D.fmtMsS` bilan soniyagacha,
+qolgan hamma son `D.fmtNum(v, dec)` bilan (bir xil ajratkich, minglik guruhlash, qisqartma yo'q).
+Masofa metrda, puls zonalari aniq davomiylikda.
 
 ## Food (js/food.js)
 
@@ -200,6 +222,8 @@ Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --
  dhikr:{ 'YYYY-MM-DD':{ total:n, sessions:[{name,n,ts}] } },
  fasting:{ 'YYYY-MM-DD':{ type:'ramadan'|'sunnah'|'qaza'|'nafl', done } },
  health:{ 'YYYY-MM-DD':{ weight, sleep, sleepFromWhoop?:true, bed:'HH:MM', wake:'HH:MM', water:n, mood:0..4, tags:[], note } },
+          // `water` — Бугун sahifasi yozadi; `sleep/bed/wake` — WHOOP `fillSleep`; `weight/mood/tags/note` uchun
+          // kiritish UI si yo'q, lekin kalitlar saqlanadi: eski bloblar va Тарих arxivi shularni o'qiydi
  food:{ logs:{ 'YYYY-MM-DD':[ {id,ts,name,grams,kcal,p,c,f,photo:id|null,items:[{name,grams,kcal,p,c,f}],note,src:'photo'|'text'|'manual'} ] },
         targets:{ kcal,p,c,f, auto:true } },      // merge: logs per day union by id (local wins); targets from the newer side
  caffeine:{ logs:[{id,name,mg,ts}], custom:[{id,name,mg}] },   // legacy — kept for old blobs/archive, no UI

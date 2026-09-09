@@ -1257,7 +1257,8 @@ def _n_recovery(r):
         return None
     return {
         "id": r.get("sleep_id") or str(r.get("cycle_id")), "cycleId": r.get("cycle_id"), "ts": r.get("created_at") or r.get("updated_at"),
-        "recovery": _rnd(s.get("recovery_score")), "hrv": _rnd(s.get("hrv_rmssd_milli")), "rhr": _rnd(s.get("resting_heart_rate")),
+        # HRV va tinch puls WHOOP bergan aniqlikda saqlanadi — ekranda yaxlitlanmaydi
+        "recovery": _rnd(s.get("recovery_score")), "hrv": _rnd(s.get("hrv_rmssd_milli"), 1), "rhr": _rnd(s.get("resting_heart_rate"), 1),
         "spo2": _rnd(s.get("spo2_percentage"), 1), "skin": _rnd(s.get("skin_temp_celsius"), 1),
         "calibrating": bool(s.get("user_calibrating")), "state": r.get("score_state"),
     }
@@ -1756,10 +1757,13 @@ FOOD_LANG = {"uz": "Uzbek (Latin script)", "uzk": "Uzbek (Cyrillic script)", "ru
 FOOD_SYSTEM = (
     "You are a nutrition analyst. Estimate the meal from the photo and/or the description. "
     "Reply with ONE JSON object only — no prose, no markdown, no code fences — exactly this shape:\n"
-    '{"items":[{"name":"...","grams":0,"kcal":0,"p":0,"c":0,"f":0}],"total":{"kcal":0,"p":0,"c":0,"f":0},'
+    '{"items":[{"name":"...","grams":0,"kcal":0,"p":0,"c":0,"f":0}],'
+    '"total":{"kcal":0,"p":0,"c":0,"f":0,"fib":0,"sug":0,"salt":0},'
     '"confidence":0.0,"advice":"..."}\n'
     "Rules: one item per distinct food; grams = estimated portion weight; kcal and macros (p=protein, c=carbs, f=fat, "
-    "all in grams) are for that portion; total = sum of items; confidence is 0..1; advice is one or two short sentences. "
+    "all in grams) are for that portion; total.kcal/p/c/f = sum of the items. In total also estimate fib (fibre), "
+    "sug (sugars) and salt, all in grams for the whole meal — omit a key only if you truly cannot estimate it. "
+    "confidence is 0..1; advice is ONE short sentence, plain everyday words, no numbers repeated from the table. "
     "Item names and advice must be written in {lang}. If the input is not food, return items:[] with confidence 0 and say so in advice."
 )
 FOOD_REPAIR = "Your previous reply was not valid JSON. Reply again with ONLY the JSON object in the required shape, nothing else."
@@ -1839,6 +1843,10 @@ def _food_shape(j: dict) -> dict:
     total = {k: _food_num(tot.get(k)) for k in ("kcal", "p", "c", "f")}
     if items and (not tot or all(total[k] == 0 for k in total)):
         total = {k: round(sum(i[k] for i in items), 1) for k in ("kcal", "p", "c", "f")}
+    # tola / shakar / tuz — model bermasa yo'q bo'lib qoladi (nol emas: "0 g tuz" yolg'on bo'lardi)
+    for k in ("fib", "sug", "salt"):
+        if _num(tot.get(k)) is not None:
+            total[k] = _food_num(tot.get(k), 2000)
     conf = _num(j.get("confidence"))
     conf = 0.5 if conf is None else max(0.0, min(1.0, conf if conf <= 1 else conf / 100))
     return {"items": items, "total": total, "confidence": round(conf, 2), "advice": str(j.get("advice") or "").strip()[:600]}

@@ -35,8 +35,6 @@
 
 /* WHOOP kun kartasi — Sog'liq bo'limining boshida */
 .wh-day .hero-main { align-items: center; }
-.wh-day-grid { margin-top: 16px; margin-bottom: 0; }
-.wh-day-grid .bento-tile { min-height: 70px; }
 .wh-notes { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
 .wh-note { display: flex; align-items: flex-start; gap: 8px; padding: 8px 11px; border-radius: 11px; font-size: 12.5px; line-height: 1.45;
   background: var(--row-bg); border: 1px solid var(--row-line); color: var(--text2); }
@@ -166,3 +164,49 @@
 .wh-body-in b.good { color: var(--success); } .wh-body-in b.bad { color: var(--danger-text); } .wh-body-in b.muted { color: var(--text3); }
 .wh-body-in.head { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); }
 .wh-body-in.head b { color: var(--text3); font-weight: 700; }
+
+/* ==== Tayyorlik: o'lchovlar jadvali ====
+   To'rt ustun: ko'rsatkich · aniq qiymat · 30 kunlik me'yor · farq.
+   Telefonda me'yor ustuni qiymat ostiga tushadi, farq o'ng chetda qoladi. */
+.wh-vt-tbl { margin-top: 4px; }
+.wh-vt-row { display: grid; grid-template-columns: 1.35fr 1fr .9fr .8fr; gap: 10px; align-items: baseline;
+  padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--text2); }
+.wh-vt-row:last-child { border-bottom: 0; }
+.wh-vt-row.head { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); padding-bottom: 6px; }
+.wh-vt-row.head b { color: var(--text3); font-weight: 700; }
+.wh-vt-lab { color: var(--text2); min-width: 0; }
+.wh-vt-val { color: var(--text); font-weight: 700; font-size: 14px; white-space: nowrap; }
+.wh-vt-val small { font-size: 11px; font-weight: 600; color: var(--text3); margin-left: 2px; }
+.wh-vt-row > span:nth-child(3) { text-align: right; white-space: nowrap; }
+.wh-vt-row > span:nth-child(3) em { display: block; font-style: normal; font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); }
+.wh-vt-row > b:last-child { text-align: right; font-weight: 700; color: var(--text2); white-space: nowrap; }
+.wh-vt-row > b:last-child.good { color: var(--success); }
+.wh-vt-row > b:last-child.bad { color: var(--danger-text); }
+@media (max-width: 430px) {
+  .wh-vt-row { grid-template-columns: 1.2fr 1fr .9fr; }
+  .wh-vt-row > span:nth-child(3) { grid-column: 2; grid-row: 2; text-align: left; font-size: 11px; }
+  .wh-vt-row > b:last-child { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
+  .wh-vt-row.head > span:nth-child(3) { display: none; }
+}
+
+/* ==== Tayyorlik: ixcham tana kartasi ==== */
+.wh-bd-who { margin: -2px 0 10px; }
+.wh-bd-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+@media (max-width: 520px) { .wh-bd-grid { grid-template-columns: 1fr 1fr; } }
+.wh-bd-cell { display: flex; flex-direction: column; gap: 3px; padding: 12px 10px; border-radius: 13px; background: var(--row-bg); border: 1px solid var(--row-line); min-width: 0; }
+.wh-bd-cell b { font-family: var(--mono); font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; color: var(--text); }
+.wh-bd-cell b small { font-size: 11px; font-weight: 600; color: var(--text3); margin-left: 2px; }
+.wh-bd-cell b .good { color: var(--success); } .wh-bd-cell b .warn { color: var(--warning); } .wh-bd-cell b .bad { color: var(--danger-text); }
+.wh-bd-cell > span { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); }
+.wh-bd-cell em { font-style: normal; font-size: 10.5px; color: var(--text3); }
+.wh-bd-trend { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.wh-bd-trend-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.wh-bd-trend-head b.good { color: var(--success); } .wh-bd-trend-head b.warn { color: var(--warning); }
+.wh-bd-sep { margin: 14px 0 10px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); }
+
+/* uyqu bosqichlari endi aniq vaqt yozadi ("1 soat 8 daq") — tor ekranda to'rt ustun sig'maydi */
+@media (max-width: 480px) {
+  .wh-stg-row { grid-template-columns: 1fr 1fr; gap: 10px 16px; }
+  .wh-stg { flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: 5px; }
+  .wh-stg i { align-self: center; }
+}

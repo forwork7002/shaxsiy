@@ -12,7 +12,8 @@
   const t = (k, p) => D.t(k, p);
   const VIEW = 'history';
   const SUBS = ['month', 'year', 'chats', 'cards'];
-  const SECTIONS = ['today', 'health', 'sleep', 'strain', 'food', 'age', 'finance', 'prayer']; // ai.js SECTIONS bilan bir xil
+  const SECTIONS = ['today', 'health', 'sleep', 'strain', 'food', 'finance', 'prayer']; // ai.js SECTIONS bilan bir xil
+  // eski arxivdagi `age` kartalari «Hammasi» ro'yxatida qoladi — `hs.sec.age` kaliti shuning uchun saqlanadi
   const MOODS = ['😔', '😐', '🙂', '😄', '🤩'];
   const DOW_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Dushanbadan boshlanadi
   const FRESH_MS = 120000;                  // bugunga tegib turgan oraliq shuncha vaqtdan keyin qayta so'raladi

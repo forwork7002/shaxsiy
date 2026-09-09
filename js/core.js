@@ -474,6 +474,26 @@
   };
   D.fmtTime = (h, m) => D.pad2(Math.floor(h)) + ':' + D.pad2(Math.floor(m));
   D.fmtMins = (mins) => { const h = Math.floor(mins / 60), m = Math.floor(mins % 60); return h ? `${h} ${D.t('unit.h')} ${m} ${D.t('unit.m')}` : `${m} ${D.t('unit.m')}`; };
+
+  /* Aniq davomiylik — hech qachon yaxlitlanmaydi, kasr soat ko'rsatilmaydi.
+     Sog'liq bo'limi «7.5 soat» emas, «7 soat 32 daqiqa» yozadi. */
+  D.fmtHm = (hours, opts = {}) => {
+    if (hours === null || hours === undefined || hours === '' || isNaN(+hours)) return '—';
+    const total = Math.round(Math.abs(+hours) * 60);          // daqiqagacha aniq
+    const h = Math.floor(total / 60), m = total % 60;
+    const body = h ? `${h} ${D.t('unit.h')} ${m} ${D.t('unit.m')}` : `${m} ${D.t('unit.m')}`;
+    return (+hours < 0 ? '−' : opts.sign && total ? '+' : '') + body;
+  };
+  D.fmtMsH = (ms, opts) => (ms === null || ms === undefined || ms === '' || isNaN(+ms) ? '—' : D.fmtHm(+ms / 3.6e6, opts));
+  /* Qisqa davomiylik soniyagacha — mashg'ulot puls zonalari uchun. */
+  D.fmtMsS = (ms) => {
+    if (ms === null || ms === undefined || ms === '' || isNaN(+ms)) return '—';
+    const total = Math.round(+ms / 1000), h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60;
+    if (h) return `${h} ${D.t('unit.h')} ${m} ${D.t('unit.m')}${s ? ` ${s} ${D.t('unit.s')}` : ''}`;
+    return m ? `${m} ${D.t('unit.m')}${s ? ` ${s} ${D.t('unit.s')}` : ''}` : `${s} ${D.t('unit.s')}`;
+  };
+  /* Ishorali aniq son: «+11.8», «−2». Nol «0» bo'lib qoladi. */
+  D.fmtSigned = (v, d = 1) => (v === null || v === undefined || isNaN(+v) ? '—' : (+v > 0 ? '+' : +v < 0 ? '−' : '') + D.fmtNum(Math.abs(+v), d));
   D.fmtTs = (ts) => { if (!ts) return '—'; const p = D.nowTz(new Date(ts)); return D.fmtDate(D.keyOf(p.y, p.m, p.d)) + ' ' + D.fmtTime(p.h, p.min); };
 
   /* ------------------------------------------------------------------ */
