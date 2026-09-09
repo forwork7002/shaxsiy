@@ -342,7 +342,12 @@
   D.act.setLang = (el) => { if (el.dataset.val !== D.lang()) D.setLang(el.dataset.val); };
   D.act.setTheme = (el) => D.theme.set(el.dataset.val);
   D.act.setOnboard = () => { if (D.onboard && D.onboard.open) D.onboard.open(); };   // Profilni qadam-baqadam qayta to'ldirish
-  D.act.setProfileText = (el) => { D.S.profile[el.dataset.k] = el.value.trim().slice(0, 40); D.save(); };
+  D.act.setProfileText = (el) => {
+    D.S.profile[el.dataset.k] = el.value.trim().slice(0, 40);
+    D.save();
+    // ism serverdagi hisobga ham yozilsin — profil varag'i va kirish oynasi bir xil ismni ko'rsatadi
+    if (el.dataset.k === 'name' && D.profile && D.profile.syncName) D.profile.syncName(D.S.profile.name);
+  };
   D.act.setProfileNum = (el) => {
     const k = el.dataset.k;
     let v = num(el.value);
@@ -875,15 +880,20 @@
   }
 
   D.act.setLogout = async () => {
-    if (!(await D.confirm({ text: t('set.logoutQ'), ok: t('set.logout') }))) return;
+    // yuborilmagan yozuv bo'lsa — buni yashirmaymiz; chiqish paytida avval yuborishga urinib ko'riladi
+    const text = t(D._pending ? 'set.logoutQ2' : 'set.logoutQ');
+    if (!(await D.confirm({ text, ok: t('set.logout') }))) return;
     D.auth.logout();
   };
   D.i18n.add({ uz: { 'set.d.archive': 'Arxiv', 'set.d.archiveLine': '{days} kun · {first} dan · {threads} suhbat', 'set.d.archiveOff': 'mavjud emas' },
     uzk: { 'set.d.archive': 'Архив', 'set.d.archiveLine': '{days} кун · {first} дан · {threads} суҳбат', 'set.d.archiveOff': 'мавжуд эмас' },
     ru: { 'set.d.archive': 'Архив', 'set.d.archiveLine': '{days} дн. · с {first} · бесед: {threads}', 'set.d.archiveOff': 'недоступен' } });
-  D.i18n.add({ uz: { 'set.account': 'Hisob', 'set.logout': 'Chiqish', 'set.logoutQ': 'Chiqilsinmi? Bu qurilmadagi nusxa o‘chiriladi, serverdagi ma’lumot saqlanadi.' },
-    uzk: { 'set.account': 'Ҳисоб', 'set.logout': 'Чиқиш', 'set.logoutQ': 'Чиқилсинми? Бу қурилмадаги нусха ўчирилади, сервердаги маълумот сақланади.' },
-    ru: { 'set.account': 'Аккаунт', 'set.logout': 'Выйти', 'set.logoutQ': 'Выйти? Копия на этом устройстве будет удалена, данные на сервере сохранятся.' } });
+  D.i18n.add({ uz: { 'set.account': 'Hisob', 'set.logout': 'Chiqish', 'set.logoutQ': 'Chiqilsinmi? Bu qurilmadagi nusxa o‘chiriladi, serverdagi ma’lumot saqlanadi.',
+      'set.logoutQ2': 'Serverga yuborilmagan yozuvlar bor. Chiqishdan oldin ularni yuborib ko‘ramiz; yetmasa shu qurilmada saqlanadi va qaytib kirganingizda o‘zi qo‘shiladi. Chiqilsinmi?' },
+    uzk: { 'set.account': 'Ҳисоб', 'set.logout': 'Чиқиш', 'set.logoutQ': 'Чиқилсинми? Бу қурилмадаги нусха ўчирилади, сервердаги маълумот сақланади.',
+      'set.logoutQ2': 'Серверга юборилмаган ёзувлар бор. Чиқишдан олдин уларни юбориб кўрамиз; етмаса шу қурилмада сақланади ва қайтиб кирганингизда ўзи қўшилади. Чиқилсинми?' },
+    ru: { 'set.account': 'Аккаунт', 'set.logout': 'Выйти', 'set.logoutQ': 'Выйти? Копия на этом устройстве будет удалена, данные на сервере сохранятся.',
+      'set.logoutQ2': 'Есть записи, не отправленные на сервер. Перед выходом попробуем их отправить; если не выйдет — они останутся на этом устройстве и вернутся при следующем входе. Выйти?' } });
   D.act.setSyncNow = async () => { await D.pull(); D.rerender(); };
   D.act.setExport = () => D.exportJson();
   D.act.setImportPick = () => { const i = D.$('#setImportInp'); if (i) i.click(); };
@@ -906,7 +916,7 @@
     next.settings.lang = prev.settings.lang; next.settings.theme = prev.settings.theme;
     D.S = next;
     D.undo.push({ label: t('set.d.resetDone'), undo: () => { D.S = prev; } });
-    D.save(); D.theme.apply(); D.renderNav(); D.rerender();
+    D.saveReplace(); D.theme.apply(); D.renderNav(); D.rerender();
     D.toast(t('set.d.resetDone'), { undo: () => D.undo.pop() });
   };
   D.act.setCopyErrors = async () => {

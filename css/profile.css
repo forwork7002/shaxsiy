@@ -39,3 +39,25 @@ button.pf-name-btn:hover { background: var(--hover); }
 .pf-actions .pf-rm { align-self: center; min-height: 40px; padding: 0 14px; margin-top: 2px; }
 .pf-private { text-align: center; margin: 0; }
 
+
+/* saqlanish qatori — odam varaqni ochganda birinchi shuni o'qiydi */
+.pf-save { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: var(--r-sm);
+  background: var(--inset); border: 1px solid var(--line); font-size: 13px; color: var(--text2); }
+.pf-save svg { flex: none; }
+.pf-save span { flex: 1; }
+.pf-save.s-ok { color: var(--success); }
+.pf-save.s-ok svg { color: var(--success); }
+.pf-save.s-err { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); }
+.pf-save .btn { flex: none; }
+
+/* eski nusxani olish taklifi — faqat server aytganda ko'rinadi */
+.pf-claim { padding: 12px; border-radius: var(--r-sm); background: var(--inset); border: 1px solid var(--line); }
+.pf-claim-t { display: flex; align-items: center; gap: 7px; font-weight: 700; margin-bottom: 4px; }
+.pf-claim-x { margin: 0 0 10px; font-size: 13px; color: var(--text2); }
+
+/* bo'y · vazn · yosh · maqsad — Sozlashga bormay shu yerda */
+.pf-facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
+.pf-fact { background: var(--bg3); padding: 10px 12px; }
+.pf-fact-l { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text3); }
+.pf-fact-v { font-size: 16px; font-weight: 700; margin-top: 2px; overflow-wrap: anywhere; }
+.pf-unit { font-size: 12px; font-weight: 600; color: var(--text3); }

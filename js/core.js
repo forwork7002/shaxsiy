@@ -10,6 +10,8 @@
   const LS_KEY = 'dash.v2';
   const UI_KEY = 'dash.ui';
   const DEV_KEY = 'dash.device';
+  // chiqishda serverga yetib bormagan nusxa shu yerda qoladi: dash.rescue.<uid>
+  const RESCUE_KEY = 'dash.rescue.';
 
   /* ------------------------------------------------------------------ */
   /* tiny helpers                                                        */
@@ -203,6 +205,7 @@
   let syncHideT = null;
   D.setSync = (s, msg) => {
     syncState = s;
+    D.emit('sync:changed', s);
     const box = D.$('#sync'), dot = D.$('#syncDot'), txt = D.$('#syncTxt');
     if (!box || !dot || !txt) return;
     clearTimeout(syncHideT);
@@ -260,28 +263,35 @@
     return out;
   };
 
-  const pushServer = D.debounce(async () => {
-    if (!D.serverEnabled()) { D.setSync('local'); return; }
+  // Bitta yozuv. Server yangiroq (stale) yoki to'liqroq (empty_overwrite) nusxani qaytarsa —
+  // uni birlashtirib qayta yuboramiz: shu sabab bo'sh holat to'liq nusxa ustidan yozilmaydi.
+  let replaceOnce = false;
+  async function pushNow(depth = 0) {
+    if (!D.serverEnabled()) { D.setSync('local'); return false; }
     try {
-      const r = await D.api('/api/data', { method: 'POST', body: JSON.stringify(D.S) });
+      const r = await D.api('/api/data' + (replaceOnce ? '?replace=1' : ''), { method: 'POST', body: JSON.stringify(D.S) });
       if (r && r.updated) D.S.meta.serverUpdated = r.updated;
+      replaceOnce = false;
       D.setSync('ok');
       D._pending = false;
+      return true;
     } catch (e) {
-      if (e && e.message === 'stale' && e.data) {
-        // server has a newer copy — merge it in, then push the merged state
+      if (e && (e.message === 'stale' || e.message === 'empty_overwrite') && e.data && depth < 2) {
         D.S = D.merge(e.data, D.S);
         lsSet(LS_KEY, D.S);
         D.emit('state:changed');
         D.rerender();
-        pushServer();
-        return;
+        return pushNow(depth + 1);
       }
       console.warn('sync', e);
       D._pending = true;
       D.setSync('err');
+      return false;
     }
-  }, 700);
+  }
+  const pushServer = D.debounce(() => pushNow(), 700);
+  /** Kechiktirmay hoziroq yuborish — chiqishdan oldin. true = server qabul qildi. */
+  D.flush = () => pushNow();
 
   D.save = () => {
     D.S.meta.updatedAt = Date.now();
@@ -292,6 +302,8 @@
   };
   // Persist without touching updatedAt (UI-only mutations of state).
   D.saveQuiet = () => lsSet(LS_KEY, D.S);
+  // Butun holatni almashtirish (tozalash, import): serverdagi to'liq nusxa ustidan yozishga ataylab ruxsat.
+  D.saveReplace = () => { replaceOnce = true; D.save(); };
 
   // Server availability: Telegram context or explicit dev flag / same-origin api.
   D.tg = (window.Telegram && window.Telegram.WebApp) || null;
@@ -336,6 +348,21 @@
     } catch (e) { console.warn('me', e); }
     return D.me;
   };
+
+  /** Chiqishda serverga yetib bormagan nusxa (dash.rescue.<uid>) — o'sha hisobga qaytilganda qo'shiladi. */
+  async function restoreRescue() {
+    const uid = (D.me && D.me.uid) || (D.S.meta && D.S.meta.owner) || '';
+    if (!uid) return;
+    const saved = lsGet(RESCUE_KEY + uid);
+    if (!saved || !saved.meta) return;
+    try { localStorage.removeItem(RESCUE_KEY + uid); } catch (e) {}
+    D.S = D.merge(D.S, D.normalize(saved));   // yuborilmay qolgan yozuvlar ustun
+    D.S.meta.updatedAt = Date.now();
+    lsSet(LS_KEY, D.S);
+    D.emit('state:changed');
+    D.rerender();
+    if (await pushNow()) D.toast(D.t('auth.restored'), { ms: 4000 });
+  }
 
   // Pull from server at boot; server wins if newer, else push local.
   D.pull = async () => {
@@ -390,6 +417,7 @@
       } else if (remote && !Object.keys(remote).filter((k) => k !== 'meta').length && !localEmpty) {
         pushServer(); // fresh server, populated client
       }
+      await restoreRescue();
       D.setSync('ok');
       D.pulled = true;          // server nusxasi shu sessiyada kamida bir marta o'qildi
       D.emit('pull:ok');
@@ -481,8 +509,9 @@
     if (hours === null || hours === undefined || hours === '' || isNaN(+hours)) return '—';
     const total = Math.round(Math.abs(+hours) * 60);          // daqiqagacha aniq
     const h = Math.floor(total / 60), m = total % 60;
-    const body = h ? `${h} ${D.t('unit.h')} ${m} ${D.t('unit.m')}` : `${m} ${D.t('unit.m')}`;
-    return (+hours < 0 ? '−' : opts.sign && total ? '+' : '') + body;
+    const body = h ? (m ? `${h} ${D.t('unit.h')} ${m} ${D.t('unit.m')}` : `${h} ${D.t('unit.h')}`) : `${m} ${D.t('unit.m')}`;
+    if (!total) return body;                                  // nolga ishora qo'yilmaydi
+    return (+hours < 0 ? '−' : opts.sign ? '+' : '') + body;
   };
   D.fmtMsH = (ms, opts) => (ms === null || ms === undefined || ms === '' || isNaN(+ms) ? '—' : D.fmtHm(+ms / 3.6e6, opts));
   /* Qisqa davomiylik soniyagacha — mashg'ulot puls zonalari uchun. */
@@ -1225,7 +1254,17 @@
       return authPending;
     },
     /** Sign out and leave nothing of this person on the device for the next one. */
+    /** Chiqish: avval yuborilmagan o'zgarishni serverga yetkazamiz, keyin qurilmadagi nusxani o'chiramiz. */
     async logout() {
+      const uid = (D.me && D.me.uid) || D.device.uid || '';
+      let safe = true;
+      if (D.serverEnabled() && D._pending) { try { safe = await D.flush(); } catch (e) { safe = false; } }
+      if (!safe && uid) {
+        // server javob bermadi — yozuvlar shu qurilmada qoladi va qaytib kirilganda o'z-o'zidan qo'shiladi
+        lsSet(RESCUE_KEY + uid, D.S);
+        D.toast(D.t('auth.unsent'), { ms: 4000 });
+        await new Promise((r) => setTimeout(r, 1400));
+      }
       try { await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }); } catch (e) {}
       try { localStorage.removeItem(LS_KEY); localStorage.removeItem(UI_KEY); } catch (e) {}
       D.device.uid = ''; D.device.name = ''; D.saveDevice();
@@ -1262,7 +1301,7 @@
     D.S = next;
     D.S.meta.deviceId = prev.meta.deviceId;
     D.undo.push({ label: D.t('data.imported'), undo: () => { D.S = prev; D.theme.apply(); D.renderNav(); } });
-    D.save();
+    D.saveReplace();
     D.theme.apply();
     D.renderNav();
     D.rerender();

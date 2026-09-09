@@ -19,6 +19,11 @@
       'pf.photo': 'Rasm tanlash', 'pf.removePhoto': 'Rasmni olib tashlash', 'pf.uploading': 'Yuklanmoqda…',
       'pf.private': "Ma'lumotlaringiz faqat sizning hisobingizda saqlanadi — boshqa hech kim ko'rmaydi.",
       'pf.e.name': "Ism 1–40 ta belgi: harf, raqam, bo'sh joy", 'pf.e.image': "Rasmni o'qib bo'lmadi", 'pf.e.big': 'Rasm juda katta', 'pf.e.net': 'Server bilan aloqa yo‘q',
+      'pf.saveOk': 'Hammasi hisobingizda saqlangan', 'pf.saveWait': 'Saqlanmoqda…', 'pf.saveErr': 'Serverga yetmadi — qayta urinib ko‘ring',
+      'pf.saveLocal': 'Faqat shu qurilmada saqlanadi', 'pf.saveNow': 'Hozir saqlash',
+      'pf.me': 'Men', 'pf.edit': 'O‘zgartirish', 'pf.noData': 'kiritilmagan',
+      'pf.claimTitle': 'Eski ma’lumotingiz turibdi', 'pf.claimText': 'Bu serverda avvalgi hisobda yig‘ilgan yozuvlar bor. Egasining parolini kiriting — hammasi shu hisobingizga qo‘shiladi.',
+      'pf.claimBtn': 'Eski ma’lumotni olish', 'pf.claimPh': 'Egasining paroli', 'pf.claimOk': 'Eski ma’lumot qo‘shildi', 'pf.claimBad': 'Parol to‘g‘ri kelmadi',
     },
     uzk: {
       'pf.title': 'Профил', 'pf.noName': 'Исм киритилмаган', 'pf.editName': 'Исмни таҳрирлаш', 'pf.namePh': 'Исмингиз', 'pf.saved': 'Сақланди',
@@ -28,6 +33,11 @@
       'pf.photo': 'Расм танлаш', 'pf.removePhoto': 'Расмни олиб ташлаш', 'pf.uploading': 'Юкланмоқда…',
       'pf.private': 'Маълумотларингиз фақат сизнинг ҳисобингизда сақланади — бошқа ҳеч ким кўрмайди.',
       'pf.e.name': 'Исм 1–40 та белги: ҳарф, рақам, бўш жой', 'pf.e.image': 'Расмни ўқиб бўлмади', 'pf.e.big': 'Расм жуда катта', 'pf.e.net': 'Сервер билан алоқа йўқ',
+      'pf.saveOk': 'Ҳаммаси ҳисобингизда сақланган', 'pf.saveWait': 'Сақланмоқда…', 'pf.saveErr': 'Серверга етмади — қайта уриниб кўринг',
+      'pf.saveLocal': 'Фақат шу қурилмада сақланади', 'pf.saveNow': 'Ҳозир сақлаш',
+      'pf.me': 'Мен', 'pf.edit': 'Ўзгартириш', 'pf.noData': 'киритилмаган',
+      'pf.claimTitle': 'Эски маълумотингиз турибди', 'pf.claimText': 'Бу серверда аввалги ҳисобда йиғилган ёзувлар бор. Эгасининг паролини киритинг — ҳаммаси шу ҳисобингизга қўшилади.',
+      'pf.claimBtn': 'Эски маълумотни олиш', 'pf.claimPh': 'Эгасининг пароли', 'pf.claimOk': 'Эски маълумот қўшилди', 'pf.claimBad': 'Парол тўғри келмади',
     },
     ru: {
       'pf.title': 'Профиль', 'pf.noName': 'Имя не указано', 'pf.editName': 'Изменить имя', 'pf.namePh': 'Ваше имя', 'pf.saved': 'Сохранено',
@@ -37,6 +47,11 @@
       'pf.photo': 'Выбрать фото', 'pf.removePhoto': 'Убрать фото', 'pf.uploading': 'Загрузка…',
       'pf.private': 'Ваши данные хранятся только в вашем аккаунте — никто другой их не видит.',
       'pf.e.name': 'Имя 1–40 символов: буквы, цифры, пробел', 'pf.e.image': 'Не удалось прочитать фото', 'pf.e.big': 'Фото слишком большое', 'pf.e.net': 'Нет связи с сервером',
+      'pf.saveOk': 'Всё сохранено в вашем аккаунте', 'pf.saveWait': 'Сохраняется…', 'pf.saveErr': 'Не дошло до сервера — попробуйте ещё раз',
+      'pf.saveLocal': 'Хранится только на этом устройстве', 'pf.saveNow': 'Сохранить сейчас',
+      'pf.me': 'Я', 'pf.edit': 'Изменить', 'pf.noData': 'не указано',
+      'pf.claimTitle': 'Есть ваши старые данные', 'pf.claimText': 'На сервере остались записи прежнего аккаунта. Введите пароль владельца — всё добавится в этот аккаунт.',
+      'pf.claimBtn': 'Забрать старые данные', 'pf.claimPh': 'Пароль владельца', 'pf.claimOk': 'Старые данные добавлены', 'pf.claimBad': 'Пароль не подошёл',
     },
   });
 
@@ -80,6 +95,35 @@
     const txt = name ? `<span class="pf-name">${esc(name)}</span>` : `<span class="pf-name muted">${esc(t('pf.noName'))}</span>`;
     return on ? `<button type="button" class="pf-name-btn" data-act="pfEditName" aria-label="${esc(t('pf.editName'))}">${txt}${D.ic('edit', 14)}</button>` : `<div class="pf-name-btn">${txt}</div>`;
   }
+  /** Ma'lumot yozilgan kunlar: kundalik, WHOOP va ovqat kunlari birlashmasi — bittasi bo'lsa ham sanaladi. */
+  function dayCount() {
+    const S = D.S, keys = new Set();
+    for (const box of [S.logs, (S.whoop || {}).days, (S.food || {}).logs]) for (const k of Object.keys(box || {})) keys.add(k);
+    return keys.size;
+  }
+  /** Saqlanish qatori — odam eng avval shuni bilishi kerak: yozganlarim hisobimda turibdimi. */
+  function syncRow() {
+    if (!online()) return `<div class="pf-save s-local">${D.ic('info', 15)}<span>${esc(t('pf.saveLocal'))}</span></div>`;
+    const st = D.syncState();
+    const k = st === 'err' ? 'pf.saveErr' : st === 'wait' ? 'pf.saveWait' : 'pf.saveOk';
+    const ic = st === 'err' ? 'alert' : st === 'wait' ? 'refresh' : 'check';
+    return `<div class="pf-save s-${esc(st)}">${D.ic(ic, 15)}<span>${esc(t(k))}</span>
+      ${st === 'ok' ? '' : `<button type="button" class="btn ghost xs" data-act="pfSyncNow" ${busy ? 'disabled' : ''}>${esc(t('pf.saveNow'))}</button>`}</div>`;
+  }
+  /** Profil raqamlari — Sozlashga yubormay, shu yerda ko'rinadi. */
+  function facts() {
+    const p = D.S.profile, lb = (D.S.settings || {}).weightUnit === 'lb';
+    const w = p.weightKg == null ? null : lb ? p.weightKg * 2.20462 : p.weightKg;
+    const age = D.profileAge();   // yosh bitta joyda hisoblanadi (core.js)
+    const none = `<span class="muted">${esc(t('pf.noData'))}</span>`;
+    const cell = (label, val) => `<div class="pf-fact"><div class="pf-fact-l">${esc(label)}</div><div class="pf-fact-v">${val}</div></div>`;
+    return `<div class="pf-facts">
+      ${cell(t('set.height'), p.heightCm ? `<span class="num">${D.fmtNum(p.heightCm)}</span> <span class="pf-unit">cm</span>` : none)}
+      ${cell(t('set.weight'), w != null ? `<span class="num">${D.fmtNum(w, 1)}</span> <span class="pf-unit">${lb ? 'lb' : 'kg'}</span>` : none)}
+      ${cell(t('set.age'), age ? `<span class="num">${D.fmtNum(age)}</span>` : none)}
+      ${cell(t('set.goal'), esc(t('set.goal.' + (['lose', 'keep', 'gain'].includes(p.goal) ? p.goal : 'keep'))))}
+    </div>`;
+  }
   function inner() {
     const on = online(), me = D.me || {}, name = nameOf();
     const uid = me.uid || D.device.uid || '';
@@ -97,13 +141,19 @@
       <div class="pf-sub">${line2}</div>
       ${since ? `<div class="pf-since tiny muted">${esc(t('pf.since', { d: since }))}</div>` : ''}
     </div>
+    ${syncRow()}
+    ${on && me.claim ? `<div class="pf-claim">
+      <div class="pf-claim-t">${D.ic('key', 15)} ${esc(t('pf.claimTitle'))}</div>
+      <p class="pf-claim-x">${esc(t('pf.claimText'))}</p>
+      <button type="button" class="btn block" data-act="pfClaim" ${busy ? 'disabled' : ''}>${esc(t('pf.claimBtn'))}</button></div>` : ''}
     <div class="pf-stats">
-      <div class="stat"><div class="stat-num num">${Object.keys(D.S.logs || {}).length}</div><div class="stat-label">${esc(t('pf.days'))}</div></div>
+      <div class="stat"><div class="stat-num num">${dayCount()}</div><div class="stat-label">${esc(t('pf.days'))}</div></div>
       <div class="stat"><div class="stat-num num">${D.activeHabits().length}</div><div class="stat-label">${esc(t('pf.habits'))}</div></div>
       <div class="stat"><div class="stat-num pf-stat-text ellipsis" title="${esc(whoop)}">${esc(whoop)}</div><div class="stat-label">WHOOP</div></div>
     </div>
+    ${facts()}
     <div class="pf-actions">
-      <button type="button" class="btn ghost block" data-act="pfDetails">${D.ic('user', 16)} ${esc(t('pf.details'))}</button>
+      <button type="button" class="btn ghost block" data-act="pfDetails">${D.ic('edit', 16)} ${esc(t('pf.edit'))}</button>
       <button type="button" class="btn ghost block" data-act="pfExport">${D.ic('download', 16)} ${esc(t('pf.export'))}</button>
       ${on ? `<button type="button" class="btn danger block" data-act="setLogout">${D.ic('logout', 16)} ${esc(t('pf.logout'))}</button>` : ''}
       ${on && me.avatar ? `<button type="button" class="btn ghost xs pf-rm" data-act="pfRemovePhoto" ${busy ? 'disabled' : ''}>${D.ic('trash', 13)} ${esc(t('pf.removePhoto'))}</button>` : ''}
@@ -183,6 +233,46 @@
     im.outerHTML = P().avatarHtml(+im.getAttribute('width') || 40, im.className.replace(/-img$/, ''));
     const av = document.getElementById('hAvatar'); if (av) av._h = null;
   }, true);
+
+  /* ------------------------------------------------------------------ */
+  /* saqlanish va eski nusxa                                             */
+  /* ------------------------------------------------------------------ */
+  D.act.pfSyncNow = async () => {
+    if (busy) return;
+    busy = true; redraw();
+    try { await D.pull(); if (D.flush) await D.flush(); } catch (e) {}
+    busy = false; redraw();
+  };
+  // Egasi paroli bilan tasdiqlanadi, keyin eski nusxa hozirgi yozuvlar ustiga emas, yoniga qo'shiladi.
+  D.act.pfClaim = async () => {
+    if (busy) return;
+    const pass = await D.prompt({ title: t('pf.claimBtn'), placeholder: t('pf.claimPh'), ok: t('pf.claimBtn') });
+    if (!pass) return;
+    busy = true; redraw();
+    try {
+      const r = await D.api('/api/me/adopt', { method: 'POST', body: JSON.stringify({ passcode: pass }) });
+      if (r && r.data) {
+        D.S = D.merge(r.data, D.S);       // hozirgi yozuvlar ustun, eskisi qo'shiladi
+        D.S.meta.updatedAt = Date.now();
+        D.save();
+        await D.meRefresh();
+        D.rerender();
+        D.toast(t('pf.claimOk'), { ms: 4000 });
+      }
+    } catch (e) { D.toast(e && e.message === 'bad_pass' ? t('pf.claimBad') : errMsg(e), { ms: 3500 }); }
+    busy = false; redraw();
+  };
+
+  /** Sozlashdagi ism maydoni ham serverga yetib borsin — bitta odamda ikki xil ism qolmaydi. */
+  const pushName = D.debounce(async (v) => {
+    if (!online()) return;
+    try { await D.api('/api/me', { method: 'POST', body: JSON.stringify({ name: v }) }); await D.meRefresh(); }
+    catch (e) { console.warn('name', e); }
+  }, 900);
+  D.profile.syncName = (v) => { v = String(v || '').trim().replace(/\s+/g, ' '); if (NAME_RE.test(v) && HAS_ALNUM.test(v)) pushName(v); };
+
+  // varaq ochiq turganda saqlanish qatori o'zgarishlarni ko'rsatib tursin
+  D.on('sync:changed', () => { if (document.getElementById('pfRoot')) redraw(); });
 
   D.act.pfDetails = () => { D.closeModal(); D.go('settings', 'general'); };
   D.act.pfExport = () => D.exportJson();
