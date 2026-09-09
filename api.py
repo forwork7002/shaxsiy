@@ -17,6 +17,8 @@ Env (start.sh):
   MA_REGISTER        "0" bo'lsa kirish oynasidagi «Hisob ochish» yopiladi (default: ochiq — har kim
                      o'ziga hisob ochadi, hisoblar data/users.json da, parollar xeshlangan)
   MA_INVITE          taklif kodi: berilsa hisob ochishda shu kod so'raladi (bo'sh = kodsiz)
+  MA_GOOGLE_INVITE   "0" bo'lsa Google bilan yangi profil ochishda taklif kodi so'ralmaydi
+                     (default: so'raladi, MA_INVITE qo'yilgan va MA_ALLOWED_EMAILS bo'sh bo'lsa)
   GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET   Google bilan kirish; MA_ALLOWED_EMAILS berilsa faqat
                      o'sha emaillar, bo'lmasa (ro'yxatdan o'tish ochiq bo'lsa) har qanday Google hisobi
   MA_SECRET          sessiya cookie imzosi kaliti — set-users.sh bir marta yozadi, keyin o'zgartirilmaydi
@@ -93,10 +95,11 @@ USERS = _parse_users(os.environ.get("MA_USERS", ""))
 # Parol hech qachon ochiq saqlanmaydi (PBKDF2-SHA256). uid tasodifiy — ismdan topib bo'lmaydi.
 REGISTER_ON = os.environ.get("MA_REGISTER", "1") != "0"
 INVITE = os.environ.get("MA_INVITE", "").strip()
-# Google bilan kirganlar odatda taklif kodini so'ramaydi: Google Cloud'dagi ilova «Testing» rejimida
-# bo'lsa faqat test users ro'yxatidagilar kira oladi — bu o'zi ro'yxat. MA_GOOGLE_INVITE=1 bo'lsa
-# Google uchun ham kod so'raladi (ro'yxat bo'lmaganda).
-GOOGLE_INVITE = os.environ.get("MA_GOOGLE_INVITE", "") == "1"
+# Taklif kodi qo'yilgan bo'lsa Google eshigi ham shu kodni so'raydi — lekin faqat YANGI profil
+# ochilayotganda; oldin kirganlar (g_seen) kodsiz kiraveradi. Ilgari default teskari edi va ilova
+# Google Cloud'da «Published» bo'lsa dunyodagi har qanday Google hisobi o'ziga profil ocha olardi
+# (2026-09-09 tekshiruvida topildi). Eski holat kerak bo'lsa: MA_GOOGLE_INVITE=0.
+GOOGLE_INVITE = os.environ.get("MA_GOOGLE_INVITE", "1") != "0"
 USERS_FILE = DATA_DIR / "users.json"
 RESERVED_NAMES = {"me", "dev", "admin", "root", "system", "whoop", "nova", "google"}
 PW_ITER = 200_000
@@ -212,6 +215,24 @@ app = Flask(__name__, static_folder=None)
 _lock = threading.Lock()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 (DATA_DIR / "backups").mkdir(exist_ok=True)
+
+
+def _private(p: Path) -> Path:
+    """Faylni faqat ilova foydalanuvchisiga ochiq qoldiradi (0600). Serverdagi boshqa lokal
+    foydalanuvchi holat blobini, WHOOP tokenini yoki emailni o'qimasin — ilgari bu fayllar
+    umask bo'yicha 0644 bo'lardi (2026-09-09 tekshiruvida topildi)."""
+    try:
+        os.chmod(p, 0o600)
+    except OSError:
+        pass
+    return p
+
+
+for _d in (DATA_DIR, DATA_DIR / "backups"):   # papkaning o'zi ham: bitta fayl e'tibordan chetda qolsa ham yopiq
+    try:
+        os.chmod(_d, 0o700)
+    except OSError:
+        pass
 try:
     db.init(DATA_DIR)
 except Exception as e:  # noqa: BLE001 — arxivsiz ham ilova ishlayveradi
@@ -639,6 +660,7 @@ def who_save(uid: str, who: dict):
     f = who_file(uid)
     tmp = f.with_name(f.name + ".tmp")
     tmp.write_text(json.dumps(who, ensure_ascii=False), encoding="utf-8")
+    _private(tmp)   # ichida email bor
     tmp.replace(f)
 
 
@@ -778,12 +800,14 @@ def save_data(uid: str, d: dict):
     f = user_file(uid)
     tmp = f.with_suffix(".tmp")
     tmp.write_text(json.dumps(d, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    _private(tmp)
     tmp.replace(f)
     # kunlik zaxira
     today = datetime.now(TZ).strftime("%Y-%m-%d")
     b = DATA_DIR / "backups" / f"{f.stem}-{today}.json"
     if not b.exists():
         b.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
+        _private(b)
         olds = sorted((DATA_DIR / "backups").glob(f"{f.stem}-*.json"))
         for old in olds[:-BACKUP_KEEP]:
             old.unlink(missing_ok=True)
@@ -791,6 +815,13 @@ def save_data(uid: str, d: dict):
 
 def whoop_file(uid: str) -> Path:
     return user_file(uid).with_name(user_file(uid).stem + ".whoop.json")
+
+
+def whoop_save(uid: str, tok: dict):
+    """WHOOP tokenlari — faqat serverda va faqat ilova o'qiy oladigan qilib (0600)."""
+    f = whoop_file(uid)
+    f.write_text(json.dumps(tok), encoding="utf-8")
+    _private(f)
 
 
 def whoop_tokens(uid: str):
@@ -1128,7 +1159,7 @@ def whoop_callback():
             "<p><a href='/#health'>Ilovaga qaytish</a></p></body>", 502
         )
     tok["expires_at"] = time.time() + int(tok.get("expires_in", 3600)) - 60
-    whoop_file(uid).write_text(json.dumps(tok), encoding="utf-8")
+    whoop_save(uid, tok)
     return redirect("/#health")
 
 
@@ -1144,7 +1175,7 @@ def whoop_access(uid: str):
         if status == 200 and "access_token" in new:
             new["expires_at"] = time.time() + int(new.get("expires_in", 3600)) - 60
             tok = new
-            whoop_file(uid).write_text(json.dumps(tok), encoding="utf-8")
+            whoop_save(uid, tok)
         else:
             log.warning("WHOOP refresh xato: %s", new)
             return None
@@ -1410,6 +1441,7 @@ def _snap_write(uid: str, snap: dict):
     f = whoop_cache_file(uid)
     tmp = f.with_suffix(".tmp")
     tmp.write_text(json.dumps(snap, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    _private(tmp)   # sog'liq ko'rsatkichlari
     tmp.replace(f)
     _wh_mem[uid] = (f.stat().st_mtime, snap)
 
@@ -2049,10 +2081,27 @@ def static_file(fname):
     return r
 
 
+# CSP: hamma kod o'zimizdan; shrift Google Fonts'dan; rasm data:/blob: (ovqat surati, avatar);
+# tashqi so'rov faqat api.anthropic.com (Nova BYOK — kalit qurilmada). 'unsafe-inline' hozircha
+# kerak: index.html ichida inline <script>/<style> bor. frame-ancestors — clickjacking'ga qarshi.
+CSP = ("default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; "
+       "object-src 'none'; img-src 'self' data: blob:; media-src 'self' blob:; "
+       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; "
+       "script-src 'self' 'unsafe-inline'; "
+       # sw.js shriftlarni offline uchun keshlaydi — fetch() connect-src'ga bo'ysunadi, shuning uchun
+       # fonts.* shu yerda ham bo'lishi shart, aks holda shriftlar umuman yuklanmaydi
+       "connect-src 'self' https://api.anthropic.com https://fonts.googleapis.com https://fonts.gstatic.com")
+
+
 @app.after_request
 def headers(resp):
     resp.headers.setdefault("X-Content-Type-Options", "nosniff")
     resp.headers.setdefault("Referrer-Policy", "no-referrer")
+    resp.headers.setdefault("Content-Security-Policy", CSP)
+    resp.headers.setdefault("X-Frame-Options", "DENY")
+    # HSTS faqat haqiqiy HTTPS ustida — lokal http://localhost sinovini buzmaslik uchun
+    if request.headers.get("X-Forwarded-Proto", "") == "https" or request.scheme == "https":
+        resp.headers.setdefault("Strict-Transport-Security", "max-age=15552000; includeSubDomains")
     return resp
 
 

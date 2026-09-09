@@ -87,13 +87,13 @@ server {
 
     client_max_body_size 26m;
 
-    # statik fayllar to'g'ridan-to'g'ri nginx'dan
-    location ~* \.(css|js|png|svg|ico|webmanifest|woff2?)\$ {
-        root $APP_DIR;
-        try_files \$uri @app;
-        expires 1h;
-        add_header Cache-Control "public, must-revalidate";
-    }
+    # Statik fayllar to'g'ridan-to'g'ri nginx'dan — faqat shu uchta papka. Ilgari qoida
+    # kengaytma bo'yicha edi (~* \.(css|js|…)\$) va $APP_DIR ichidagi ISTALGAN .js/.css
+    # faylni ilovaning oq ro'yxatini chetlab o'tib berardi (2026-09-09 tekshiruvi).
+    location ^~ /js/    { root $APP_DIR; try_files \$uri @app; expires 1h; add_header Cache-Control "public, must-revalidate"; }
+    location ^~ /css/   { root $APP_DIR; try_files \$uri @app; expires 1h; add_header Cache-Control "public, must-revalidate"; }
+    location ^~ /icons/ { root $APP_DIR; try_files \$uri @app; expires 1h; add_header Cache-Control "public, must-revalidate"; }
+    location = /app.css { root $APP_DIR; try_files \$uri @app; expires 1h; add_header Cache-Control "public, must-revalidate"; }
     location = /sw.js        { root $APP_DIR; add_header Cache-Control "no-cache"; try_files \$uri @app; }
     location = /manifest.json { root $APP_DIR; add_header Cache-Control "no-cache"; try_files \$uri @app; }
 
