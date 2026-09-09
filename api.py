@@ -322,9 +322,15 @@ def auth_config():
 
 
 # ── Terib topishga qarshi: manzil bo'yicha muvaffaqiyatsiz urinishlar ──
-_fails: dict = {}          # (nima, ip) → [vaqtlar]
+#
+# Hisob data/.fails.json da, flock ostida: ikkita gunicorn ishchisi bitta hisobni ko'rishi shart.
+# Xotiradagi dict bo'lganda urinishlar ishchilar orasida bo'linib ketardi va amaldagi chegara
+# ikki barobar bo'lardi (jonli serverda 11 ta noto'g'ri kod 403 dan o'tib ketdi — shu sabab).
+FAILS_FILE = DATA_DIR / ".fails.json"     # {"nima|ip": [vaqt, …]} — faqat muvaffaqiyatsiz urinishlar
+FAIL_KEEP = 3600                          # bundan eski yozuvlar har yozuvda tashlanadi
+FAIL_KEYS_MAX = 5000                      # ko'p manzildan hujum bo'lsa ham fayl o'smasin
+_fails_mem: dict = {}                     # fayl ochilmasa (disk to'lgan, ruxsat yo'q) — zaxira
 _fails_lock = threading.Lock()
-FAIL_MAX = 4000            # xotira o'smasin — shundan oshsa eskilari tashlanadi
 
 
 def client_ip() -> str:
@@ -335,23 +341,55 @@ def client_ip() -> str:
     return parts[-1] if parts else (request.remote_addr or "?")
 
 
+def _fails_count(key: str, window: int, add: bool) -> int:
+    """Oyna ichidagi urinishlar soni; add=True bo'lsa avval shu urinish qo'shiladi."""
+    now = time.time()
+    try:
+        fd = os.open(FAILS_FILE, os.O_RDWR | os.O_CREAT, 0o600)
+    except OSError as e:  # noqa: BLE001 — cheklovsiz qolgandan ko'ra xotiradagi zaxira yaxshi
+        log.warning(".fails.json ochilmadi (%s) — hisob xotirada", e)
+        with _fails_lock:
+            hits = [t for t in _fails_mem.get(key, []) if now - t < window]
+            if add:
+                _fails_mem[key] = hits + [now]
+            return len(hits) + (1 if add else 0)
+    try:
+        with os.fdopen(fd, "r+", encoding="utf-8") as fh:
+            fcntl.flock(fh, fcntl.LOCK_EX)
+            try:
+                d = json.loads(fh.read() or "{}")
+            except ValueError:
+                d = {}
+            if not isinstance(d, dict):
+                d = {}
+            hits = [t for t in d.get(key, []) if isinstance(t, (int, float)) and now - t < window]
+            if not add:
+                return len(hits)
+            d[key] = [t for t in d.get(key, []) if isinstance(t, (int, float)) and now - t < FAIL_KEEP] + [now]
+            for k in list(d):                       # eskirganlarni tozalash
+                d[k] = [t for t in d[k] if isinstance(t, (int, float)) and now - t < FAIL_KEEP]
+                if not d[k]:
+                    del d[k]
+            if len(d) > FAIL_KEYS_MAX:              # eng eski urinishlilarini tashlaymiz
+                for k in sorted(d, key=lambda x: d[x][-1])[:len(d) - FAIL_KEYS_MAX]:
+                    del d[k]
+            fh.seek(0)
+            fh.truncate()
+            json.dump(d, fh)
+            return len(hits) + 1
+    except OSError as e:  # noqa: BLE001
+        log.warning(".fails.json yozilmadi: %s", e)
+        return 0
+
+
 def note_fail(what: str, ip: str = None):
     """Muvaffaqiyatsiz urinishni qayd etadi (noto'g'ri parol, noto'g'ri taklif kodi)."""
-    now = time.time()
-    with _fails_lock:
-        if len(_fails) > FAIL_MAX:
-            for k, v in list(_fails.items()):
-                if not v or now - v[-1] > 3600:
-                    _fails.pop(k, None)
-        _fails.setdefault((what, ip or client_ip()), []).append(now)
+    _fails_count(f"{what}|{ip or client_ip()}", FAIL_KEEP, add=True)
 
 
 def too_many(what: str, limit: int, window: int = 900, ip: str = None) -> bool:
     """Shu manzil oyna ichida limitdan oshdimi. Urinishni qayd etmaydi — faqat qaraydi."""
-    now = time.time()
-    with _fails_lock:
-        hits = [t for t in _fails.get((what, ip or client_ip()), []) if now - t < window]
-    return len(hits) >= limit
+    return _fails_count(f"{what}|{ip or client_ip()}", window, add=False) >= limit
 
 
 @app.post("/api/login")
