@@ -562,6 +562,7 @@ def me_adopt():
         return jsonify({"error": "too_many"}), 429
     body = request.get_json(silent=True) or {}
     if not hmac.compare_digest(str(body.get("passcode") or ""), PASSCODE):
+        note_fail("adopt")   # too_many() faqat qaraydi — sanamasak, chegara hech qachon ishlamaydi
         time.sleep(0.4)
         return jsonify({"error": "bad_pass"}), 401
     with _lock:
