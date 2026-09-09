@@ -657,7 +657,7 @@
   /* ------------------------------------------------------------------ */
   /* view                                                                */
   /* ------------------------------------------------------------------ */
-  const RENDER = { habits: renderHabits, spheres: renderSpheres, notes: renderNotes, review: renderReview, insights: renderInsights };
+  const RENDER = { habits: renderHabits, spheres: renderSpheres, notes: renderNotes, review: renderReview, insights: () => (D.ai ? D.ai.card('week') : '') + renderInsights() };
   function render() {
     let sub = D.sub('stats', 'habits'); if (!SUBS.includes(sub)) sub = 'habits';
     const seg = `<div class="seg st-seg">${SUBS.map((s) => `<button class="${sub === s ? 'on' : ''}" data-act="sub" data-view="stats" data-sub="${s}">${esc(t('st.sub.' + s))}</button>`).join('')}</div>`;

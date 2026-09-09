@@ -422,7 +422,7 @@
     const sub = D.sub('gym', 'log');
     const gym = curGym(), day = curDay();
     let h = `<div class="gym">${splitPill()}${subSeg(sub)}`;
-    if (sub === 'today') h += renderToday(gym, day);
+    if (sub === 'today') h += renderToday(gym, day) + (D.ai ? D.ai.card('gym') : '');
     else if (sub === 'history') h += renderHistory();
     else h += renderLog(gym, day);
     return h + '</div>';

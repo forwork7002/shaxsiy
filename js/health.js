@@ -372,8 +372,7 @@
     const sub = SUBS.includes(D.sub('health', 'day')) ? D.sub('health', 'day') : 'day';
     const seg = `<div class="seg hl-seg">${SUBS.map((s) => `<button class="${sub === s ? 'on' : ''}" data-act="sub" data-view="health" data-sub="${s}">${esc(D.t('hl.sub.' + s))}</button>`).join('')}</div>`;
     const body = { day: renderDay, sleep: renderSleep, strain: renderStrain, weight: renderWeight, water: renderWater, caffeine: renderCaffeine, stack: renderStack }[sub]();
-    // AI reads sleep, recovery, weight, water, caffeine and the stack together — only worth showing on the overview tabs.
-    const ai = D.ai && (sub === 'day' || sub === 'sleep' || sub === 'strain') ? D.ai.card('health') : '';
+    const ai = D.ai && (sub === 'day' ? D.ai.card('health') : sub === 'sleep' ? D.ai.card('sleep') : sub === 'strain' ? D.ai.card('strain') : '') || '';
     return `<div class="hl">${seg}${body}${ai}</div>`;
   }
 

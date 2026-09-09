@@ -107,6 +107,15 @@ WHOOP_ID = os.environ.get("WHOOP_CLIENT_ID", "")
 WHOOP_SECRET = os.environ.get("WHOOP_CLIENT_SECRET", "")
 AI_KEY = os.environ.get("AI_API_KEY") or os.environ.get("ANTHROPIC_API_KEY") or ""
 AI_MODEL = os.environ.get("AI_MODEL", "claude-opus-5")
+# OpenAI ham bo'ladi: OPENAI_API_KEY berilsa (yoki AI_PROVIDER=openai) so'rovlar OpenAI'ga ketadi.
+OPENAI_KEY = os.environ.get("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-5")
+OPENAI_BASE = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
+AI_PROVIDER = (os.environ.get("AI_PROVIDER") or ("openai" if OPENAI_KEY else "anthropic" if AI_KEY else "")).lower()
+if AI_PROVIDER == "openai" and not OPENAI_KEY:
+    log.error("AI_PROVIDER=openai, lekin OPENAI_API_KEY bo'sh — AI o'chirilgan"); AI_PROVIDER = ""
+if AI_PROVIDER == "anthropic" and not AI_KEY:
+    log.error("AI_PROVIDER=anthropic, lekin AI_API_KEY bo'sh — AI o'chirilgan"); AI_PROVIDER = ""
 BACKUP_KEEP = 30
 
 app = Flask(__name__, static_folder=None)
@@ -442,7 +451,7 @@ def post_data():
 @app.get("/api/health")
 def health():
     return jsonify({"ok": True, "time": datetime.now(TZ).isoformat(), "dev": DEV,
-                    "whoop": bool(WHOOP_ID and WHOOP_SECRET), "ai": bool(AI_KEY),
+                    "whoop": bool(WHOOP_ID and WHOOP_SECRET), "ai": bool(AI_PROVIDER), "aiProvider": AI_PROVIDER or None,
                     "telegram": bool(BOT_TOKEN), "users": len(USERS)})
 
 
@@ -1044,16 +1053,45 @@ def ai_client():
     return _ai_client
 
 
+def ai_openai(system: str, msgs: list, max_tokens: int):
+    """OpenAI chat completions. (natija, None) yoki (None, (xato, status))."""
+    body = {"model": OPENAI_MODEL, "messages": ([{"role": "system", "content": system}] if system else []) + msgs,
+            "max_completion_tokens": max_tokens}
+    req = urllib.request.Request(OPENAI_BASE + "/chat/completions", data=json.dumps(body).encode("utf-8"), method="POST",
+                                 headers={"Authorization": "Bearer " + OPENAI_KEY, "Content-Type": "application/json", "User-Agent": USER_AGENT})
+    try:
+        with urllib.request.urlopen(req, timeout=120) as r:
+            j = json.loads(r.read().decode("utf-8") or "{}")
+    except urllib.error.HTTPError as e:
+        raw = e.read().decode("utf-8", "replace")[:400]
+        try:
+            msg = (json.loads(raw).get("error") or {}).get("message") or raw
+        except Exception:  # noqa: BLE001
+            msg = raw
+        log.warning("OpenAI %s: %s", e.code, msg[:200])
+        if e.code == 429:
+            return None, ("rate_limited", 429)
+        return None, (f"api_{e.code}: {msg[:160]}", 502)
+    except Exception as e:  # noqa: BLE001
+        log.warning("OpenAI ulanish: %s", e)
+        return None, ("ai_connection", 502)
+    ch = (j.get("choices") or [{}])[0]
+    text = ((ch.get("message") or {}).get("content") or "").strip()
+    u = j.get("usage") or {}
+    return {"text": text, "model": j.get("model"), "stop": ch.get("finish_reason"),
+            "usage": {"in": u.get("prompt_tokens"), "out": u.get("completion_tokens")}}, None
+
+
 @app.post("/api/ai")
 def ai():
     uid, err = current_user()
     if err:
         return err
-    if not AI_KEY:
+    if not AI_PROVIDER:
         return jsonify({"error": "ai_not_configured"}), 501
     body = request.get_json(silent=True) or {}
     msgs = body.get("messages")
-    system = str(body.get("system") or "")[:12000]
+    system = str(body.get("system") or "")[:16000]
     if not isinstance(msgs, list) or not msgs:
         return jsonify({"error": "messages required"}), 400
     clean = []
@@ -1064,6 +1102,11 @@ def ai():
             clean.append({"role": role, "content": content[:12000]})
     if not clean or clean[0]["role"] != "user":
         return jsonify({"error": "first message must be user"}), 400
+    if AI_PROVIDER == "openai":
+        out, fail = ai_openai(system, clean, int(body.get("max_tokens") or 2048))
+        if fail:
+            return jsonify({"error": fail[0]}), fail[1]
+        return jsonify(out)
     try:
         import anthropic
         resp = ai_client().messages.create(
