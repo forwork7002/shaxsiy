@@ -67,6 +67,11 @@ USERS = _parse_users(os.environ.get("MA_USERS", ""))
 GOOGLE_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 GOOGLE_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 ALLOWED_EMAILS = {x.strip().lower() for x in os.environ.get("MA_ALLOWED_EMAILS", "").split(",") if x.strip()}
+# Google kirish faqat ruxsat ro'yxati bilan ma'noga ega: ro'yxat bo'sh bo'lsa istalgan Google hisobi
+# o'ziga yangi profil ochib olardi. Uchala shart ham bo'lmasa — Google eshigi yopiq.
+GOOGLE_ON = bool(GOOGLE_ID and GOOGLE_SECRET and ALLOWED_EMAILS)
+if GOOGLE_ID and GOOGLE_SECRET and not ALLOWED_EMAILS:
+    log.error("GOOGLE_CLIENT_ID bor, lekin MA_ALLOWED_EMAILS bo'sh — Google kirish o'chirilgan")
 SESSION_DAYS = int(os.environ.get("MA_SESSION_DAYS", "30"))
 COOKIE = "dash_s"
 WHOOP_ID = os.environ.get("WHOOP_CLIENT_ID", "")
@@ -134,7 +139,7 @@ def _set_session(resp, uid: str):
 @app.get("/api/auth/config")
 def auth_config():
     """Kirish oynasi nimani ko'rsatishini biladi: ismlar ro'yxati, umumiy parol bormi, Google bormi."""
-    return jsonify({"users": [u["name"] for u in USERS], "passcode": bool(PASSCODE), "google": bool(GOOGLE_ID and GOOGLE_SECRET)})
+    return jsonify({"users": [u["name"] for u in USERS], "passcode": bool(PASSCODE), "google": GOOGLE_ON})
 
 
 @app.post("/api/login")
@@ -176,8 +181,8 @@ GOOGLE_INFO = "https://oauth2.googleapis.com/tokeninfo"
 
 @app.get("/api/auth/google")
 def google_login():
-    if not (GOOGLE_ID and GOOGLE_SECRET):
-        return "Google kirish sozlanmagan (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET)", 501
+    if not GOOGLE_ON:
+        return "Google kirish sozlanmagan (GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET / MA_ALLOWED_EMAILS)", 501
     nonce = secrets.token_hex(12)
     state = f"{nonce}.{sign('g:' + nonce)}"
     q = urllib.parse.urlencode({
@@ -189,6 +194,8 @@ def google_login():
 
 @app.get("/api/auth/google/callback")
 def google_callback():
+    if not GOOGLE_ON:
+        return "Google kirish sozlanmagan", 501
     if request.args.get("error"):
         return f"Google xato: {html.escape(request.args.get('error', '')[:200])}", 400
     code, state = request.args.get("code", ""), request.args.get("state", "")
@@ -209,7 +216,7 @@ def google_callback():
     if st2 != 200 or info.get("aud") != GOOGLE_ID or str(info.get("email_verified", "")).lower() != "true" or not info.get("sub"):
         return "Google hisobini tekshirib bo'lmadi", 401
     email = str(info.get("email", "")).lower()
-    if ALLOWED_EMAILS and email not in ALLOWED_EMAILS:
+    if not email or email not in ALLOWED_EMAILS:   # so'zsiz: ro'yxat bo'sh bo'lsa GOOGLE_ON ham yolg'on
         log.warning("Google: ruxsatsiz email %s", email)
         return "Bu Google hisobiga ruxsat berilmagan", 403
     uid = "g_" + hashlib.sha256(str(info["sub"]).encode()).hexdigest()[:20]
@@ -265,8 +272,11 @@ def _secret() -> bytes:
             except OSError:
                 pass
         _SECRET_CACHE = f.read_text(encoding="utf-8").strip().encode()
-    except OSError:
-        _SECRET_CACHE = b"dev-secret"
+    except OSError as e:
+        # fayl yozib bo'lmadi — vaqtinchalik tasodifiy kalit: qayta ishga tushganda sessiyalar
+        # bekor bo'ladi, lekin hech kim uni taxmin qila olmaydi
+        log.error("sessiya sirini saqlab bo'lmadi (%s) — vaqtinchalik kalit ishlatilmoqda", e)
+        _SECRET_CACHE = secrets.token_bytes(32)
     return _SECRET_CACHE
 
 
