@@ -1029,6 +1029,10 @@
     if (more && more.classList.contains('show') && !ev.target.closest('#more') && !ev.target.closest('[data-act=toggleMore]')) D.closeMore();
     const bg = D.$('#modalBg');
     if (bg && ev.target === bg) { D.closeModal(); return; }
+    // Qidiruv oynasi butun ekranni egallaydi va ichida yopish tugmasi yo'q —
+    // telefonda Escape ham yo'q, fonni bosmasa undan chiqib bo'lmasdi.
+    const pal = D.$('#palette');
+    if (pal && ev.target === pal) { D.act.palClose(); return; }
     dispatch('data-act', ev);
   });
   document.addEventListener('change', (ev) => dispatch('data-change', ev));

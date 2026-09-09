@@ -137,6 +137,9 @@
   // the hero tiles sit three-up on a phone: the currency word is dropped there (the big number above carries it)
   const plain = (n) => (D.S.settings.showAmounts === false ? '•••' : D.fmtNum(Math.round(+n || 0)));
   const plainSigned = (n) => (D.S.settings.showAmounts === false ? '•••' : (n > 0 ? '+' : n < 0 ? '−' : '') + D.fmtNum(Math.abs(Math.round(+n || 0))));
+  /* «Doimiy to'lovlar: 3 560 000 so'm» — mono belongs on the amount, not on the sentence around it */
+  const SLOT = '\u0000';
+  const line = (key, v) => esc(t(key, { v: SLOT })).split(SLOT).join(`<span class="num">${esc(v)}</span>`);
 
   // module-local UI state (device only, not persisted)
   let draftType = 'out';
@@ -181,6 +184,21 @@
   const setMonth = (mk) => { D.ui.filters.finMonth = mk; D.saveUi(); };
 
   const cat = (id) => F().cats.find((c) => c.id === id) || { id, name: id || '—', icon: '📦' };
+  const catKey = () => (draftType === 'in' ? 'finCatIn' : 'finCat');
+  /* categories the user actually reaches for come first — ordering is per type,
+     so «Kirim» opens on Maosh instead of Oziq-ovqat */
+  function catOrder(type) {
+    const from = D.addDays(D.today(), -90), w = {};
+    for (const x of F().tx) if (x && x.type === type && x.date >= from) w[x.cat] = (w[x.cat] || 0) + 1;
+    return F().cats.map((c, i) => ({ c, i, n: w[c.id] || 0 })).sort((a, b) => b.n - a.n || a.i - b.i).map((x) => x.c);
+  }
+  /* a category deleted in Sozlash must not stay selected — it would file the next entry under a dead id */
+  function selCat() {
+    const id = D.ui.filters[catKey()];
+    if (id && F().cats.some((c) => c.id === id)) return id;
+    const o = catOrder(draftType);
+    return (o[0] || F().cats[0] || {}).id || 'boshqa';
+  }
   const catLabel = (id) => { const c = cat(id); return (c.icon ? c.icon + ' ' : '') + c.name; };
   const acc = (id) => (id ? F().accounts.find((a) => a.id === id) : null);
   const effect = (tx) => (tx.type === 'in' ? 1 : -1) * (+tx.amount || 0);
@@ -260,15 +278,21 @@
     if (!c) { c = { id: 'obuna', name: t('fin.subCat'), icon: '🔁' }; F().cats.push(c); }
     return c.id;
   }
-  /** what the recurring payments will still take out of the current month */
+  /** what the recurring payments will still take out of the current month.
+      A charge whose date has already passed and was never paid still has to come
+      out of what is left, so it counts too — only auto ones get their `next`
+      moved forward by runSubs, so a past date here means genuinely unpaid. */
   function billsLeft(mk) {
     if (mk !== D.monthKey()) return 0;
-    const today = D.today(), end = mk + '-' + D.pad2(D.daysInMonth(mk));
+    const start = mk + '-01', end = mk + '-' + D.pad2(D.daysInMonth(mk));
     let s = 0;
     for (const b of F().subs) {
-      let k = b.next, g = 0;
-      const day = Math.max(+b.day || 0, k ? D.parseKey(k).d : 0);
-      while (k && k <= end && g++ < 12) { if (k >= today) s += +b.amount || 0; k = advance(k, b.period, day); }
+      let k = b.next;
+      if (!k) continue;
+      const amt = +b.amount || 0;
+      if (k < start) { s += amt; continue; }   // overdue from an earlier month: lands now, once
+      const day = Math.max(+b.day || 0, D.parseKey(k).d);
+      for (let g = 0; k && k <= end && g < 12; g++) { s += amt; k = advance(k, b.period, day); }
     }
     return s;
   }
@@ -356,7 +380,7 @@
       colors.push(k === today ? 'var(--text)' : k > today ? 'var(--line3)' : 'var(--accent)');
     }
     const maxDay = vals.length ? Math.max(...vals) : 0;
-    const bars = `<div class="fin-spark mt"><div class="row between mb-s"><div class="eyebrow">${esc(t('fin.daily'))}</div>${maxDay ? `<span class="small muted num">${esc(t('fin.dailyMax'))} ${esc(money(maxDay))}</span>` : ''}</div>${D.chart.bars({ values: vals, labels, colors, height: 56 })}</div>`;
+    const bars = `<div class="fin-spark mt"><div class="row between mb-s"><div class="eyebrow">${esc(t('fin.daily'))}</div>${maxDay ? `<span class="small muted">${esc(t('fin.dailyMax'))} <span class="num">${esc(money(maxDay))}</span></span>` : ''}</div>${D.chart.bars({ values: vals, labels, colors, height: 56 })}</div>`;
 
     // headline: today's allowance when a limit exists, otherwise the plain month result
     let eyebrow, num, cls, meta;
@@ -367,7 +391,7 @@
       cls = over ? 'bad' : S.allow > 0 && S.left < S.allow * 0.25 ? 'warn' : 'good';
       const p = S.allow > 0 ? D.clamp((S.spentToday / S.allow) * 100, 0, 100) : 100;
       meta = `<span class="bar thick mt-s"><i class="bar-fill" style="width:${p.toFixed(1)}%;background:${over ? 'var(--danger-text)' : 'var(--accent)'}"></i></span>
-        <div class="row between mt-s small muted"><span class="num">${esc(t('fin.spentToday', { v: money(S.spentToday) }))}</span><span class="num">${esc(t('fin.allow', { v: money(Math.round(S.allow)) }))}</span></div>`;
+        <div class="row between mt-s small muted"><span>${line('fin.spentToday', money(S.spentToday))}</span><span>${line('fin.allow', money(Math.round(S.allow)))}</span></div>`;
     } else {
       eyebrow = t('fin.net');
       num = signed(A.net);
@@ -387,22 +411,28 @@
     const elapsed = mk === D.monthKey() ? D.parseKey(D.today()).d : mk < D.monthKey() ? dim : 0;
     const bills = billsLeft(mk);
     const notes = [];
-    if (elapsed && A.out > 0) notes.push(t('fin.pace', { v: money(Math.round((A.out / elapsed) * dim)) }));
-    if (bills > 0) notes.push(t('fin.billsLeft', { v: money(bills) }));
+    if (elapsed && A.out > 0) notes.push(line('fin.pace', money(Math.round((A.out / elapsed) * dim))));
+    if (bills > 0) notes.push(line('fin.billsLeft', money(bills)));
 
     return `<div class="card fin-hero">
       <div class="card-head"><div class="eyebrow">${esc(eyebrow)}</div>
         <div class="row" style="gap:6px">${left ? `<span class="pill">${esc(t('fin.daysLeft', { n: left }))}</span>` : `<span class="pill on">${esc(t('fin.monthOver'))}</span>`}${limitPill}</div></div>
       <div class="kpi"><div class="kpi-num num ${cls}">${esc(num)}</div></div>
       ${meta}${stats}
-      ${notes.length ? `<div class="fin-notes">${notes.map((x) => `<span class="num">${esc(x)}</span>`).join('')}</div>` : ''}
+      ${notes.length ? `<div class="fin-notes">${notes.map((x) => `<span>${x}</span>`).join('')}</div>` : ''}
       ${bars}
     </div>`;
   }
 
+  const chipsHtml = () => { const sel = selCat(); return catOrder(draftType).map((c) => `<button class="fin-chip ${c.id === sel ? 'on' : ''}" data-act="finChip" data-cat="${esc(c.id)}" role="radio" aria-checked="${c.id === sel}"><span>${esc(c.icon || '📦')}</span>${esc(c.name)}</button>`).join(''); };
+  /* keep the chosen chip visible without ever scrolling the page itself */
+  function scrollChip() {
+    const box = D.$('#finChips'), on = D.$('#finChips .fin-chip.on');
+    if (box && on) box.scrollLeft = Math.max(0, on.offsetLeft - 12);
+  }
+
   /* the fastest possible entry: amount → category chip → done */
   function addCard() {
-    const sel = D.ui.filters.finCat || (F().cats[0] || {}).id;
     const hasAcc = F().accounts.length > 0;
     return `<div class="card fin-add">
       <div class="card-head"><div class="title">${D.ic('plus', 16)} ${esc(t('fin.add'))}</div>
@@ -410,9 +440,7 @@
           <button class="${draftType === 'out' ? 'on' : ''}" data-act="finType" data-type="out">${esc(t('fin.out'))}</button>
           <button class="${draftType === 'in' ? 'on' : ''}" data-act="finType" data-type="in">${esc(t('fin.in'))}</button></div></div>
       <input class="inp num fin-amount" id="finAmount" inputmode="decimal" autocomplete="off" placeholder="${esc(t('fin.amountPh'))}" aria-label="${esc(t('fin.amount'))}" data-enter="finAdd">
-      <div class="fin-chips" id="finChips" role="radiogroup" aria-label="${esc(t('fin.cat'))}">
-        ${F().cats.map((c) => `<button class="fin-chip ${c.id === sel ? 'on' : ''}" data-act="finChip" data-cat="${esc(c.id)}" role="radio" aria-checked="${c.id === sel}"><span>${esc(c.icon || '📦')}</span>${esc(c.name)}</button>`).join('')}
-      </div>
+      <div class="fin-chips" id="finChips" role="radiogroup" aria-label="${esc(t('fin.cat'))}">${chipsHtml()}</div>
       <div class="fin-add-row">
         <input class="inp" id="finNote" placeholder="${esc(t('fin.notePh'))}" aria-label="${esc(t('common.note'))}" data-enter="finAdd">
         <input class="inp" type="date" id="finDate" value="${esc(draftDate || D.today())}" aria-label="${esc(t('common.date'))}">
@@ -481,7 +509,7 @@
     const cut = Date.now() - 30 * 86400000;
     let ref30 = null;
     for (const s of snaps) { if (s.t <= cut) ref30 = s; else break; }
-    const d30 = ref30 ? total - ref30.v : null;
+    const d30 = ref30 && total - ref30.v !== 0 ? total - ref30.v : null;   // a pill that reads «30 kun 0» says nothing
 
     let h = `<div class="card fin-hero">
       <div class="card-head"><div class="eyebrow">${esc(t('fin.netWorth'))}</div>
@@ -499,6 +527,7 @@
     const subs = F().subs.slice().sort((a, b) => ((a.next || '9') < (b.next || '9') ? -1 : 1));
     const mo = D.sum(subs, monthlyEq);
     h += `<div class="section-title">${esc(t('fin.subs'))}<span class="right num">${esc(subs.length ? money(mo) + t('fin.mo') : '')}</span></div>`;
+    if (subs.length) h += `<div class="fin-subnote">${line('fin.perYear', money(mo * 12))}</div>`;
     if (!subs.length) h += `<div class="card flat"><div class="empty">${esc(t('fin.noSubs'))}</div></div>`;
     else {
       h += '<ul class="list">';
@@ -516,7 +545,7 @@
             <button class="li-del" data-act="finSubDel" data-id="${esc(s.id)}" aria-label="${esc(t('btn.delete'))}">${D.ic('x', 16)}</button>
           </div></li>`;
       }
-      h += `</ul><div class="fin-notes"><span class="num">${esc(t('fin.perYear', { v: money(mo * 12) }))}</span></div>`;
+      h += '</ul>';
     }
     h += `<button class="dashed mt" data-act="finSubEdit">${D.ic('plus', 14)} ${esc(t('fin.addSub'))}</button>`;
     return h;
@@ -533,6 +562,7 @@
       return `<div class="fin">${topBar(sub)}${sub === 'accounts' ? renderAccounts() : renderMonth()}</div>`;
     },
     mount() {
+      scrollChip();
       clearTimeout(mountTimer);
       mountTimer = setTimeout(() => { mountTimer = null; try { runSubs(); } catch (e) { console.error(e); } }, 0);
     },
@@ -549,9 +579,11 @@
   D.act.finType = (el) => {
     draftType = el.dataset.type === 'in' ? 'in' : 'out';
     D.$$('#finTypeSeg button').forEach((b) => b.classList.toggle('on', b.dataset.type === draftType));
+    D.patch('finChips', chipsHtml());   // income and expense keep their own order and their own last pick
+    scrollChip();
   };
   D.act.finChip = (el) => {
-    D.ui.filters.finCat = el.dataset.cat; D.saveUi();
+    D.ui.filters[catKey()] = el.dataset.cat; D.saveUi();
     D.$$('#finChips .fin-chip').forEach((b) => { const on = b.dataset.cat === el.dataset.cat; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
   };
   D.act.finSearch = (el) => {
@@ -585,7 +617,7 @@
   D.act.finAdd = () => {
     const amount = parseAmount((D.$('#finAmount') || {}).value);
     if (!(amount > 0)) { D.toast(t('fin.badAmount')); const a = D.$('#finAmount'); if (a) a.focus(); return; }
-    const catId = D.ui.filters.finCat || (F().cats[0] || {}).id || 'boshqa';
+    const catId = selCat();
     const accId = (D.$('#finAcc') || {}).value || null;
     const date = (D.$('#finDate') || {}).value || D.today();
     draftDate = date === D.today() ? null : date;

@@ -260,7 +260,6 @@
   }
 
   /* ---------- actions ---------- */
-  D.act.obNext = () => next();
   D.act.obBack = () => back();
   D.act.obFinish = () => finish();
   D.act.obSet = (el) => {
