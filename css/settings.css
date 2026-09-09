@@ -81,6 +81,21 @@
   .set-hab .li-text { font-size: 13.5px; }
 }
 @media (max-width: 400px) { .set-sph-sel { width: 112px; } }
+/* habit emoji + done-label: two fields, then a row of suggested emoji chips that fill the input in place */
+.set-hab-emoji { display: inline-block; width: 22px; margin-right: 4px; font-size: 15px; line-height: 1; text-align: center; vertical-align: -1px; }
+.set-emoji-grid { margin-bottom: 8px; }
+.set-emoji-grid .field { margin-bottom: 0; }
+.set-emoji-grid .inp { min-height: 40px; }
+.set-emoji-inp { font-size: 17px; text-align: center; }
+.set-emoji-inp::placeholder { opacity: .45; }
+.set-emoji-row { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin: 0 0 12px; }
+.set-emoji-chip { height: 40px; min-width: 0; padding: 0; border-radius: 10px; border: 1px solid var(--line2); background: var(--f-input); font-size: 18px; line-height: 1; cursor: pointer;
+  transition: background .15s, border-color .15s, transform .1s; }
+.set-emoji-chip:hover { background: var(--hover); border-color: var(--line3); }
+.set-emoji-chip:active { transform: scale(.94); }
+.set-emoji-chip.on { background: color-mix(in srgb, var(--success) 16%, transparent); border-color: var(--success); box-shadow: 0 0 8px var(--success-glow); }
+@media (max-width: 400px) { .set-emoji-row { grid-template-columns: repeat(8, 1fr); gap: 3px; } .set-emoji-chip { height: 36px; font-size: 16px; } }
+.modal .set-emoji-grid { margin-top: 2px; }
 
 /* prayer */
 .set-times { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }

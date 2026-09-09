@@ -1,35 +1,131 @@
-/* ==== tasks ==== (prefix tk- · Вазифа + Мақсад) */
+/* ==== tasks ==== (prefix tk- · checklist board: Hafta · Oy · Streak + Vazifalar · Maqsadlar) */
 
-/* sub-tab segment at the top */
-.tk-seg button { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+/* sub-tab segment — five tabs must fit a 360px phone */
+.tk-seg button { min-height: 40px; padding: 8px 6px; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; }
 
-/* quick-add card */
+/* ---------- day cards (Notion-like: white card, thin line, air) ---------- */
+.tk-row { display: flex; gap: 10px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
+  margin: 0 calc(-1 * var(--tk-pad)) 12px; padding: 2px var(--tk-pad) 10px; scrollbar-width: none; }
+.tk { --tk-pad: 16px; }
+.tk-row::-webkit-scrollbar { display: none; }
+.tk-card { --tk-cw: 84%; flex: 0 0 var(--tk-cw); max-width: 320px; min-width: 0; scroll-snap-align: start; scroll-margin-left: var(--tk-pad); display: flex; flex-direction: column;
+  background: var(--card-bg); border: 1px solid var(--card-line); border-radius: var(--r); padding: 14px 14px 12px; box-shadow: var(--sh-card);
+  backdrop-filter: blur(13px); -webkit-backdrop-filter: blur(13px); transition: border-color .2s; }
+@supports not (backdrop-filter: blur(1px)) { .tk-card { background: var(--card-solid); } }
+[data-theme="light"] .tk-card { background: var(--card-solid); }
+.tk-card.today { border-color: var(--line3); }
+.tk-card.all { border-color: color-mix(in srgb, var(--success) 45%, var(--card-line)); }
+.tk-ch { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+.tk-ch-l { font-size: 15px; font-weight: 700; color: var(--text2); letter-spacing: -.01em; }
+.tk-card.today .tk-ch-l { color: var(--text); }
+.tk-ch-d { font-size: 11px; color: var(--text4); }
+.tk-cb { flex: 1; display: flex; flex-direction: column; gap: 2px; min-height: 0; }
+/* phones: cards run their full height (the row snaps, the page scrolls). ≥700px a long list scrolls inside the card so the footer ring
+   (the Notion cue) stays on screen; no scrollbar chrome, and no overscroll trap — when the list ends the page takes over. */
+.tk-cb { margin: 0 -6px; padding: 0 6px; scrollbar-width: none; }
+.tk-cb::-webkit-scrollbar { display: none; }
+@media (min-width: 700px) { .tk-card { max-height: calc(100vh - 220px); } .tk-cb { overflow-y: auto; } .tk-sheet .tk-card { max-height: none; } .tk-sheet .tk-cb { overflow: visible; } }
+.tk-sep { height: 1px; background: var(--line); margin: 6px 0; }
+.tk-none { font-size: 12px; color: var(--text3); padding: 10px 0; }
+.tk-em { font-family: var(--font-em); font-size: 16px; line-height: 1; flex: none; width: 20px; text-align: center; }
+
+/* a habit line: check · emoji · name (· n/target · +1) */
+.tk-hb, .tk-tk { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 4px 4px 4px 2px; margin: 0 -4px 0 -2px; border-radius: var(--r-xs); font-size: 13.5px; color: var(--text); transition: background .15s, opacity .2s; }
+.tk-hb.tap { cursor: pointer; user-select: none; }
+.tk-hb.tap:hover, .tk-tk:hover { background: var(--hover); }
+.tk-hb .chk, .tk-tk .chk { width: 20px; height: 20px; border-radius: 6px; }
+.tk-hb .chk.on::after, .tk-tk .chk:checked::after { left: 6px; top: 2px; width: 5px; height: 9px; }
+.tk-hb-name, .tk-tk-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.tk-hb.done, .tk-tk.done { opacity: .55; }
+.tk-hb.done .tk-hb-name, .tk-tk.done .tk-tk-text { text-decoration: line-through; text-decoration-color: var(--text3); font-weight: 500; }
+.tk-hb-n { font-size: 12px; font-weight: 700; color: var(--text2); flex: none; }
+.tk-hb-n small { font-size: 10px; color: var(--text3); font-weight: 600; }
+.tk-plus { width: 32px; height: 32px; cursor: pointer; flex: none; border-radius: 9px; border: 1px solid var(--line2); background: var(--glass); color: var(--text); display: inline-flex; align-items: center; justify-content: center; transition: background .15s; }
+.tk-plus:hover { background: var(--hover); border-color: var(--line3); }
+.tk-plus:disabled { opacity: .35; cursor: default; }
+.tk-tk-text { cursor: pointer; font-weight: 500; }
+.tk-pd { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--text4); }
+.tk-pd.p2 { background: var(--warning); } .tk-pd.p3 { background: var(--danger); }
+
+/* inline «+ vazifa» (never rerenders on input; Enter commits) */
+.tk-inl { width: 100%; margin-top: 6px; padding: 7px 6px; border: 0; border-bottom: 1px dashed var(--line2); background: transparent; color: var(--text); font-size: 13px; font-family: inherit; outline: none; border-radius: 0; transition: border-color .2s; }
+.tk-inl::placeholder { color: var(--text4); }
+.tk-inl:focus { border-bottom-color: var(--focus); border-bottom-style: solid; }
+
+/* footer ring + count */
+.tk-cf { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
+.tk-cf .ring-val { display: none; }
+.tk-cf-n { font-size: 12px; font-weight: 700; color: var(--text3); }
+.tk-card.all .tk-cf-n { color: var(--success); }
+
+/* ---------- Tezkor tugmalar ---------- */
+.tk-quick { padding: 14px; }
+.tk-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.tk-pill { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 7px 14px 7px 10px; border-radius: var(--r-pill); border: 1px solid var(--line2); background: var(--glass); color: var(--text2); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; max-width: 100%; transition: background .15s, color .15s, border-color .15s, transform .1s; }
+.tk-pill > span:not(.tk-em) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tk-pill:hover { border-color: var(--line3); color: var(--text); }
+.tk-pill:active { transform: scale(.97); }
+.tk-pill.on { background: var(--success); border-color: var(--success); color: var(--ink-on-light); box-shadow: 0 0 12px var(--success-glow); }
+.tk-pill .tk-em { width: auto; }
+.tk-pill-n { font-size: 11px; opacity: .8; }
+
+/* ---------- Oy ---------- */
+.tk-cal { padding: 14px 12px 12px; }
+.tk-mnav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.tk-mtitle { font-size: 15px; font-weight: 700; color: var(--text); text-transform: capitalize; }
+.tk-dow, .tk-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.tk-dow { margin-bottom: 6px; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--text3); text-align: center; text-transform: uppercase; }
+.tk-dow span:nth-child(6), .tk-dow span:nth-child(7) { color: var(--text4); }
+.tk-pad { display: block; }
+/* cells reuse Tarix's .hs-cell / .hs-dn (history.css) — only the button-specific bits are here */
+.tk-cell { font-family: inherit; cursor: pointer; }
+.tk-cell.future { cursor: default; }
+.tk-cell small { font-size: 9px; font-weight: 600; opacity: .8; line-height: 1; }
+.tk-msum { margin-top: 12px; }
+.tk-msum .stat-num { display: inline-flex; align-items: center; gap: 2px; }
+.tk-msum .stat-num .ic { color: var(--warning); }
+@media (min-width: 720px) { .tk-cell { aspect-ratio: auto; height: 58px; } .tk-cell .hs-dn { font-size: 13px; } }
+
+/* day card inside the Oy sheet */
+.tk-sheet .tk-card { --tk-cw: 100%; max-width: none; box-shadow: none; }
+
+/* ---------- Streak ---------- */
+.tk-sk { padding: 14px; }
+.tk-sk-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.tk-sr { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
+.tk-sr:first-of-type { border-top: 0; }
+.tk-sr .tk-em { font-size: 18px; width: 24px; }
+.tk-sr-body { flex: 1; min-width: 0; }
+.tk-sr-name { font-size: 13.5px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 5px; }
+.tk-strip { display: flex; gap: 3px; }
+.tk-strip i { flex: 1 1 0; max-width: 9px; height: 7px; border-radius: 2px; background: var(--line2); }
+.tk-strip i.on { background: var(--success); }
+.tk-strip i.miss { background: color-mix(in srgb, var(--danger) 45%, transparent); }
+.tk-strip i.open { background: transparent; border: 1px solid var(--line3); }
+.tk-strip i.off { opacity: .35; }
+.tk-sr-nums { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex: none; min-width: 52px; }
+.tk-sr-nums .streak { font-size: 14px; }
+.tk-sr-best { font-size: 11px; color: var(--text3); font-weight: 700; }
+.tk-sr-best small { font-weight: 500; font-family: var(--font); }
+
+/* ---------- Vazifalar / Maqsadlar (management tabs) ---------- */
 .tk-add .input-row { align-items: stretch; }
 .tk-add .btn.sq { height: auto; min-height: 42px; }
 .tk-opts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
 .tk-opts .tk-date { flex: 1 1 120px; max-width: 190px; min-height: 40px; }
 .tk-opts .tk-goalsel { flex: 2 1 150px; min-height: 40px; }
 .tk-opts .tk-year { flex: 0 1 96px; min-height: 40px; }
-.tk-opts .tk-dirtag { margin-left: auto; padding: 6px 10px; max-width: 46%; }
-.tk-opts .tk-dirtag { overflow: hidden; text-overflow: ellipsis; }
+.tk-opts .tk-dirtag { margin-left: auto; padding: 6px 10px; max-width: 46%; overflow: hidden; text-overflow: ellipsis; }
 .tk-prio button { min-height: 40px; min-width: 44px; letter-spacing: -2px; line-height: 1; padding-left: 8px; padding-right: 6px; }
 .tk-prio button.on { box-shadow: inset 0 1px 0 rgba(255,255,255,.4); }
-
-/* stats strip */
 .tk-stats { margin-bottom: 12px; }
 .tk-stats .stat-sub { font-size: 10.5px; }
-
-/* filter tabs (pill row on wide screens; 2×2 grid on phones so nothing is clipped) */
 .tk-tabs button { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
 .tk-tabs button .num { font-size: 11px; opacity: .75; }
 .tk-tabs button.on .num { opacity: .85; }
 .tk-tabs button.tk-tab-bad:not(.on) { color: var(--danger-text); border-color: color-mix(in srgb, var(--danger) 38%, transparent); background: color-mix(in srgb, var(--danger) 8%, transparent); }
-
-/* bulk push button */
 .tk-push { display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 12px; min-height: 42px; color: var(--warning); border-color: color-mix(in srgb, var(--warning) 45%, transparent); }
 .tk-push:hover { color: var(--warning); background: color-mix(in srgb, var(--warning) 10%, transparent); }
-
-/* list card + group headers */
 .tk-list { padding: 8px 12px 10px; }
 .tk-list .section-title { margin: 8px 0 8px; }
 .tk-list .section-title.tk-bad { color: var(--danger-text); }
@@ -41,8 +137,6 @@
 .tk-gh-btn:hover { color: var(--text2); }
 .tk-list .empty.small { padding: 8px; }
 .tk-list .dashed { margin: 4px 0 6px; min-height: 40px; }
-
-/* rows */
 .tk .li { padding: 8px 6px 8px 12px; }
 .tk-over { border-color: color-mix(in srgb, var(--danger) 30%, var(--line)); }
 .tk-over .chk { border-color: color-mix(in srgb, var(--danger) 55%, var(--line3)); }
@@ -60,22 +154,18 @@
 .tk .li.hl { animation: tkHl 2.4s var(--ease-out) forwards; }
 @keyframes tkHl { 0%, 60% { background: color-mix(in srgb, var(--warning) 14%, transparent); box-shadow: inset 3px 0 0 0 var(--warning); } 100% { background: var(--inset); box-shadow: none; } }
 
-/* goals: KPI card */
+/* goals: KPI card, year pills, rows */
 .tk-kpi-row { align-items: center; gap: 16px; }
 .tk-kpi .kpi { margin-top: 6px; }
 .tk-dirs { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line); }
 .tk-dirs .hbar { margin: 5px 0; font-size: 12px; }
 .tk-dirs .hbar-label { width: 104px; }
 .tk-dirs .hbar-val { min-width: 44px; }
-
-/* goals: year pills + direction tag */
 .tk-years { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
 .tk-years .pill { cursor: pointer; min-height: 40px; padding: 6px 12px; font-family: inherit; gap: 6px; }
 .tk-years .pill .num { font-size: 10.5px; }
 .tk-years .pill.on .num { color: inherit; opacity: .8; }
 .tk-years .pill:hover { border-color: var(--line3); color: var(--text); }
-
-/* goals: rows */
 .tk-goal { align-items: flex-start; }
 .tk-goal > .chk { margin-top: 4px; }
 .tk-goal .tk-acts { margin-top: -4px; }
@@ -96,11 +186,17 @@
 .tk-mini .chk:checked::after, .tk-mini .chk.on::after { left: 6px; top: 2px; width: 5px; height: 9px; }
 .tk-mini .tk-acts .li-del { width: 40px; height: 40px; }
 
-/* phones */
+/* ---------- breakpoints ---------- */
+@media (min-width: 700px) { .tk-card { --tk-cw: calc((100% - 20px) / 3); max-width: none; }
+  .tk-hb, .tk-tk { min-height: 32px; font-size: 13px; } .tk-hb-name { font-weight: 500; } }
+@media (min-width: 960px) { .tk { --tk-pad: 28px; } }
 @media (max-width: 480px) {
   .tk-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; overflow: visible; padding-bottom: 0; }
   .tk-tabs button { width: 100%; min-width: 0; padding-left: 8px; padding-right: 8px; }
   .tk-opts .tk-date { max-width: none; }
   .tk-opts .tk-goalsel { flex-basis: 100%; }
   .tk-opts .tk-year { flex: 0 1 84px; }
+  .tk-seg button { padding: 8px 4px; font-size: 11.5px; }
+  .tk { --tk-pad: 12px; }
 }
+@media (max-width: 400px) { .tk-cal { padding: 12px 8px 10px; } .tk-grid, .tk-dow { gap: 3px; } .tk-cell { min-height: 38px; padding: 4px 1px 3px; } .tk-cell .hs-dn { font-size: 11px; } }

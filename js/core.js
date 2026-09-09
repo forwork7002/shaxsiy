@@ -99,6 +99,11 @@
       if (!h.schedule) h.schedule = { type: 'daily' };
       if (!D.SPHERE_IDS.includes(h.sphere)) h.sphere = 'boshqa';
       if (h.order === undefined) h.order = i;
+      // optional emoji (≤ 4 code points) and done-label (≤ 24 chars); sphere defaults are NOT written here (see D.habitEmoji)
+      const em = typeof h.emoji === 'string' ? h.emoji.trim() : '';
+      if (em && Array.from(em).length <= 4) h.emoji = em; else delete h.emoji;
+      const dl = typeof h.doneLabel === 'string' ? Array.from(h.doneLabel.trim()).slice(0, 24).join('') : ''; // code points, never a split surrogate
+      if (dl) h.doneLabel = dl; else delete h.doneLabel;
     });
     for (const k of Object.keys(n.logs)) if (!Array.isArray(n.logs[k]) || !n.logs[k].length) delete n.logs[k];
     n.tasks.forEach((t) => { if (!t.id) t.id = D.uid('t'); if (!t.priority) t.priority = 2; });
@@ -542,6 +547,50 @@
   };
   D.activeHabits = () => D.S.habits.filter((h) => h.active).sort((a, b) => (a.order || 0) - (b.order || 0));
   D.dueHabits = (key) => D.activeHabits().filter((h) => D.habitDue(h, key));
+
+  // emoji: the record's own, else the sphere default (never persisted — a later sphere change updates it)
+  const SPHERE_EMOJI = { ruh: '🕌', aql: '📘', qalb: '💚', tana: '🏃', boshqa: '✅', aralash: '✨' };
+  D.SPHERE_EMOJI = SPHERE_EMOJI;
+  D.habitEmoji = (h) => (h && h.emoji) || SPHERE_EMOJI[h && h.sphere] || SPHERE_EMOJI.boshqa;
+
+  // tick/count mutators shared by Bugun, Vazifa and the palette. None of them save or rerender — callers do.
+  const targetOf = (h) => (h && h.target && +h.target.n > 0 ? +h.target.n : 0);
+  function setLog(k, id, on) {
+    const arr = D.S.logs[k] || [];
+    const i = arr.indexOf(id);
+    if (on && i < 0) arr.push(id);
+    if (!on && i >= 0) arr.splice(i, 1);
+    if (arr.length) D.S.logs[k] = arr; else delete D.S.logs[k];
+  }
+  D.habits = {
+    // plain habit: flip S.logs[day] membership; targeted habit: done = counts ≥ target. Returns the new done state.
+    toggle(h, day) {
+      const q = targetOf(h);
+      const on = q ? ((D.S.counts[day] || {})[h.id] || 0) >= q : !(D.S.logs[day] || []).includes(h.id);
+      setLog(day, h.id, on);
+      return on;
+    },
+    // targeted habit: S.counts[day][h.id] += delta (clamped 0..9999), then S.logs mirrors counts ≥ target. Returns the new count.
+    bump(h, day, delta = 1) {
+      const q = targetOf(h);
+      if (!q) return 0;
+      const c = D.S.counts[day] || {};
+      const n = D.clamp((+c[h.id] || 0) + (+delta || 0), 0, 9999);
+      if (n) c[h.id] = n; else delete c[h.id];
+      if (Object.keys(c).length) D.S.counts[day] = c; else delete D.S.counts[day];
+      setLog(day, h.id, n >= q);
+      return n;
+    },
+    done(h, day) {
+      const q = targetOf(h);
+      if (!q) return { done: (D.S.logs[day] || []).includes(h.id), n: null, target: null };
+      const n = +((D.S.counts[day] || {})[h.id] || 0);
+      return { done: n >= q, n, target: q };
+    },
+    doneLabel: (h) => (h && h.doneLabel) || (h && h.name) || '',
+    // set a plain habit's tick to a value (used by the prayer → habit mirror in today.js)
+    mark: (id, day, on) => setLog(day, id, !!on),
+  };
 
   /* ------------------------------------------------------------------ */
   /* undo                                                                */

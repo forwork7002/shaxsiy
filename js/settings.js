@@ -33,6 +33,7 @@
       'set.h.add': 'Yangi odat', 'set.h.namePh': 'Odat nomi…', 'set.h.sphere': 'Soha', 'set.h.schedule': 'Jadval',
       'set.sch.daily': 'Har kuni', 'set.sch.days': 'Kunlar', 'set.sch.week': 'Haftasiga', 'set.sch.weekN': 'haftasiga {n} marta', 'set.h.perWeek': 'marta haftasiga',
       'set.h.target': 'Maqsad', 'set.h.targetN': 'Miqdor', 'set.h.unit': 'Birlik', 'set.h.unitPh': 'sahifa, daq…', 'set.h.remind': 'Eslatma',
+      'set.h.emoji': 'Emoji', 'set.h.emojiHint': "Bo'sh qolsa — soha belgisi", 'set.h.doneLabel': 'Bajarildi yozuvi', 'set.h.doneLabelPh': 'Yozdim', 'set.h.doneLabelHint': 'Tezkor tugmada ko‘rinadi',
       'set.h.needName': 'Odat nomini kiriting', 'set.h.needDays': 'Kamida bitta kun tanlang', 'set.h.added': "Odat qo'shildi", 'set.h.saved': 'Saqlandi',
       'set.h.edit': 'Odatni tahrirlash', 'set.h.deleteTitle': "Odatni o'chirish",
       'set.h.deleteText': "«{name}» odati va uning BARCHA tarixi ({n} kun) o'chirilsinmi? Nofaol qilish tarixni saqlab qoladi.",
@@ -86,6 +87,7 @@
       'set.h.add': 'Янги одат', 'set.h.namePh': 'Одат номи…', 'set.h.sphere': 'Соҳа', 'set.h.schedule': 'Жадвал',
       'set.sch.daily': 'Ҳар куни', 'set.sch.days': 'Кунлар', 'set.sch.week': 'Ҳафтасига', 'set.sch.weekN': 'ҳафтасига {n} марта', 'set.h.perWeek': 'марта ҳафтасига',
       'set.h.target': 'Мақсад', 'set.h.targetN': 'Миқдор', 'set.h.unit': 'Бирлик', 'set.h.unitPh': 'саҳифа, дақ…', 'set.h.remind': 'Эслатма',
+      'set.h.emoji': 'Эмодзи', 'set.h.emojiHint': 'Бўш қолса — соҳа белгиси', 'set.h.doneLabel': 'Бажарилди ёзуви', 'set.h.doneLabelPh': 'Ёздим', 'set.h.doneLabelHint': 'Тезкор тугмада кўринади',
       'set.h.needName': 'Одат номини киритинг', 'set.h.needDays': 'Камида битта кун танланг', 'set.h.added': 'Одат қўшилди', 'set.h.saved': 'Сақланди',
       'set.h.edit': 'Одатни таҳрирлаш', 'set.h.deleteTitle': 'Одатни ўчириш',
       'set.h.deleteText': '«{name}» одати ва унинг БАРЧА тарихи ({n} кун) ўчирилсинми? Нофаол қилиш тарихни сақлаб қолади.',
@@ -139,6 +141,7 @@
       'set.h.add': 'Новая привычка', 'set.h.namePh': 'Название привычки…', 'set.h.sphere': 'Сфера', 'set.h.schedule': 'Расписание',
       'set.sch.daily': 'Ежедневно', 'set.sch.days': 'Дни', 'set.sch.week': 'В неделю', 'set.sch.weekN': '{n} раз в неделю', 'set.h.perWeek': 'раз в неделю',
       'set.h.target': 'Цель', 'set.h.targetN': 'Количество', 'set.h.unit': 'Единица', 'set.h.unitPh': 'стр., мин…', 'set.h.remind': 'Напоминание',
+      'set.h.emoji': 'Эмодзи', 'set.h.emojiHint': 'Пусто — значок сферы', 'set.h.doneLabel': 'Подпись «сделано»', 'set.h.doneLabelPh': 'Записал', 'set.h.doneLabelHint': 'Показывается на быстрой кнопке',
       'set.h.needName': 'Введите название привычки', 'set.h.needDays': 'Выберите хотя бы один день', 'set.h.added': 'Привычка добавлена', 'set.h.saved': 'Сохранено',
       'set.h.edit': 'Изменить привычку', 'set.h.deleteTitle': 'Удалить привычку',
       'set.h.deleteText': 'Удалить привычку «{name}» и ВСЮ её историю ({n} дн.)? Деактивация сохранит историю.',
@@ -177,6 +180,9 @@
   const TZS = ['Asia/Tashkent', 'Asia/Almaty', 'Europe/Moscow', 'Asia/Dubai', 'Europe/Istanbul', 'UTC'];
   const CURS = ['UZS', 'USD', 'EUR', 'RUB', 'KZT'];
   const HABIT_SPHERES = ['ruh', 'aql', 'qalb', 'tana', 'boshqa'];
+  const EMOJI_CHIPS = ['🕌', '📘', '💚', '🏃', '✍️', '💤', '🧘', '💧', '🥗', '📖', '🧠', '🚶', '🏋️', '🧹', '📵', '🌅'];
+  const cleanEmoji = (v) => Array.from(String(v || '').trim()).slice(0, 4).join('');
+  const cleanDoneLabel = (v) => Array.from(String(v || '').trim()).slice(0, 24).join('');
   const DOW_ORDER = [1, 2, 3, 4, 5, 6, 0]; // Mon..Sun
   const OFFSET_IDS = ['bomdod', 'quyosh', 'peshin', 'asr', 'shom', 'xufton'];
   const FALLBACK_CAT = 'boshqa';
@@ -376,7 +382,7 @@
   /* ------------------------------------------------------------------ */
   /* HABITS                                                              */
   /* ------------------------------------------------------------------ */
-  const draft = { name: '', sphere: 'ruh', type: 'daily', days: [1, 2, 3, 4, 5], n: 3, tn: '', unit: '', remind: '' };
+  const draft = { name: '', sphere: 'ruh', type: 'daily', days: [1, 2, 3, 4, 5], n: 3, tn: '', unit: '', remind: '', emoji: '', doneLabel: '' };
 
   function renderHabits() {
     const list = sortedHabits(), cnt = doneCounts();
@@ -398,6 +404,7 @@
         ${draft.type === 'days' ? daysPicker('setDraftDay', draft.days) : ''}
         ${draft.type === 'week' ? `<div class="set-inp-unit">${numInp(draft.n, 'setDraft', 'data-k="n" min="1" max="7" step="1"')}<span>${t('set.h.perWeek')}</span></div>` : ''}
       </div>
+      ${emojiFields({ emoji: draft.emoji, doneLabel: draft.doneLabel, sphere: draft.sphere, inputId: 'setDraftEmoji', labelId: 'setDraftDoneLabel', chipAct: 'setDraftEmoji', bind: 'data-input="setDraft"' })}
       <div class="set-grid3 set-opt">
         <div class="field"><label class="field-label">${t('set.h.targetN')}</label>${numInp(draft.tn, 'setDraft', 'data-k="tn" min="1" step="1" placeholder="—"')}</div>
         <div class="field"><label class="field-label">${t('set.h.unit')}</label><input class="inp sm" maxlength="12" value="${esc(draft.unit)}" placeholder="${esc(t('set.h.unitPh'))}" data-input="setDraft" data-k="unit"></div>
@@ -417,7 +424,7 @@
     return `<div class="li set-hab ${h.active ? '' : 'off'}">
       <input type="checkbox" class="chk big" ${h.active ? 'checked' : ''} data-change="setHabitActive" data-id="${id}" aria-label="${esc(h.name)}">
       <div class="li-body">
-        <div class="li-text set-edit" data-act="setHabitName" data-id="${id}" title="${esc(t('btn.edit'))}">${esc(h.name)}</div>
+        <div class="li-text"><span class="set-hab-emoji" aria-hidden="true">${esc(D.habitEmoji(h))}</span><span class="set-edit" data-act="setHabitName" data-id="${id}" title="${esc(t('btn.edit'))}">${esc(h.name)}</span></div>
         <div class="li-meta">
           <span class="tag" style="--c:${sph.color}">${esc(sph.name())}</span>
           <span>${esc(schedSummary(h))}</span>
@@ -436,7 +443,37 @@
     </div>`;
   }
 
-  D.act.setDraft = (el) => { const k = el.dataset.k; draft[k] = k === 'n' ? D.clamp(+el.value || 1, 1, 7) : el.value; };
+  // emoji + done-label fields shared by the add form and the edit modal. The chip row fills the input in place (no rerender).
+  function emojiFields(o) {
+    const ph = D.habitEmoji({ sphere: o.sphere });
+    const cur = cleanEmoji(o.emoji);
+    return `
+      <div class="set-grid2 set-emoji-grid">
+        <div class="field"><label class="field-label" for="${o.inputId}">${t('set.h.emoji')}</label>
+          <input class="inp sm set-emoji-inp" id="${o.inputId}" value="${esc(cur)}" placeholder="${esc(ph)}" maxlength="16" autocomplete="off" inputmode="text" ${o.bind || ''} data-k="emoji">
+          <div class="set-hint">${esc(t('set.h.emojiHint'))}</div></div>
+        <div class="field"><label class="field-label" for="${o.labelId}">${t('set.h.doneLabel')}</label>
+          <input class="inp sm" id="${o.labelId}" value="${esc(o.doneLabel || '')}" placeholder="${esc(t('set.h.doneLabelPh'))}" maxlength="24" autocomplete="off" ${o.bind || ''} data-k="doneLabel">
+          <div class="set-hint">${esc(t('set.h.doneLabelHint'))}</div></div>
+      </div>
+      <div class="set-emoji-row" role="group" aria-label="${esc(t('set.h.emoji'))}">
+        ${EMOJI_CHIPS.map((e) => `<button type="button" class="set-emoji-chip ${e === cur ? 'on' : ''}" data-act="${o.chipAct}" data-e="${esc(e)}" data-for="${o.inputId}" aria-label="${esc(e)}" aria-pressed="${e === cur ? 'true' : 'false'}">${esc(e)}</button>`).join('')}
+      </div>`;
+  }
+  function pickEmoji(el) {
+    const e = cleanEmoji(el.dataset.e), inp = D.$('#' + el.dataset.for);
+    if (inp) inp.value = e;
+    const row = el.closest('.set-emoji-row');
+    if (row) for (const b of row.querySelectorAll('.set-emoji-chip')) { const on = b === el; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); }
+    return e;
+  }
+  D.act.setDraftEmoji = (el) => { draft.emoji = pickEmoji(el); };
+  D.act.setEhEmoji = (el) => { pickEmoji(el); };
+
+  D.act.setDraft = (el) => {
+    const k = el.dataset.k; draft[k] = k === 'n' ? D.clamp(+el.value || 1, 1, 7) : el.value;
+    if (k === 'sphere') D.rerender(); // select change (not a text input): refresh the emoji placeholder for the new sphere
+  };
   D.act.setDraftType = (el) => { draft.type = el.dataset.val; D.rerender(); };
   D.act.setDraftDay = (el) => {
     const d = +el.dataset.d;
@@ -460,7 +497,10 @@
       target: tn && tn > 0 ? { n: Math.round(tn), unit: (draft.unit || '').trim().slice(0, 12) } : null,
       remind: draft.remind || null, createdAt: Date.now(), order: D.S.habits.length,
     });
-    Object.assign(draft, { name: '', tn: '', unit: '', remind: '' });
+    const nh = D.S.habits[D.S.habits.length - 1], em = cleanEmoji(draft.emoji), dl = cleanDoneLabel(draft.doneLabel);
+    if (em) nh.emoji = em;
+    if (dl) nh.doneLabel = dl;
+    Object.assign(draft, { name: '', tn: '', unit: '', remind: '', emoji: '', doneLabel: '' });
     D.save(); D.rerender(); D.toast(t('set.h.added'));
   };
   D.act.setHabitActive = (el) => { const h = findHabit(el.dataset.id); if (!h) return; h.active = !!el.checked; D.save(); D.rerender(); };
@@ -503,6 +543,7 @@
           ${['daily', 'days', 'week'].map((v) => `<option value="${v}" ${sc.type === v ? 'selected' : ''}>${esc(t('set.sch.' + v))}</option>`).join('')}</select></div>
       </div>
       <div class="field" id="setEhDays" ${sc.type === 'days' ? '' : 'hidden'}>${daysPicker('setEhDay', sc.days || [])}</div>
+      ${emojiFields({ emoji: h.emoji, doneLabel: h.doneLabel, sphere: h.sphere, inputId: 'setEhEmoji', labelId: 'setEhDoneLabel', chipAct: 'setEhEmoji' })}
       <div class="field" id="setEhWeek" ${sc.type === 'week' ? '' : 'hidden'}><div class="set-inp-unit"><input class="inp sm num set-num" id="setEhN" type="number" min="1" max="7" value="${attr(D.clamp(+sc.n || 3, 1, 7))}"><span>${t('set.h.perWeek')}</span></div></div>
       <div class="set-grid3">
         <div class="field"><label class="field-label">${t('set.h.targetN')}</label><input class="inp sm num" id="setEhTn" type="number" inputmode="numeric" min="1" value="${h.target && h.target.n ? esc(h.target.n) : ''}" placeholder="—"></div>
@@ -529,6 +570,9 @@
     h.schedule = buildSchedule(type, days, (D.$('#setEhN') || {}).value);
     h.target = tn && tn > 0 ? { n: Math.round(tn), unit: ((D.$('#setEhUnit') || {}).value || '').trim().slice(0, 12) } : null;
     h.remind = (D.$('#setEhRemind') || {}).value || null;
+    const em = cleanEmoji((D.$('#setEhEmoji') || {}).value), dl = cleanDoneLabel((D.$('#setEhDoneLabel') || {}).value);
+    if (em) h.emoji = em; else delete h.emoji;
+    if (dl) h.doneLabel = dl; else delete h.doneLabel;
     D.closeModal(); D.save(); D.rerender(); D.toast(t('set.h.saved'));
   };
   D.act.setHabitDel = async (el) => {

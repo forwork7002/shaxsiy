@@ -92,12 +92,18 @@ D.chart.heat({days, valueFn, cols})                        // heatmap
 D.chart.donut({parts:[{v,color,label}], size})
 D.streak(datesSet)          // grace-day streak from a Set of day keys
 D.habitDue(habit, key)      // schedule check
+D.habitDone(habit, key) D.habitStreak(habit) D.activeHabits() D.dueHabits(key)
+D.habitEmoji(habit)         // habit.emoji or the sphere default (ruh 🕌 aql 📘 qalb 💚 tana 🏃 boshqa ✅ aralash ✨) — never written into the record
+D.habits.toggle(h, day) -> bool         // plain habit: flip S.logs[day]; targeted: done = counts ≥ target (no save/rerender — callers do)
+D.habits.bump(h, day, delta=1) -> n     // targeted: S.counts[day][h.id] += delta (0..9999), S.logs mirrors counts ≥ target
+D.habits.done(h, day) -> {done, n, target}   D.habits.doneLabel(h) -> h.doneLabel || h.name
+D.habits.mark(id, day, on)              // set a plain habit's tick (prayer mirror); same S.logs rules as toggle
 D.sphere(id)                // {id,name(),color}
 D.spheres                   // ordered list
 D.tg                        // always null now (no Telegram script) — guards stay null-safe
 D.api(path, opts)           // fetch (same-origin session cookie), JSON
 D.serverEnabled()           // true when served by api.py (window.DASH_SERVER) or ?server=1
-D.emit(name, data) D.on(name, fn)   // simple event bus ('state:changed', 'view:changed', 'day:changed', 'pull:ok' — a D.pull() that read the server copy; D.pulled stays true after the first)
+D.emit(name, data) D.on(name, fn)   // simple event bus ('state:changed', 'view:changed', 'day:changed', 'habit:toggled' {habit,day,on} — today.js mirrors prayer habits into S.prayers, 'pull:ok' — a D.pull() that read the server copy; D.pulled stays true after the first)
 D.theme.set('dark'|'light'|'auto')
 D.search.register(fn)       // fn(query) → [{label, sub, go:()=>{}}] for Ctrl+K palette
 D.merge(remote, local)      // union merge used by the server pull / stale-push path
@@ -178,7 +184,7 @@ Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --
  profile:{ name:'', heightCm:null, weightKg:null, age:null /* derived from birthYear when set */, birthYear:null, sex:'m', activity:3,
            goal:'lose'|'keep'|'gain' /* default keep */, whoopAge:null, paceOfAging:null, whoopAgeAt:null /* 'YYYY-MM-DD' typed-in date */ },
  habits:[ {id,name,sphere:'ruh'|'aql'|'qalb'|'tana'|'boshqa'|'aralash',active,schedule:{type:'daily'}|{type:'days',days:[0..6]}|{type:'week',n},
-           target:null|{n,unit}, remind:null|'HH:MM', createdAt, order} ],
+           target:null|{n,unit}, remind:null|'HH:MM', createdAt, order, emoji?:string /* ≤ 4 code points */, doneLabel?:string /* ≤ 24 chars, quick-button text */} ],
  logs:{ 'YYYY-MM-DD':[habitId] },               // key deleted when empty (Кун stat relies on it)
  counts:{ 'YYYY-MM-DD':{habitId:n} },           // quantified habits
  notes:{ 'YYYY-MM-DD':text },

@@ -152,15 +152,6 @@
   const hashStr = (s) => { let h = 0; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0; return h; };
   const safe = (fn) => { try { return fn(); } catch (e) { console.error('today', e); D.logError(e); return `<div class="card flat"><div class="small muted">${esc(t('error.view'))}</div></div>`; } };
 
-  function logHas(k, id) { return (D.S.logs[k] || []).includes(id); }
-  function setLog(k, id, on) {
-    const arr = D.S.logs[k] || [];
-    const i = arr.indexOf(id);
-    if (on && i < 0) arr.push(id);
-    if (!on && i >= 0) arr.splice(i, 1);
-    if (arr.length) D.S.logs[k] = arr; else delete D.S.logs[k];
-  }
-
   // prayer ↔ habit map, memoised on the habit list signature
   let phCache = { sig: null, map: {}, rev: {} };
   function prayerHabits() {
@@ -180,7 +171,7 @@
     const o = D.S.prayers[k] || { bomdod: null, peshin: null, asr: null, shom: null, xufton: null };
     o[id] = v || null;
     if (D.PRAYERS.every((p) => !o[p])) delete D.S.prayers[k]; else D.S.prayers[k] = o;
-    if (!opts.noHabit) { const hid = prayerHabits().map[id]; if (hid) { const h = findHabit(hid); if (h && !(h.target && h.target.n)) setLog(k, hid, !!v && v !== 'missed'); } }
+    if (!opts.noHabit) { const hid = prayerHabits().map[id]; if (hid) { const h = findHabit(hid); if (h && !(h.target && h.target.n)) D.habits.mark(hid, k, !!v && v !== 'missed'); } }
   }
   // habit ticked in the checklist → mirror to prayer state
   function syncPrayerFromHabit(k, hid, on) {
@@ -399,10 +390,11 @@
     const sp = sphereOf(h);
     const streak = st > 1 ? `<span class="streak" title="${esc(t('common.streak'))}">${D.ic('fire', 12)}${st}</span>` : '';
     const tag = `<span class="tag" style="--c:var(--${sp})">${esc(t('sphere.' + sp))}</span>`;
+    const name = `<span class="td-hab-emoji" aria-hidden="true">${esc(D.habitEmoji(h))}</span>${esc(h.name)}`;
     if (q) {
       return `<div class="li td-hab ${on ? 'done' : ''}">
         <i class="chk ${on ? 'on' : ''}" aria-hidden="true"></i>
-        <div class="li-body"><div class="li-text">${esc(h.name)}</div><div class="li-meta">${tag}${esc(h.target.unit || '')}</div></div>
+        <div class="li-body"><div class="li-text">${name}</div><div class="li-meta">${tag}${esc(h.target.unit || '')}</div></div>
         ${streak}
         <div class="td-step">
           <button class="td-step-btn" data-act="tdCount" data-id="${esc(h.id)}" data-d="-1" aria-label="−">${D.ic('minus', 14)}</button>
@@ -412,7 +404,7 @@
     }
     return `<div class="li tap td-hab ${on ? 'done' : ''}" data-act="tdHabit" data-id="${esc(h.id)}" role="checkbox" tabindex="0" aria-checked="${on ? 'true' : 'false'}">
       <i class="chk ${on ? 'on' : ''}" aria-hidden="true"></i>
-      <div class="li-body"><div class="li-text">${esc(h.name)}</div></div>
+      <div class="li-body"><div class="li-text">${name}</div></div>
       ${streak}${tag}</div>`;
   }
   function habitsCard(k) {
@@ -485,19 +477,14 @@
   D.act.tdHabit = (el) => {
     const k = key(), id = el.dataset.id, h = findHabit(id);
     if (!h) return;
-    const on = !logHas(k, id);
-    setLog(k, id, on);
+    const on = D.habits.toggle(h, k);
     syncPrayerFromHabit(k, id, on);
     haptic(); D.save(); D.rerender();
   };
   D.act.tdCount = (el) => {
     const k = key(), id = el.dataset.id, h = findHabit(id);
     if (!h || !(h.target && h.target.n)) return;
-    const c = D.S.counts[k] || {};
-    const n = D.clamp((+c[id] || 0) + (+el.dataset.d || 0), 0, 9999);
-    if (n) c[id] = n; else delete c[id];
-    if (Object.keys(c).length) D.S.counts[k] = c; else delete D.S.counts[k];
-    setLog(k, id, n >= +h.target.n);
+    D.habits.bump(h, k, +el.dataset.d || 0);
     haptic(); D.save(); D.rerender();
   };
 
@@ -747,11 +734,8 @@
       out.push({ label: h.name, sub: t('today.searchHabit'), icon: 'checkSq', go: () => {
         const k = D.today();
         let on;
-        if (h.target && h.target.n) {
-          const c = D.S.counts[k] || (D.S.counts[k] = {});
-          c[h.id] = (+c[h.id] || 0) + 1; on = true;
-          setLog(k, h.id, c[h.id] >= +h.target.n);
-        } else { on = !logHas(k, h.id); setLog(k, h.id, on); syncPrayerFromHabit(k, h.id, on); }
+        if (h.target && h.target.n) { D.habits.bump(h, k, 1); on = true; }
+        else { on = D.habits.toggle(h, k); syncPrayerFromHabit(k, h.id, on); }
         D.ui.viewDate = null; D.saveUi(); D.save(); D.go('today');
         D.toast(t(on ? 'today.marked' : 'today.unmarked', { name: h.name }));
       } });
@@ -771,6 +755,8 @@
     try { D.patch('tdDayRing', ringHtml()); D.patch('tdNext', nextHtml()); } catch (e) { console.error(e); }
   });
   D.on('day:changed', () => { D.ui.viewDate = null; D.saveUi(); if (D.current() === 'today') D.rerender(); });
+  // a prayer habit ticked on the Vazifa board (or any other view) mirrors into S.prayers like a Bugun tick; the emitter saves afterwards
+  D.on('habit:toggled', (e) => { if (e && e.habit && e.day) syncPrayerFromHabit(e.day, e.habit.id, !!e.on); });
   // keyboard: core delegates clicks only — make the custom habit rows / quick tiles reachable with Enter or Space
   document.addEventListener('keydown', (ev) => {
     if (D.current() !== 'today' || (ev.key !== 'Enter' && ev.key !== ' ')) return;
