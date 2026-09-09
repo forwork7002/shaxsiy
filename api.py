@@ -228,11 +228,23 @@ def _private(p: Path) -> Path:
     return p
 
 
-for _d in (DATA_DIR, DATA_DIR / "backups"):   # papkaning o'zi ham: bitta fayl e'tibordan chetda qolsa ham yopiq
-    try:
-        os.chmod(_d, 0o700)
-    except OSError:
-        pass
+def _lock_data_dir():
+    """Ishga tushganda data/ ni yopadi: papkalar 0700, fayllar 0600. Ilgari yozilgan fayllar
+    (holat blobi, WHOOP tokenlari, zaxiralar) 0644 bo'lib qolgan — bir marta shu yerda tuzatiladi."""
+    n = 0
+    for p in [DATA_DIR, *DATA_DIR.rglob("*")]:
+        try:
+            want = 0o700 if p.is_dir() else 0o600
+            if (p.stat().st_mode & 0o777) != want:
+                os.chmod(p, want)
+                n += 1
+        except OSError:
+            pass
+    if n:
+        log.info("data/ ruxsatlari tuzatildi: %d ta", n)
+
+
+_lock_data_dir()
 try:
     db.init(DATA_DIR)
 except Exception as e:  # noqa: BLE001 — arxivsiz ham ilova ishlayveradi
