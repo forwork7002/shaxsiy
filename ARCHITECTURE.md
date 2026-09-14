@@ -256,6 +256,17 @@ tarixi bor odam bir vaqtda 28 ta tabrik olardi. Keyingi nishonlar bittalab tabri
 `check()` **`D.pulled` dan oldin ishlamaydi**: bo'sh holat ustida «birinchi ishga tushirish»
 qilib qo'yilsa, odam butun tarixini nishonsiz ko'rardi va uni qaytarib bo'lmasdi.
 
+**To'plam oynasining tartibi** javob beradigan savollar bo'yicha: martaba (qayerdaman) →
+**martabalar yo'li** (nima oldinda) → haftalik sinov (shu hafta nima) → **eng yaqin uchta nishon**
+(endi nima) → 39/84 (qancha yig'ildi) → oilalar → tushuntirish. Tushuntirish oxirida: u
+ma'lumotnoma, birinchi o'qiladigan narsa emas.
+
+**Rang = ma'lumot, bu yerda ham:** martaba chizig'i martaba rangida, nishon chizig'i o'z
+metallida, haftalik sinov ko'k (davom etyapti) yoki yashil (bajarildi). `--c` berilmagan
+joyda chiziq **oq emas**, `--text3` — oq ekranda hech narsadan farq qilmay «bu muhim» deb
+qichqiradi. Yorug' temada martaba ranglari MATN sifatida qoraytiriladi (laym oq fonda
+1.31:1 — o'qib bo'lmaydi); to'ldirish va medal metallari o'zgarmaydi.
+
 **Qayerda ko'rinadi:** Sozlash › profil kartasi ichida (`cardHtml`) va Бугун sahifasining
 tepasida, hafta chizig'idan keyin (`tile`, today.js `render()`). Bugun qatori ataylab
 ingichka va ataylab tayyorlik hero'sidan oldin — hero kunning asosiy raqami bo'lib
@@ -266,7 +277,15 @@ Yuklanishi: birinchi ekranga kerak emas, shuning uchun `core.js` dagi `LAZY_LIBS
 bo'sh vaqtda keladi (kechiktirilgan bo'limlar navbatidan keyin) va kelgach o'zi bir marta
 `check()` qiladi hamda Бугун ochiq bo'lsa uni qayta chizadi. CSS prefiksi `lv-`, amallar
 `lvOpen` / `lvMedal` / `lvOpenFromModal`.
+Bugun ekranidagi qator `[data-view="today"]` ichida tekislanadi (fon va chegara yo'q, faqat
+ajratgich): o'sha ekran «jimjit va nafis» ko'rinishga o'tgan, va to'ldirilgan quticha u yerda
+yagona bo'lib ajralib turardi.
+
 Sinov: `node tests/test_levels.js` (103 ta tekshiruv, haqiqiy `core.js` bilan).
+Ko'rinish brauzerda tekshiriladi — Chrome CDP orqali headless, 412px, 600 kunlik sun'iy holat
+bilan: qorong'i va yorug' tema, tabrik, bo'sh holat, WCAG kontrasti, kesilish va gorizontal
+sirg'alish. Uchta ko'rinish nuqsoni (tishlar, panjara, lenta) va yorug' temadagi kontrast
+xatosi aynan shu bilan topilgan — kod o'qib topilmasdi.
 
 ## Kit classes (app.css)
 
