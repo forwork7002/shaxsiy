@@ -593,9 +593,25 @@ html.sky-turn body::after { animation: skyTurn 2.6s var(--ease-out); }
 
    Qimmat soat jimjit, lekin bo'sh emas — undagi har bir belgi o'z
    o'lchamida turadi. Shu yerda ham shunday: raqam kattalashdi va
-   jadval kengligiga o'tdi, yorliq bitta tizimga qo'shildi, kun tasmasi
-   esa ilovaning qolgan qismidagi kabi teskari rang bilan belgilanadi.
-   Hech qanday yangi quti, hech qanday yangi rang qo'shilmadi.
+   jadval kengligiga o'tdi. Hech qanday yangi quti, hech qanday yangi
+   rang qo'shilmadi.
+
+   EGALIK QOIDASI — bu bo'lim bir marta shu yerda buzilgan, takrorlanmasin.
+   today.css ning oxirida `[data-view="today"]` bilan qamralgan blok bor
+   va u aynan shu ekran uchun ataylab yozilgan. Uning aniqligi (0,2,0)
+   bu yerdagi oddiy sinf qoidasidan (0,1,0) yuqori.
+   Men avval o'sha blok bilan qoplangan sinflarni ham bu yerda yozgandim.
+   Natijasi ikki xil bo'ldi va ikkalasi ham yomon:
+     · `.td-strip2-*` — to'rtta qoida butunlay O'LIK edi. Fayl ularni
+       bo'yayapman deb turardi, ekranda esa today.css chizardi.
+     · `.td-day-title` — DURAGAY: o'lcham/vazn ularniki (16px/500),
+       katta harf va harflar oralig'i meniki. Ya'ni ekranda ikkala
+       tomon ham mo'ljallamagan narsa turardi.
+   Qoida: faqat Bugun ekranida uchraydigan sinf va uni today.css o'z
+   bloki ichida allaqachon bo'yagan bo'lsa — u O'SHANING mulki, bu yerga
+   yozilmaydi. Bu yerda faqat today.css qoplamagan narsa qoladi (guruh
+   hisobi, qator vaqtlari, hafta tasmasi). Yangi qoida qo'shishdan oldin
+   today.css ning `[data-view="today"]` ro'yxatini ko'rib chiqing.
    --------------------------------------------------------------------- */
 
 /* hafta chizig'i.
@@ -620,15 +636,12 @@ html.sky-turn body::after { animation: skyTurn 2.6s var(--ease-out); }
 [data-view="today"] .td-wd.on .td-wd-n { color: var(--text); font-weight: 700; }
 .td-wd-dot.on { background: var(--text4); }
 
-/* «Bugun qilinadi» sarlavhasi — ilovaning yagona yorliq tizimiga qo'shildi */
-.td-day-title { font-size: 11px; font-weight: 600; letter-spacing: .15em;
-  text-transform: uppercase; color: var(--text3); }
+/* Sarlavhaning o'zi today.css niki (16px/500, jimjit). Bu yerda faqat
+   uning o'ng tomonidagi hisob — u qoplanmagan. */
 .td-day-prog { font-size: 13px; font-weight: 700; color: var(--text2); letter-spacing: -.02em; }
-.td-day-head { margin-bottom: 14px; }
 
 /* guruh qatorlari (Namozlar · Odatlar · Vazifalar · Maqsadlar) —
    raqam nihoyat qahramon: 13px dan 20px ga, jadval kengligida */
-.td-grp { padding: 15px 0; }
 .td-grp-name { font-size: 14px; font-weight: 600; letter-spacing: -.01em; color: var(--text); }
 .td-grp-n { font-size: 20px; font-weight: 700; letter-spacing: -.035em; color: var(--text);
   font-variant-numeric: tabular-nums; min-width: 42px; text-align: right; }
@@ -637,7 +650,6 @@ html.sky-turn body::after { animation: skyTurn 2.6s var(--ease-out); }
 
 /* ichki qatorlar (Bomdod, Peshin…) — vaqt jadval kengligida, ya'ni
    ustun tekis turadi va «04:42» bilan «12:19» bir xil joy egallaydi */
-.td-row { padding: 9px 0; }
 .td-row-name { font-size: 14px; }
 .td-row-right { font-size: 12px; font-weight: 600; letter-spacing: .02em;
   font-variant-numeric: tabular-nums; color: var(--text4); }
@@ -645,15 +657,7 @@ html.sky-turn body::after { animation: skyTurn 2.6s var(--ease-out); }
 
 /* pastdagi uchta ko'rsatkich — bu o'lchov katakchalari, ya'ni ilovaning
    qolgan joyidagi .stat bilan bir xil o'qilishi kerak edi */
-.td-strip2 { gap: 6px; }
-.td-strip2-item { gap: 5px; padding: 14px 12px; }
-.td-strip2-val { font-size: 24px; font-weight: 700; letter-spacing: -.04em; color: var(--text); }
-.td-strip2-val small { font-size: 13px; color: var(--text3); font-weight: 600; }
-.td-strip2-lab { font-size: 11px; font-weight: 600; letter-spacing: .10em;
-  text-transform: uppercase; color: var(--text3); }
 @media (max-width: 400px) {
-  .td-strip2-val { font-size: 21px; }
-  .td-strip2-lab { letter-spacing: .06em; }
   .td-grp-n { font-size: 18px; min-width: 38px; }
 }
 
