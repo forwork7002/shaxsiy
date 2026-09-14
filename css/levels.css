@@ -200,7 +200,8 @@
   border-color: var(--c); box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 18%, transparent); }
 .lv-step.now .lv-step-d b { font-size: 14px; font-weight: 800; color: var(--c); line-height: 1; }
 .lv-step-n { font-size: 12px; font-weight: 700; line-height: 1.15; color: var(--text3); overflow-wrap: anywhere; }
-.lv-step-l { font-size: 10.5px; color: var(--text4); line-height: 1; }
+/* 11px — ilova bo'ylab quyi chegara. Joy yetmasa harflar orasini qisqartiring. */
+.lv-step-l { font-size: 11px; color: var(--text4); line-height: 1; }
 .lv-step.done .lv-step-n, .lv-step.now .lv-step-n { color: var(--text); }
 .lv-step.now .lv-step-n { color: var(--c); }
 
