@@ -181,10 +181,17 @@
 .lv-path { margin: 0; }
 .lv-rail { display: flex; gap: 0; margin: 0; padding: 2px 0 0; list-style: none;
   overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
-  /* Chekkalar so'nadi. Ularsiz yarim ko'ringan martaba nomi o'rtasidan kesilib,
-     «ntizom» bo'lib qolardi — o'quvchiga bu xato bo'lib ko'rinadi. */
-  -webkit-mask: linear-gradient(90deg, transparent, #000 38px, #000 calc(100% - 38px), transparent);
-          mask: linear-gradient(90deg, transparent, #000 38px, #000 calc(100% - 38px), transparent); }
+  /* Chekkalar so'nadi — «yana bor, suring» degani.
+     ZONA QISQA (20px) BO'LISHI SHART. Uzunroq qilib ko'rildi (38, keyin 60px)
+     va natija teskari chiqdi: chetdagi martaba aslida TO'LIQ ko'rinib turadi
+     (o'lchandi: «Intizom» −2…74px, ya'ni 76px lik qadamdan atigi 2px kesilgan),
+     demak so'zni buzayotgan narsa kesilish emas, so'nishning o'zi edi — u
+     birinchi harfni yeb «ntizom» qilardi va bu xato bo'lib o'qilardi.
+     Yorliq qadam ichida markazda turadi, ikki yonida ~12px havo bor; zona
+     shundan katta bo'lsa harfga tegadi. 20px — havodan sal kattaroq, ya'ni
+     haqiqiy kesilgan chetni yumshatadi, butun so'zga tegmaydi. */
+  -webkit-mask: linear-gradient(90deg, transparent, #000 20px, #000 calc(100% - 20px), transparent);
+          mask: linear-gradient(90deg, transparent, #000 20px, #000 calc(100% - 20px), transparent); }
 .lv-rail::-webkit-scrollbar { display: none; }
 .lv-step { position: relative; flex: none; width: 76px; display: flex; flex-direction: column;
   align-items: center; gap: 4px; text-align: center; }
