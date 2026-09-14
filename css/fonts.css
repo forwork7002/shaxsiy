@@ -150,3 +150,74 @@
   src: url('../fonts/onest-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Mulish — egasining tanlovi. So'ragani WHOOP'dagi shrift edi; WHOOP o'z
+   shrift serverida Proxima Nova (matn) va DIN/DINPro (raqam) beradi, ikkalasi
+   ham tijoriy litsenziya, ya'ni bu yerga qo'yib bo'lmaydi. Mulish — Proxima
+   Nova'ga proporsiyasi jihatidan eng yaqin ochiq shrift, kirilli to'liq.
+
+   FAYLNING O'ZI O'LCHANDI (fontTools, 1000 birlikli em) — ro'yxatlarga emas,
+   glifga qaraldi:
+
+     belgi              Mulish   Onest   Plex
+     U+0027  '            202     222     242     <- ilova AYNAN shuni ishlatadi
+     U+2019  ’            211     261     273
+     U+02BB  ʻ            500     261     600     <- ilovada umuman uchramaydi
+     o kichik             553     595     560
+     x-balandlik          500     527     516
+     raqam kengliklari  600×10   10 xil  600×10
+
+   Apostrof haqida aniqlik: ilova matnlari oddiy ASCII apostrofni ishlatadi
+   (bo'lsin = 62 6f 27 6c…), U+02BB va U+02BC esa js va index.html da nol
+   marta uchraydi. Shuning uchun Mulish'dagi keng U+02BB (500) bu ilovada
+   ko'rinmaydi; ko'rinadigan U+0027 esa Mulish'da eng tor — Onest'dan ham.
+
+   Raqamlar: o'nta raqamning hammasi 600 birlik, ya'ni tabular xususiyat
+   kerak ham emas. GSUB da 'tnum' YO'Q, lekin bu muhim emas — sukut holatning
+   o'zi ustunlarni tekis tutadi. (whoop-ui.css dagi font-feature-settings:
+   "tnum" 1 shu oilada jimgina hech narsa qilmaydi, zarari ham yo'q.)
+
+   Vazn o'qi 200..1000. Ilovada haqiqatda ishlatiladigan vaznlar 300..800,
+   ya'ni hammasi oraliq ichida. Quyidagi `font-weight: 200 1000` ataylab
+   shunday — haqiqiy oraliqdan keng yozilsa brauzer chetlarini o'zi qisadi.
+
+   x-balandlik Onest'dan 5% past (500 va 527). 11px eng kichik qadam edi:
+   harf balandligi 5.8px dan 5.5px ga tushadi. Sezilarli emas, lekin
+   11px dan pastga tushirmaslik qoidasi shu sababdan ham kuchida qoladi.
+
+   Eski onest-*.woff2 va plex-*.woff2 fayllari ataylab o'chirilmadi: keshida
+   eski versiyani ushlab turgan qurilma ularni hali ham so'rashi mumkin.
+   ═══════════════════════════════════════════════════════════════════════════ */
+@font-face {
+  font-family: 'Mulish';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('../fonts/mulish-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Mulish';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('../fonts/mulish-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Mulish';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('../fonts/mulish-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Mulish';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('../fonts/mulish-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
