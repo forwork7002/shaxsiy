@@ -178,3 +178,123 @@
 .td-wd.on .td-wd-l, .td-wd.on .td-wd-n { color: var(--ink-on-light); }
 .td-wd.on .td-wd-dot.on { background: var(--ink-on-light); opacity: .7; }
 .td-wd[disabled] { opacity: .3; }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   «Jimjit va nafis» — Bugun ekrani
+   Egasi uslubni o'zi tanladi: kam rang, ko'p bo'shliq, nozik chiziqlar,
+   tipografika va raqamlar asosiy qahramon. Qimmat soat kayfiyati.
+
+   Shuning uchun bu yerda uchta narsa olib tashlanadi:
+     1. to'ldirilgan quticha fonlari — ular ekranni bo'laklarga bo'lib
+        tashlaydi va har biri e'tibor talab qiladi. O'rniga nozik ajratgich:
+        bo'lim baribir ko'rinadi, lekin qichqirmaydi;
+     2. BOSH HARFLI mayda yorliqlar — .13em oraliq bilan yozilgan
+        «UYQU VAQTI» jimjitlikning aksi. Oddiy yozuv o'qishga ham qulay;
+     3. bir vaqtda bir nechta urg'u rangi.
+   Qolgani bo'shliq va raqam. Bo'shliq bu yerda bo'sh joy emas — u
+   ierarxiyani ranг va chiziq o'rniga havo bilan quradi.
+
+   Qamrov [data-view="today"] orqali: core.js #view ga shu atributni qo'yadi,
+   ya'ni qoidalar boshqa bo'limlarga tarqamaydi. Aniqlik (0,2,0) global
+   .card (0,1,0) dan yuqori, shuning uchun !important kerak emas.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+[data-view="today"] .card {
+  background: transparent; border: 0; border-radius: 0;
+  border-top: 1px solid var(--line);
+  padding: 26px 2px 24px; margin-bottom: 0;
+}
+[data-view="today"] .card:first-of-type { border-top: 0; padding-top: 10px; }
+
+/* Yorliq endi baqirmaydi */
+[data-view="today"] .td-kpi-lab,
+[data-view="today"] .eyebrow,
+[data-view="today"] .ib-time-state {
+  text-transform: none; letter-spacing: 0; font-weight: 500;
+  font-size: 12px; color: var(--text3);
+}
+
+/* Raqam — asosiy qahramon: kattaroq, yengilroq vazn, ustunda tekis turadi.
+   Onest raqamlari sukut bo'yicha har xil kenglikda, shuning uchun tabular
+   shu yerda majburiy — aks holda soat sanayotganda raqamlar sakraydi. */
+[data-view="today"] .td-kpi-val {
+  font-size: 27px; font-weight: 400; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+}
+[data-view="today"] .td-kpi-val small { font-size: 12px; font-weight: 400; margin-left: 3px; }
+[data-view="today"] .td-kpi-val.dur { font-size: 19px; font-weight: 400; }
+[data-view="today"] .td-kpis { gap: 16px; margin-top: 22px; padding-top: 20px; }
+[data-view="today"] .td-kpi-d { font-weight: 500; }
+
+/* Nafas */
+[data-view="today"] .td-grp { padding: 16px 0; }
+[data-view="today"] .td-row { padding: 11px 0; }
+[data-view="today"] .td-day { padding: 0; }
+[data-view="today"] .td-day-head { margin-bottom: 14px; }
+[data-view="today"] .td-day-title { font-size: 16px; font-weight: 500; }
+
+/* Ilhom bloki: chiziqli chegara va gradient o'rniga chap tomonda bitta chiziq */
+[data-view="today"] .td-insp {
+  border: 0; border-left: 2px solid var(--line2); border-radius: 0;
+  background: transparent; padding: 2px 0 2px 14px; margin: 4px 0 14px;
+}
+
+/* Pastdagi uch katak: to'ldirilgan quticha o'rniga ochiq ustunlar.
+   Quticha bu yerda hech narsa qo'shmasdi — uchta raqamni ajratib turish
+   uchun chegara kerak emas, ustun oralig'i yetarli. */
+[data-view="today"] .td-strip2 { gap: 0; }
+[data-view="today"] .td-strip2-item {
+  background: transparent; border: 0; border-radius: 0; padding: 4px 12px 4px 0;
+}
+[data-view="today"] .td-strip2-item + .td-strip2-item {
+  border-left: 1px solid var(--line); padding-left: 14px;
+}
+[data-view="today"] .td-strip2-val { font-size: 20px; font-weight: 400; font-variant-numeric: tabular-nums; }
+[data-view="today"] .td-strip2-lab { font-size: 12px; }
+
+/* Soat ostidagi yorliq va holat so'zi.
+   «UYQU VAQTI» .10em oraliq bilan bosh harfda yozilgan edi, ostida yana
+   «UYQU VAQTI YAQIN» — bir gap ikki marta, ikkalasi ham baland ovozda.
+   Yorliq oddiy yozuvga tushdi, holat so'zi esa kichrayib yengillashdi:
+   rangi baribir zonani aytadi, o'lcham bilan ham baqirishi shart emas. */
+[data-view="today"] .wh-ready-label,
+[data-view="today"] .td-ready .wh-ready-label {
+  text-transform: none; letter-spacing: 0; font-weight: 500;
+  font-size: 12px; color: var(--text3);
+}
+[data-view="today"] .td-ready-state { font-size: 15px; font-weight: 500; letter-spacing: 0; margin-top: 8px; }
+[data-view="today"] .arc-num { font-weight: 300; letter-spacing: -.035em; }
+[data-view="today"] .arc-num small { font-weight: 300; color: var(--text3); }
+
+/* Soat ostidagi ikki qator bir gapni ikki marta baland ovozda aytardi:
+   «UYQU VAQTI» (1.65px oraliq) va ostida «UYQU VAQTI YAQIN». Ikkalasi ham
+   oddiy yozuvga tushdi — ma'no o'zgarmadi, ovoz pasaydi. */
+[data-view="today"] .arc-sub {
+  text-transform: none; letter-spacing: .01em; font-weight: 500;
+  font-size: 12px; color: var(--text3);
+}
+[data-view="today"] .td-ready-state { text-transform: none; }
+
+/* Yoy atrofidagi yaltirash olib tashlandi.
+   core.js chart.arc() har bir faol segmentga ichki uslub bilan
+   `filter: drop-shadow(0 0 6px <rang>)` qo'yadi. Yorug' temada uni
+   allaqachon o'chirishgan; qorong'ida esa u yoyni butun ekrandagi eng
+   baland narsaga aylantirib turgandi. Yoyning o'zi qoladi — jimjit
+   dizaynda bitta ifodali element bo'lishi kerak, aks holda ekran quruq
+   bo'lib qoladi. Ketadigani ovoz, shakl emas.
+
+   Ikkinchi foydasi: drop-shadow — har kadrda qayta hisoblanadigan blur,
+   soat esa har soniyada yangilanadi. Telefonda bu bekorga sarflangan ish.
+   Ichki uslubni bosish uchun !important shart (yorug' tema qoidasi ham
+   aynan shu sababdan shunday yozilgan). */
+[data-view="today"] .arc rect.on { filter: none !important; }
+
+/* Hafta chipi: to'ldirilgan yorqin quticha o'rniga ostiga bitta chiziq.
+   Bugungi kun baribir ajralib turadi, lekin ekranning eng yorqin nuqtasi
+   bo'lib qolmaydi — u yerda soat turishi kerak. */
+[data-view="today"] .td-wd.on {
+  background: transparent; border-color: transparent;
+  box-shadow: inset 0 -2px 0 var(--accent);
+}
+[data-view="today"] .td-wd.on .td-wd-l { color: var(--text3); }
+[data-view="today"] .td-wd.on .td-wd-n { color: var(--text); font-weight: 600; }
