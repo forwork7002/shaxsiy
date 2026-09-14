@@ -45,9 +45,9 @@ button.pf-name-btn:hover { background: var(--hover); }
   background: var(--inset); border: 1px solid var(--line); font-size: 13px; color: var(--text2); }
 .pf-save svg { flex: none; }
 .pf-save span { flex: 1; }
-.pf-save.s-ok { color: var(--success); }
-.pf-save.s-ok svg { color: var(--success); }
-.pf-save.s-err { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); }
+.pf-save.s-ok { color: var(--success-text); }
+.pf-save.s-ok svg { color: var(--success-text); }
+.pf-save.s-err { color: var(--danger-text); border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); }
 .pf-save .btn { flex: none; }
 
 /* eski nusxani olish taklifi — faqat server aytganda ko'rinadi */

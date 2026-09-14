@@ -22,7 +22,7 @@
 .ob-num-wrap .ob-inp { font-size: 30px; font-weight: 700; padding-right: 56px; padding-left: 56px; -moz-appearance: textfield; }
 .ob-num-wrap .ob-inp::-webkit-outer-spin-button, .ob-num-wrap .ob-inp::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .ob-unit { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 13px; font-weight: 700; color: var(--text3); pointer-events: none; }
-.ob-age { font-size: 15px; font-weight: 700; color: var(--success); min-height: 20px; text-align: center; }
+.ob-age { font-size: 15px; font-weight: 700; color: var(--success-text); min-height: 20px; text-align: center; }
 .ob-seg { margin: 0 auto; }
 
 /* katta tanlov tugmalari (jins, maqsad) */

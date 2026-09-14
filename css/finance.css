@@ -5,14 +5,14 @@
 
 .fin-nav .label { display: flex; flex-direction: column; align-items: center; gap: 2px; text-transform: capitalize; }
 .fin-nav-lbl { font-size: 15px; }
-.fin-nav-today { border: 0; background: transparent; color: var(--success); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; min-height: 32px; border-radius: 8px; }
+.fin-nav-today { border: 0; background: transparent; color: var(--success-text); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; min-height: 32px; border-radius: 8px; }
 .fin-nav-today:hover { background: var(--hover); }
 
 /* ---- hero: the one number ---- */
 .fin-hero .kpi-num { font-size: clamp(26px, 9vw, 44px); }
-.fin-hero .kpi-num.good { color: var(--success); text-shadow: 0 0 24px var(--success-glow); }
+.fin-hero .kpi-num.good { color: var(--success-text); text-shadow: 0 0 24px var(--success-glow); }
 .fin-hero .kpi-num.bad { color: var(--danger-text); }
-.fin-hero .kpi-num.warn { color: var(--warning); }
+.fin-hero .kpi-num.warn { color: var(--warning-text); }
 .fin-hero .stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
 .fin-hero .stat { padding: 11px 9px; }
 /* three amounts side by side on a phone: one line each, never a broken word */
@@ -27,7 +27,7 @@
 
 .fin-hint { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
 .fin-link { display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent; color: var(--text3); font-size: 11.5px; font-weight: 600; padding: 6px 0; min-height: 40px; text-align: left; }
-.fin-link:hover { color: var(--info); }
+.fin-link:hover { color: var(--info-text); }
 
 /* ---- quick add: amount → chip → done ---- */
 .fin-amount { width: 100%; margin-bottom: 10px; min-height: 56px; font-size: 24px; font-weight: 700; letter-spacing: -.02em; text-align: center; }
@@ -53,7 +53,7 @@
 .fin-day .num { letter-spacing: 0; text-transform: none; color: var(--text2); font-size: 11.5px; }
 .fin-ico { width: 34px; height: 34px; flex: none; display: inline-flex; align-items: center; justify-content: center; font-size: 17px; border-radius: 10px; background: var(--recess); border: 1px solid var(--line); }
 .fin-amt { font-weight: 700; font-size: 13.5px; white-space: nowrap; color: var(--text); }
-.fin-amt.in { color: var(--success); }
+.fin-amt.in { color: var(--success-text); }
 .li.tap .li-del { margin-left: -4px; }
 
 /* ---- accounts + recurring ---- */
@@ -65,7 +65,7 @@
 .fin-bal.bad { color: var(--danger-text); }
 .fin-bal-edit { display: flex; flex-direction: column; gap: 6px; }
 .fin-bal-edit .inp { width: 100%; min-height: 40px; font-weight: 700; }
-.fin-bal-ok { color: var(--success); }
+.fin-bal-ok { color: var(--success-text); }
 .li .btn.icon, .li .li-del { min-width: 40px; min-height: 40px; }
 
 .fin-sub { align-items: flex-start; flex-wrap: wrap; row-gap: 6px; }
@@ -79,6 +79,6 @@
    o'qimasdan ham. Fon to'q emas, yumshoq: to'q qizil ustidagi oq yozuv ikkala
    mavzuda ham yomon o'qilardi, rangli yozuv esa har doim aniq turadi. */
 #finTypeSeg button[data-type="out"] { color: var(--danger-text); }
-#finTypeSeg button[data-type="in"] { color: var(--success); }
+#finTypeSeg button[data-type="in"] { color: var(--success-text); }
 #view #finTypeSeg button[data-type="out"].on { background: color-mix(in srgb, var(--danger) 22%, transparent); color: var(--danger-text); }
-#view #finTypeSeg button[data-type="in"].on { background: color-mix(in srgb, var(--success) 22%, transparent); color: var(--success); }
+#view #finTypeSeg button[data-type="in"].on { background: color-mix(in srgb, var(--success) 22%, transparent); color: var(--success-text); }

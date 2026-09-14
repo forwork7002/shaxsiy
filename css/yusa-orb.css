@@ -132,7 +132,7 @@
 
 .yusa-ctx { display: flex; align-items: center; gap: 6px; padding: 8px 13px 10px; flex: none;
   font-size: 11.5px; color: var(--text3); border-bottom: 1px solid var(--line); }
-.yusa-ctx .ic { color: var(--violet); flex: none; }
+.yusa-ctx .ic { color: var(--violet-text); flex: none; }
 .yusa-ctx span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .yusa-feed { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 12px; display: grid; gap: 12px; align-content: start; }
@@ -144,7 +144,7 @@
 .yusa-an::before { content: ''; position: absolute; left: 0; top: 12px; bottom: 12px; width: 2px; border-radius: 2px;
   background: linear-gradient(180deg, var(--violet), color-mix(in srgb, var(--info) 70%, transparent)); }
 .yusa-an-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-.yusa-an-head .eyebrow { color: var(--violet); }
+.yusa-an-head .eyebrow { color: var(--violet-text); }
 .yusa-an .help { margin: 0; }
 .yusa-an .empty { padding: 12px 0 2px; }
 .yusa-an .banner { margin: 10px 0 0; flex-wrap: wrap; }
@@ -163,7 +163,7 @@
 .yusa-bubble p { margin: 0 0 7px; } .yusa-bubble p:last-child { margin-bottom: 0; }
 .yusa-bubble strong { color: var(--text); font-weight: 700; }
 .yusa-bubble .ai-ul, .yusa-bubble .ai-ol { margin: 6px 0 8px; padding-left: 18px; display: grid; gap: 4px; }
-.yusa-bubble li::marker { color: var(--violet); }
+.yusa-bubble li::marker { color: var(--violet-text); }
 /* Tor panelda "ai_not_configured" kabi bo'linmas so'z tugma ostiga kirib ketmasin:
    belgi va matn birinchi qatorda, tugmalar esa o'z qatorida. */
 .yusa-err { margin: 0; flex-wrap: wrap; row-gap: 9px; align-items: flex-start; }

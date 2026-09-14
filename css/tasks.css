@@ -31,7 +31,7 @@
 
 /* «Kechikkanlarni bugunga surish» — sarlavhaning o'zida, o'ng chekkada */
 .tk-hd-b { flex: none; min-height: 32px; padding: 6px 11px; border-radius: var(--r-pill); font-family: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer;
-  color: var(--warning); border: 1px solid color-mix(in srgb, var(--warning) 38%, transparent); background: color-mix(in srgb, var(--warning) 9%, transparent); transition: background .15s; }
+  color: var(--warning-text); border: 1px solid color-mix(in srgb, var(--warning) 38%, transparent); background: color-mix(in srgb, var(--warning) 9%, transparent); transition: background .15s; }
 .tk-hd-b:hover { background: color-mix(in srgb, var(--warning) 18%, transparent); }
 
 /* yig'iladigan «Bajarilgan» sarlavhasi */
@@ -41,7 +41,7 @@
 .tk-hd-x .ic { transition: transform .25s var(--ease-out); }
 .tk-fold.open .tk-hd-x .ic { transform: rotate(180deg); }
 
-.tk-ok { display: flex; align-items: center; gap: 7px; padding: 12px 2px; font-size: 13px; font-weight: 600; color: var(--success); }
+.tk-ok { display: flex; align-items: center; gap: 7px; padding: 12px 2px; font-size: 13px; font-weight: 600; color: var(--success-text); }
 .tk-more { width: 100%; min-height: 42px; margin-top: 4px; border: 0; background: transparent; color: var(--text3); font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 10px; }
 .tk-more:hover { background: var(--hover); color: var(--text); }
 .tk-sub { margin-top: 4px; font-size: 12px; color: var(--text4); }
@@ -83,7 +83,7 @@
 .tk-r.sw { transition: background .2s; background: var(--card-solid); cursor: grabbing; }
 .tk-swh { position: absolute; top: 0; bottom: 0; z-index: 0; display: flex; align-items: center; gap: 6px; padding: 0 18px; font-size: 12px; font-weight: 700; opacity: 0; transition: opacity .15s; }
 .tk-swh.l { right: 0; color: var(--danger-text); }
-.tk-swh.r { left: 0; color: var(--success); }
+.tk-swh.r { left: 0; color: var(--success-text); }
 .tk-r.sw ~ .tk-swh { opacity: .4; }
 .tk-r.sw-l ~ .tk-swh.l, .tk-r.sw-r ~ .tk-swh.r { opacity: 1; }
 
@@ -118,7 +118,7 @@
 .tk-tabs button { min-height: 40px; }
 .tk-tabs button .num { font-size: 11px; opacity: .7; }
 .tk-gn { flex: none; font-size: 11.5px; font-weight: 700; color: var(--text3); }
-.tk-gn.full { color: var(--success); }
+.tk-gn.full { color: var(--success-text); }
 .tk-gy { flex: none; font-size: 11px; font-weight: 600; color: var(--text4); }
 .tk-goal > .tk-r-w .ic { transition: transform .25s var(--ease-out); }
 .tk-goal > .tk-r-w.open .ic { transform: rotate(180deg); }
@@ -162,4 +162,4 @@
    chegarasiz: qaysi biri bo'lim, qaysi biri sahifa ekani shundan ko'rinadi. */
 .tk .hb-seg, .tk .bk-seg { margin: -2px 0 12px; padding: 0; gap: 2px; background: transparent; border: 0; }
 .tk .hb-seg button, .tk .bk-seg button { min-height: 34px; padding: 7px 10px; font-size: 12px; }
-#view .tk .hb-seg button.on, #view .tk .bk-seg button.on { background: var(--accent-soft); color: var(--accent); }
+#view .tk .hb-seg button.on, #view .tk .bk-seg button.on { background: var(--accent-soft); color: var(--accent-text); }
