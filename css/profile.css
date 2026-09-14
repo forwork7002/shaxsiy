@@ -9,7 +9,7 @@
 .pf-av-ini { display: grid; place-items: center; background: hsl(var(--h, 200) 58% 38%); color: #fff;
   font-weight: 700; font-size: calc(var(--s, 40px) * .38); letter-spacing: .02em; line-height: 1; user-select: none; }
 .pf-cam { position: absolute; right: -4px; bottom: -2px; width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 2px solid var(--bg3);
-  background: var(--btn-grad); color: var(--ink-on-light); display: grid; place-items: center; box-shadow: var(--sh-btn); transition: transform .1s, filter .15s; }
+  background: var(--btn-grad); color: var(--on-btn); display: grid; place-items: center; box-shadow: var(--sh-btn); transition: transform .1s, filter .15s; }
 .pf-cam::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; }   /* 44 px bosish maydoni */
 @media (hover: hover) { .pf-cam:hover { filter: brightness(1.06); } }
 .pf-cam:active { transform: scale(.94); }

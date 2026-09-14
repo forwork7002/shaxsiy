@@ -1,5 +1,5 @@
 /* Service worker: cache-first app shell, network-first API. Bump CACHE on every release. */
-const CACHE = 'dash-v79';
+const CACHE = 'dash-v80';
 const V = '?v=' + CACHE.replace('dash-', '');
 const ASSETS = [
   './app.css',
@@ -20,6 +20,7 @@ const ASSETS = [
   './css/settings.css',
   './css/onboard.css',
   './css/yusa-orb.css',
+  './css/whoop-ui.css',
   './js/core.js',
   './js/i18n.js',
   './js/prayer.js',

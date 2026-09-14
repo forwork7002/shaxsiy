@@ -1131,13 +1131,13 @@
   /* charts (return SVG/HTML strings)                                    */
   /* ------------------------------------------------------------------ */
   D.chart = {
-    ring({ pct = 0, size = 120, stroke = 8, color = 'var(--success)', track = 'var(--line)', label = '', sub = '', glow = true, id = '' }) {
+    ring({ pct = 0, size = 120, stroke = 11, color = 'var(--success)', track = 'var(--line)', label = '', sub = '', glow = true, id = '' }) {
       const r = (size - stroke) / 2, C = 2 * Math.PI * r, p = D.clamp(pct, 0, 100);
       return `<div class="ring-wrap" style="width:${size}px;height:${size}px" ${id ? `id="${id}"` : ''}>
         <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
           <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${track}" stroke-width="${stroke}"/>
           <circle class="ring-fill" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round"
-            stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${(C * (1 - p / 100)).toFixed(2)}" transform="rotate(-90 ${size / 2} ${size / 2})" ${glow ? 'style="filter:drop-shadow(0 0 6px ' + color + ')"' : ''}/>
+            stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${(C * (1 - p / 100)).toFixed(2)}" transform="rotate(-90 ${size / 2} ${size / 2})" ${glow ? 'style="filter:drop-shadow(0 0 14px ' + color + ')"' : ''}/>
         </svg>
         <div class="ring-val"><div class="ring-pct num">${label !== '' ? label : Math.round(p) + '%'}</div>${sub ? `<div class="ring-sub">${sub}</div>` : ''}</div></div>`;
     },
@@ -1178,7 +1178,7 @@
       let seg = '';
       for (let i = 0; i < n; i++) {
         const a = -84 + i * (168 / (n - 1));
-        seg += `<rect x="93.5" y="8" width="13" height="27" rx="6.5" transform="rotate(${a.toFixed(2)} 100 100)" fill="${i < on ? color : track}"/>`;
+        seg += `<rect x="93.5" y="8" width="13" height="27" rx="6.5" transform="rotate(${a.toFixed(2)} 100 100)" fill="${i < on ? color : track}"${i < on ? ` class="on" style="filter:drop-shadow(0 0 6px ${color})"` : ''}/>`;
       }
       return `<div class="arc-wrap"${id ? ` id="${id}"` : ''}>
         <svg class="arc" viewBox="0 0 200 112" role="img" aria-label="${D.esc(String(label || Math.round(p) + '%'))}">${seg}</svg>
@@ -1559,6 +1559,12 @@
     let title = '', sub = '';
     try { title = v.title ? v.title() : D.t('nav.' + current); } catch (e) { title = D.t('nav.' + current); }
     try { sub = v.subtitle ? v.subtitle() : ''; } catch (e) { sub = ''; }
+    /* Sana — bo'lim nomining USTIDA, mayda katta harflarda (css/whoop-ui.css uni
+       `order: -1` bilan tepaga chiqaradi). Avval «qachon», keyin «nima» — WHOOP
+       bosh sahifasining tartibi shu. Bo'lim o'z izohini bersa, o'shanisi ustun:
+       sana hamma sahifada bir xil, izoh esa sahifaga xos. Ichki sahifada umuman
+       yozilmaydi — u yerda chap burchakda orqaga strelkasi turadi. */
+    if (!sub && isTab) { try { sub = D.esc(D.fmtDate(D.today(), 'weekday')); } catch (e) { sub = ''; } }
     // Chap burchak — faqat ichki sahifada, orqaga qaytish uchun. Yorliqda u bo'sh:
     // yorliqdan qaytadigan joy yo'q, panel o'zi turibdi.
     const left = isTab ? ''

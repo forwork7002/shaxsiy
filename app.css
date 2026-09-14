@@ -47,7 +47,7 @@
   --f-input: rgba(255,255,255,.045); --f-input-focus: rgba(255,255,255,.07);
   /* Asosiy tugma — tekis oq. Gradient "bu tugma" degan bezak edi; oq to'rtburchak
      qora ekranda o'zidan boshqa hech narsaga o'xshamaydi, ya'ni izlash shart emas. */
-  --btn-grad: #FFFFFF;
+  --btn-grad: #FFFFFF; --on-btn: #000000;
   --title-grad: linear-gradient(180deg,#FFFFFF 0%,#9AA0A8 130%);
   --wash1: transparent; --wash2: transparent; --wash3: transparent; --grain: transparent;
   --ruh: #4FB8F5; --aql: #16EC06; --qalb: #FF6E8A; --tana: #FF9F1C; --boshqa: #8A9099; --aralash: #8B7BFF;
@@ -103,7 +103,7 @@
   /* Oq fonda oq tugma ko'rinmaydi — bu yerda u teskarisiga aylanadi: qora
      to'ldirish, oq yozuv. `--ink-on-light` bu temada qora bo'lgani uchun
      tugmaning matn rangi alohida beriladi (css/whoop-ui.css). */
-  --btn-grad: #0A0B0D;
+  --btn-grad: #0A0B0D; --on-btn: #FFFFFF;
   --title-grad: linear-gradient(180deg,#0A0B0D 0%,#3C424A 130%);
   --wash1: transparent; --wash2: transparent; --wash3: transparent; --grain: transparent;
   --ruh: #0077BD; --aql: #10820A; --qalb: #C4265A; --tana: #B96A00; --boshqa: #666C75; --aralash: #6A55E0;
@@ -284,7 +284,7 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 [data-theme="light"] input[type="date"].inp, [data-theme="light"] input[type="time"].inp { color-scheme: light; }
 .field { margin-bottom: 12px; }
 .field-label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); }
-.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; min-height: 44px; border: 0; border-radius: var(--r-sm); background: var(--btn-grad); color: var(--ink-on-light); font-size: 13px; font-weight: 700; transition: transform .1s, filter .15s, background .15s, border-color .15s; white-space: nowrap; line-height: 1.2; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; min-height: 44px; border: 0; border-radius: var(--r-sm); background: var(--btn-grad); color: var(--on-btn); font-size: 13px; font-weight: 700; transition: transform .1s, filter .15s, background .15s, border-color .15s; white-space: nowrap; line-height: 1.2; }
 @media (hover: hover) { .btn:hover { filter: brightness(1.06); transform: translateY(-1px); } }
 .btn:active { transform: translateY(0); }
 .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; filter: none; }
@@ -302,7 +302,7 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .seg { display: flex; gap: 4px; padding: 3px; background: var(--glass); border: 1px solid var(--line2); border-radius: 11px; margin-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
 .seg::-webkit-scrollbar { display: none; }
 .seg button { flex: 1; padding: 10px 10px; min-height: 42px; border: 0; background: transparent; color: var(--text3); border-radius: 8px; font-size: 12.5px; font-weight: 600; white-space: nowrap; transition: background .15s, color .15s; }
-.seg button.on { background: var(--btn-grad); color: var(--ink-on-light); }
+.seg button.on { background: var(--btn-grad); color: var(--on-btn); }
 .seg.compact { display: inline-flex; margin: 0; }
 .seg.compact button { flex: none; padding: 8px 12px; font-size: 12px; min-height: 36px; }
 .tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 10px; scrollbar-width: none; }
@@ -565,7 +565,7 @@ body { font-weight: 450; }
 .auth-users { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; width: 100%; margin-bottom: 4px; }
 .auth-user { flex: 1 1 96px; min-height: 44px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line2); background: var(--glass);
   color: var(--text2); font-size: 14px; font-weight: 700; transition: background .15s, border-color .15s, color .15s, transform .1s; }
-.auth-user.on { background: var(--btn-grad); color: var(--ink-on-light); border-color: transparent; }
+.auth-user.on { background: var(--btn-grad); color: var(--on-btn); border-color: transparent; }
 .auth-user:active { transform: scale(.97); }
 .auth-or { width: 100%; text-align: center; font-size: 11.5px; color: var(--text4); margin: 4px 0; }
 .auth-google { font-weight: 700; }

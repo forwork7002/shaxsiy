@@ -35,7 +35,7 @@
 .ob-opt-l { font-size: 15px; font-weight: 700; color: var(--text); }
 .ob-opt-s { font-size: 11.5px; color: var(--text3); }
 .ob-opt.on { background: var(--btn-grad); border-color: transparent; }
-.ob-opt.on .ob-opt-l, .ob-opt.on .ob-opt-s { color: var(--ink-on-light); }
+.ob-opt.on .ob-opt-l, .ob-opt.on .ob-opt-s { color: var(--on-btn); }
 
 /* faollik slayderi */
 .ob-act-lbl { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 2px; font-size: 15px; font-weight: 700; color: var(--text); }

@@ -614,7 +614,7 @@
     const strain = live ? live.strain : i.strain;
     const hasRec = i.recovery != null;
     const z = hasRec ? zRec(i.recovery) : '';
-    const ring = D.chart.ring({ pct: hasRec ? i.recovery : 0, size: 112, stroke: 10, color: hasRec ? recColor(z) : 'var(--line3)', label: hasRec ? i.recovery + '%' : '—', sub: t('wh.recovery') });
+    const ring = D.chart.ring({ pct: hasRec ? i.recovery : 0, size: 112, stroke: 14, color: hasRec ? recColor(z) : 'var(--line3)', label: hasRec ? i.recovery + '%' : '—', sub: t('wh.recovery') });
     const verdict = hasRec ? t(z === 'good' ? 'wh.ready.high' : z === 'warn' ? 'wh.ready.mid' : 'wh.ready.low') : t('hl.wh.noData');
     // me'yorga nisbatan farq pastdagi jadvalda bor — bu yerda faqat kalibrlash ogohlantirishi
     const sub = w.days[key] && w.days[key].calibrating ? esc(t('wh.calibrating')) : '';
@@ -729,9 +729,9 @@
       ${d.stages ? `<div class="mt">${stagesHtml(d.stages)}</div>` : ''}
     </div>`;
     const ringRow = (d.sleepPerf != null || d.sleepEff != null || d.sleepCons != null) ? `<div class="card"><div class="wh-rings">
-        ${d.sleepPerf != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepPerf, size: 84, stroke: 7, color: recColor(d.sleepPerf >= 85 ? 'good' : d.sleepPerf >= 70 ? 'warn' : 'bad'), glow: false })}<span>${esc(t('wh.sl.perf'))}</span></div>` : ''}
-        ${d.sleepEff != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepEff, size: 84, stroke: 7, color: 'var(--info)', glow: false })}<span>${esc(t('wh.sl.eff'))}</span></div>` : ''}
-        ${d.sleepCons != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepCons, size: 84, stroke: 7, color: 'var(--violet)', glow: false })}<span>${esc(t('wh.sl.cons'))}</span></div>` : ''}
+        ${d.sleepPerf != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepPerf, size: 84, stroke: 9, color: recColor(d.sleepPerf >= 85 ? 'good' : d.sleepPerf >= 70 ? 'warn' : 'bad'), glow: false })}<span>${esc(t('wh.sl.perf'))}</span></div>` : ''}
+        ${d.sleepEff != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepEff, size: 84, stroke: 9, color: 'var(--info)', glow: false })}<span>${esc(t('wh.sl.eff'))}</span></div>` : ''}
+        ${d.sleepCons != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepCons, size: 84, stroke: 9, color: 'var(--violet)', glow: false })}<span>${esc(t('wh.sl.cons'))}</span></div>` : ''}
       </div><div class="help mt-s">${esc(d.sleepCons != null && d.sleepCons < 60 ? t('wh.sl.consHint') : t('wh.sl.effHint'))}</div></div>` : '';
     // 14 nights: what you got, with what you needed as the target line
     const days = D.lastDays(14, key);
