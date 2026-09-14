@@ -448,6 +448,27 @@
     </div>`;
   }
 
+  /* Quyi vazifalar oynada tahrirlanadi. Qatordagi chip faqat ular MAVJUD
+     bo'lsa chiqadi (aks holda har qatorda bo'sh belgi turardi), ya'ni
+     birinchisini qo'shadigan joy shu yerda bo'lishi shart — bo'lmasa
+     imkoniyatga umuman kirib bo'lmaydi.
+     O'zgarishlar darhol yoziladi va faqat shu bo'lakning o'zi qayta
+     chiziladi: butun ko'rinishni qayta chizish oynadagi boshqa maydonlarga
+     yozilgan, hali saqlanmagan matnni yo'qotardi. */
+  function subEditor(x) {
+    const list = subs(x);
+    const rows = list.map((s) => `<li class="tk-sb ${s.done ? 'done' : ''}">
+        <input type="checkbox" class="chk" data-change="tkmSubToggle" data-id="${esc(x.id)}" data-sid="${esc(s.id)}" ${s.done ? 'checked' : ''} aria-label="${esc(s.text)}">
+        <span class="tk-sb-t">${esc(s.text)}</span>
+        <button class="tk-r-x" data-act="tkmSubDel" data-id="${esc(x.id)}" data-sid="${esc(s.id)}" aria-label="${esc(t('btn.delete'))}">${D.ic('x', 13)}</button>
+      </li>`).join('');
+    return `${rows ? `<ul class="list">${rows}</ul>` : `<div class="tk-sub">${esc(t('tasks.sub.none'))}</div>`}
+      <div class="tk-new sm">
+        <input class="inp tk-new-i" id="tkmSubNew" placeholder="${esc(t('tasks.sub.ph'))}" data-enter="tkmSubAdd" data-id="${esc(x.id)}" autocomplete="off" maxlength="200">
+        <button class="btn sq ghost tk-new-b" data-act="tkmSubAdd" data-id="${esc(x.id)}" aria-label="${esc(t('btn.add'))}">${D.ic('plus', 15)}</button>
+      </div>`;
+  }
+
   function taskRow(x, ctx, opts = {}) {
     const overdue = !x.done && x.date && x.date < ctx.today;
     const mini = !!opts.mini;
@@ -910,11 +931,39 @@
             ${['d', 'w', 'm', 'y'].map((u) => `<option value="${u}" ${ru === u ? 'selected' : ''}>${esc(t('tasks.rep.' + u))}</option>`).join('')}
           </select>
         </div></div>
+      <div class="field"><span class="field-label">${esc(t('tasks.sub'))}</span><div id="tkmSubs">${subEditor(x)}</div></div>
       <div class="field"><label class="field-label" for="tkmGoal">${esc(t('tasks.goalLink'))}</label><select class="sel" id="tkmGoal">${goalOptions(x.goalId || '')}</select></div>
       <div class="field"><label class="field-label" for="tkmNote">${esc(t('tasks.note'))}</label><textarea class="inp ta" id="tkmNote" rows="3" maxlength="2000" placeholder="${esc(t('tasks.note.ph'))}">${esc(noteOf(x))}</textarea></div>`,
     { title: t('tasks.edit'), noFocus: true,
       actions: [{ label: t('btn.cancel'), act: 'closeSheet' }, { label: t('btn.save'), act: 'tkSaveMore', primary: true, data: { id: x.id } }] });
   };
+  /* Oynadagi quyi vazifalar — darhol yoziladi, lekin faqat o'z bo'lagi
+     qayta chiziladi (D.rerender emas: oynadagi saqlanmagan matn qolsin). */
+  const subPatch = (x) => D.patch('tkmSubs', subEditor(x));
+  D.act.tkmSubAdd = (el) => {
+    const x = byId(D.S.tasks, el.dataset.id); if (!x) return;
+    const inp = el.tagName === 'INPUT' ? el : document.getElementById('tkmSubNew');
+    const text = (inp ? inp.value : '').trim();
+    if (!text) { if (inp) inp.focus(); return; }
+    if (!Array.isArray(x.sub)) x.sub = [];
+    x.sub.push({ id: D.uid('s'), text, done: false });
+    D.save(); subPatch(x); focusId('tkmSubNew'); haptic();
+  };
+  D.act.tkmSubToggle = (el) => {
+    const x = byId(D.S.tasks, el.dataset.id); if (!x) return;
+    const s = subs(x).find((y) => y.id === el.dataset.sid); if (!s) return;
+    s.done = !s.done;
+    D.save(); subPatch(x); haptic();
+  };
+  D.act.tkmSubDel = (el) => {
+    const x = byId(D.S.tasks, el.dataset.id); if (!x || !Array.isArray(x.sub)) return;
+    const i = x.sub.findIndex((y) => y.id === el.dataset.sid);
+    if (i < 0) return;
+    x.sub.splice(i, 1);
+    if (!x.sub.length) delete x.sub;         // bo'sh massiv yozuvda qolmasin
+    D.save(); subPatch(x);
+  };
+
   D.act.tkmPrio = (el) => { sheetPrio = +el.dataset.p || 2; segPick(el, sheetPrio); };
   D.act.tkmClearDate = () => { const d = document.getElementById('tkmDate'); if (d) d.value = ''; };
   D.act.tkmClearTime = () => { const d = document.getElementById('tkmTime'); if (d) d.value = ''; };

@@ -359,6 +359,34 @@ console.log('\n16. Takrorlanuvchi vazifa bajarilganda');
     delete D.ui.filters.tasks.smart;
   }
 
+  /* Quyi vazifa qo'shish yo'li. Qatordagi chip faqat quyi vazifa MAVJUD
+     bo'lsa chiqadi, ya'ni birinchisini qo'shish yo'li oynada bo'lishi shart —
+     bo'lmasa imkoniyatga umuman kirib bo'lmaydi. */
+  {
+    let sheetHtml = '';
+    const oldSheet = D.sheet;
+    D.sheet = (html) => { sheetHtml = html; };
+    D.S.tasks = [{ id: 'z1', text: 'Katta ish', date: TODAY, done: false, doneAt: null, priority: 2, createdAt: 1 }];
+    D.act.tkMore({ dataset: { id: 'z1' } });
+    ok('quyi vazifasiz vazifada ham qo‘shish maydoni bor', sheetHtml.includes('tkmSubNew'));
+    ok('  «quyi vazifa yo‘q» deb yozilgan', sheetHtml.includes('tk-sub'));
+    ok('oynada vaqt maydoni bor', sheetHtml.includes('tkmTime'));
+    ok('oynada takror tanlagichi bor', sheetHtml.includes('tkmRepU'));
+    ok('oynada izoh maydoni bor', sheetHtml.includes('tkmNote'));
+
+    const box = { value: 'birinchi qadam', focus: noop, tagName: 'INPUT', dataset: { id: 'z1' } };
+    D.act.tkmSubAdd(box);
+    const z = D.S.tasks[0];
+    ok('oynadan quyi vazifa qo‘shildi', z.sub && z.sub.length === 1 && z.sub[0].text === 'birinchi qadam', z.sub);
+    ok('  belgisiz boshlanadi', z.sub[0].done === false);
+    D.act.tkmSubToggle({ dataset: { id: 'z1', sid: z.sub[0].id } });
+    ok('  belgilash ishlaydi', z.sub[0].done === true);
+    ok('  asosiy vazifa hamon bajarilmagan', z.done === false && z.doneAt === null);
+    D.act.tkmSubDel({ dataset: { id: 'z1', sid: z.sub[0].id } });
+    ok('oxirgisi o‘chirilsa maydon butunlay yo‘qoladi', z.sub === undefined, z.sub);
+    D.sheet = oldSheet;
+  }
+
   // quyi vazifa asosiy vazifani bajarilgan QILMAYDI (levels.js ochkosi buzilmasin)
   D.S.tasks = [{ id: 'q1', text: 'Katta ish', date: TODAY, done: false, doneAt: null, priority: 2, createdAt: 1,
     sub: [{ id: 's1', text: 'a', done: false }] }];
