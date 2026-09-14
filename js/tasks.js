@@ -451,8 +451,11 @@
   function taskRow(x, ctx, opts = {}) {
     const overdue = !x.done && x.date && x.date < ctx.today;
     const mini = !!opts.mini;
-    // sana faqat bugundan boshqa bo'lsa yoziladi — «Bugun» guruhida takrorlashning hojati yo'q
-    const when = x.date && x.date !== ctx.today ? D.fmtDate(x.date) : '';
+    /* Sana guruh sarlavhasi aytib bo'lgan narsani takrorlamaydi: «Ertaga»
+       guruhidagi har qatorda «15-sentabr» yozilsa, u ma'lumot bermaydi-yu,
+       nom uchun joyni yeydi va uzunroq nom ikki-uch qatorga bo'linib ketadi.
+       Kechikkan va Keyinroq da esa sana KERAK — u yerda har qatorniki boshqa. */
+    const when = x.date && x.date !== ctx.today && x.date !== opts.hideDate ? D.fmtDate(x.date) : '';
     const swipe = !x.done && !mini;
     const sw = swipe
       ? ` data-swl="tkDel" data-swr="tkMove" data-to="${x.date === ctx.today ? 'tomorrow' : 'today'}"` : '';
@@ -484,8 +487,10 @@
 
   function group(key, arr, ctx, opts = {}) {
     if (!arr.length && !opts.always) return '';
+    // sarlavha sanani aytib bo'lgan guruhlarda qatorda takrorlanmaydi
+    const hideDate = key === 'today' ? ctx.today : key === 'tomorrow' ? D.addDays(ctx.today, 1) : null;
     const body = arr.length
-      ? `<ul class="list">${arr.map((x) => taskRow(x, ctx)).join('')}</ul>`
+      ? `<ul class="list">${arr.map((x) => taskRow(x, ctx, { hideDate })).join('')}</ul>`
       : `<div class="tk-ok">${D.ic('check', 15)} ${esc(t('tasks.allDone'))}</div>`;
     return head(t('tasks.g.' + key), opts.cls, opts.n !== undefined ? opts.n : arr.length, opts) + body;
   }
