@@ -45,8 +45,14 @@ const ASSETS = [
 ];
 // Shriftlar o'z faylimizda. Nomi o'zgarmagunicha mazmuni ham o'zgarmaydi, shuning
 // uchun ular ?v= siz keshlanadi — CSS ham aynan shu manzilni so'raydi.
+// Ikkala oila ham: css/fonts.css ikkalasini e'lon qiladi va qaysi biri ishlatilishi
+// app.css dagi tokenga bog'liq. Offline'da ikkalasi ham tayyor turishi kerak — token
+// o'zgarganda foydalanuvchi internetsiz qolsa, shrift tushib qolmasin.
+// Jami 261 KB, lekin brauzer faqat sahifadagi harflarga mos subsetni so'raydi.
 const FONTS = ['./fonts/plex-sans-latin.woff2', './fonts/plex-sans-latin-ext.woff2',
-  './fonts/plex-sans-cyrillic.woff2', './fonts/plex-sans-cyrillic-ext.woff2'];
+  './fonts/plex-sans-cyrillic.woff2', './fonts/plex-sans-cyrillic-ext.woff2',
+  './fonts/onest-latin.woff2', './fonts/onest-latin-ext.woff2',
+  './fonts/onest-cyrillic.woff2', './fonts/onest-cyrillic-ext.woff2'];
 const SHELL = [
   './', './index.html', './manifest.json', './icons/icon.svg',
   // css/js manzillari ?v= bilan — index.html dagi teglar bilan aynan bir xil bo'lishi shart,

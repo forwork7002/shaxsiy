@@ -1,11 +1,59 @@
-/* IBM Plex Sans — butun ilovaning yagona shrifti (o'zgaruvchan, 100–700).
-   Nega aynan shu:
-     • raqamlari bir xil kenglikda chizilgan — 1 ham, 7 ham, 0 ham. Hech qanday
-       sozlashsiz ustunlar tekis turadi, «11 daq» da bo'shliq ochilmaydi;
-     • kirill (ў қ ғ ҳ) va lotin bitta ustaxonada chizilgani uchun til almashganda
-       ilova o'zgarmaydi;
-     • qorong'i fonda mayda yozuv ochiq qoladi — ilovaning yarmi 10–13 px.
-   Fayllar shu yerda turadi: internetsiz ham, birinchi ochilishda ham darrov chiqadi. */
+/* Ilovaning shriftlari. Ikkala oila ham shu yerda turadi: internetsiz ham,
+   birinchi ochilishda ham darrov chiqadi. Qaysi biri qayerda ishlatilishi —
+   app.css dagi --font / --display tokenlari orqali hal qilinadi.
+
+   ┌─ O'LCHANGAN FARQ (fontTools bilan, 2026-09-14; taxmin emas) ──────────┐
+   │                       IBM Plex Sans      Onest                        │
+   │  vazn o'qi            100 … 700          100 … 900                    │
+   │  x-balandlik          516/1000 (51.6%)   527/1000 (52.7%)             │
+   │  bosh harf            698                707                          │
+   │  tnum xususiyati      YO'Q               BOR                          │
+   │  raqamlar (sukut)     bir xil kenglikda  har xil (10 xil)             │
+   │  satr balandligi      1.30 em            1.27 em                      │
+   └───────────────────────────────────────────────────────────────────────┘
+
+   Bundan kelib chiqadigan ikkita qoida:
+
+   1. ONEST BILAN `font-variant-numeric: tabular-nums` SHART. Onest raqamlari
+      sukut bo'yicha har xil kenglikda (1 tor, 0 keng) — ustunda «10 118» va
+      «11,4» bir-birining tagida sakrab turadi. app.css dagi `.num` klassida
+      bu qoida allaqachon bor va Onest'da haqiqatan ishlaydi (tnum bor).
+      IBM Plex'da esa tnum YO'Q — lekin unga kerak ham emas, raqamlari
+      tug'ilishidan bir xil kenglikda. Ya'ni `.num` Plex uchun bekor, Onest
+      uchun hayotiy. Raqam ko'rsatadigan yangi joy yozsangiz, `.num` ni
+      qo'yishni unutmang.
+
+   2. Mayda yozuvdan qo'rqmaslik mumkin: Onest'ning x-balandligi Plex'nikidan
+      KATTAROQ (52.7% va 51.6%), ya'ni 11px da harf 5.80px, Plex'da 5.68px.
+      Oila almashgani mayda yozuvni kichraytirmaydi.
+
+   O'zbek tili qamrovi tekshirildi (ikkala oilada ham belgilar TO'LIQ):
+     kirill    Ў ў Қ қ Ғ ғ Ҳ ҳ — cyrillic va cyrillic-ext subsetlarida
+     lotin     Oʻ oʻ Gʻ gʻ — U+02BB va U+02BC
+
+   ┌─ LEKIN: APOSTROF KENGLIGI (o'lchandi, 1000 birlikli em da) ───────────┐
+   │                      kenglik   belgi   chap    o'ng                   │
+   │  Plex  U+02BB          600      118     250     232                   │
+   │  Onest U+02BB          261      126      68      67                   │
+   │  (solishtirish uchun: bosh harf «O» — Plex 708, Onest 761)            │
+   └───────────────────────────────────────────────────────────────────────┘
+   Plex'da apostrof bosh harf «O» bilan deyarli teng joy egallaydi, ichidagi
+   belgi esa atigi 118 birlik — qolgani bo'sh havo. Natijada «Oʻzbekiston»
+   ekranda «O ʻ zbekiston» bo'lib, so'z ikkiga bo'linib ko'rinadi. Bu bitta
+   so'zning muammosi emas: oʻ va gʻ o'zbek lotinchasining eng ko'p uchraydigan
+   birikmalari (oʻz, koʻp, boʻldi, gʻoya, toʻliq, oʻqish…), ya'ni nuqson
+   ilovaning deyarli har bir jumlasida takrorlanadi.
+   Onest'da apostrof 2.3 barobar tor va ikki tomoni teng — so'z yaxlit turadi.
+   Shu sabab o'zbek matni uchun Onest to'g'riroq tanlov.
+
+   Subset'lar Google Fonts ning unicode-range jadvali bo'yicha bo'lingan:
+   brauzer sahifada qaysi harflar borligiga qarab faqat keraklisini yuklaydi.
+   Kirill yozuvga o'tilmasa, kirill fayli umuman so'ralmaydi. */
+
+/* ══════════════ IBM Plex Sans ══════════════
+   Neytral, muhandislik ohangidagi grotesk. Raqamlari tug'ilishidan bir xil
+   kenglikda — shuning uchun jadval va ustunlar uchun xavfsiz tanlov. */
+
 /* cyrillic-ext — 23 KB */
 @font-face {
   font-family: 'IBM Plex Sans';
@@ -40,5 +88,49 @@
   font-weight: 100 700;
   font-display: swap;
   src: url('../fonts/plex-sans-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* ══════════════ Onest ══════════════
+   Yumaloqroq, iliqroq, geometrik-gumanistik grotesk. Kirill bilan lotin bitta
+   loyihada chizilgan — til almashganda ilovaning ohangi o'zgarmaydi.
+   Vazn o'qi 900 gacha yetadi: sarlavha Plex'da yetib bo'lmaydigan og'irlikka
+   chiqa oladi, ya'ni hajmni kattalashtirmasdan urg'u berish mumkin.
+   Jami 88 KB, to'rtta subset. */
+
+/* cyrillic-ext — 10 KB */
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/onest-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic — 16 KB */
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/onest-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext — 28 KB */
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/onest-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin — 34 KB · raqamlar va tnum shu subsetda */
+@font-face {
+  font-family: 'Onest';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../fonts/onest-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
