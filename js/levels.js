@@ -473,6 +473,14 @@
 
     /* vazifa va maqsad — `doneAt` (ms) bo'lsa o'sha kun, bo'lmasa vazifaning sanasi */
     const dayOf = (ts) => { const n = +ts; return Number.isFinite(n) && n > 0 ? D.dayKey(new Date(n)) : null; };
+    // TAKRORLANUVCHI VAZIFA ATAYLAB ALOHIDA SANALMAYDI.
+    // 2026-09-14 dan beri «har kuni suv ich» kabi vazifa bajarilganda joriysi
+    // done bo'lib qoladi va keyingi sana bilan yangisi tug'iladi, ya'ni har kuni
+    // bitta bajarilgan vazifa qo'shiladi. Uni x.repeat orqali chiqarib tashlash
+    // mumkin edi — qilinmadi: har kuni belgilash ham haqiqiy ish, xuddi odat
+    // kabi. Ochkoga ta'siri taskCap bilan chegaralangan (kuniga 36 dan oshmaydi,
+    // odatnikida 80), ya'ni daraja egri chizig'i buzilmaydi. Nishon esa
+    // «bajarilgan vazifalar» deydi va bu hamon rost.
     const perDay = new Map();
     for (const x of S.tasks || []) {
       if (!x || !x.done) continue;
