@@ -196,7 +196,9 @@ Everything it asks is editable later in Settings → Profil.
 ```js
 D.levels.info()      // {xp, level, have, need, pct, next, max, rank, st}
 D.levels.medals()    // [{id, fam, need, cur, done, got, on, pct, tier, ic}]
+D.levels.week()      // shu haftaning sinovi: {id, need, cur, pct, done, daysLeft}
 D.levels.cardHtml()  // Sozlash › profil kartasi ichidagi blok (profile.js chaqiradi)
+D.levels.tile()      // Bugun sahifasining tepasidagi qator (today.js chaqiradi)
 D.levels.open()      // to'liq to'plam — pastki oyna
 D.levels.check()     // yangi nishon/daraja bo'lsa: S.awards ga yozadi va tabriklaydi
 ```
@@ -218,13 +220,35 @@ rangi sovuqdan issiqqa o'sadi, oxirgisi `var(--text)` (qattiq oq yorug' temada k
 namoz jamoat 12 / yakka 8 / qazo 3 (+20 besh vaqt to'liq bo'lsa), zikr har 33 tasiga 2 (≤ 30),
 ro'za 40, vazifa 6 (≤ 36), maqsad 120, kitob kuni 12, ovqat kuni 10, WHOOP kuni 6,
 mashg'ulot 12 (≤ 24), suv me'yori 6, kundalik 6, shukr 5 (≤ 15), moliya kuni 5,
-hafta yakuni 25, **mukammal kun +50**. Chegaralar shuning uchun: ularsiz bitta bo'limni
-«sog'ib» daraja olish mumkin bo'lardi va daraja hayotni emas, bitta ekranni ko'rsatardi.
+hafta yakuni 25, **mukammal kun +50**, **bajarilgan haftalik sinov +80**. Chegaralar
+shuning uchun: ularsiz bitta bo'limni «sog'ib» daraja olish mumkin bo'lardi va daraja
+hayotni emas, bitta ekranni ko'rsatardi.
 
-**Nishonlar** — 16 oila, 49 ta bosqich (bronza · kumush · oltin · olmos). `id` = oila nomi + son
-(`kun365`, `namoz1000`) va u **hech qachon o'zgartirilmaydi**: `S.awards.got` ichida yozilgan.
-Yangi nishon qo'shish = `FAMS` ga bosqich qo'shish + `lv.f.*` / `lv.d.*` uchta tilda; o'lchov
-yangi bo'lsa `collect()` dagi `st` ga maydon va `FIELD` ga qator.
+**Nishonlar** — 21 oila + 3 sirli, jami 84 ta bosqich (bronza · kumush · oltin · olmos).
+`id` = oila nomi + son (`kun365`, `namoz1000`) va u **hech qachon o'zgartirilmaydi**:
+`S.awards.got` ichida yozilgan. Yangi nishon qo'shish = `FAMS` ga bosqich qo'shish +
+`lv.f.*` / `lv.d.*` uchta tilda; o'lchov yangi bo'lsa `collect()` dagi `st` ga maydon
+va `FIELD` ga qator.
+
+**Sirli nishonlar** (`secret: true`) — Sahar (30 kun ketma-ket bomdod jamoat bilan),
+To'liq oy (12 ta bir kun ham qoldirilmagan oy), Qaytish (30 kundan uzoq tanaffusdan
+keyin yana 30 kun). Sharti olinmagunicha ko'rsatilmaydi, to'plamda «?» bo'lib turadi.
+«Qaytish» ataylab bor: uzoq tanaffusdan qaytgan odam jazolanmasin, aksincha — aynan
+shu uchun nishon olsin.
+
+**Medal grafikasi butunlay CSS da** (`css/levels.css` › `.lv-med`): o'ymakor chekka
+`repeating-conic-gradient`, metall yuza `linear-gradient`, yorug'lik dog'i, qora siyoh
+belgi. SVG gradient ishlatilmadi — 84 ta nishon bitta oynada chizilganda har biriga
+ikkitadan `<defs>` kerak bo'lardi. Olinmagan medalning chekkasi — ilgarilash yoyi
+(`conic-gradient`, `--p` foizi HTML dan). Tabrikda `.pop` sinfi medalni aylantirib
+chiqaradi va bir marta yaltiratadi; `prefers-reduced-motion` app.css da to'xtatadi.
+
+**Haftalik sinov** (`WEEKLY` jadvali, 10 ta) — hafta kalitidan tanlanadi (`weekPick`),
+hech qayerda saqlanmaydi. Shu sabab o'tgan haftalarniki ham orqaga qarab aniq bilinadi
+va ikki qurilma birlashganda ziddiyat chiqmaydi. **YANGI SINOV FAQAT JADVAL OXIRIGA
+QO'SHILADI** — o'rtaga qo'shilsa eski haftalarning sinovi ham o'zgaradi va odam
+«bajarilgan» deb bilgan narsasini yo'qotadi. Bajarilgani `sinov` nishon oilasiga
+va +80 ochkoga aylanadi.
 
 **Birinchi ishga tushirish.** `awards.init` false bo'lsa hamma bajarilgan shart jimgina
 `got[id] = 0` bilan yoziladi va bitta umumiy oyna ko'rsatiladi — aks holda 600 kunlik
@@ -232,10 +256,17 @@ tarixi bor odam bir vaqtda 28 ta tabrik olardi. Keyingi nishonlar bittalab tabri
 `check()` **`D.pulled` dan oldin ishlamaydi**: bo'sh holat ustida «birinchi ishga tushirish»
 qilib qo'yilsa, odam butun tarixini nishonsiz ko'rardi va uni qaytarib bo'lmasdi.
 
+**Qayerda ko'rinadi:** Sozlash › profil kartasi ichida (`cardHtml`) va Бугун sahifasining
+tepasida, hafta chizig'idan keyin (`tile`, today.js `render()`). Bugun qatori ataylab
+ingichka va ataylab tayyorlik hero'sidan oldin — hero kunning asosiy raqami bo'lib
+qolishi kerak. Faqat bugungi kunda chiziladi: o'tgan kunni ochganda «bugun +N ochko»
+yolg'on bo'lardi.
+
 Yuklanishi: birinchi ekranga kerak emas, shuning uchun `core.js` dagi `LAZY_LIBS` orqali
 bo'sh vaqtda keladi (kechiktirilgan bo'limlar navbatidan keyin) va kelgach o'zi bir marta
-`check()` qiladi. CSS prefiksi `lv-`, amallar `lvOpen` / `lvOpenFromModal`.
-Sinov: `node tests/test_levels.js` (77 ta tekshiruv, haqiqiy `core.js` bilan).
+`check()` qiladi hamda Бугун ochiq bo'lsa uni qayta chizadi. CSS prefiksi `lv-`, amallar
+`lvOpen` / `lvMedal` / `lvOpenFromModal`.
+Sinov: `node tests/test_levels.js` (103 ta tekshiruv, haqiqiy `core.js` bilan).
 
 ## Kit classes (app.css)
 

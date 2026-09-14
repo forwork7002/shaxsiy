@@ -743,7 +743,7 @@
         <span class="lv-rank">${esc(t('lv.r.' + i.rank.id))}</span>
         <span class="lv-motto">${esc(t('lv.m.' + i.rank.id))}</span>
         ${barHtml(i.pct)}
-        <span class="lv-sub"><b class="num">${D.fmtNum(i.xp)}</b> ${esc(t('lv.xp'))} · ${progressLine(i)}</span>
+        <span class="lv-sub num"><b>${D.fmtNum(i.xp)}</b> ${esc(t('lv.xp'))} · ${progressLine(i)}</span>
       </span>
       ${D.ic('chevR', 16)}
     </button>
@@ -751,7 +751,7 @@
     <div class="lv-strip">
       ${recent.map((m) => `<span class="lv-strip-i" title="${esc(famName(m.fam) + ' · ' + needLabel(m))}">${medalHtml(m, 30)}</span>`).join('')}
       ${rest > 0 ? `<span class="lv-more num">+${rest}</span>` : ''}
-      <span class="lv-count small muted">${esc(t('lv.got', { a: on.length, b: ALL.length }))}</span>
+      <span class="lv-count small muted num">${esc(t('lv.got', { a: on.length, b: ALL.length }))}</span>
     </div>`;
   }
 
@@ -765,7 +765,7 @@
           <span class="lv-td-top"><span class="lv-rank">${esc(t('lv.r.' + i.rank.id))}</span>
             ${i.todayXp ? `<span class="lv-td-xp num">${esc(t('lv.todayXp', { n: D.fmtNum(i.todayXp) }))}</span>` : ''}</span>
           ${barHtml(i.pct)}
-          <span class="lv-sub">${progressLine(i)}</span>
+          <span class="lv-sub num">${progressLine(i)}</span>
         </span>
         ${D.ic('chevR', 16)}
       </button>
@@ -781,7 +781,7 @@
                      : hidden ? t('lv.secret') : t('lv.left', { n: D.fmtNum(left) });
     return `<button type="button" class="lv-cell${m.on ? ' on' : ''}" data-act="lvMedal" data-id="${esc(m.id)}">
       ${medalHtml(m, 46)}
-      <b>${esc(hidden ? '— — —' : needLabel(m))}</b>
+      <b class="num">${esc(hidden ? '— — —' : needLabel(m))}</b>
       <span class="tiny muted">${esc(sub)}</span>
     </button>`;
   }
@@ -803,11 +803,11 @@
           <div class="lv-rank">${esc(t('lv.r.' + i.rank.id))}</div>
           <div class="lv-motto">${esc(t('lv.m.' + i.rank.id))}</div>
           ${barHtml(i.pct)}
-          <div class="lv-sub"><b class="num">${D.fmtNum(i.xp)}</b> ${esc(t('lv.xp'))} · ${progressLine(i)}</div>
+          <div class="lv-sub num"><b>${D.fmtNum(i.xp)}</b> ${esc(t('lv.xp'))} · ${progressLine(i)}</div>
         </div>
       </div>
       ${weekHtml(false)}
-      <div class="lv-total">${esc(t('lv.got', { a: on, b: ALL.length }))}</div>
+      <div class="lv-total num">${esc(t('lv.got', { a: on, b: ALL.length }))}</div>
       ${on ? '' : `<p class="empty">${esc(t('lv.empty'))}</p>`}
       <p class="lv-how help">${esc(t('lv.how'))}</p>
       ${fams}
@@ -830,7 +830,7 @@
       body: `<div class="lv-one">
         ${medalHtml(m, 104, ' pop')}
         <div class="lv-one-t">
-          <b>${esc(hidden ? t('lv.secretHint') : needLabel(m) + ' · ' + tierName(m))}</b>
+          <b class="num">${esc(hidden ? t('lv.secretHint') : needLabel(m) + ' · ' + tierName(m))}</b>
           <span class="small muted">${esc(hidden ? '' : famDesc(m.fam))}</span>
           ${hidden ? '' : `${barHtml(m.pct)}<span class="small">${esc(t('lv.have', { n: D.fmtNum(m.cur) }))} · ${esc(line)}</span>`}
         </div>

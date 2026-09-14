@@ -124,6 +124,9 @@
 /* Ataylab ingichka: tayyorlik hero'si kunning asosiy raqami bo'lib     */
 /* qolishi kerak, bu qator esa faqat «qayerdaman» deb eslatadi.        */
 /* ------------------------------------------------------------------ */
+/* .card ning foni va chegarasi ATAYLAB bu yerda qayta yozilmaydi: Bugun
+   sahifasining uslubi app.css/today.css da o'zgarib turadi va bu qator o'sha
+   o'zgarishni o'zi olishi kerak. Bu yerda faqat ichki joylashuv. */
 .lv-td { display: flex; flex-direction: column; gap: 10px; }
 .lv-td-b { display: flex; align-items: center; gap: 12px; width: 100%; padding: 0; text-align: left;
   border: 0; background: transparent; color: var(--text); font: inherit; }

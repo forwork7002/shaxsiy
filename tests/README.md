@@ -6,7 +6,7 @@
 - `test_prayer_waqt.js` — joriy namoz vaqti quyosh chiqishida almashadi (`prayer.next`)
 - `test_prayer_names.js` — odat nomidan namozni tanish (`prayer.matchName`)
 - `test_levels.js` — daraja va nishonlar: ochko hisobi, kunlik chegaralar,
-  ketma-ketlik, `D.normalize` va `D.merge` (77 ta tekshiruv)
+  ketma-ketlik, haftalik sinov, `D.normalize` va `D.merge` (103 ta tekshiruv)
 
 Namoz sinovlari `js/prayer.js` ni Node'da `eval` qiladi va `D` ning kerakli
 qismini `core.js` dagi aynan o'sha amalga oshirishlar bilan taqlid qiladi.
