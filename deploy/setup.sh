@@ -43,6 +43,25 @@ id -u "$APP_USER" >/dev/null 2>&1 || useradd --system --home "$APP_DIR" --shell 
 mkdir -p "$APP_DIR"/{data,data/backups,certs}
 chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 
+echo "▸ .env…"
+if [ ! -f "$APP_DIR/.env" ]; then
+  # Sukut bo'yicha YOPIQ: MA_REGISTER yozilmasa ilova hisob ochishni ochiq
+  # qoldiradi, ya'ni saytni topgan har kim o'ziga hisob ochardi.
+  ( umask 077
+  {
+    echo "# setup.sh yaratdi. To'ldirish uchun deploy/ dagi set-*.sh skriptlari."
+    echo "# Hamma sozlama ro'yxati: .env.example"
+    echo "MA_REGISTER=0"
+    echo "MA_SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -dc 'a-f0-9')"
+    echo "PORT=8081"
+  } > "$APP_DIR/.env" )
+  echo "  ✓ $APP_DIR/.env yaratildi (hisob ochish YOPIQ, sessiya kaliti yozildi)"
+else
+  echo "  · mavjud .env tegilmadi"
+fi
+chown "$APP_USER:$APP_USER" "$APP_DIR/.env"
+chmod 600 "$APP_DIR/.env"
+
 echo "▸ Python muhiti…"
 if [ ! -d "$APP_DIR/.venv" ]; then python3 -m venv "$APP_DIR/.venv"; fi
 "$APP_DIR/.venv/bin/pip" install -q --upgrade pip
@@ -61,11 +80,12 @@ Type=simple
 User=$APP_USER
 Group=$APP_USER
 WorkingDirectory=$APP_DIR
-EnvironmentFile=$APP_DIR/.env
+# '-' — fayl yo'q bo'lsa xizmat baribir ko'tariladi (sozlanmagan, lekin tirik).
+EnvironmentFile=-$APP_DIR/.env
 # --threads: AI so'rovi 10-30 soniya davom etadi. Ipsiz (sync) ishchi shu paytda
 # boshqa hech narsani bajara olmasdi — ikkinchi bo'lim tahlili yoki oddiy /api/data
 # navbatda turardi va foydalanuvchiga AI yana ham sekinroq ko'rinardi.
-ExecStart=$APP_DIR/.venv/bin/gunicorn -w 2 --threads 8 -b 127.0.0.1:8081 --no-control-socket --timeout 120 --access-logfile - api:app
+ExecStart=$APP_DIR/.venv/bin/gunicorn --worker-class gthread --workers 2 --threads 8 -b 127.0.0.1:8081 --no-control-socket --timeout 120 --graceful-timeout 30 --access-logfile - api:app
 Restart=always
 RestartSec=3
 # ilova faqat o'z papkasiga yozadi
@@ -82,7 +102,27 @@ systemctl daemon-reload
 systemctl enable $SERVICE >/dev/null
 
 echo "▸ nginx…"
-cat > /etc/nginx/sites-available/$SERVICE <<NGINX
+# ┌────────────────────────────────────────────────────────────────────────┐
+# │ MAVJUD HTTPS SOZLAMASINI USTIGA YOZMAYMIZ.                             │
+# │                                                                        │
+# │ Quyidagi blok faqat HTTP (listen 80) sozlamasini yozadi. Agar serverda │
+# │ certbot allaqachon TLS qo'shgan bo'lsa, uni ustiga yozish quyidagiga   │
+# │ olib keladi: sayt 443 da javob bermay qoladi, api.py esa HSTS ni       │
+# │ max-age=15552000 (180 kun) bilan yuborgan — ya'ni saytga bir marta     │
+# │ kirgan HAR QANDAY brauzer 180 kun davomida HTTP ga tushishdan bosh     │
+# │ tortadi. Natija: sayt hamma uchun butunlay ochilmaydi, shu jumladan    │
+# │ tuzatmoqchi bo'lgan odam uchun ham.                                    │
+# │                                                                        │
+# │ Shuning uchun: TLS bor bo'lsa — tegilmaydi. Ataylab qayta yozish uchun │
+# │ FORCE_NGINX=1 ./deploy/setup.sh                                        │
+# └────────────────────────────────────────────────────────────────────────┘
+NGINX_CONF=/etc/nginx/sites-available/$SERVICE
+if [ -f "$NGINX_CONF" ] && grep -q "listen 443" "$NGINX_CONF" && [ "${FORCE_NGINX:-0}" != "1" ]; then
+  cp -a "$NGINX_CONF" "$NGINX_CONF.setup-$(date +%Y-%m-%d_%H%M%S).bak"
+  echo "  MAVJUD HTTPS SOZLAMASI SAQLANDI — ustiga yozilmadi (zaxira nusxasi olindi)."
+  echo "  Qayta yozish kerak bo'lsa: FORCE_NGINX=1 bash deploy/setup.sh"
+else
+cat > "$NGINX_CONF" <<NGINX
 server {
     listen 80;
     listen [::]:80;
@@ -145,6 +185,7 @@ server {
     }
 }
 NGINX
+fi
 ln -sf /etc/nginx/sites-available/$SERVICE /etc/nginx/sites-enabled/$SERVICE
 rm -f /etc/nginx/sites-enabled/default
 nginx -t >/dev/null && systemctl reload nginx

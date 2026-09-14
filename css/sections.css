@@ -19,7 +19,7 @@
 #view .tabs button.on { background: var(--accent); border-color: var(--accent); color: var(--ink-on-light); }
 #view .section-title::before { background: var(--accent); opacity: .9; }
 #view .card-head > .title > .ic { color: var(--accent-text); }
-#view .btn:not(.ghost):not(.danger):not(.icon) { background: var(--btn-grad); color: var(--ink-on-light); }
+#view .btn:not(.ghost):not(.danger):not(.icon) { background: var(--btn-grad); color: var(--on-btn); }
 
 /* ---------- hero ----------
    Bo'limning bosh bloki. Ilgari uning ichida rangli gradient, chetida yorug'lik

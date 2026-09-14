@@ -668,7 +668,7 @@
     const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
     return (h ? h + ':' + D.pad2(m) : D.pad2(m)) + ':' + D.pad2(s);
   };
-  const heroRing = (pct) => D.chart.ring({ pct, size: 84, stroke: 6, color: 'var(--accent)', label: D.ic('mosque', 22), sub: D.fmtPct(pct) });
+  const heroRing = (pct) => D.chart.ring({ pct, size: 84, stroke: 8, color: 'var(--accent)', label: D.ic('mosque', 22), sub: D.fmtPct(pct) });
   function heroHtml() {
     const hs = heroState();
     if (!hs) return `<div class="card ib-hero"><div class="eyebrow">${esc(t('ib.next'))}</div><div class="ib-hero-count num">—</div></div>`;

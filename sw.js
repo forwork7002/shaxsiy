@@ -1,5 +1,5 @@
 /* Service worker: cache-first app shell, network-first API. Bump CACHE on every release. */
-const CACHE = 'dash-v76';
+const CACHE = 'dash-v81';
 const V = '?v=' + CACHE.replace('dash-', '');
 const ASSETS = [
   './app.css',
@@ -20,6 +20,8 @@ const ASSETS = [
   './css/settings.css',
   './css/onboard.css',
   './css/yusa-orb.css',
+  './css/levels.css',
+  './css/whoop-ui.css',
   './js/core.js',
   './js/i18n.js',
   './js/prayer.js',
@@ -38,6 +40,7 @@ const ASSETS = [
   './js/settings.js',
   './js/onboard.js',
   './js/yusa-orb.js',
+  './js/levels.js',
   './js/app.js',
 ];
 // Shriftlar o'z faylimizda. Nomi o'zgarmagunicha mazmuni ham o'zgarmaydi, shuning

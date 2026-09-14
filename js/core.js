@@ -115,6 +115,12 @@
       whoop: { connected: false, lastSync: null, cache: {}, days: {}, workouts: [], body: {} },
       // food.logs: {'YYYY-MM-DD': [meal]}; targets: auto=true → profildan hisoblanadi, aks holda qo'lda kiritilgan qiymatlar
       food: { logs: {}, targets: { kcal: null, p: null, c: null, f: null, auto: true } },
+      // Nishonlar (js/levels.js). Bu yerda FAQAT «qaysi nishon qachon berildi»
+      // turadi — ochko ham, daraja sharti ham holatdan qayta hisoblanadi.
+      // Hisoblagich saqlansa ikki qurilma birlashganda qo'shilib ketardi.
+      // got: {nishonId: 'YYYY-MM-DD' | 0 (tizim yoqilgunga qadar olingan)}
+      // level: oxirgi tabriklangan daraja · init: birinchi hisob bo'lib o'tganmi
+      awards: { got: {}, level: 0, init: false },
     };
   }
   D.defaultState = defaultState;
@@ -186,6 +192,15 @@
       n.food.logs[k].forEach((m) => { if (m && !m.id) m.id = D.uid('fd'); });
     }
     if (typeof n.food.targets.auto !== 'boolean') n.food.targets.auto = true;
+    // nishonlar: qiymat kun kaliti yoki 0. Tanimagan nishon id'si ham qoladi —
+    // kelajakda qo'shiladigan nishonni bu yerda o'chirib yuborish mumkin emas.
+    for (const k of Object.keys(n.awards.got)) {
+      const v = n.awards.got[k];
+      if (v === 0 || (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v))) continue;
+      n.awards.got[k] = 0;
+    }
+    n.awards.level = Math.max(0, Math.floor(+n.awards.level || 0));
+    n.awards.init = !!n.awards.init;
     n.meta.v = D.VERSION;
     return n;
   };
@@ -264,6 +279,53 @@
   delete D.device.novaKey;
   D.saveDevice = () => lsSet(DEV_KEY, D.device);
 
+  /* Holatni diskka yozish — to'plamli.
+     JSON.stringify(D.S) sinxron ishlaydi va holat o'sgani sayin qimmatlashadi.
+     Har bosish (odat belgilash, suv qo'shish) alohida to'liq yozuv edi: ketma-ket
+     o'nta belgi — o'nta to'liq serializatsiya, hammasi asosiy oqimda. Endi 400 ms
+     oynadagi o'zgarishlar bitta yozuvga birlashadi; chiqishda darrov yoziladi. */
+  let lsDirty = false, lsTimer = 0;
+  function saveLocalNow() {
+    if (lsTimer) { clearTimeout(lsTimer); lsTimer = 0; }
+    if (!lsDirty) return;
+    lsDirty = false;
+    lsSet(LS_KEY, D.S);
+  }
+  function saveLocalSoon() {
+    lsDirty = true;
+    if (!lsTimer) lsTimer = setTimeout(() => { lsTimer = 0; saveLocalNow(); }, 400);
+  }
+  function saveLocalForce() { lsDirty = true; saveLocalNow(); }
+  function saveLocalCancel() { lsDirty = false; if (lsTimer) { clearTimeout(lsTimer); lsTimer = 0; } }
+  /** Chiqish nuqtalari uchun: bayroqqa qaramay bir marta yozadi. Modullarning
+      o'z kechiktirishlari (today.js dagi kunlik eslatma — D.S ga darrov yoziladi,
+      D.save() esa 300 ms kutiladi) shu bilan qutqariladi. */
+  D.flushLocal = saveLocalForce;
+
+  /** Ichida odamning yozuvlari bormi — import ogohlantirishi uchun.
+      pull() dagi «bu qurilma bo'shmi» savoli boshqacha hal qilingan
+      (meta.updatedAt), bu esa «almashtirishdan oldin ogohlantirish kerakmi». */
+  D.hasContent = (st) => {
+    if (!st || typeof st !== 'object') return false;
+    for (const k of ['logs', 'habits', 'tasks', 'goals', 'notes', 'counts', 'gratitude',
+                     'prayers', 'dhikr', 'fasting', 'health', 'learn', 'reviews', 'books', 'focus']) {
+      const v = st[k];
+      if (Array.isArray(v) ? v.length : v && typeof v === 'object' && Object.keys(v).length) return true;
+    }
+    for (const [k, sub] of [['finance', 'tx'], ['finance', 'accounts'], ['finance', 'subs'], ['finance', 'wishlist'],
+                            ['food', 'logs'], ['nova', 'threads'], ['caffeine', 'logs'], ['stack', 'items'],
+                            ['gym', 'logs'], ['gym', 'days'], ['gym', 'exercises'],
+                            ['whoop', 'days'], ['whoop', 'workouts'], ['ai', 'log']]) {
+      const box = st[k];
+      if (!box || typeof box !== 'object') continue;
+      const v = box[sub];
+      if (Array.isArray(v) ? v.length : v && typeof v === 'object' && Object.keys(v).length) return true;
+    }
+    const pr = st.profile;
+    if (pr && (pr.name || pr.weightKg || pr.heightCm)) return true;
+    return false;
+  };
+
   D.S = null;
   D.load = () => {
     let s = lsGet(LS_KEY);
@@ -304,7 +366,9 @@
   D.merge = (remote, local) => {
     const r = D.normalize(D.deep(remote)), l = local;
     const newer = (+r.meta.updatedAt || 0) > (+l.meta.updatedAt || 0) ? r : l;
-    const out = D.normalize(D.deep(newer));
+    // r allaqachon shu funksiyaga tegishli, normallashtirilgan nusxa — uni
+    // ustidan yozaversak bo'ladi. Faqat lokal g'olib bo'lganda nusxa kerak.
+    const out = newer === r ? r : D.normalize(D.deep(l));
     /* Kun xaritalari: kun kaliti butunligicha lokal nusxadan olinadi.
        Ikki qavat birlashtirish (har kalit alohida) ko'rinishidan to'g'riroq —
        ikki qurilmada bir kunda yozilgan narsalar saqlanib qolardi — lekin u
@@ -339,6 +403,26 @@
     out.whoop.days = Object.assign({}, r.whoop.days, l.whoop.days);
     out.whoop.workouts = unionById(l.whoop.workouts, r.whoop.workouts);
     out.whoop.connected = !!(l.whoop.connected || r.whoop.connected);
+    /* Nishonlar — birlashma, va sana ERTAROG'I yutadi. Berilgan nishon hech
+       qachon qaytarib olinmaydi: bu yagona joy bo'lib, u yerda «lokal g'olib»
+       qoidasi noto'g'ri bo'lardi — telefonda olingan nishon planshetdagi eski
+       nusxa bilan qo'shilganda yo'qolib ketardi. 0 = «tizim yoqilgunga qadar»,
+       ya'ni har qanday sanadan erta.
+       Ikkala manba oldindan o'zgaruvchiga olinadi: `out` ba'zan `r` ning o'zi
+       bo'ladi (server yangiroq bo'lsa), ya'ni `out.awards.got` ga yozish bilan
+       `r.awards.got` ham almashadi. Keyin solishtirish uchun o'qilsa allaqachon
+       birlashtirilgan jadval o'qilardi va natija qaysi tomon «remote» ekaniga
+       bog'liq chiqardi — aynan shu xato sinovda tutilgan. */
+    const rGot = r.awards.got, lGot = l.awards.got;
+    const got = Object.assign({}, rGot, lGot);
+    for (const k of Object.keys(got)) {
+      const a = rGot[k], b = lGot[k];
+      if (a === undefined || b === undefined) continue;
+      got[k] = a === 0 || b === 0 ? 0 : (String(a) < String(b) ? a : b);
+    }
+    out.awards.got = got;
+    out.awards.level = Math.max(+r.awards.level || 0, +l.awards.level || 0);
+    out.awards.init = !!(r.awards.init || l.awards.init);
     out.meta.deviceId = l.meta.deviceId;
     out.meta.updatedAt = Math.max(+r.meta.updatedAt || 0, +l.meta.updatedAt || 0, Date.now());
     return out;
@@ -374,7 +458,7 @@
     } catch (e) {
       if (e && (e.message === 'stale' || e.message === 'empty_overwrite') && e.data && depth < 2) {
         D.S = D.merge(e.data, D.S);
-        lsSet(LS_KEY, D.S);
+        saveLocalForce();
         D.emit('state:changed');
         D.rerender();
         return pushNow(depth + 1);
@@ -401,13 +485,13 @@
   D.save = () => {
     D.S.meta.updatedAt = Date.now();
     saveSeq++;
-    lsSet(LS_KEY, D.S);
+    saveLocalSoon();
     D.setSync(D.serverEnabled() ? 'wait' : 'local');
     pushServer();
     D.emit('state:changed');
   };
   // Persist without touching updatedAt (UI-only mutations of state).
-  D.saveQuiet = () => lsSet(LS_KEY, D.S);
+  D.saveQuiet = () => saveLocalSoon();
   // Butun holatni almashtirish (tozalash, import): serverdagi to'liq nusxa ustidan yozishga ataylab ruxsat.
   D.saveReplace = () => { replaceOnce = true; D.save(); };
 
@@ -484,7 +568,7 @@
     try {
       D.S = D.merge(D.S, D.normalize(saved));   // yuborilmay qolgan yozuvlar ustun
       D.S.meta.updatedAt = Date.now();
-      lsSet(LS_KEY, D.S);
+      saveLocalForce();
     } catch (e) {
       // birlashtirish yiqilsa blob o'z joyida qoladi — bu yagona nusxa, o'chirmaymiz
       console.warn('rescue', e); if (D.logError) D.logError(e);
@@ -497,8 +581,21 @@
   }
 
   // Pull from server at boot; server wins if newer, else push local.
-  D.pull = async () => {
-    if (!D.serverEnabled()) return false;
+  // window.focus iOS'da juda tez-tez otiladi: klaviatura yopilganda, ilovalar
+  // almashinuvidan qaytganda, Google oynasidan qaytganda. Har biri to'liq
+  // /api/data + birlashtirish + to'liq yozuv + qayta chizish edi, ustiga ular
+  // bir-birining ustiga chiqardi.
+  let pullBusy = null, pullAt = 0;
+  const PULL_GAP = 20000;
+  D.pull = (opts) => {
+    if (!D.serverEnabled()) return Promise.resolve(false);
+    if (pullBusy) return pullBusy;
+    const force = !!(opts && opts.force);
+    if (!force && Date.now() - pullAt < PULL_GAP) return Promise.resolve(false);
+    pullBusy = pullRun().finally(() => { pullBusy = null; pullAt = Date.now(); });
+    return pullBusy;
+  };
+  async function pullRun() {
     try {
       D.setSync('wait');
       const remote = await D.api('/api/data', { timeout: 60000 });
@@ -532,7 +629,7 @@
         migrated.meta.deviceId = D.S.meta.deviceId;
         D.S = localEmpty ? migrated : D.merge(migrated, D.S);
         D.S.meta.updatedAt = Date.now();
-        lsSet(LS_KEY, D.S);
+        saveLocalForce();
         D.theme.apply(); D.renderNav();
         D.emit('state:changed');
         D.rerender();
@@ -542,12 +639,12 @@
         if (localEmpty && rU) {
           D.S = D.normalize(remote);
           if (!D.S.meta.deviceId) D.S.meta.deviceId = D.uid('dev');
-          lsSet(LS_KEY, D.S);
+          saveLocalForce();
           D.emit('state:changed');
           D.rerender();
         } else if (rU > lU) {
           D.S = D.merge(remote, D.S);
-          lsSet(LS_KEY, D.S);
+          saveLocalForce();
           D.emit('state:changed');
           D.rerender();
           pushServer();
@@ -906,6 +1003,21 @@
   const actionsHtml = (list) => list.map((a) =>
     `<button class="btn ${a.primary ? '' : 'ghost'} ${a.danger ? 'danger' : ''}" data-act="${a.act}" ${a.data ? Object.entries(a.data).map(([k, v]) => `data-${k}="${D.esc(v)}"`).join(' ') : ''}>${D.esc(a.label)}</button>`).join('');
 
+  // iOS: fon skrollini qulflash (o'rnini eslab qolgan holda)
+  let lockY = 0, locked = 0;
+  function scrollLock() {
+    if (locked++) return;
+    lockY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.top = -lockY + 'px';
+    document.body.classList.add('modal-open');
+  }
+  function scrollUnlock() {
+    if (!locked || --locked) return;
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    window.scrollTo(0, lockY);
+  }
+
   D.modal = (o) => {
     const bg = D.$('#modalBg');
     const acts = actionsHtml(o.actions || [{ label: D.t('btn.close'), act: 'closeModal' }]);
@@ -914,7 +1026,7 @@
       <div class="modal-body">${o.body || ''}</div>
       ${acts ? `<div class="modal-actions">${acts}</div>` : ''}</div>`;
     bg.classList.add('show');
-    document.body.classList.add('modal-open');
+    if (!bg._open) { bg._open = true; scrollLock(); }
     bg._onClose = o.onClose || null;
     if (o.onOpen) setTimeout(o.onOpen, 0);
     const f = bg.querySelector('input,textarea,select,button.btn');
@@ -924,7 +1036,7 @@
     const bg = D.$('#modalBg');
     if (!bg || !bg.classList.contains('show')) return;
     bg.classList.remove('show');
-    document.body.classList.remove('modal-open');
+    if (bg._open) { bg._open = false; scrollUnlock(); }
     const f = bg._onClose; bg._onClose = null; bg.innerHTML = '';
     if (f) f();
   };
@@ -1038,6 +1150,7 @@
     more: '<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',
     logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
     key: '<circle cx="8" cy="15" r="4"/><path d="m10.9 12.1 9.1-9.1M17 5l3 3M14 8l3 3"/>',
+    shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
     globe: '<circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/>',
     undo: '<path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/>',
     save: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
@@ -1053,13 +1166,13 @@
   /* charts (return SVG/HTML strings)                                    */
   /* ------------------------------------------------------------------ */
   D.chart = {
-    ring({ pct = 0, size = 120, stroke = 8, color = 'var(--success)', track = 'var(--line)', label = '', sub = '', glow = true, id = '' }) {
+    ring({ pct = 0, size = 120, stroke = 11, color = 'var(--success)', track = 'var(--line)', label = '', sub = '', glow = true, id = '' }) {
       const r = (size - stroke) / 2, C = 2 * Math.PI * r, p = D.clamp(pct, 0, 100);
       return `<div class="ring-wrap" style="width:${size}px;height:${size}px" ${id ? `id="${id}"` : ''}>
         <svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}">
           <circle cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${track}" stroke-width="${stroke}"/>
           <circle class="ring-fill" cx="${size / 2}" cy="${size / 2}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round"
-            stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${(C * (1 - p / 100)).toFixed(2)}" transform="rotate(-90 ${size / 2} ${size / 2})" ${glow ? 'style="filter:drop-shadow(0 0 6px ' + color + ')"' : ''}/>
+            stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${(C * (1 - p / 100)).toFixed(2)}" transform="rotate(-90 ${size / 2} ${size / 2})" ${glow ? 'style="filter:drop-shadow(0 0 14px ' + color + ')"' : ''}/>
         </svg>
         <div class="ring-val"><div class="ring-pct num">${label !== '' ? label : Math.round(p) + '%'}</div>${sub ? `<div class="ring-sub">${sub}</div>` : ''}</div></div>`;
     },
@@ -1100,7 +1213,7 @@
       let seg = '';
       for (let i = 0; i < n; i++) {
         const a = -84 + i * (168 / (n - 1));
-        seg += `<rect x="93.5" y="8" width="13" height="27" rx="6.5" transform="rotate(${a.toFixed(2)} 100 100)" fill="${i < on ? color : track}"/>`;
+        seg += `<rect x="93.5" y="8" width="13" height="27" rx="6.5" transform="rotate(${a.toFixed(2)} 100 100)" fill="${i < on ? color : track}"${i < on ? ` class="on" style="filter:drop-shadow(0 0 6px ${color})"` : ''}/>`;
       }
       return `<div class="arc-wrap"${id ? ` id="${id}"` : ''}>
         <svg class="arc" viewBox="0 0 200 112" role="img" aria-label="${D.esc(String(label || Math.round(p) + '%'))}">${seg}</svg>
@@ -1116,7 +1229,7 @@
         const h = Math.max(2, ((+v || 0) / mx) * (H - 2 * pad));
         const x = pad + i * colW + (colW - bw) / 2;
         const c = colors ? colors[i] : miss && miss[i] ? 'var(--danger)' : color;
-        s += `<rect x="${x.toFixed(1)}" y="${(H - pad - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${c}" opacity="${v ? 1 : 0.25}"><title>${D.esc(labels[i] || '')}: ${v}</title></rect>`;
+        s += `<rect x="${x.toFixed(1)}" y="${(H - pad - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(bw / 2, 5).toFixed(1)}" fill="${c}" opacity="${v ? 1 : 0.25}"><title>${D.esc(labels[i] || '')}: ${v}</title></rect>`;
       });
       s += '</svg>';
       if (labels.length) s += `<div class="spark-labels">${labels.map((l) => `<span>${D.esc(l)}</span>`).join('')}</div>`;
@@ -1249,13 +1362,18 @@
       Bittalab: hammasini birdan qo'shsak, el.async=false ularni ketma-ket, bo'linmaydigan
       bitta bo'lakda bajaradi (225 KB tahlil) va o'sha paytda bosilgan tugma javob bermaydi.
       Har fayldan keyin bo'sh vaqtni kutamiz, shunda oradagi bosishlar o'tib ketadi. */
+  /* Bo'lim emas, kutubxona, lekin birinchi ekranga ham kerak emas: u faqat
+     Sozlashdagi profil kartasida chiziladi. Navbatning oxirida keladi va
+     kelgach o'zi bir marta nishonlarni tekshiradi. */
+  const LAZY_LIBS = ['levels'];
   D.preloadViews = () => {
     const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
-    const queue = Object.keys(lazySrc);
+    const queue = Object.keys(lazySrc).map((id) => () => D.loadView(id))
+      .concat(LAZY_LIBS.map((name) => () => D.loadLib(name)));
     const next = () => {
-      const id = queue.shift();
-      if (!id) return;
-      D.loadView(id).then(() => {
+      const job = queue.shift();
+      if (!job) return;
+      job().then(() => {
         if (queue.length) return idle(next, { timeout: 1500 });
         // Navbat tugadi. Bir marta qayta chizamiz: kelgan fayllardan biri joriy ekranga
         // qo'shadigan narsa bergan bo'lishi mumkin (masalan ibodat.js dagi qazo bloki).
@@ -1468,10 +1586,25 @@
   /* O'rtadagi ko'tarilgan joyning indeksi. Bitta son — panelning chizilishi
      ham, CSS dagi doira ham shundan kelib chiqadi. */
   const MID = 2;
-  /* Yorliq belgisi — SVG emas, emoji. Beshta joyda chiziqli belgilar
-     kichrayib bir-biriga o'xshab qoladi; emoji rangli, ya'ni yorliqni
-     o'qimasdan ham tanib olasiz. Shrift --emoji tokenidan (tizimniki). */
-  const TAB_EM = { today: '🏠', prayer: '🕌', health: '🍽️', finance: '💰', tasks: '✅' };
+  /* Yorliq belgisi — chiziqli ikonka, bo'limning o'z `icon` maydonidan
+     (D.view() da beriladi). Yon panel allaqachon shuni chizardi, ya'ni endi
+     ikkala panel bitta belgini ko'rsatadi.
+
+     Bu yerda ilgari emoji turardi va sababi yozib qo'yilgandi: «beshta joyda
+     chiziqli belgilar kichrayib bir-biriga o'xshab qoladi; emoji rangli,
+     ya'ni yorliqni o'qimasdan ham tanib olasiz». E'tiroz o'rinli, lekin
+     ikkita narsa uni yopadi. Birinchisi — yozuv har doim belgining ostida
+     turadi, ya'ni tanish faqat shaklga tayanmaydi. Ikkinchisi va
+     muhimrog'i — butun ilovada endi rang MA'LUMOTni bildiradi: yashil
+     «yuqori zona», sariq «e'tibor ber». Beshta rangli emoji panelda
+     doimiy yonib turganda bu qoida buziladi — ular hech qanday o'lchov
+     bildirmasdan ko'zning rangga bo'lgan e'tiborini o'ziga tortadi.
+     Shakllar o'zi ham yetarlicha farqli: kalendar, machit, yurak, hamyon,
+     belgilangan katak.
+
+     Qaytarish kerak bo'lsa: bu yerga TAB_EM jadvalini qaytaring va quyidagi
+     renderNav dagi D.ic(...) o'rniga TAB_EM[id] ni qo'ying — boshqa joyga
+     tegmaydi. */
 
   D.renderTop = () => {
     const el = D.$('#top');
@@ -1481,6 +1614,12 @@
     let title = '', sub = '';
     try { title = v.title ? v.title() : D.t('nav.' + current); } catch (e) { title = D.t('nav.' + current); }
     try { sub = v.subtitle ? v.subtitle() : ''; } catch (e) { sub = ''; }
+    /* Sana — bo'lim nomining USTIDA, mayda katta harflarda (css/whoop-ui.css uni
+       `order: -1` bilan tepaga chiqaradi). Avval «qachon», keyin «nima» — WHOOP
+       bosh sahifasining tartibi shu. Bo'lim o'z izohini bersa, o'shanisi ustun:
+       sana hamma sahifada bir xil, izoh esa sahifaga xos. Ichki sahifada umuman
+       yozilmaydi — u yerda chap burchakda orqaga strelkasi turadi. */
+    if (!sub && isTab) { try { sub = D.esc(D.fmtDate(D.today(), 'weekday')); } catch (e) { sub = ''; } }
     // Chap burchak — faqat ichki sahifada, orqaga qaytish uchun. Yorliqda u bo'sh:
     // yorliqdan qaytadigan joy yo'q, panel o'zi turibdi.
     const left = isTab ? ''
@@ -1548,7 +1687,7 @@
       try { b = BADGE[id] ? BADGE[id]() : 0; } catch (e) { b = 0; }
       const lab = D.esc(D.t('nav.' + id));
       return `<button class="nav-tab${mid ? ' nav-mid' : ''}${current === id ? ' on' : ''}" data-act="go" data-view="${id}" aria-label="${lab}">
-        <span class="nav-ic"><span class="nav-em">${TAB_EM[id] || ''}</span>${b ? `<i class="nav-badge num">${D.fmtNum(b)}</i>` : ''}</span>
+        <span class="nav-ic"><span class="nav-em">${D.ic(v.icon || 'grid', 22)}</span>${b ? `<i class="nav-badge num">${D.fmtNum(b)}</i>` : ''}</span>
         <span class="nav-lab">${lab}</span></button>`;
     };
     // Beshta yorliq bir xil yo'l bilan chiziladi — o'rtadagisining farqi
@@ -1767,18 +1906,43 @@
   /* ------------------------------------------------------------------ */
   D.exportJson = () => {
     const b = new Blob([JSON.stringify(D.S, null, 1)], { type: 'application/json' });
+    const url = URL.createObjectURL(b);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(b);
+    a.href = url;
     a.download = 'dash_' + D.today() + '.json';
+    a.rel = 'noopener';
+    // iOS Safari hujjatda turmagan havolaning click() ini e'tiborsiz qoldiradi
+    document.body.appendChild(a);
     a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 2000);
   };
-  D.importJson = (text) => {
+  /** Holatdagi yozuvlar sonini qisqacha sanaydi — import oynasida ko'rsatish uchun. */
+  D.countRecords = (st) => {
+    if (!st) return 0;
+    let n = 0;
+    for (const k of ['habits', 'tasks', 'goals', 'gratitude', 'learn', 'reviews', 'books']) n += (st[k] || []).length;
+    for (const k of ['logs', 'counts', 'notes', 'prayers', 'dhikr', 'fasting', 'health']) n += Object.keys(st[k] || {}).length;
+    n += ((st.finance || {}).tx || []).length;
+    for (const day of Object.values((st.food || {}).logs || {})) n += (day || []).length;
+    return n;
+  };
+
+  D.importJson = async (text) => {
     let j;
     try { j = JSON.parse(text); } catch (e) { throw new Error(D.t('data.badJson')); }
     if (!j || typeof j !== 'object') throw new Error(D.t('data.badJson'));
     const next = D.isOldFormat(j) ? D.migrateOld(j) : D.normalize(j);
     const prev = D.S;
+    // Import — almashtirish, qo'shish emas: qurilmadagi ham, serverdagi ham
+    // nusxa ustidan yoziladi. Shuning uchun so'raymiz.
+    if (D.hasContent(prev)) {
+      const ok = await D.confirm({
+        title: D.t('data.importTitle'),
+        text: D.t('data.importWarn', { now: D.countRecords(prev), next: D.countRecords(next) }),
+        ok: D.t('data.importOk'), danger: true,
+      });
+      if (!ok) return false;
+    }
     D.S = next;
     D.S.meta.deviceId = prev.meta.deviceId;
     D.undo.push({ label: D.t('data.imported'), undo: () => { D.S = prev; D.theme.apply(); D.renderNav(); } });
@@ -1787,6 +1951,7 @@
     D.renderNav();
     D.rerender();
     D.toast(D.t('data.imported'), { undo: () => D.undo.pop() });
+    return true;
   };
 
   /* ------------------------------------------------------------------ */
@@ -1799,7 +1964,8 @@
     if (D.tg) { try { D.tg.ready(); D.tg.expand(); if (D.tg.disableVerticalSwipes) D.tg.disableVerticalSwipes(); } catch (e) {} }
     const [hash, hashSub] = location.hash.replace('#', '').split('/');
     const boot0 = resolveView(hash, hashSub);
-    const empty = !Object.keys(D.S.logs).length && !D.S.habits.length && !D.S.tasks.length && !D.S.finance.tx.length;
+    // pull() dagi bilan bir xil ma'no: «bu qurilma hech qachon saqlamagan»
+    const empty = !(+D.S.meta.updatedAt);
     D.loading = empty && D.serverEnabled();
     // Birinchi manzil tarixga YANGI yozuv qo'shmaydi: qo'shsa, ilova ochilishi
     // bilan bitta «o'lik» orqaga bosish paydo bo'lardi (u hech qayerga olib
@@ -1807,16 +1973,32 @@
     D.go(boot0 ? boot0[0] : D.ui.view, boot0 ? boot0[1] : undefined, { fromHistory: true });
     D.setSync(D.serverEnabled() ? 'wait' : 'local');
     if (D._corrupt) D.toast(D.t('data.corrupt'), { ms: 6000 });
-    D.pull().finally(() => { if (D.loading) { D.loading = false; D.rerender(); } });
-    // soat / kun almashuvi
+    D.pull({ force: true }).finally(() => { if (D.loading) { D.loading = false; D.rerender(); } });
+    // soat / kun almashuvi — faqat sahifa ko'rinib turganda. Fondagi ilovada
+    // soatni yurgizishdan foyda yo'q: iOS baribir chizmaydi, batareya esa ketadi.
     let lastDay = D.today();
-    setInterval(() => {
+    let tickT = 0;
+    const onTick = () => {
       const k = D.today();
       if (k !== lastDay) { lastDay = k; D.emit('day:changed', k); D.rerender(); }
       D.emit('tick');
-    }, 30 * 1000);
+    };
+    const tickStart = () => { if (!tickT) tickT = setInterval(onTick, 30 * 1000); };
+    const tickStop = () => { if (tickT) { clearInterval(tickT); tickT = 0; } };
+    tickStart();
     window.addEventListener('focus', () => { if (D.serverEnabled()) D.pull(); });
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) D.emit('tick'); });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        tickStop();
+        D.flushLocal();          // ilovadan chiqilmoqda — holat shartsiz diskka
+      } else {
+        tickStart();
+        onTick();
+        if (D.serverEnabled()) D.pull();
+      }
+    });
+    // iOS'da beforeunload ishonchsiz; pagehide — yagona kafolatlangan nuqta.
+    window.addEventListener('pagehide', () => D.flushLocal());
     // Orqaga / oldinga — tarixdan kelgan chaqiruv, shuning uchun yangi yozuv qo'shilmaydi
     window.addEventListener('hashchange', () => {
       const [h, sb] = location.hash.replace('#', '').split('/');

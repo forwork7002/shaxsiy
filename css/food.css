@@ -59,7 +59,7 @@
   background: var(--inset); color: var(--text2); display: grid; place-items: center; transition: background .15s, color .15s; }
 .fd-water-b:active { background: var(--hover); color: var(--text); }
 .fd-water-b[disabled] { opacity: .35; }
-@media (max-width: 360px) { .fd-water { gap: 7px; padding: 10px; } .fd-water-b { width: 32px; height: 32px; } }
+@media (max-width: 360px){ .fd-water { gap: 7px; padding: 10px; } .fd-water-b { width: 32px; height: 32px; } }
 
 /* ---- rasm tugmasi: bo'limning asosiy ishi ----
    Bo'lim rangi qattiq plita bo'lib emas, shisha bo'lib keladi: karta fonining
@@ -82,7 +82,7 @@
   box-shadow: inset 0 1px 0 rgba(255,255,255,.30), 0 12px 30px rgba(0,0,0,.40),
     0 0 34px -12px color-mix(in srgb, var(--sec) 70%, transparent); }
 [data-theme="light"] #view .fd-shot:not(.ghost):not(.danger):not(.icon) { color: var(--text);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 10px 24px rgba(46,42,36,.10),
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 10px 24px color-mix(in srgb, var(--text) 10%, transparent),
     0 0 30px -12px color-mix(in srgb, var(--sec) 50%, transparent); }
 /* zatvor orqasidagi nur — doira shishaning ichida yoritilgandek turadi */
 .fd-shot::after { content: ''; position: absolute; left: 4px; top: 50%; width: 150px; height: 150px; margin-top: -75px;
@@ -93,12 +93,12 @@
   background: radial-gradient(circle at 36% 26%, rgba(255,255,255,.24), rgba(255,255,255,.03) 62%), rgba(0,0,0,.30);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.32), inset 0 0 0 1px rgba(255,255,255,.11), 0 1px 3px rgba(0,0,0,.4);
   transition: transform .18s var(--ease-spring), box-shadow .18s; }
-.fd-shot:hover .fd-lens { box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 0 0 1px rgba(255,255,255,.2), 0 1px 3px rgba(0,0,0,.4); }
+@media (hover: hover) { .fd-shot:hover .fd-lens { box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 0 0 1px rgba(255,255,255,.2), 0 1px 3px rgba(0,0,0,.4); } }
 .fd-shot:active .fd-lens { transform: scale(.86); }
 .fd-shot .ic { flex: none; }
 [data-theme="light"] .fd-shot .fd-lens { background: radial-gradient(circle at 36% 26%, rgba(255,255,255,.95), rgba(255,255,255,.4) 62%), color-mix(in srgb, var(--sec) 12%, transparent);
   box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px color-mix(in srgb, var(--sec) 26%, transparent), 0 1px 3px color-mix(in srgb, var(--sec) 20%, transparent); }
-@media (prefers-reduced-motion: reduce) { .fd-shot .fd-lens { transition: none; } .fd-shot:active .fd-lens { transform: none; } }
+@media (prefers-reduced-motion: reduce){ .fd-shot .fd-lens { transition: none; } .fd-shot:active .fd-lens { transform: none; } }
 .fd-cap-row { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
 .fd-cap-row .fd-text { flex: 1; min-width: 0; }
 .fd-cap-row label.btn { cursor: pointer; }
@@ -109,8 +109,8 @@
   background: linear-gradient(150deg, color-mix(in srgb, var(--sec) 22%, transparent), color-mix(in srgb, var(--sec) 7%, transparent) 70%), var(--card-solid);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 4px 14px rgba(0,0,0,.30); }
 [data-theme="light"] #view .fd-send:not(.ghost):not(.danger):not(.icon) { color: var(--text);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 4px 12px rgba(46,42,36,.08); }
-@media (max-width: 380px) { .fd-cap { padding: 10px; } .fd-cap-row { gap: 5px; } .fd-cap-row .btn.sq { width: 38px; height: 38px; } }
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 4px 12px color-mix(in srgb, var(--text) 8%, transparent); }
+@media (max-width: 380px){ .fd-cap { padding: 10px; } .fd-cap-row { gap: 5px; } .fd-cap-row .btn.sq { width: 38px; height: 38px; } }
 
 /* ---- tahlil: rasm → nom → katta kkal → makrolar → tarkib → bitta maslahat ---- */
 .fd-busy-row { display: flex; align-items: center; gap: 10px; color: var(--text3); font-size: 13.5px; padding: 6px 0; }
@@ -148,7 +148,7 @@
 .fd-avg .muted { font-weight: 600; }
 .fd-days { margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--line); }
 .fd-day { display: flex; align-items: baseline; gap: 8px; padding: 7px 6px; border-radius: 8px; cursor: pointer; font-size: 12.5px; color: var(--text2); }
-.fd-day:hover { background: var(--hover); }
+@media (hover: hover) { .fd-day:hover { background: var(--hover); } }
 .fd-day.on { background: var(--inset); color: var(--text); font-weight: 700; }
 .fd-day-n { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fd-day-k { font-family: var(--num); white-space: nowrap; min-width: 84px; text-align: right; }

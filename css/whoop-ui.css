@@ -1,0 +1,357 @@
+/* =====================================================================
+   WHOOP qatlami — asbob paneli tili.
+
+   Bu fayl hammasidan KEYIN yuklanadi va o'zidan oldingilarning ustiga
+   yozadi. Ataylab shunday: modul CSS'lari (today, ibodat, food...) o'z
+   joyida tegilmay qoladi, ko'rinish esa bitta joydan boshqariladi.
+   Orqaga qaytarish ham shuning uchun oson — index.html dan bitta qator
+   olib tashlansa, ilova eski ko'rinishiga qaytadi.
+
+   Uch qoida butun fayl bo'ylab takrorlanadi:
+
+   1. RANG = MA'LUMOT. Zona ranglari (yashil/sariq/qizil), ko'k zo'riqish,
+      binafsha uyqu. Bosiladigan narsa rangsiz — oq yoki kulrang. Shuning
+      uchun ekrandagi har bir rang dog'i biror o'lchovni bildiradi.
+   2. YORLIQ KICHIK, RAQAM KATTA. Yorliq 10px katta harflarda, keng
+      oraliqda — u o'qilishi emas, TANILISHI kerak. Raqam esa uzoqdan
+      o'qiladi: 40–52px, zich, jadval kengligida.
+   3. CHIZIQ QUTIDAN YAXSHI. Bo'lishni chegara emas, soch tolasidek
+      chiziq va bo'shliq bajaradi. Qancha quti kam bo'lsa, shuncha
+      ma'lumot ko'rinadi.
+   ===================================================================== */
+
+/* ---------------------------------------------------------------------
+   1. MIKRO-YORLIQ
+   Butun ilovada bitta yorliq uslubi. Ilgari o'nlab joyda o'nta xil
+   o'lcham va oraliq bor edi (9.5/10/10.5/11/12px, .06–.13em) — ko'z
+   ularni boshqa-boshqa narsa deb o'qirdi. Endi bitta: 10px, .15em.
+   --------------------------------------------------------------------- */
+.eyebrow, .stat-label, .kpi-label, .field-label, .hero-eyebrow,
+.section-title, .dashed, .wh-trend-name, .wh-ready-label, .td-kpi-lab,
+.ring-sub, .arc-sub, .nav-lab, .top-sub, .wh-ring > span {
+  font-size: 10px; font-weight: 600; letter-spacing: .15em;
+  text-transform: uppercase; color: var(--text3);
+}
+/* Bo'lim sarlavhasi: oldidagi rangli chiziqcha olib tashlandi. U bo'lim
+   rangini takrorlardi, ya'ni hech narsa qo'shmasdi — va rang endi faqat
+   ma'lumotga tegishli. Qolgani — yozuv va uni davom ettiradigan chiziq. */
+.section-title { margin: 26px 0 12px; gap: 14px; color: var(--text3); }
+.section-title::before, #view .section-title::before { display: none; }
+.section-title::after { background: var(--line); opacity: 1; order: 1; }
+.section-title .right { order: 2; margin-left: 0; font-size: 11px; letter-spacing: .04em; text-transform: none; color: var(--text2); }
+.hero-eyebrow, .kpi-label, .stat-label { color: var(--text3); }
+
+/* ---------------------------------------------------------------------
+   2. RAQAMLAR
+   WHOOP'da raqam — sahifaning o'zi, qolgani izoh. Shuning uchun u katta,
+   zich (-.04em) va JADVAL kengligida: 1 bilan 8 bir xil joy egallaydi,
+   ya'ni har soniyada yangilanadigan son sakramaydi.
+   --------------------------------------------------------------------- */
+.kpi-num, .hero-num, .stat-num, .ring-pct, .arc-num, .td-kpi-val,
+.wh-ready-num, .wh-trend-val, .stepper .val, .li-right {
+  font-weight: 700; font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1; letter-spacing: -.04em; color: var(--text);
+}
+.hero-num { font-size: 46px; line-height: .95; }
+.hero-num small { font-size: 15px; font-weight: 600; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--text3); margin-left: 4px; }
+.kpi-num { font-size: 44px; line-height: .95; }
+.kpi-total { font-size: 15px; color: var(--text3); font-weight: 600; }
+.stat-num { font-size: 25px; line-height: 1; letter-spacing: -.035em; }
+.stat-num.money { font-size: 18px; letter-spacing: -.03em; }
+.arc-num { font-size: 46px; font-weight: 700; line-height: .95; }
+.arc-num small { font-size: 16px; font-weight: 600; color: var(--text3); letter-spacing: 0; }
+.ring-pct { font-size: 27px; letter-spacing: -.045em; }
+.td-kpi-val { font-size: 23px; }
+.wh-trend-val { font-size: 22px; }
+@media (max-width: 400px) {
+  .hero-num { font-size: 40px; } .kpi-num { font-size: 38px; }
+  .arc-num { font-size: 40px; } .stat-num { font-size: 22px; }
+  .td-kpi-val { font-size: 20px; }
+}
+
+/* ---------------------------------------------------------------------
+   3. KARTA
+   Tekis, ingichka chegarali, tik burchakli. Kartaning tepasida zona
+   chizig'i bo'lishi mumkin: 2px rangli tasma butun kartani bo'yashdan
+   yaxshiroq — u holatni aytadi, lekin ichidagi matnni o'qishga xalaqit
+   qilmaydi (ilgari fon ham, chegara ham, raqam ham bir xil rangda edi:
+   bitta gap uch marta aytilardi).
+   --------------------------------------------------------------------- */
+.card, .hero { border-radius: var(--r); border: 1px solid var(--card-line);
+  background: var(--card-solid); padding: 17px 16px; margin-bottom: 12px; }
+.card-head { margin-bottom: 14px; align-items: center; }
+.card-head .title { font-size: 13px; font-weight: 700; letter-spacing: .02em; }
+.divider { background: var(--line); margin: 16px -16px; }
+.card.flat { background: transparent; border: 1px solid var(--line); padding: 14px 15px; }
+
+/* zona tasmasi — Bugun sahifasidagi tayyorlik kartasi va shunga o'xshashlar */
+.td-ready::after, .card[data-zone]::after {
+  content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px;
+  background: var(--z, var(--line3)); pointer-events: none;
+}
+.card[data-zone="good"] { --z: var(--z-high); }
+.card[data-zone="warn"] { --z: var(--z-mid); }
+.card[data-zone="bad"]  { --z: var(--z-low); }
+.td-ready { --z: var(--line3); padding-top: 18px; }
+.td-ready.z-good { --z: var(--z-high); }
+.td-ready.z-warn { --z: var(--z-mid); }
+.td-ready.z-bad  { --z: var(--z-low); }
+.td-ready-state { font-size: 15px; font-weight: 700; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--z); }
+.td-kpis { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 15px; }
+.td-kpi-d { font-size: 11px; font-weight: 700; letter-spacing: .02em; }
+
+/* hero — bo'limning bosh o'lchovi */
+.hero-main { gap: 18px; margin-top: 10px; align-items: center; }
+.hero-title { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.hero-sub { font-size: 12.5px; color: var(--text3); margin-top: 4px; }
+.hero-foot { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 14px; }
+
+/* ---------------------------------------------------------------------
+   4. HALQA VA YOY
+   Halqa qalinlashdi (core.js dagi geometriya bilan birga) va yonadi.
+   Yonish bezak emas: qora fonda ingichka neon chiziq o'zidan ko'ra
+   kichikroq ko'rinadi — atrofidagi yorug'lik uni ko'z ko'radigan
+   o'lchamga qaytaradi. Yo'lakcha (track) esa deyarli ko'rinmaydi:
+   u «qancha qoldi» ni emas, faqat aylananing o'zini chizadi.
+   --------------------------------------------------------------------- */
+.ring-wrap svg > circle:first-child { stroke: var(--track); }
+.ring-val { gap: 1px; }
+.ring-sub { margin-top: 5px; font-size: 9px; letter-spacing: .14em; }
+.arc-wrap { max-width: 268px; }
+.arc-val { margin-top: -44px; }
+.arc-sub { margin-top: 7px; }
+.arc-cap { font-size: 12.5px; color: var(--text3); margin-top: 14px; line-height: 1.45; }
+.wh-ring > span { display: block; margin-top: 8px; }
+
+/* ---------------------------------------------------------------------
+   5. O'LCHOV KATAKCHALARI
+   --------------------------------------------------------------------- */
+.stat { background: var(--card2); border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 13px 12px 12px; }
+.stat-label { margin-top: 7px; }
+.stat-sub { font-size: 11px; color: var(--text4); margin-top: 4px; }
+/* Zona belgisi nuqtadan TASMAga aylandi: katakchaning tepasida chetdan chetga
+   ingichka chiziq. Nuqta burchakda turganda uni topish uchun qarash kerak edi
+   va uchta katakcha yonma-yon bo'lsa, uchta nuqta chalkashardi. Tasma esa
+   periferik ko'rinadi — raqamni o'qishdan oldin holat allaqachon ma'lum.
+   Kartaning tepasidagi zona tasmasi bilan bitta til (3-bo'lim). */
+.zone { top: 0; left: 0; right: 0; width: auto; height: 2px; border-radius: 0;
+  background: var(--line2); box-shadow: none; }
+.stat { overflow: hidden; }
+.zone.z-good { background: var(--z-high); box-shadow: 0 0 10px -2px var(--success-glow); }
+.zone.z-warn { background: var(--z-mid); box-shadow: 0 0 10px -2px var(--warning-glow); }
+.zone.z-bad  { background: var(--z-low); box-shadow: 0 0 10px -2px color-mix(in srgb, var(--danger) 70%, transparent); }
+
+/* ---------------------------------------------------------------------
+   6. CHIZIQLI GRAFIKALAR
+   Barcha to'ldirishlar kapsula shaklida va yonib turadi. Bo'sh qismi —
+   deyarli ko'rinmas yo'lakcha, shunda ko'z to'ldirilganini o'qiydi.
+   --------------------------------------------------------------------- */
+.bar { height: 6px; background: var(--track); border-radius: 99px; }
+.bar.thin { height: 4px; } .bar.thick { height: 12px; }
+.bar-fill { border-radius: 99px; box-shadow: 0 0 10px -2px currentColor; color: inherit; }
+.hbar { font-size: 12px; }
+.hbar-label { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); width: 92px; }
+.hbar-val { font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.segbar { height: 5px; gap: 3px; margin: 12px 0 16px; }
+.segbar i { border-radius: 99px; background: var(--track); }
+.segbar i.on { background: var(--z-high); box-shadow: 0 0 8px var(--success-glow); }
+.segbar i.half { background: var(--z-mid); box-shadow: 0 0 8px var(--warning-glow); }
+.spark-labels { font-size: 9px; font-weight: 600; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--text4); margin-top: 7px; }
+.spark-target { stroke: var(--line3); stroke-dasharray: 2 4; }
+.hm i, .hm-year-grid i { border-radius: 2px; background: var(--track); }
+.legend { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text4); margin-top: 12px; }
+
+/* ---------------------------------------------------------------------
+   7. TUGMA VA TANLOVLAR
+   Asosiy tugma — teskari rang: qorong'i temada oq, yorug'ida qora.
+   Rang emas, QARAMA-QARSHILIK uni ko'rsatadi, shuning uchun u qaysi
+   sahifada bo'lmasin bir xil kuchda turadi va zona ranglari bilan
+   bellashmaydi.
+   --------------------------------------------------------------------- */
+.btn { border-radius: var(--r-pill); font-size: 12px; font-weight: 700;
+  letter-spacing: .05em; text-transform: uppercase; padding: 11px 20px; }
+.btn.block { white-space: normal; line-height: 1.3; }
+.btn, #view .btn:not(.ghost):not(.danger):not(.icon) { background: var(--btn-grad); color: var(--on-btn); }
+@media (hover: hover) { .btn:hover { filter: none; transform: translateY(-1px); opacity: .88; } }
+.btn.ghost, #view .btn.ghost { background: transparent; border: 1px solid var(--line2); color: var(--text); }
+@media (hover: hover) { .btn.ghost:hover { background: var(--hover); border-color: var(--line3); opacity: 1; } }
+.btn.danger, #view .btn.danger { background: transparent; border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent); color: var(--danger-text); }
+.btn.sm { padding: 9px 15px; font-size: 11px; }
+.btn.xs { padding: 7px 12px; font-size: 10px; letter-spacing: .08em; }
+.btn.icon, .btn.sq, #view .btn.icon { text-transform: none; letter-spacing: 0; border-radius: 50%; }
+.btn.icon, #view .btn.icon { background: transparent; color: var(--text3); }
+.dashed { border-radius: var(--r-sm); border-color: var(--line2); padding: 12px; }
+
+.seg { background: var(--inset); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 3px; }
+.seg button { border-radius: var(--r-pill); font-size: 11px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--text3); }
+.seg button.on, #view .seg button.on { background: var(--btn-grad); color: var(--on-btn); }
+.tabs button { border-radius: var(--r-pill); font-size: 11px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; background: transparent; border-color: var(--line2); }
+.tabs button.on, #view .tabs button.on { background: var(--btn-grad); color: var(--on-btn); border-color: var(--btn-grad); }
+.pill { font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+  border-radius: var(--r-pill); background: transparent; border-color: var(--line2); }
+.tag { font-size: 9.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.streak { font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
+
+/* Kalit va belgilash — «yoqilgan» degani doim zona yashili */
+.toggle.on { background: var(--z-high); box-shadow: 0 0 12px var(--success-glow); }
+.chk:checked, .chk.on { box-shadow: 0 0 14px var(--success-glow); }
+.chk, .chk.big { border-radius: var(--r-xs); }
+.slider::-webkit-slider-thumb { background: var(--text); border-color: var(--bg); }
+.slider::-moz-range-thumb { background: var(--text); border-color: var(--bg); }
+.inp, .sel, .ta { border-radius: var(--r-sm); border-color: var(--line); }
+.inp:focus, .sel:focus, .ta:focus { border-color: var(--line3); }
+
+/* ---------------------------------------------------------------------
+   8. RO'YXAT QATORLARI
+   Quti emas, qator. Ilgari har element o'z chegarasi va o'z foni bilan
+   alohida karta edi — o'ntasi yonma-yon turganda ekran to'rga
+   aylanardi. Endi ular bitta ustunda, orasida soch tolasidek chiziq:
+   ro'yxat ro'yxatdek o'qiladi.
+   --------------------------------------------------------------------- */
+.li { background: transparent; border: 0; border-bottom: 1px solid var(--line);
+  border-radius: 0; margin-bottom: 0; padding: 13px 2px; min-height: 52px; }
+.li:last-child { border-bottom: 0; }
+@media (hover: hover) { .li:hover { background: var(--hover); } }
+.li.done { opacity: .42; background: transparent; }
+.li.hl { background: color-mix(in srgb, var(--warning) 4%, transparent); box-shadow: inset 2px 0 0 0 var(--z-mid); }
+.li-text { font-size: 14.5px; }
+.li-meta { font-size: 10.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text4); margin-top: 5px; }
+.li-right { font-size: 15px; }
+.empty { font-size: 12.5px; color: var(--text4); padding: 26px 8px; }
+
+/* ---------------------------------------------------------------------
+   9. TEPA PANEL
+   Sana — nom USTIDA, mayda katta harflarda. Bu WHOOP'ning bosh sahifasi
+   tartibi: avval «qachon», keyin «nima». Nom esa kattalashdi — u
+   sahifaning sarlavhasi, panelning yozuvi emas.
+   --------------------------------------------------------------------- */
+.top { padding: calc(env(safe-area-inset-top) + 18px) 18px 10px; }
+.top-txt { display: flex; flex-direction: column; }
+.top-sub { order: -1; margin: 0 0 5px; color: var(--text4); }
+.top-title { font-size: 27px; font-weight: 700; letter-spacing: -.035em; line-height: 1.1; }
+.top-btn { border-radius: 50%; border: 1px solid var(--line2); background: var(--card2); }
+@media (max-width: 360px) { .top-title { font-size: 23px; } }
+
+/* ---------------------------------------------------------------------
+   10. PASTKI PANEL
+   Panel endi suzmaydi — ekran chekkasiga yopishadi va tepasida bitta
+   soch tolasi chiziq turadi. Suzuvchi kapsula «men alohida elementman»
+   deydi; asbob panelida esa u shassining bir qismi bo'lishi kerak.
+   Faol yorliqni rang emas, ikkita narsa ko'rsatadi: tepadagi oq chiziq
+   va belgining to'liq yonishi. Ikkalasi ham rangsiz, ya'ni dalton
+   ko'zga ham, quyosh ostidagi ekranga ham ishlaydi.
+   --------------------------------------------------------------------- */
+.nav { left: 0; right: 0; bottom: 0; border-radius: 0; padding: 0 2px env(safe-area-inset-bottom);
+  height: calc(64px + env(safe-area-inset-bottom));
+  background: var(--nav); border: 0; border-top: 1px solid var(--line2); box-shadow: var(--sh-nav); }
+.nav-tab { position: relative; padding: 0 0 10px; gap: 5px; color: var(--text4); }
+.nav-tab.on { color: var(--text); }
+.nav-lab { font-size: 9px; letter-spacing: .12em; }
+.nav-ic { padding: 4px 14px; border-radius: 0; background: transparent; }
+.nav-tab.on .nav-ic { background: transparent; }
+/* Belgi endi SVG (core.js, renderNav). `display: flex` shart — span ichidagi
+   svg matn qatori sifatida joylashsa, ostida harf pastligicha bo'sh joy
+   qoladi va belgi yozuvga nisbatan bir-ikki piksel yuqorida osilib turadi. */
+.nav-em { display: flex; font-size: 0; opacity: .38; }
+.nav-em .ic { stroke-width: 1.9; }
+.nav-tab.on .nav-em { opacity: 1; }
+.nav-tab.on .nav-em .ic { stroke-width: 2.2; }
+/* Ko'tarilgan doira oq (yorug' temada qora) — belgisi ham unga teskari
+   bo'lishi kerak, aks holda oq ustida oq chiziq ko'rinmay qoladi. */
+.nav-tab.nav-mid .nav-em { color: var(--on-btn); opacity: 1; }
+.nav-tab.on::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+  width: 26px; height: 2px; background: var(--text); }
+.nav-badge { background: var(--z-low); color: #fff; font-weight: 700; box-shadow: 0 0 0 2px var(--nav); }
+/* O'rtadagi ko'tarilgan yorliq — oq disk. Uning ustida chiziq kerak emas:
+   shakli o'zi qayerdaligini aytadi. */
+.nav-tab.nav-mid .nav-ic { width: 54px; height: 54px; margin-top: -24px; padding: 0;
+  border-radius: 50%; background: var(--btn-grad); box-shadow: 0 10px 26px rgba(0,0,0,.6); }
+.nav-tab.nav-mid::before { display: none; }
+.nav-tab.nav-mid .nav-em .ic { width: 24px; height: 24px; stroke-width: 2.1; }
+
+/* ---------------------------------------------------------------------
+   11. YON PANEL (kengroq ekran)
+   --------------------------------------------------------------------- */
+@media (min-width: 960px) {
+  .side { background: #000; border-right: 1px solid var(--line); }
+  [data-theme="light"] .side { background: var(--bg2); }
+  .side-brand { padding: 10px 12px 22px; }
+  .dash-title { font-size: 19px; letter-spacing: .2em; text-transform: uppercase; font-weight: 700; }
+  .side-tab { position: relative; border-radius: 0; padding: 12px 12px 12px 14px;
+    font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text4); }
+  .side-tab.on { background: transparent; border: 0; color: var(--text); }
+  .side-tab.on::before { content: ''; position: absolute; left: 0; top: 8px; bottom: 8px; width: 2px; background: var(--text); }
+  .top, .page { max-width: 880px; }
+}
+
+/* ---------------------------------------------------------------------
+   12. OYNA VA XABAR
+   --------------------------------------------------------------------- */
+.sheet { border-radius: 22px 22px 0 0; background: var(--bg3); border-top: 1px solid var(--line2); }
+.sheet-title { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); }
+.sheet-grip { background: var(--line3); width: 40px; }
+.modal { border-radius: var(--r-lg); background: var(--bg3); border-color: var(--line2); }
+.modal-title { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); }
+.banner { border-radius: var(--r-sm); font-size: 12px; font-weight: 600; letter-spacing: .02em; }
+
+/* ---------------------------------------------------------------------
+   13. WHOOP BO'LIMINING O'ZI
+   Tayyorlik qatori — chapida zona tasmasi bo'lgan holat chizig'i.
+   Ilgari butun qator zona rangiga bo'yalardi: uchta rang navbat bilan
+   ekranning eng katta yuzasini egallardi va ostidagi hamma narsa
+   shunga qarab boshqacha ko'rinardi. Endi rang — faqat 3px.
+   --------------------------------------------------------------------- */
+.wh-ready { background: var(--card2); border: 1px solid var(--line);
+  border-left: 3px solid var(--zc, var(--line3)); border-radius: var(--r-sm); padding: 14px 15px; }
+.wh-ready.good { --zc: var(--z-high); background: var(--card2); border-color: var(--line); border-left-color: var(--z-high); }
+.wh-ready.warn { --zc: var(--z-mid);  background: var(--card2); border-color: var(--line); border-left-color: var(--z-mid); }
+.wh-ready.bad  { --zc: var(--z-low);  background: var(--card2); border-color: var(--line); border-left-color: var(--z-low); }
+.wh-ready-num { font-size: 30px; color: var(--zc, var(--text)); }
+.wh-ready.good .wh-ready-num { color: var(--z-high); }
+.wh-ready.warn .wh-ready-num { color: var(--z-mid); }
+.wh-ready.bad  .wh-ready-num { color: var(--danger-text); }
+.wh-ready-text { font-size: 13px; margin-top: 3px; }
+.wh-ready-side b { font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.wh-trend-row { padding: 16px 0; border-top-color: var(--line); }
+.wh-trend-foot { font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--text4); margin-top: 6px; }
+.wh-brand { font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.wh-note { border-radius: var(--r-xs); font-size: 12.5px; background: var(--inset); }
+
+/* ---------------------------------------------------------------------
+   14. YORUG' TEMADAGI TUZATISHLAR
+   Asosiy to'ldirish (`--btn-grad`) va uning ustidagi matn (`--on-btn`)
+   temaga qarab o'zi almashadi — shuning uchun bu yerda tugma rangi yo'q.
+   Ilgari bu ikkisi bitta token (`--ink-on-light`) bilan ishlanardi va u
+   yorug' temada fon bilan bir xil qoraga tushardi: qora tugma ustida qora
+   yozuv, ettita joyda. Juftlik kiritilgach, tuzatish tokenning o'zida
+   qoldi — bu yerga faqat shaffof variantlar tushdi.
+   --------------------------------------------------------------------- */
+[data-theme="light"] .btn.ghost, [data-theme="light"] #view .btn.ghost,
+[data-theme="light"] .btn.icon, [data-theme="light"] #view .btn.icon { color: var(--text); }
+[data-theme="light"] .btn.danger, [data-theme="light"] #view .btn.danger { color: var(--danger-text); }
+[data-theme="light"] .nav-tab.nav-mid .nav-ic { box-shadow: 0 8px 22px rgba(10,11,13,.22); }
+[data-theme="light"] .nav-badge { color: #fff; }
+/* Yonish — qorong'i fonning asbobi. Qora ustida u neon chiziqni ko'z
+   ko'radigan qalinlikka qaytaradi; oq ustida esa teskarisi bo'ladi —
+   halqa atrofida iflos yashil dog' paydo bo'ladi va raqam xiralashadi.
+   Filtr JS'dan, element ichiga yoziladi (core.js, chart.ring/arc), shu
+   sabab uni bosish uchun `!important` dan boshqa yo'l yo'q. */
+[data-theme="light"] .ring-fill,
+[data-theme="light"] .arc rect.on { filter: none !important; }
+[data-theme="light"] .bar-fill, [data-theme="light"] .segbar i.on,
+[data-theme="light"] .segbar i.half, [data-theme="light"] .toggle.on,
+[data-theme="light"] .chk:checked, [data-theme="light"] .chk.on,
+[data-theme="light"] .zone.z-good, [data-theme="light"] .zone.z-warn,
+[data-theme="light"] .zone.z-bad { box-shadow: none; }
+
+/* Kirish ekrani — bir xil tilda */
+.auth-card { border-radius: var(--r); background: var(--card-solid); border-color: var(--card-line); }
+.auth-title { font-size: 15px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); }
+.auth-user.on { background: var(--btn-grad); color: var(--on-btn); }
+.auth-ic { border-radius: 50%; background: transparent; border: 1px solid color-mix(in srgb, var(--success) 40%, transparent); }

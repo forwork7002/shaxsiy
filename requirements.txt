@@ -1,3 +1,7 @@
-flask>=3.0
-anthropic>=1.0
-gunicorn>=21
+# Serverda o'rnatilgan versiyalar (2026-09-14): Flask 3.1.3, anthropic 1.4.0,
+# gunicorn 26.2.0. Yuqori chegara ataylab qo'yilgan — `pip install -U` keyingi
+# katta versiyani olib kelib saytni yiqitmasin. Chegarani ko'tarishdan oldin
+# CHANGELOG o'qib, /api/ai va /api/food/analyze ni qo'lda sinang.
+flask>=3.0,<4.0
+anthropic>=1.0,<2.0
+gunicorn>=21.2,<27.0
