@@ -12,8 +12,14 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="preload" as="font" type="font/woff2" href="fonts/plex-sans-cyrillic.woff2" crossorigin>
-<link rel="preload" as="font" type="font/woff2" href="fonts/plex-sans-latin.woff2" crossorigin>
+<!-- Oldindan yuklash faqat AMALDA chiziladigan oila uchun. --font Mulish ga
+     o'tgach bu yerda Plex qolib ketgan edi: ikkita fayl har ochilishda majburan
+     yuklanardi-yu, hech qachon ishlatilmasdi. preload ni brauzer «lbatta kerak»
+     deb tushunadi, ya'ni uni kechiktirmaydi ham — birinchi ochilish shuncha
+     sekinlashardi. Eski woff2 fayllari fonts/ da qoldi: keshida eski versiyani
+     ushlab turgan qurilma ularni hali so'rashi mumkin. -->
+<link rel="preload" as="font" type="font/woff2" href="fonts/mulish-cyrillic.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/mulish-latin.woff2" crossorigin>
 <link rel="stylesheet" href="css/fonts.css?v=v90">
 <link rel="stylesheet" href="app.css?v=v90">
 <link rel="stylesheet" href="css/sections.css?v=v90">
