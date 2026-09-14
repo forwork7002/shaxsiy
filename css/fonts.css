@@ -14,14 +14,30 @@
 
    Bundan kelib chiqadigan ikkita qoida:
 
-   1. ONEST BILAN `font-variant-numeric: tabular-nums` SHART. Onest raqamlari
-      sukut bo'yicha har xil kenglikda (1 tor, 0 keng) — ustunda «10 118» va
-      «11,4» bir-birining tagida sakrab turadi. app.css dagi `.num` klassida
-      bu qoida allaqachon bor va Onest'da haqiqatan ishlaydi (tnum bor).
-      IBM Plex'da esa tnum YO'Q — lekin unga kerak ham emas, raqamlari
-      tug'ilishidan bir xil kenglikda. Ya'ni `.num` Plex uchun bekor, Onest
-      uchun hayotiy. Raqam ko'rsatadigan yangi joy yozsangiz, `.num` ni
-      qo'yishni unutmang.
+   1. ONEST BILAN tnum KERAK — LEKIN HAMMA JOYDA EMAS. Onest raqamlari
+      sukut bo'yicha har xil kenglikda (wght 400 da '1' 363, '0' 665) —
+      ustunda «10 118» va «11,4» bir-birining tagida sakrab turadi.
+      IBM Plex'da bu muammo yo'q edi: uning raqamlari tug'ilishidan bir xil
+      kenglikda (tnum xususiyati ham yo'q, kerak ham emas). Ya'ni tnum
+      butun boshli talab bo'lib Onest bilan birga keldi.
+      2026-09-14 dan beri u KLASSDA emas, GLOBAL: whoop-ui.css 17-bo'limi
+      `body, .inp, .sel, .ta, button, input, select, textarea` ga beradi.
+      Sababi to'g'ri — `.num` ni 164 joyga qo'l bilan yozish "qaysidir
+      joyda esdan chiqdi" degani.
+
+      SHUNING UCHUN ENDI ESLAB QOLISH KERAK BO'LGAN NARSA TESKARI: tnum ni
+      qo'shish emas, KERAKMAS JOYDA O'CHIRISH. Global qoida meros bo'lib
+      tushadi, ya'ni jumla ichidagi raqamga ham tegadi — u yerda tnum
+      nuqson, chunki Onest'ning '1' i juda tor va tnum unga ikki tomondan
+      havo qo'shadi: 14px da tnum bilan «11» 18.8px, tnumsiz 10.2px.
+      Jumlada bu «1 1» bo'lib ko'rinadi — apostrof muammosining aynan
+      o'zi, faqat raqamda.
+      O'chirish uchun IKKALASI ham kerak (font-feature-settings global
+      qoidada ham bor va u font-variant-numeric dan ustun turadi):
+          font-variant-numeric: proportional-nums;
+          font-feature-settings: "tnum" 0;
+      Namuna: whoop-ui.css dagi `.nav-badge` — belgi hech narsa bilan
+      tekislanmaydi, tnum unga faqat kenglik qo'shardi.
 
    2. Mayda yozuvdan qo'rqmaslik mumkin: Onest'ning x-balandligi Plex'nikidan
       KATTAROQ (52.7% va 51.6%), ya'ni 11px da harf 5.80px, Plex'da 5.68px.
