@@ -318,7 +318,9 @@ Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --
  counts:{ 'YYYY-MM-DD':{habitId:n} },           // quantified habits
  notes:{ 'YYYY-MM-DD':text },
  gratitude:[ {id,date,text} ],
- tasks:[ {id,text,date,done,doneAt,priority:1|2|3,createdAt,goalId} ],
+ tasks:[ {id,text,date,done,doneAt,priority:1|2|3,createdAt,goalId,
+          // ixtiyoriy — 2026-09-14 dan oldingi yozuvlarda umuman yo'q, o'quvchi ularsiz ham ishlashi shart
+          time?:'HH:MM', note?:string, sub?:[{id,text,done}], repeat?:{unit:'d'|'w'|'m'|'y',n:1..99} } ],
  goals:[ {id,text,dir:'shaxsiy'|'oilaviy'|'ish'|'moliyaviy',priority,year,done,doneAt} ],
  prayers:{ 'YYYY-MM-DD':{ bomdod:null|'jamaat'|'alone'|'qaza'|'missed', peshin, asr, shom, xufton } },
  dhikr:{ 'YYYY-MM-DD':{ total:n, sessions:[{name,n,ts}] } },
@@ -344,6 +346,21 @@ Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --
 ```
 
 Device-only (never synced): localStorage `dash.ui` (active view, sub-tabs, filters, viewDate) and `dash.device` (whoop tokens if client-side, nova key if BYOK).
+
+### Vazifa yozuvining ikkita o'zgarmas qoidasi
+
+`levels.js` ochkoni vazifadan **faqat `done` va `doneAt` orqali** hisoblaydi, shuning uchun:
+
+1. **`done` — «odam bajardim dedi»**, boshqa hech narsa emas. Quyi vazifalar (`sub`) to'liq
+   belgilangani uni `true` qilmaydi, va bitta vazifa — bitta vazifa: quyi vazifalar alohida
+   sanalmaydi, aks holda «100 ta vazifa» nishonini beshta haqiqiy ish bilan olish mumkin bo'lardi.
+2. **`doneAt` — ms belgisi** (`Date.now()`), sana satri emas. `levels.js` uni `new Date(+ts)` bilan
+   o'qiydi: satr bo'lsa `NaN` chiqadi va ochko jimgina noto'g'ri kunga yoziladi, xato berilmaydi.
+
+Takrorlanuvchi vazifa bajarilganda joriysi bajarilgan bo'lib **qoladi** (ya'ni ochkosini oladi) va
+keyingi sana bilan **yangi yozuv** tug'iladi — `tasks.js › spawnRepeat`. `db.py › _facts_of` kunlik
+arxivga faqat `id,text,date,doneAt,priority,goalId` ni yozadi; ixtiyoriy maydonlar to'liq holicha
+foydalanuvchi blobida va `state_versions` da saqlanadi, ya'ni tiklashda yo'qolmaydi.
 
 ## Old-data migration (core.js `D.migrateOld(json)`)
 

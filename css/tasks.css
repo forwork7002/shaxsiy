@@ -2,6 +2,11 @@
 
    Qoida: qator = katakcha + nom. Ramka yo'q, faqat ingichka ajratuvchi chiziq.
    Sana, muhimlik, maqsad — qatorni bosganda ochiladigan oynada.
+
+   Qatorning o'ng tomonida ixtiyoriy belgilar bo'lishi mumkin (vaqt · takror ·
+   izoh · quyi vazifa hisobi). Ular FAQAT yozuvda o'sha maydon bo'lsa chiziladi:
+   maydonsiz eski vazifa avvalgidek ikki elementli qator bo'lib qolaveradi,
+   ya'ni ro'yxat yangi imkoniyatlardan foydalanmaydigan odamda ham o'zgarmaydi.
    ------------------------------------------------------------------ */
 
 .tk { --tk-pad: 14px; }
@@ -87,6 +92,65 @@
 .tk-r.sw ~ .tk-swh { opacity: .4; }
 .tk-r.sw-l ~ .tk-swh.l, .tk-r.sw-r ~ .tk-swh.r { opacity: 1; }
 
+/* ---------- tez sana tanlagichi va aqlli o'qish ----------
+   Uchta chip yangi vazifaning SUKUT sanasini belgilaydi. Qatorda «ertaga»
+   deb yozilsa, yozilgani chipdan ustun turadi.
+
+   tk-pv — yozilayotgan qatordan nima o'qilganini AYNAN o'sha payt ko'rsatadi.
+   Bu bezak emas, xavfsizlik choragi: so'zni jimgina yeb qo'yadigan qidiruv
+   eng yomon turdagi nuqson, chunki odam nima yo'qolganini ko'rmaydi. Har bir
+   chipni bosib bekor qilish mumkin — shuning uchun u tugma, yorliq emas. */
+.tk-qk { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: -4px 0 14px; }
+.tk-qk button { min-height: 32px; padding: 6px 12px; border-radius: var(--r-pill); border: 1px solid var(--line2);
+  background: var(--glass); color: var(--text3); font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s; }
+@media (hover: hover) { .tk-qk button:hover { background: var(--hover); color: var(--text); } }
+.tk-qk button.on { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 40%, transparent); color: var(--accent-text); }
+.tk-qk-h { flex: 1 1 100%; font-size: 11px; line-height: 1.45; color: var(--text4); }
+
+.tk-pv-in { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: -8px 0 10px; padding: 8px 10px;
+  border: 1px dashed var(--line2); border-radius: 12px; background: var(--inset); animation: tkPv .18s var(--ease-out); }
+@keyframes tkPv { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+.tk-pv-c { display: inline-flex; align-items: center; gap: 5px; min-height: 26px; padding: 3px 8px; border-radius: var(--r-pill);
+  border: 0; background: var(--accent-soft); color: var(--accent-text); font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer;
+  transition: background .15s, color .15s; }
+.tk-pv-c .ic { opacity: .75; }
+@media (hover: hover) { .tk-pv-c:hover { background: color-mix(in srgb, var(--danger) 16%, transparent); color: var(--danger-text); } }
+.tk-pv-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: var(--text2); }
+
+/* ---------- qatordagi belgilar: vaqt · takror · izoh · quyi vazifa ----------
+   Hammasi ixtiyoriy. Yozuvda maydon bo'lmasa belgi ham chizilmaydi, ya'ni
+   eski vazifaning qatori avvalgidek ikki elementdan iborat bo'lib qoladi. */
+.tk-r-meta { flex: none; display: inline-flex; align-items: center; gap: 6px; }
+.tk-r-tm { font-size: 11px; font-weight: 700; color: var(--text3); }
+.tk-r.over .tk-r-tm { color: var(--danger-text); }
+.tk-r-mi { display: inline-flex; color: var(--text4); }
+.tk-r-sn { min-height: 22px; padding: 2px 7px; border-radius: var(--r-pill); border: 1px solid var(--line2);
+  background: transparent; color: var(--text3); font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer;
+  transition: background .15s, color .15s, border-color .15s; }
+@media (hover: hover) { .tk-r-sn:hover { background: var(--hover); color: var(--text); } }
+.tk-r-sn.full { color: var(--success-text); border-color: color-mix(in srgb, var(--success) 34%, transparent); }
+.tk-r-sn.on { background: var(--accent-soft); border-color: color-mix(in srgb, var(--accent) 34%, transparent); color: var(--accent-text); }
+.tk-r.done .tk-r-meta { opacity: .7; }
+
+/* ochilgan quyi vazifalar — maqsad ochilishi (tk-gx) bilan bir xil qoida:
+   qatorning ostida, katakchaning chetidan boshlanadi */
+.tk-subs { margin: 0 0 10px 36px; padding: 8px 0 0; border-top: 1px dashed var(--line2); }
+.tk-subs .tk-new { margin: 6px 0 0; }
+.tk-sb { display: flex; align-items: center; gap: 10px; padding: 7px 2px; list-style: none; }
+.tk-sb + .tk-sb { border-top: 1px solid var(--line); }
+.tk-sb .chk { width: 20px; height: 20px; border-radius: 7px; }
+.tk-sb .chk:checked::after { left: 6px; top: 2px; width: 5px; height: 9px; }
+.tk-sb-t { flex: 1; min-width: 0; font-size: 13px; line-height: 1.35; color: var(--text2); }
+.tk-sb.done .tk-sb-t { color: var(--text4); text-decoration: line-through; text-decoration-color: var(--text4); }
+
+/* ---------- bajarilganlar kun bo'yicha ----------
+   Bitta uzun ro'yxatda «buni qachon qilgandim» degan savolga javob yo'q edi. */
+.tk-dd { display: flex; align-items: center; gap: 8px; margin: 14px 0 2px; font-size: 11px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase; color: var(--text4); }
+.tk-dd:first-of-type { margin-top: 8px; }
+.tk-dd-n { font-weight: 700; opacity: .65; }
+
 /* ---------- Odatlar ---------- */
 .tk-hcard { padding: 12px var(--tk-pad) 12px; }
 .tk-h { display: flex; align-items: center; gap: 11px; padding: 11px 2px; border-top: 1px solid var(--line); border-radius: 12px; transition: background .15s; }
@@ -133,6 +197,14 @@
 .tk-mini .chk:checked::after { left: 6px; top: 2px; width: 5px; height: 10px; }
 .tk-mini .tk-r-w { min-width: 32px; min-height: 32px; }
 .tk-mini.p3::before { top: 11px; height: 18px; }
+
+/* takrorlanish tanlagichi (vazifa oynasida) — «Har [2] [haftada]» bitta
+   jumla bo'lib o'qilsin, shuning uchun uch bo'lak bir qatorda turadi */
+.tk-rep { display: flex; align-items: center; gap: 8px; }
+.tk-rep-e { flex: none; font-size: 13px; font-weight: 600; color: var(--text2); }
+.tk-rep-n { flex: 0 0 72px; text-align: center; }
+.tk-rep-n:disabled { opacity: .4; }
+.tk-rep-u { flex: 1; min-width: 0; }
 
 /* muhimlik tanlagichi (vazifa oynasida) */
 .tk-prio button { min-height: 40px; min-width: 46px; letter-spacing: -2px; line-height: 1; padding-left: 9px; padding-right: 7px; }
