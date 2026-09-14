@@ -78,10 +78,13 @@ eq('cheksiz ochko ham 50 da to‘xtaydi', L._levelFor(9e9), 50);
 
 console.log('\n2. Nishonlar jadvali');
 const ids = L.ALL.map((m) => m.id);
-eq('nishonlar soni', ids.length, 49);
+eq('nishonlar soni', ids.length, 84);
 eq('id lar takrorlanmaydi', new Set(ids).size, ids.length);
-ok('har nishonda bosqich rangi bor', L.ALL.every((m) => m.tier && m.tier.c));
-ok('«Qirq kun» — oltin', L.ALL.find((m) => m.id === 'qirq40').tier.id === 'oltin');
+ok('har nishonda bosqich bor', L.ALL.every((m) => L.TIERS.includes(m.tier)));
+ok('«Qirq kun» — oltin', L.ALL.find((m) => m.id === 'qirq40').tier === 'oltin');
+ok('sirli nishonlar olmos', L.ALL.filter((m) => m.secret).every((m) => m.tier === 'olmos'));
+eq('sirli nishonlar soni', L.ALL.filter((m) => m.secret).length, 3);
+ok('har oilada o‘lchov manbasi bor', L.FAMS.every((f) => L.ALL.some((m) => m.fam === f.id)));
 ok('har oilaning bosqichlari o‘sib boradi', L.FAMS.every((f) => f.steps.every((v, i) => i === 0 || v > f.steps[i - 1])));
 
 console.log('\n3. Bo‘sh holat');
@@ -189,7 +192,101 @@ eq('tartibga bog‘liq emas (sana)', M2.awards.got.kun7, '2026-02-01');
 eq('tartibga bog‘liq emas (daraja)', M2.awards.level, 12);
 eq('tartibga bog‘liq emas (soni)', Object.keys(M2.awards.got).length, 3);
 
-console.log('\n14. Chizish — HTML quriladimi');
+console.log('\n14. Haftalik sinov — hafta kalitidan, saqlanmasdan');
+const wkNow = D.weekKey(TODAY);
+ok('bir xil hafta — bir xil sinov', L._weekPick(wkNow).id === L._weekPick(wkNow).id);
+ok('sinov jadvaldan olinadi', L.WEEKLY.some((w) => w.id === L._weekPick(wkNow).id));
+const picks = new Set();
+for (let i = 0; i < 40; i++) picks.add(L._weekPick(D.weekKey(D.addDays(TODAY, -7 * i))).id);
+ok('qirq haftada kamida uch xil sinov chiqadi', picks.size >= 3, Array.from(picks));
+/* Sinovni bajarib ko'ramiz. TUGAGAN hafta olinadi: TODAY dushanbaga to'g'ri
+   kelsa joriy haftada atigi bitta kun bo'ladi va 15 ta jamoat namozini
+   joylashtirib bo'lmaydi. Test kalendarga bog'liq bo'lmasligi kerak. */
+const prevWk = D.weekKey(daysBack(7));
+const prevDays = [];
+for (let i = 1; i <= 21 && prevDays.length < 7; i++) { const k = daysBack(i); if (D.weekKey(k) === prevWk) prevDays.push(k); }
+eq('tugagan haftada yetti kun bor', prevDays.length, 7);
+const wSpec = L._weekPick(prevWk);
+// bir kunda ko'pi bilan nechta bo'lishi mumkin — o'lchov turiga qarab
+const PER = { habits: 9, jamaat: 5, zikr: 400, sleep7: 1, note: 1, workouts: 3, food: 1, tasks: 4, fast: 1, perfect: 1 };
+function fillWeek(days, field, total) {
+  const s = { habits: [], logs: {}, prayers: {}, dhikr: {}, fasting: {}, notes: {}, tasks: [],
+              whoop: { connected: false, lastSync: null, cache: {}, days: {}, workouts: [], body: {} },
+              food: { logs: {}, targets: { kcal: null, p: null, c: null, f: null, auto: true } } };
+  const per = PER[field];
+  let left = total;
+  for (const k of days) {
+    if (left <= 0) break;
+    const take = Math.min(per, left);
+    if (field === 'habits') s.logs[k] = Array.from({ length: take }, (_, i) => 'h' + i);
+    if (field === 'jamaat') { s.prayers[k] = {}; D.PRAYERS.slice(0, take).forEach((x) => { s.prayers[k][x] = 'jamaat'; }); }
+    if (field === 'zikr') s.dhikr[k] = { total: take, sessions: [] };
+    if (field === 'sleep7') s.whoop.days[k] = { sleepH: 8 };
+    if (field === 'note') s.notes[k] = 'x';
+    if (field === 'workouts') for (let i = 0; i < take; i++) s.whoop.workouts.push({ id: 'w' + k + i, k, start: 0 });
+    if (field === 'food') s.food.logs[k] = [{ id: 'f' + k, ts: 0, name: 'x', kcal: 1, p: 0, c: 0, f: 0 }];
+    if (field === 'tasks') for (let i = 0; i < take; i++) s.tasks.push({ id: 't' + k + i, text: 'x', date: k, done: true, doneAt: null, priority: 2 });
+    if (field === 'fast') s.fasting[k] = { type: 'nafl', done: true };
+    if (field === 'perfect') {
+      s.habits = ['a', 'b', 'c'].map((x, i) => ({ id: x, name: x, sphere: 'tana', active: true, schedule: { type: 'daily' }, order: i }));
+      s.logs[k] = ['a', 'b', 'c'];
+      s.prayers[k] = { bomdod: 'jamaat', peshin: 'jamaat', asr: 'jamaat', shom: 'jamaat', xufton: 'jamaat' };
+    }
+    left -= take;
+  }
+  return s;
+}
+c = setState(fillWeek(prevDays, wSpec.f, wSpec.n));
+eq('o‘tgan haftaning sinovi bajarildi (' + wSpec.id + ')', c.st.challenges, 1);
+eq('sinov nishon o‘lchoviga tushdi', L.medals().find((m) => m.id === 'sinov5').cur, 1);
+c = setState(fillWeek(prevDays, wSpec.f, wSpec.n - 1));
+eq('bir dona kam — bajarilmagan', c.st.challenges, 0);
+setState({});
+const w = L.week();
+eq('bo‘sh holatda sinov bajarilmagan', w.done, false);
+eq('bo‘sh holatda ilgarilash nol', w.cur, 0);
+eq('joriy hafta maqsadi jadvaldagidek', w.need, L._weekPick(D.weekKey(TODAY)).n);
+ok('kun sanog‘i 0..6', w.daysLeft >= 0 && w.daysLeft <= 6, w.daysLeft);
+
+console.log('\n15. Sirli nishonlar va yangi o‘lchovlar');
+// Sahar: 30 kun ketma-ket bomdod jamoat bilan
+pr = {};
+for (let i = 0; i < 31; i++) pr[daysBack(i)] = { bomdod: 'jamaat', peshin: 'alone', asr: null, shom: null, xufton: null };
+c = setState({ prayers: pr });
+eq('sahar zanjiri', c.st.sahar, 31);
+ok('«Sahar» nishoni berildi', L.medals().find((m) => m.id === 'sahar30').done);
+// Qaytish: uzoq tanaffusdan keyin 30 kun
+const lg = {};
+for (let i = 0; i < 20; i++) lg[daysBack(120 + i)] = ['h1'];   // eski davr
+for (let i = 0; i < 30; i++) lg[daysBack(i)] = ['h1'];         // 70 kunlik tanaffusdan keyin
+c = setState({ logs: lg });
+eq('tanaffusdan keyingi zanjir', c.st.comeback, 30);
+ok('«Qaytish» nishoni berildi', L.medals().find((m) => m.id === 'qaytish30').done);
+// tanaffussiz uzluksiz yozuvda «Qaytish» bo'lmaydi
+const lg2 = {};
+for (let i = 0; i < 90; i++) lg2[daysBack(i)] = ['h1'];
+c = setState({ logs: lg2 });
+eq('tanaffus bo‘lmasa — qaytish yo‘q', c.st.comeback, 0);
+ok('«Qaytish» berilmaydi', !L.medals().find((m) => m.id === 'qaytish30').done);
+// To'liq oy: tugagan oyning hamma kuni yozilgan bo'lsa
+const lg3 = {};
+for (let d = 1; d <= 31; d++) lg3['2026-08-' + D.pad2(d)] = ['h1'];
+for (let d = 1; d <= 30; d++) lg3['2026-06-' + D.pad2(d)] = ['h1'];
+for (let d = 1; d <= 14; d++) lg3['2026-09-' + D.pad2(d)] = ['h1'];   // joriy oy — sanalmaydi
+c = setState({ logs: lg3 });
+eq('to‘liq oylar', c.st.fullMonths, 2);
+// sirli nishon olinmagunicha sharti ko'rsatilmaydi
+const secret = L.medals().find((m) => m.id === 'toliqoy12');
+ok('sirli nishon hali olinmagan', !secret.done);
+ok('sirli nishon belgisi bor', secret.secret === true);
+
+console.log('\n16. Kunlik ochko va bugungi hisob');
+c = setState({ logs: { [TODAY]: ['a', 'b'], [daysBack(1)]: ['a'] } });
+eq('bugungi ochko', L.info().todayXp, 20);
+eq('kechagi ochko alohida', c.days.get(daysBack(1)), 10);
+eq('jami — ikkalasining yig‘indisi', c.xp, 30);
+
+console.log('\n17. Chizish — HTML quriladimi');
 eval(fs.readFileSync(path.join(ROOT, 'js', 'i18n.js'), 'utf8'));   // haqiqiy matnlar
 setState({ habits: hs, logs: { [TODAY]: ['a', 'b', 'c'] }, prayers: { [TODAY]: five },
            gratitude: [{ id: 'g1', date: TODAY, text: 'shukr' }] });

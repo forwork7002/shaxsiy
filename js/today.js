@@ -579,11 +579,15 @@
       const td = D.today();
       if (D.ui.viewDate && D.ui.viewDate >= td) { D.ui.viewDate = null; D.saveUi(); }
       const k = key();
-      // Tartib uchta savolga qarab: "qaysi kun?" → "tanam qanday?" →
-      // "kun qanday ketyapti?" → "kunning raqamlari". Belgilash hech qaysi
-      // bosqichda yo'q: odat Trekkerda, vazifa Ro'yxatda, namoz Ibodatda,
-      // suv esa Ovqat sahifasida yoziladi.
-      return safe(() => weekStrip(k)) + safe(() => heroCard(k)) + safe(() => listCard(k)) + safe(() => numbersStrip(k));
+      // Tartib uchta savolga qarab: "qaysi kun?" → "qayerdaman?" → "tanam
+      // qanday?" → "kun qanday ketyapti?" → "kunning raqamlari". Belgilash
+      // hech qaysi bosqichda yo'q: odat Trekkerda, vazifa Ro'yxatda, namoz
+      // Ibodatda, suv esa Ovqat sahifasida yoziladi.
+      // Daraja qatori ataylab ingichka va ataylab TAYYORLIK HERO'SIDAN OLDIN
+      // emas — u kunning asosiy raqami bo'lib qolishi kerak. Faqat bugungi
+      // kunda ko'rinadi: o'tgan kunni ochganda "bugun +N ochko" yolg'on bo'lardi.
+      const lv = k === td && D.levels ? safe(() => D.levels.tile()) : '';
+      return safe(() => weekStrip(k)) + lv + safe(() => heroCard(k)) + safe(() => listCard(k)) + safe(() => numbersStrip(k));
     },
   });
 })();

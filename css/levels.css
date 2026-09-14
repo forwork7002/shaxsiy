@@ -1,57 +1,139 @@
-/* ==== daraja va nishonlar — profil kartasidagi blok + to'plam oynasi ====
-   Rang bu yerda bezak emas: martaba rangi darajani, nishon rangi bosqichni
-   bildiradi. Ikkalasi ham `--c` orqali HTML dan keladi (js/levels.js), shuning
-   uchun bu faylda bitta ham qattiq rang yo'q. */
+/* ==== daraja va nishonlar ====
+   Bu faylda ikkita narsa chiziladi: martaba belgisi (daraja raqami) va MEDAL.
+   Martaba rangi HTML dan `--c` bilan keladi (js/levels.js), medal metallari esa
+   shu yerda: bosqich nomi `data-t` da, ranglar quyidagi to'rt qatorda.
+   SVG gradient ataylab ishlatilmadi — 84 ta nishon bitta oynada chizilganda har
+   biriga ikkitadan <defs> kerak bo'lardi. CSS gradient bir marta o'qiladi. */
 
-.lv { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+.lv-med[data-t="bronza"] { --m1: #F3BE8B; --m2: #C77B3C; --m3: #6F3C13; }
+.lv-med[data-t="kumush"] { --m1: #F7FAFD; --m2: #B9C0C8; --m3: #6B747F; }
+.lv-med[data-t="oltin"]  { --m1: #FFEFB8; --m2: #FFC530; --m3: #9A6A05; }
+.lv-med[data-t="olmos"]  { --m1: #E6FDFF; --m2: #7FE7FF; --m3: #22778F; }
 
-/* ---- martaba belgisi: daraja raqami yonayotgan kvadratda ---- */
-.lv-mark { position: relative; width: 56px; height: 56px; flex: none; display: grid; place-items: center;
-  border-radius: 18px; color: var(--c, var(--text));
+/* ------------------------------------------------------------------ */
+/* MEDAL                                                               */
+/* Uch qatlam: tashqi halqa (o'ymakor chekka yoki ilgarilash yoyi),    */
+/* metall yuza, va ichkarida belgi. Olinmagani ham ko'rinadi — chekkasi */
+/* bo'ylab qancha qolgani yoy bo'lib turadi: nimaga intilish kerakligini */
+/* yashirish motivatsiyani o'ldiradi, yorqin ko'rsatish esa aldaydi.    */
+/* ------------------------------------------------------------------ */
+.lv-med { position: relative; width: var(--s, 36px); height: var(--s, 36px); flex: none;
+  display: inline-grid; place-items: center; border-radius: 50%; }
+.lv-med-ring { position: absolute; inset: 0; border-radius: 50%; }
+.lv-med-face { position: absolute; inset: 11%; border-radius: 50%; display: grid; place-items: center; overflow: hidden; }
+.lv-med-face svg { position: relative; z-index: 1; }
+
+/* --- olingan: o'ymakor chekka + yaltiragan metall --- */
+.lv-med.on .lv-med-ring {
+  background: repeating-conic-gradient(from -6deg, var(--m1) 0 6deg, var(--m3) 6deg 12deg);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--m3) 70%, transparent),
+              0 2px 10px color-mix(in srgb, var(--m2) 45%, transparent); }
+.lv-med.on .lv-med-face {
+  background: linear-gradient(148deg, var(--m1) 0%, var(--m2) 46%, var(--m3) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 7px rgba(0,0,0,.34),
+              0 0 0 1px color-mix(in srgb, var(--m3) 55%, transparent); }
+/* yorug'lik dog'i — metallni tekis rangdan ajratadigan yagona narsa */
+.lv-med.on .lv-med-face::before { content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 33% 24%, rgba(255,255,255,.62), rgba(255,255,255,0) 58%); }
+/* belgi metall ustida qora siyoh: to'rt metallning to'rttasida ham o'qiladi */
+.lv-med.on { color: rgba(0,0,0,.76); }
+
+/* --- olinmagan: so'ngan disk + ilgarilash yoyi --- */
+.lv-med:not(.on) { color: var(--text4); }
+.lv-med:not(.on) .lv-med-ring {
+  background: conic-gradient(from -90deg, var(--text3) calc(var(--p, 0) * 1%), var(--track) 0); }
+.lv-med:not(.on) .lv-med-face { background: var(--bg3); box-shadow: inset 0 0 0 1px var(--line2); }
+.lv-med.secret .lv-med-q { font-size: calc(var(--s) * .34); font-weight: 800; color: var(--text4); line-height: 1; }
+
+/* --- olingan lahza: aylanib chiqadi va bir marta yaltiraydi --- */
+@keyframes lv-pop {
+  0%   { transform: scale(.4) rotate(-26deg); opacity: 0; }
+  55%  { transform: scale(1.12) rotate(6deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+@keyframes lv-shine {
+  0%, 42% { transform: translateX(-140%) rotate(18deg); }
+  100%    { transform: translateX(160%) rotate(18deg); }
+}
+.lv-med.pop { animation: lv-pop .62s var(--ease-spring) both; animation-delay: var(--d, 0ms); }
+.lv-med.pop .lv-med-face::after { content: ''; position: absolute; top: -30%; bottom: -30%; width: 42%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent);
+  animation: lv-shine 1.5s .35s var(--ease-out) 2 both; animation-delay: calc(var(--d, 0ms) + 350ms); }
+
+/* ------------------------------------------------------------------ */
+/* MARTABA BELGISI — daraja raqami yonayotgan kvadratda                */
+/* ------------------------------------------------------------------ */
+.lv-mark { position: relative; width: 54px; height: 54px; flex: none; display: grid; place-items: center;
+  border-radius: 17px; color: var(--c, var(--text));
   background: radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--c) 22%, transparent), transparent 72%);
   border: 2px solid color-mix(in srgb, var(--c) 55%, transparent);
   box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 7%, transparent),
               inset 0 0 20px color-mix(in srgb, var(--c) 16%, transparent); }
-.lv-mark-n { font-size: 22px; font-weight: 800; line-height: 1; letter-spacing: -.02em; color: var(--c); }
-.lv-mark.big { width: 78px; height: 78px; border-radius: 24px; }
-.lv-mark.big .lv-mark-n { font-size: 31px; }
+.lv-mark-n { font-size: 21px; font-weight: 800; line-height: 1; letter-spacing: -.02em; color: var(--c); }
+.lv-mark.big { width: 76px; height: 76px; border-radius: 23px; }
+.lv-mark.big .lv-mark-n { font-size: 30px; }
 
-/* ---- profil kartasidagi qator ---- */
+/* ------------------------------------------------------------------ */
+/* UMUMIY QISMLAR                                                      */
+/* ------------------------------------------------------------------ */
+.lv-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.lv-rank { font-size: 17px; font-weight: 700; line-height: 1.15; color: var(--c, var(--text)); }
+.lv-motto { font-size: 13px; color: var(--text3); line-height: 1.25; overflow-wrap: anywhere; }
+.lv-sub { font-size: 13px; color: var(--text2); }
+.lv-sub b { color: var(--text); font-weight: 700; }
+
+.lv-bar { display: block; height: 5px; margin: 4px 0 2px; border-radius: var(--r-pill); background: var(--track); overflow: hidden; }
+.lv-bar > i { display: block; height: 100%; border-radius: inherit; background: var(--c, var(--text));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--c) 55%, transparent); transition: width .6s var(--ease-out); }
+
+/* ------------------------------------------------------------------ */
+/* HAFTALIK SINOV                                                      */
+/* ------------------------------------------------------------------ */
+.lv-ch { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--inset); }
+.lv-ch .lv-bar { grid-column: 1 / -1; margin: 2px 0 0; }
+.lv-ch-ic { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--track); color: var(--text2); }
+.lv-ch.done { border-color: color-mix(in srgb, var(--success) 38%, var(--line)); }
+.lv-ch.done .lv-ch-ic { background: color-mix(in srgb, var(--success) 20%, transparent); color: var(--success-text); }
+.lv-ch.done .lv-bar > i { background: var(--success); box-shadow: 0 0 10px var(--success-glow); }
+.lv-ch-t { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.lv-ch-h { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--text3); }
+.lv-ch-x { font-size: 14px; color: var(--text); line-height: 1.25; overflow-wrap: anywhere; }
+.lv-ch-n { font-size: 16px; font-weight: 700; align-self: center; white-space: nowrap; }
+.lv-ch-n i { font-style: normal; font-size: 13px; color: var(--text3); font-weight: 600; }
+
+/* ------------------------------------------------------------------ */
+/* PROFIL KARTASIDAGI BLOK                                             */
+/* ------------------------------------------------------------------ */
+.lv { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
 .lv-hero { display: flex; align-items: center; gap: 13px; width: 100%; padding: 12px; text-align: left;
   border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--inset); color: var(--text);
   font: inherit; transition: background .15s, border-color .15s; }
 @media (hover: hover) { .lv-hero:hover { background: var(--hover); border-color: color-mix(in srgb, var(--c) 40%, var(--line)); } }
 .lv-hero:active { transform: scale(.995); }
 .lv-hero > svg:last-child { color: var(--text3); flex: none; }
-.lv-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.lv-rank { font-size: 17px; font-weight: 700; line-height: 1.15; color: var(--c, var(--text)); }
-.lv-motto { font-size: 12px; color: var(--text3); line-height: 1.25; overflow-wrap: anywhere; }
-.lv-sub { font-size: 12px; color: var(--text2); }
-.lv-sub b { color: var(--text); font-weight: 700; }
 
-/* ---- ilgarilash chizig'i ---- */
-.lv-bar { display: block; height: 5px; margin: 4px 0 2px; border-radius: var(--r-pill); background: var(--track); overflow: hidden; }
-.lv-bar > i { display: block; height: 100%; border-radius: inherit; background: var(--c, var(--text));
-  box-shadow: 0 0 10px color-mix(in srgb, var(--c) 55%, transparent); transition: width .5s var(--ease-out); }
-
-/* ---- nishon belgisi ---- */
-.lv-chip { width: var(--s, 36px); height: var(--s, 36px); flex: none; display: grid; place-items: center;
-  border-radius: 50%; color: var(--text4); border: 1.5px solid var(--line2); background: var(--recess); }
-.lv-chip.on { color: var(--c); border-color: color-mix(in srgb, var(--c) 62%, transparent);
-  background: color-mix(in srgb, var(--c) 12%, transparent);
-  box-shadow: inset 0 0 12px color-mix(in srgb, var(--c) 20%, transparent); }
-
-/* olinmagan nishon ko'rinib turadi, lekin so'ngan: nimaga intilish kerakligini
-   yashirish motivatsiyani o'ldiradi, uni yorqin ko'rsatish esa aldaydi */
-.lv-chip:not(.on) svg { opacity: .55; }
-
-/* ---- kartadagi nishonlar qatori ---- */
 .lv-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 .lv-strip-i { display: inline-flex; }
-.lv-more { font-size: 12px; font-weight: 700; color: var(--text3); padding: 0 2px; }
+.lv-more { font-size: 13px; font-weight: 700; color: var(--text3); padding: 0 2px; }
 .lv-strip .lv-count { margin-left: auto; }
 
-/* ---- to'plam oynasi ---- */
+/* ------------------------------------------------------------------ */
+/* BUGUN SAHIFASINING TEPASIDAGI QATOR                                 */
+/* Ataylab ingichka: tayyorlik hero'si kunning asosiy raqami bo'lib     */
+/* qolishi kerak, bu qator esa faqat «qayerdaman» deb eslatadi.        */
+/* ------------------------------------------------------------------ */
+.lv-td { display: flex; flex-direction: column; gap: 10px; }
+.lv-td-b { display: flex; align-items: center; gap: 12px; width: 100%; padding: 0; text-align: left;
+  border: 0; background: transparent; color: var(--text); font: inherit; }
+.lv-td-b > svg:last-child { color: var(--text3); flex: none; }
+.lv-td-top { display: flex; align-items: baseline; gap: 8px; }
+.lv-td-xp { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--success-text); white-space: nowrap; }
+
+/* ------------------------------------------------------------------ */
+/* TO'PLAM OYNASI                                                      */
+/* ------------------------------------------------------------------ */
 .lv-sheet { display: flex; flex-direction: column; gap: 14px; }
 .lv-top { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: var(--r-sm);
   border: 1px solid color-mix(in srgb, var(--c) 28%, var(--line));
@@ -59,48 +141,60 @@
 .lv-top-t { flex: 1; min-width: 0; }
 .lv-top .lv-rank { font-size: 19px; }
 .lv-how { margin: 0; }
-.lv-total { font-size: 13px; font-weight: 700; color: var(--text2); }
+.lv-total { font-size: 14px; font-weight: 700; color: var(--text2); }
 
 .lv-fam { display: flex; flex-direction: column; gap: 8px; }
-.lv-fam-h { display: flex; align-items: baseline; gap: 7px; margin: 0; font-size: 14px; flex-wrap: wrap; }
+.lv-fam-h { display: flex; align-items: baseline; gap: 7px; margin: 0; font-size: 15px; flex-wrap: wrap; }
 .lv-fam-h svg { color: var(--text3); align-self: center; flex: none; }
 .lv-fam-h b { font-weight: 700; }
-.lv-fam-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 8px; }
+.lv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
 
-.lv-item { position: relative; display: flex; align-items: center; gap: 9px; padding: 9px 10px; min-width: 0;
-  border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--recess); overflow: hidden; }
-.lv-item.on { border-color: color-mix(in srgb, var(--c, var(--line2)) 34%, var(--line)); background: var(--inset); }
-.lv-item-t { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-.lv-item-t b { font-size: 13px; font-weight: 700; line-height: 1.2; }
-.lv-item-t span { line-height: 1.2; overflow-wrap: anywhere; }
-.lv-item-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--track); }
-.lv-item-bar > i { display: block; height: 100%; background: var(--text3); }
+.lv-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 11px 6px 9px;
+  min-width: 0; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--recess);
+  color: var(--text); font: inherit; text-align: center; transition: background .15s, border-color .15s; }
+.lv-cell.on { background: var(--inset); border-color: var(--line2); }
+@media (hover: hover) { .lv-cell:hover { background: var(--hover); } }
+.lv-cell:active { transform: scale(.97); }
+.lv-cell b { font-size: 13px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.lv-cell span { line-height: 1.2; overflow-wrap: anywhere; }
 
-/* ---- tabrik oynasi ---- */
-.lv-cel { display: flex; flex-direction: column; gap: 8px; }
-.lv-cel-m { display: flex; align-items: center; gap: 11px; padding: 11px; border-radius: var(--r-sm);
-  border: 1px solid color-mix(in srgb, var(--c) 34%, var(--line));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 10%, transparent), transparent), var(--inset); }
-.lv-cel-m b { font-size: 15px; font-weight: 700; }
-.lv-cel-m .small { margin-left: auto; text-align: right; flex: none; }
-.lv-cel-lv { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
-.lv-cel-lv b { display: block; font-size: 18px; font-weight: 700; color: var(--c); }
-.lv-cel-lv span { display: block; font-size: 13px; color: var(--text2); }
+/* ------------------------------------------------------------------ */
+/* BITTA NISHON OYNASI VA TABRIK                                       */
+/* ------------------------------------------------------------------ */
+.lv-one { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.lv-one-t { display: flex; flex-direction: column; gap: 4px; align-items: center; width: 100%; }
+.lv-one-t b { font-size: 16px; font-weight: 700; }
+.lv-one .lv-bar { width: 100%; }
 
-/* ---- yorug' tema ----
-   Martaba ranglari qora fon uchun tanlangan (neon yashil, sariq, laym). Oq
-   fonda ular MATN sifatida o'qilmaydi — 1.6:1 gacha tushadi. To'ldirish va
-   chekka o'sha-o'shaligicha qoladi, faqat matn va ikonka qoraytiriladi:
-   shunda daraja rangi ma'nosini yo'qotmaydi, lekin ko'rinadi. */
+.lv-cel { display: flex; flex-direction: column; gap: 10px; }
+.lv-cel-m { display: flex; align-items: center; gap: 13px; padding: 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--line2); background: var(--inset); }
+.lv-cel-m b { display: block; font-size: 16px; font-weight: 700; }
+.lv-cel-m span { display: block; }
+.lv-cel-lv { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.lv-cel-lv b { display: block; font-size: 19px; font-weight: 700; color: var(--c); }
+.lv-cel-lv span { display: block; font-size: 14px; color: var(--text2); }
+
+/* ------------------------------------------------------------------ */
+/* YORUG' TEMA                                                         */
+/* Martaba ranglari qora fon uchun tanlangan (neon yashil, sariq, laym).*/
+/* Oq fonda ular MATN sifatida o'qilmaydi — 1.6:1 gacha tushadi.        */
+/* To'ldirish va chekka o'sha-o'shaligicha qoladi, faqat matn va belgi  */
+/* qoraytiriladi: daraja rangi ma'nosini yo'qotmaydi, lekin ko'rinadi.  */
+/* Medal metallariga tegilmaydi — ular o'zi yorug' fon uchun ham to'g'ri.*/
+/* ------------------------------------------------------------------ */
 [data-theme="light"] .lv-rank,
 [data-theme="light"] .lv-mark-n,
 [data-theme="light"] .lv-cel-lv b { color: color-mix(in srgb, var(--c) 68%, #000); }
-[data-theme="light"] .lv-chip.on { color: color-mix(in srgb, var(--c) 74%, #000); }
 
-/* ---- tor ekran ---- */
+/* ------------------------------------------------------------------ */
+/* TOR EKRAN                                                           */
+/* ------------------------------------------------------------------ */
 @media (max-width: 380px) {
-  .lv-mark { width: 48px; height: 48px; border-radius: 15px; }
-  .lv-mark-n { font-size: 19px; }
-  .lv-fam-g { grid-template-columns: 1fr 1fr; }
-  .lv-item { padding: 8px; gap: 7px; }
+  .lv-mark { width: 46px; height: 46px; border-radius: 14px; }
+  .lv-mark-n { font-size: 18px; }
+  .lv-mark.big { width: 66px; height: 66px; border-radius: 20px; }
+  .lv-mark.big .lv-mark-n { font-size: 26px; }
+  .lv-grid { grid-template-columns: repeat(3, 1fr); }
+  .lv-hero { gap: 10px; padding: 10px; }
 }
