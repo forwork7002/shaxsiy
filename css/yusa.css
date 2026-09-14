@@ -12,8 +12,8 @@
 .yu-head-acts .btn.icon { width: 40px; height: 40px; border: 1px solid var(--line); background: var(--inset); }
 .yu-status { position: relative; display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
 .yu-state { transition: color .3s, border-color .3s, background .3s; }
-.yu-state.think { color: var(--info-text); border-color: rgba(125,211,252,.35); background: rgba(125,211,252,.10); }
-.yu-state.happy { color: var(--success-text); border-color: rgba(107,227,164,.35); background: rgba(107,227,164,.10); }
+.yu-state.think { color: var(--info-text); border-color: color-mix(in srgb, var(--info) 35%, transparent); background: color-mix(in srgb, var(--info) 10%, transparent); }
+.yu-state.happy { color: var(--success-text); border-color: color-mix(in srgb, var(--success) 35%, transparent); background: color-mix(in srgb, var(--success) 10%, transparent); }
 
 /* orb avatar (CSS only) */
 .yu-orb { --g: var(--success-glow); position: relative; width: 60px; height: 60px; flex: none; border-radius: 50%;
@@ -62,8 +62,8 @@
 .yu-bubble .yu-ul, .yu-bubble .yu-ol { margin: 4px 0 6px; padding-left: 18px; display: grid; gap: 4px; }
 .yu-bubble .yu-ul:last-child, .yu-bubble .yu-ol:last-child { margin-bottom: 0; }
 .yu-bubble li::marker { color: var(--text3); }
-.yu-bubble strong { font-weight: 700; color: var(--success-text); background: rgba(107,227,164,.10); padding: 0 5px; border-radius: 6px; }
-[data-theme="light"] .yu-bubble strong { background: rgba(79,168,105,.14); color: var(--text); }
+.yu-bubble strong { font-weight: 700; color: var(--success-text); background: color-mix(in srgb, var(--success) 10%, transparent); padding: 0 5px; border-radius: 6px; }
+[data-theme="light"] .yu-bubble strong { background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--text); }
 [data-theme="light"] .yu-bubble code { color: var(--text); background: var(--inset); }
 .yu-bubble em { font-style: italic; color: var(--text2); }
 .yu-bubble code { font-family: var(--mono); font-size: 12.5px; padding: 1px 6px; border-radius: 6px; background: var(--f-input); border: 1px solid var(--line2); color: var(--info-text); }
@@ -103,7 +103,7 @@
 
 /* thread list */
 .yu-th { cursor: pointer; min-height: 52px; }
-.yu-th.yu-on { border-color: rgba(107,227,164,.35); background: rgba(107,227,164,.06); box-shadow: inset 3px 0 0 0 var(--success); }
+.yu-th.yu-on { border-color: color-mix(in srgb, var(--success) 35%, transparent); background: color-mix(in srgb, var(--success) 6%, transparent); box-shadow: inset 3px 0 0 0 var(--success); }
 .yu-th .li-del { min-width: 40px; min-height: 40px; }
 .yu-newbtn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 42px; margin-top: 2px; }
 

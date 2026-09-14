@@ -4,36 +4,57 @@
    chrome (header/nav/side) · modal/toast · module sections
    ===================================================================== */
 
-/* ---------- tokens ---------- */
+/* ---------- tokens ----------
+   Rang tili WHOOP'dan olindi: qora kanvas, ustida faqat o'lchov yonadi.
+   Bitta qoida hamma narsani hal qiladi — RANG = MA'LUMOT.
+     yashil/sariq/qizil — zona (tayyorlik, bajarilish, ogohlantirish)
+     ko'k — zo'riqish va axborot
+     binafsha — uyqu
+   Bosiladigan narsa (tugma, tanlangan yorliq, kalit) rangsiz: oq yoki kulrang.
+   Shuning uchun ekranda nechta rang ko'rinsa, shuncha haqiqiy o'lchov bor.
+   Ilgari urg'u terakota edi va u hech qanday ma'no bildirmasdan hamma joyda
+   yonardi — ko'z unga o'rganib qolgach, haqiqiy ogohlantirish ham xuddi
+   shunday ko'rinardi. Endi urg'u tugmada emas, ma'lumotda.
+   ---------- */
 :root {
-  --bg: #0A090C; --bg2: #111017; --bg3: #16151C;
-  --text: #F7F6F4; --text2: #A9A59E; --text3: #8E8981; --text4: #6B665F;
-  /* Tokenning nomi togri aytadi: bu YORUG fon ustidagi siyoh. Oq qilib qoyilgani
-     uchun terakota tugmada 2.66:1, yashil ibodat dialida 1.60:1 chiqardi. */
-  --ink-on-light: #231E19;
-  /* Matn qatlami: rang MATN sifatida ishlatilganda. Qorongi temada asosiy
-     qiymat bilan bir xil — bu yerda hammasi allaqachon AA dan otadi. */
-  --accent-text: #E07658; --success-text: #6BE3A4; --warning-text: #F2C063;
-  --info-text: #7DD3FC; --violet-text: #A78BFA;
-  --success: #6BE3A4; --success-glow: rgba(107,227,164,.40);
-  --warning: #F2C063; --warning-glow: rgba(242,192,99,.55);
-  --danger: #FF6B6B; --danger-text: #FF8A8A;
-  --info: #7DD3FC; --accent: #E07658; --violet: #A78BFA;
-  --glass: #1C1B23; --inset: rgba(255,255,255,.045); --recess: rgba(255,255,255,.03);
-  --card-bg: #16151C; --card-solid: #16151C; --card2: #1C1B23; --card-line: rgba(255,255,255,.07); --sheen: transparent;
-  --row-bg: rgba(255,255,255,.04); --row-line: rgba(255,255,255,.07);
-  --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.12); --line3: rgba(255,255,255,.20);
-  --track: rgba(255,255,255,.08); --nav: #1A1921; --accent-soft: rgba(224,118,88,.16);
-  --hover: rgba(255,255,255,.07); --focus: rgba(255,255,255,.28);
-  --f-input: rgba(0,0,0,.28); --f-input-focus: rgba(0,0,0,.36);
-  --btn-grad: linear-gradient(150deg,#E8845F 0%,#D46B4D 100%);
-  --title-grad: linear-gradient(180deg,#FFFFFF 0%,#C7C4BC 120%);
+  /* Kanvas — chin qora. OLED'da piksel butunlay o'chadi, ya'ni kartaning
+     chekkasi chiziqsiz ham seziladi; shu sabab chegara juda ingichka. */
+  --bg: #000000; --bg2: #08080A; --bg3: #131316;
+  --text: #FFFFFF; --text2: #B6BBC2; --text3: #878D96; --text4: #5B616A;
+  /* Tokenning nomi to'g'ri aytadi: bu YORUG' fon ustidagi siyoh. Oq tugma ham,
+     neon yashil to'ldirish ham shuni ishlatadi — ikkalasida ham qora yagona
+     to'g'ri javob (oq matn neon yashil ustida 2:1 ga tushardi). */
+  --ink-on-light: #000000;
+  /* Matn qatlami: rang MATN sifatida ishlatilganda. Qora fonda neon yashil va
+     sariq o'zi 13:1 dan o'tadi, shuning uchun o'zgarmaydi; qizil esa 3.5:1 —
+     u faqat to'ldirish uchun qoladi, matnga yorug'rog'i ketadi. */
+  --accent-text: #4FB8F5; --success-text: #16EC06; --warning-text: #FFDE00;
+  --info-text: #4FB8F5; --violet-text: #A99BFF;
+  --success: #16EC06; --success-glow: rgba(22,236,6,.45);
+  --warning: #FFDE00; --warning-glow: rgba(255,222,0,.45);
+  --danger: #FF0026; --danger-text: #FF4D63;
+  --info: #0093E7; --accent: #0093E7; --violet: #8B7BFF;
+  /* Zona uchligi nomma-nom: JS ham, CSS ham shu uchtasidan o'qiydi, shunda
+     "yuqori tayyorlik" ilovaning hamma burchagida bir xil yashil bo'ladi. */
+  --z-high: #16EC06; --z-mid: #FFDE00; --z-low: #FF0026;
+  --strain: #0093E7; --sleep: #8B7BFF; --recovery: #16EC06;
+  --glass: #131316; --inset: rgba(255,255,255,.04); --recess: rgba(255,255,255,.025);
+  --card-bg: #0E0E10; --card-solid: #0E0E10; --card2: #17171A; --card-line: rgba(255,255,255,.08); --sheen: transparent;
+  --row-bg: rgba(255,255,255,.035); --row-line: rgba(255,255,255,.07);
+  --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.13); --line3: rgba(255,255,255,.24);
+  --track: rgba(255,255,255,.09); --nav: #000000; --accent-soft: rgba(0,147,231,.16);
+  --hover: rgba(255,255,255,.07); --focus: rgba(255,255,255,.55);
+  --f-input: rgba(255,255,255,.045); --f-input-focus: rgba(255,255,255,.07);
+  /* Asosiy tugma — tekis oq. Gradient "bu tugma" degan bezak edi; oq to'rtburchak
+     qora ekranda o'zidan boshqa hech narsaga o'xshamaydi, ya'ni izlash shart emas. */
+  --btn-grad: #FFFFFF;
+  --title-grad: linear-gradient(180deg,#FFFFFF 0%,#9AA0A8 130%);
   --wash1: transparent; --wash2: transparent; --wash3: transparent; --grain: transparent;
-  --ruh: #7FBEEA; --aql: #7BDFB4; --qalb: #F09CBE; --tana: #F0A25C; --boshqa: #B5AFA3; --aralash: #A78BFA;
+  --ruh: #4FB8F5; --aql: #16EC06; --qalb: #FF6E8A; --tana: #FF9F1C; --boshqa: #8A9099; --aralash: #8B7BFF;
   /* Butun ilova — bitta oila: IBM Plex Sans (o'zgaruvchan 100–700, css/fonts.css).
      Sarlavha ham, matn ham, raqam ham shundan; farq faqat vazn va o'lchamda.
      Uch narsa uchun tanlandi: raqamlari o'zidan bir xil kenglikda (ustunlar tekis,
-     «11 daq» da bo'shliq yo'q), kirill bilan lotin bir usta qo'lidan chiqqan
+     "11 daq" da bo'shliq yo'q), kirill bilan lotin bir usta qo'lidan chiqqan
      (Quicksand'da kirill umuman yo'q edi — sarlavhalar jimgina Nunito'ga qulardi),
      va mayda yozuv qorong'i fonda ochiq qoladi.
      Mono endi faqat kodda: u har qurilmada boshqacha edi, raqamlar shu sabab har xil chiqardi. */
@@ -41,42 +62,53 @@
   --num: var(--font);
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-  --r: 22px; --r-sm: 14px; --r-xs: 9px; --r-lg: 28px; --r-pill: 999px;
-  --sh: none; --sh-modal: 0 24px 70px rgba(0,0,0,.6); --sh-card: none;
-  --sh-nav: 0 10px 30px rgba(0,0,0,.5);
+  /* Burchaklar qisqardi (22 -> 16). Yumaloq karta "yumshoq, do'stona" deydi;
+     asbob paneli esa aniq bo'lishi kerak. Chekka qanchalik tik bo'lsa, ichidagi
+     raqam shunchalik jiddiy o'qiladi. */
+  --r: 16px; --r-sm: 11px; --r-xs: 7px; --r-lg: 20px; --r-pill: 999px;
+  --sh: none; --sh-modal: 0 32px 80px rgba(0,0,0,.85); --sh-card: none;
+  --sh-nav: 0 -14px 34px rgba(0,0,0,.85);
   --sh-btn: none;
   --ease-out: cubic-bezier(.22,1,.36,1); --ease-spring: cubic-bezier(.34,1.56,.64,1); --ease-sheet: cubic-bezier(.32,.72,0,1);
-  /* Panelning egallagan joyi: balandligi (62) + pastdagi bo'shliq (10) +
-     nafas (14). Sahifa to'ldirishi, toast, Ibodat tugmasi va Yusa oynasi
-     shu bitta sondan hisoblaydi — panel o'lchami shu yerda o'zgaradi. */
-  --nav-h: 86px; --side-w: 220px;
+  /* Panelning egallagan joyi: balandligi (64) + nafas (14). Panel endi ekran
+     chekkasiga yopishadi (suzmaydi), shuning uchun pastdagi 10px bo'shliq
+     yo'qoldi. Sahifa to'ldirishi, toast, Ibodat tugmasi va Yusa oynasi shu
+     bitta sondan hisoblaydi — panel o'lchami shu yerda o'zgaradi. */
+  --nav-h: 78px; --side-w: 220px;
   color-scheme: dark;
 }
+/* Yorug' tema — "laboratoriya oq"i. WHOOP'da bunday rejim yo'q, shuning uchun
+   bu yerda tarjima qilindi: qora kanvas oqqa aylanadi, zona ranglari esa oq
+   fonda o'qilishi uchun to'qlashadi (neon yashil oq fonda 1.6:1 — matn uchun
+   umuman yaramaydi). To'ldirish sifatida ular yorqinroq qoladi. */
 [data-theme="light"] {
-  --bg: #F3EEE7; --bg2: #EDE6DC; --bg3: #FFFFFF;
-  --text: #231E19; --text2: #6B6259; --text3: #665E55; --text4: #726A61;
-  --ink-on-light: #231E19;
-  /* Matn qatlami — fon #F3EEE7 ustida 4.6:1 dan past tushmaydi.
-     Asosiy ranglar (--accent, --success...) fon sifatida oz holicha qoladi. */
-  --accent-text: #b74721; --success-text: #30784f; --warning-text: #8c641b;
-  --info-text: #327099; --violet-text: #7553d4;
-  --success: #3F9C67; --success-glow: rgba(63,156,103,.30);
-  --warning: #d69a2b; --warning-glow: rgba(214,154,43,.4);
-  --danger: #d65c5c; --danger-text: #c03c3c;
-  --info: #3C87B8; --accent: #DD6B44; --violet: #7C5CD6;
-  --glass: #FAF6F1; --inset: rgba(40,32,26,.045); --recess: rgba(40,32,26,.03);
-  --card-bg: #FFFFFF; --card-solid: #FFFFFF; --card2: #FAF6F1; --card-line: rgba(40,32,26,.09); --sheen: transparent;
-  --row-bg: #FFFFFF; --row-line: rgba(40,32,26,.07);
-  --line: rgba(40,32,26,.09); --line2: rgba(40,32,26,.16); --line3: rgba(40,32,26,.24);
-  --track: rgba(40,32,26,.10); --nav: #FFFFFF; --accent-soft: rgba(221,107,68,.14);
-  --hover: rgba(40,32,26,.06); --focus: rgba(221,107,68,.55);
-  --f-input: rgba(40,32,26,.045); --f-input-focus: #FFFFFF;
-  --btn-grad: linear-gradient(150deg,#E4805F 0%,#DD6B44 100%);
-  --title-grad: linear-gradient(180deg,#231E19 0%,#4A423A 120%);
+  --bg: #F1F2F4; --bg2: #E8EAED; --bg3: #FFFFFF;
+  --text: #0A0B0D; --text2: #4A4F57; --text3: #666C75; --text4: #878D96;
+  --ink-on-light: #0A0B0D;
+  --accent-text: #00649F; --success-text: #10820A; --warning-text: #8A6B00;
+  --info-text: #00649F; --violet-text: #5B48C7;
+  --success: #17BE0C; --success-glow: rgba(23,190,12,.32);
+  --warning: #F5C900; --warning-glow: rgba(245,201,0,.40);
+  --danger: #E00020; --danger-text: #C10018;
+  --info: #0077BD; --accent: #0077BD; --violet: #6A55E0;
+  --z-high: #17BE0C; --z-mid: #F5C900; --z-low: #E00020;
+  --strain: #0077BD; --sleep: #6A55E0; --recovery: #17BE0C;
+  --glass: #FFFFFF; --inset: rgba(10,11,13,.04); --recess: rgba(10,11,13,.025);
+  --card-bg: #FFFFFF; --card-solid: #FFFFFF; --card2: #F7F8F9; --card-line: rgba(10,11,13,.10); --sheen: transparent;
+  --row-bg: #FFFFFF; --row-line: rgba(10,11,13,.07);
+  --line: rgba(10,11,13,.09); --line2: rgba(10,11,13,.15); --line3: rgba(10,11,13,.26);
+  --track: rgba(10,11,13,.10); --nav: #FFFFFF; --accent-soft: rgba(0,119,189,.13);
+  --hover: rgba(10,11,13,.06); --focus: rgba(0,119,189,.6);
+  --f-input: rgba(10,11,13,.045); --f-input-focus: #FFFFFF;
+  /* Oq fonda oq tugma ko'rinmaydi — bu yerda u teskarisiga aylanadi: qora
+     to'ldirish, oq yozuv. `--ink-on-light` bu temada qora bo'lgani uchun
+     tugmaning matn rangi alohida beriladi (css/whoop-ui.css). */
+  --btn-grad: #0A0B0D;
+  --title-grad: linear-gradient(180deg,#0A0B0D 0%,#3C424A 130%);
   --wash1: transparent; --wash2: transparent; --wash3: transparent; --grain: transparent;
-  --ruh: #4f8fc0; --aql: #4fa869; --qalb: #b6406b; --tana: #d18a3a; --boshqa: #8f877a; --aralash: #7c5cd6;
-  --sh: none; --sh-modal: 0 24px 70px rgba(60,45,32,.22); --sh-card: none;
-  --sh-nav: 0 8px 26px rgba(60,45,32,.16);
+  --ruh: #0077BD; --aql: #10820A; --qalb: #C4265A; --tana: #B96A00; --boshqa: #666C75; --aralash: #6A55E0;
+  --sh: none; --sh-modal: 0 24px 70px rgba(10,11,13,.20); --sh-card: none;
+  --sh-nav: 0 -10px 28px rgba(10,11,13,.10);
   --sh-btn: none;
   color-scheme: light;
 }
@@ -95,7 +127,7 @@ body { min-height: 100vh; min-height: 100dvh; position: relative; overflow-x: hi
    har aylantirishda qayta bo'yalardi. Tokenlar (--wash1..3, --grain) o'z
    joyida qoldi, shaffofga aylantirildi: ularga murojaat qiladigan modullar
    bor. */
-::selection { background: rgba(224,118,88,.3); color: var(--text); }
+::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--text); }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
 button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
 button { cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
@@ -167,7 +199,7 @@ p { margin: 0 0 8px; }
    WHOOP ulanish qatori shuni ishlatadi. Bir payt uni butunlay shaffof qilgandim
    va o'sha oltita joy sahifa chekkasida yalang'och matn bo'lib qolgandi. */
 .card.flat { background: var(--inset); border: 1px solid var(--line); padding: 14px 16px; }
-.card.all-done::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 0%, rgba(107,227,164,.10), transparent 60%); }
+.card.all-done::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--success) 10%, transparent), transparent 60%); }
 .card.all-done .kpi-num, .card.all-done .kpi-label { color: var(--success-text); }
 .card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
 .card-head .title { flex: 1; min-width: 0; }
@@ -193,7 +225,7 @@ p { margin: 0 0 8px; }
 .zone { position: absolute; top: 9px; right: 9px; width: 7px; height: 7px; border-radius: 50%; background: var(--line3); }
 .zone.z-good { background: var(--success); box-shadow: 0 0 7px var(--success-glow); }
 .zone.z-warn { background: var(--warning); box-shadow: 0 0 7px var(--warning-glow); }
-.zone.z-bad { background: var(--danger-text); box-shadow: 0 0 7px rgba(255,138,138,.55); }
+.zone.z-bad { background: var(--danger-text); box-shadow: 0 0 7px color-mix(in srgb, var(--danger-text) 55%, transparent); }
 
 /* ---------- list rows ---------- */
 .list { list-style: none; margin: 0; padding: 0; }
@@ -201,9 +233,9 @@ p { margin: 0 0 8px; }
   background: var(--row-bg); border: 1px solid var(--row-line); border-radius: 13px;
   transition: background .2s, border-color .2s, opacity .3s; min-height: 46px; }
 @media (hover: hover) { .li:hover { background: var(--hover); } }
-.li.done { opacity: .5; background: rgba(107,227,164,.04); }
+.li.done { opacity: .5; background: color-mix(in srgb, var(--success) 4%, transparent); }
 .li.done .li-text { text-decoration: line-through; text-decoration-color: var(--text3); }
-.li.hl { background: rgba(242,192,99,.10); box-shadow: inset 3px 0 0 0 var(--warning); }
+.li.hl { background: color-mix(in srgb, var(--warning) 10%, transparent); box-shadow: inset 3px 0 0 0 var(--warning); }
 .li.tap { cursor: pointer; user-select: none; }
 .li-body { flex: 1; min-width: 0; }
 .li-text { font-size: 14px; color: var(--text); line-height: 1.4; overflow-wrap: anywhere; }
@@ -226,10 +258,10 @@ p { margin: 0 0 8px; }
 
 /* ---------- chips ---------- */
 .pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: var(--r-pill); background: var(--glass); border: 1px solid var(--line); color: var(--text3); font-size: 11px; font-weight: 600; letter-spacing: .02em; white-space: nowrap; transition: background .2s, color .2s, border-color .2s; }
-.pill.on { background: rgba(242,192,99,.10); color: var(--warning-text); border-color: rgba(242,192,99,.32); }
-.pill.good { background: rgba(107,227,164,.10); color: var(--success-text); border-color: rgba(107,227,164,.3); }
-.pill.bad { background: rgba(255,107,107,.10); color: var(--danger-text); border-color: rgba(255,107,107,.3); }
-.pill.info { background: rgba(125,211,252,.10); color: var(--info-text); border-color: rgba(125,211,252,.3); }
+.pill.on { background: color-mix(in srgb, var(--warning) 10%, transparent); color: var(--warning-text); border-color: color-mix(in srgb, var(--warning) 32%, transparent); }
+.pill.good { background: color-mix(in srgb, var(--success) 10%, transparent); color: var(--success-text); border-color: color-mix(in srgb, var(--success) 30%, transparent); }
+.pill.bad { background: color-mix(in srgb, var(--danger) 10%, transparent); color: var(--danger-text); border-color: color-mix(in srgb, var(--danger) 30%, transparent); }
+.pill.info { background: color-mix(in srgb, var(--info) 10%, transparent); color: var(--info-text); border-color: color-mix(in srgb, var(--info) 30%, transparent); }
 .pill.big { padding: 8px 12px; font-size: 12px; }
 button.pill { min-height: 40px; padding: 8px 13px; }
 .tag { --c: var(--boshqa); display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--r-pill); font-size: 10px; font-weight: 700; letter-spacing: .01em; white-space: nowrap;
@@ -258,8 +290,8 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .btn:disabled { opacity: .45; cursor: not-allowed; transform: none; filter: none; }
 .btn.ghost { background: var(--glass); color: var(--text); border: 1px solid var(--line2); box-shadow: none; font-weight: 600; }
 @media (hover: hover) { .btn.ghost:hover { background: var(--hover); border-color: var(--line3); } }
-.btn.danger { background: rgba(255,107,107,.12); color: var(--danger-text); border: 1px solid rgba(255,107,107,.3); box-shadow: none; }
-@media (hover: hover) { .btn.danger:hover { background: rgba(255,107,107,.2); } }
+.btn.danger { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger-text); border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent); box-shadow: none; }
+@media (hover: hover) { .btn.danger:hover { background: color-mix(in srgb, var(--danger) 20%, transparent); } }
 .btn.sm { padding: 9px 14px; font-size: 12.5px; border-radius: 11px; min-height: 40px; }
 .btn.xs { padding: 7px 11px; font-size: 11.5px; border-radius: 9px; min-height: 36px; }
 .btn.block { width: 100%; }
@@ -297,7 +329,7 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .stepper .val { flex: 1; text-align: center; font-family: var(--num); font-size: 22px; font-weight: 700; color: var(--text); }
 .emoji-row { display: flex; gap: 6px; }
 .emoji-row button { flex: 1; font-size: 22px; padding: 8px 0; border-radius: 12px; border: 1.5px solid var(--line2); background: var(--f-input); transition: background .15s, border-color .15s; line-height: 1; }
-.emoji-row button.on { border-color: var(--success); background: rgba(107,227,164,.12); transform: scale(1.06); }
+.emoji-row button.on { border-color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); transform: scale(1.06); }
 .toggle { position: relative; width: 44px; height: 26px; border-radius: 13px; background: var(--line2); border: 0; padding: 0; flex: none; transition: background .2s; }
 .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--text); transition: transform .2s; }
 .toggle.on { background: var(--success); }
@@ -345,11 +377,11 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .spark-labels span { flex: 1; text-align: center; overflow: hidden; }
 .hm { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
 .hm i, .hm-year-grid i { width: 12px; height: 12px; border-radius: 3px; display: block; background: var(--line); }
-.hm i[data-l="1"], .hm-year-grid i[data-l="1"] { background: rgba(107,227,164,.22); }
-.hm i[data-l="2"], .hm-year-grid i[data-l="2"] { background: rgba(107,227,164,.42); }
-.hm i[data-l="3"], .hm-year-grid i[data-l="3"] { background: rgba(107,227,164,.65); }
+.hm i[data-l="1"], .hm-year-grid i[data-l="1"] { background: color-mix(in srgb, var(--success) 22%, transparent); }
+.hm i[data-l="2"], .hm-year-grid i[data-l="2"] { background: color-mix(in srgb, var(--success) 42%, transparent); }
+.hm i[data-l="3"], .hm-year-grid i[data-l="3"] { background: color-mix(in srgb, var(--success) 65%, transparent); }
 .hm i[data-l="4"], .hm-year-grid i[data-l="4"] { background: var(--success); box-shadow: 0 0 5px var(--success-glow); }
-.hm i[data-l="f"], .hm-year-grid i[data-l="f"] { background: rgba(125,211,252,.35); }
+.hm i[data-l="f"], .hm-year-grid i[data-l="f"] { background: color-mix(in srgb, var(--info) 35%, transparent); }
 .hm-year { overflow-x: auto; padding-bottom: 6px; }
 .hm-year-grid { display: grid; grid-template-rows: repeat(7, 10px); grid-auto-flow: column; gap: 2.5px; width: max-content; }
 .hm-year-grid i { width: 10px; height: 10px; border-radius: 2px; }
@@ -472,9 +504,9 @@ i.top-av { background: linear-gradient(150deg, var(--accent), color-mix(in srgb,
 @media (min-width: 960px){ .toast { bottom: 24px; } }
 .kbd { font-family: var(--mono); font-size: 10.5px; padding: 2px 6px; border-radius: 5px; background: var(--inset); border: 1px solid var(--line2); color: var(--text3); }
 .error-card pre { white-space: pre-wrap; font-size: 11px; max-height: 200px; overflow: auto; }
-.banner { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: var(--r-sm); background: rgba(242,192,99,.10); border: 1px solid rgba(242,192,99,.3); color: var(--warning-text); font-size: 12.5px; margin-bottom: 12px; }
-.banner.bad { background: rgba(255,107,107,.10); border-color: rgba(255,107,107,.3); color: var(--danger-text); }
-.banner.good { background: rgba(107,227,164,.10); border-color: rgba(107,227,164,.3); color: var(--success-text); }
+.banner { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--warning) 10%, transparent); border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent); color: var(--warning-text); font-size: 12.5px; margin-bottom: 12px; }
+.banner.bad { background: color-mix(in srgb, var(--danger) 10%, transparent); border-color: color-mix(in srgb, var(--danger) 30%, transparent); color: var(--danger-text); }
+.banner.good { background: color-mix(in srgb, var(--success) 10%, transparent); border-color: color-mix(in srgb, var(--success) 30%, transparent); color: var(--success-text); }
 @media (min-width: 960px){ .fab { bottom: 24px; right: 24px; } }
 
 /* ---------- loading skeleton ---------- */

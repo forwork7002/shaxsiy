@@ -40,8 +40,39 @@ cp .env.example .env   # MA_USERS / MA_PASSCODE, Google, WHOOP, AI kalitlari
 ```
 Nginx/Caddy orqali HTTPS bilan chiqaring. Lokal test: `.env` da `MA_DEV=1` → `http://127.0.0.1:8081/?server=1`.
 
-Ma'lumot `data/<uid>.json` da, kunlik zaxiralar `data/backups/` da (30 kun), arxiv `data/dash.db` (SQLite),
+Ma'lumot `data/<uid>.json` da, kunlik zaxiralar `data/backups/` da, arxiv `data/dash.db` (SQLite),
 ovqat rasmlari `data/<uid>.food/`. Eski `data/data.json` bo'lsa birinchi so'rovda ko'chiriladi.
+
+## Ma'lumot saqlanishi
+
+Hisob ochgan odamning ma'lumoti yillar o'tsa ham butun qolishi kerak. Shuning uchun:
+
+**Serverda, o'z-o'zidan.** Har kuni: bazaning butunligi tekshiriladi (`PRAGMA quick_check`) → arxiv
+siqiladi → nusxa olinadi va nusxaning o'zi ochib tekshiriladi → oyiga bir marta `VACUUM`.
+Baza buzilgan bo'lsa **nusxa umuman olinmaydi**, ya'ni buzuq nusxa sog'ining ustiga chiqmaydi.
+Nusxalar avlodlarga ajratiladi: 14 kun har kuni · 8 hafta haftasiga bitta · 24 oy oyiga bitta ·
+undan narisi **yiliga bitta va abadiy**.
+
+**Serverdan tashqariga — bu eng muhimi.** Yuqoridagilarning hammasi bitta diskda yotadi.
+Droplet yo'qolsa hammasi birga ketadi. Shuning uchun nusxani tashqariga chiqarish kerak:
+
+```powershell
+.\deploy\schedule-backup.ps1     # bir marta: har kuni 21:00 da o'zi tortadi
+.\deploy\pull-backup.ps1         # yoki qo'lda, istalgan vaqtda
+```
+```bash
+./deploy/pull-backup.sh root@SERVER_IP ~/dash-zaxira    # Linux/Mac
+```
+Ikkalasi ham arxivni ochib tekshiradi, lokal nusxalarni ham avlodlarga ajratadi va serverga
+`data/.offsite` belgisini yozadi. **Sozlash → Ma'lumot → «Ma'lumot sog'ligi»** o'sha belgining
+yoshini ko'rsatadi va 7 kundan oshsa qizil chiziq chiqaradi — jimgina to'xtagan zaxira
+zaxira emas. Tiklash: `./deploy/restore-backup.sh root@SERVER_IP <fayl.tgz>`.
+
+**Ilovadan tashqariga.** Sozlash → Ma'lumot → **To'liq eksport (ZIP)**: holat, butun arxiv
+(o'chirilgan yozuvlar ham), profil va suratlar — hammasi oddiy JSON va JPG. Bu faylni o'qish
+uchun shu ilova kerak emas.
+
+Sinov: `.venv/bin/python tests/test_durability.py` (43 ta tekshiruv).
 
 ## WHOOP
 developer.whoop.com → ilova → Redirect URI `https://sizning-domen/api/whoop/callback` → `.env` ga `WHOOP_CLIENT_ID/SECRET`.

@@ -324,6 +324,17 @@ def _atomic_write(p: Path, data, mode: int = 0o600) -> None:
         except OSError:
             pass
         os.replace(tmp, p)
+        # Papkaning o'zini ham diskka tushiramiz: fsync(fayl) MAZMUNNI kafolatlaydi,
+        # NOMNI esa yo'q. Papka yozuvi keshda qolsa, elektr uzilganda fayl eski nomi
+        # bilan qolishi — ya'ni almashtirish umuman bo'lmagani — mumkin.
+        try:
+            dfd = os.open(str(p.parent), os.O_RDONLY)
+            try:
+                os.fsync(dfd)
+            finally:
+                os.close(dfd)
+        except OSError:
+            pass
     except BaseException:
         try:
             tmp.unlink(missing_ok=True)
@@ -1145,28 +1156,13 @@ def load_data(uid: str) -> dict:
 
 
 def _write_atomic(f: Path, text: str):
-    """Yozib, DISKKA TUSHIRIB, keyin o'rniga qo'yadi.
+    """_atomic_write ning eski nomi — bitta amalga oshirish qolishi uchun shunga yo'naltiriladi.
 
-    tmp.write_text() + replace() o'zi yetarli emas: yozuv sahifa keshida turadi
-    va rename undan oldin diskka tushishi mumkin. Elektr uzilsa yoki VM qulasa
-    fayl BO'SH yoki yarim yozilgan holda qoladi — ya'ni ma'lumot yo'qoladi.
-    fsync fayl mazmunini, papkaning fsync'i esa nomni kafolatlaydi.
+    Ikkitasi yonma-yon turganda ular ajralib ketadi: biri noyob vaqtinchalik nom
+    ishlatardi (ikki ishchi bir-birining yarim faylini nashr qilmasin), ikkinchisi
+    papkani fsync qilardi (nom ham diskka tushsin). Endi ikkalasi ham bir joyda.
     """
-    tmp = f.with_suffix(f.suffix + ".tmp")
-    with open(tmp, "w", encoding="utf-8") as fh:
-        fh.write(text)
-        fh.flush()
-        os.fsync(fh.fileno())
-    _private(tmp)
-    tmp.replace(f)
-    try:
-        dfd = os.open(str(f.parent), os.O_RDONLY)
-        try:
-            os.fsync(dfd)
-        finally:
-            os.close(dfd)
-    except OSError:
-        pass
+    _atomic_write(f, text)
 
 
 def save_data(uid: str, d: dict):
