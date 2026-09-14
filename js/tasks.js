@@ -577,6 +577,10 @@
     if (!body) body = `<div class="empty">${esc(t('tasks.empty'))}<div class="tk-sub">${esc(t('tasks.emptyHint'))}</div></div>`;
 
     const q = ['today', 'tomorrow', 'none'].includes(F().newDate) ? F().newDate : 'today';
+    /* Ko'rsatma bir marta ishlatilgandan keyin yo'qoladi. O'rgatuvchi yozuv
+       doim turib qolsa u ko'rsatma bo'lmay qoladi — shovqin bo'ladi va odam
+       uni ko'rmay qo'yadi. Bilib olgan odamga takrorlashning hojati yo'q. */
+    const hint = F().smart ? '' : `<span class="tk-qk-h">${esc(t('tasks.q.hint'))}</span>`;
     return `
       <div class="tk-new">
         <input class="inp tk-new-i" id="tkText" placeholder="${esc(t('tasks.add.ph'))}" data-enter="tkAdd" data-input="tkPreview" autocomplete="off" maxlength="300" enterkeyhint="done">
@@ -585,7 +589,7 @@
       <div class="tk-pv" id="tkPv"></div>
       <div class="tk-qk">
         ${['today', 'tomorrow', 'none'].map((k) => `<button class="${q === k ? 'on' : ''}" data-act="tkQk" data-q="${k}">${esc(t('tasks.q.' + k))}</button>`).join('')}
-        <span class="tk-qk-h">${esc(t('tasks.q.hint'))}</span>
+        ${hint}
       </div>
       <div class="card tk-list">${body}</div>
       ${T.length ? `<div class="tk-hint">${esc(t('tasks.swipe'))}</div>` : ''}`;
@@ -767,6 +771,8 @@
       priority: p.priority || 2, createdAt: Date.now(), goalId: p.goalId || null };
     if (p.time) x.time = p.time;
     if (p.repeat) x.repeat = p.repeat;
+    // bir marta ishlatilgan bo'lsa ko'rsatma yo'qoladi (qurilmada saqlanadi)
+    if (p.date !== undefined || p.time || p.priority || p.goalId || p.repeat) { F().smart = 1; D.saveUi(); }
     D.S.tasks.unshift(x);
     if (inp) inp.value = '';
     pvOff.clear();

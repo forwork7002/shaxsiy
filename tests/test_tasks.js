@@ -346,6 +346,17 @@ console.log('\n16. Takrorlanuvchi vazifa bajarilganda');
     const e = typeIn('ertaga bo‘lsin');
     eq('  lekin yozilgani chipdan ustun', e && e.date, plus(1));
     D.ui.filters.tasks = { newDate: 'today' };
+
+    /* Ko'rsatma bir marta ishlatilgandan keyin yo'qolishi kerak: doim turgan
+       o'rgatuvchi yozuv ko'rsatma bo'lmay, shovqin bo'lib qoladi. */
+    D.ui.sub.tasks = 'tasks';
+    ok('boshida ko‘rsatma turadi', D.views.tasks.render().includes('tk-qk-h'));
+    typeIn('oddiy vazifa');
+    ok('  oddiy matndan keyin hamon turadi', D.views.tasks.render().includes('tk-qk-h'));
+    typeIn('ertaga bank');
+    ok('  bir marta ishlatilgach yo‘qoladi', !D.views.tasks.render().includes('tk-qk-h'));
+    ok('  lekin chiplarning o‘zi qoladi', D.views.tasks.render().includes('tk-qk'));
+    delete D.ui.filters.tasks.smart;
   }
 
   // quyi vazifa asosiy vazifani bajarilgan QILMAYDI (levels.js ochkosi buzilmasin)
