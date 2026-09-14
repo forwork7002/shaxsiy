@@ -20,18 +20,24 @@
 .lv-med { position: relative; width: var(--s, 36px); height: var(--s, 36px); flex: none;
   display: inline-grid; place-items: center; border-radius: 50%; }
 .lv-med-ring { position: absolute; inset: 0; border-radius: 50%; }
-.lv-med-face { position: absolute; inset: 11%; border-radius: 50%; display: grid; place-items: center; overflow: hidden; }
+.lv-med-face { position: absolute; inset: 12%; border-radius: 50%; display: grid; place-items: center; overflow: hidden; }
 .lv-med-face svg { position: relative; z-index: 1; }
 
-/* --- olingan: o'ymakor chekka + yaltiragan metall --- */
+/* --- olingan: tanga. Uch qatlam bilan chiqadi: tashqi halqa metall,
+   uning eng chekkasida MAYDA tishlar (tanganing frezalangan yoni), ichkarida
+   o'yilgan chiziq va yuza. Tishlar ataylab mayda va past kontrastli — ilgari
+   ular 6 gradusli va yorqin edi va medal tangaga emas, QUYOSHGA o'xshardi. --- */
 .lv-med.on .lv-med-ring {
-  background: repeating-conic-gradient(from -6deg, var(--m1) 0 6deg, var(--m3) 6deg 12deg);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--m3) 70%, transparent),
-              0 2px 10px color-mix(in srgb, var(--m2) 45%, transparent); }
+  background: linear-gradient(160deg, var(--m1) 0%, var(--m2) 42%, var(--m3) 100%);
+  box-shadow: 0 1px 5px rgba(0,0,0,.5), inset 0 0 0 1px color-mix(in srgb, var(--m3) 55%, transparent); }
+.lv-med.on .lv-med-ring::after { content: ''; position: absolute; inset: 0; border-radius: 50%; opacity: .55;
+  background: repeating-conic-gradient(from 0deg, rgba(0,0,0,.30) 0 2deg, rgba(255,255,255,.22) 2deg 4deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 78%, #000 80%);
+          mask: radial-gradient(circle, transparent 0 78%, #000 80%); }
 .lv-med.on .lv-med-face {
-  background: linear-gradient(148deg, var(--m1) 0%, var(--m2) 46%, var(--m3) 100%);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -3px 7px rgba(0,0,0,.34),
-              0 0 0 1px color-mix(in srgb, var(--m3) 55%, transparent); }
+  background: linear-gradient(150deg, var(--m1) 0%, var(--m2) 45%, var(--m3) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 6px rgba(0,0,0,.32),
+              0 0 0 1px color-mix(in srgb, var(--m3) 62%, transparent); }
 /* yorug'lik dog'i — metallni tekis rangdan ajratadigan yagona narsa */
 .lv-med.on .lv-med-face::before { content: ''; position: absolute; inset: 0; border-radius: 50%;
   background: radial-gradient(circle at 33% 24%, rgba(255,255,255,.62), rgba(255,255,255,0) 58%); }
@@ -150,15 +156,17 @@
 .lv-fam-h { display: flex; align-items: baseline; gap: 7px; margin: 0; font-size: 15px; flex-wrap: wrap; }
 .lv-fam-h svg { color: var(--text3); align-self: center; flex: none; }
 .lv-fam-h b { font-weight: 700; }
-.lv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+/* To'rt ustun: har oilaning to'rt bosqichi BITTA qatorda tursin. Uch ustunda
+   to'rtinchisi yolg'iz qolib, har oiladan keyin bo'sh joy ochilib ketardi. */
+.lv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 7px; }
 
-.lv-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 11px 6px 9px;
+.lv-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 4px 8px;
   min-width: 0; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--recess);
   color: var(--text); font: inherit; text-align: center; transition: background .15s, border-color .15s; }
 .lv-cell.on { background: var(--inset); border-color: var(--line2); }
 @media (hover: hover) { .lv-cell:hover { background: var(--hover); } }
 .lv-cell:active { transform: scale(.97); }
-.lv-cell b { font-size: 13px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.lv-cell b { font-size: 12.5px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
 .lv-cell span { line-height: 1.2; overflow-wrap: anywhere; }
 
 /* ------------------------------------------------------------------ */
@@ -168,6 +176,12 @@
 .lv-one-t { display: flex; flex-direction: column; gap: 4px; align-items: center; width: 100%; }
 .lv-one-t b { font-size: 16px; font-weight: 700; }
 .lv-one .lv-bar { width: 100%; }
+/* Chiziq nishonning o'z metallida. Oldin u --c ni topolmay oq bo'lib qolardi
+   va oyna ichida qaysi nishon ekani rangdan bilinmasdi. */
+.lv-one[data-t="bronza"] { --c: #C77B3C; }
+.lv-one[data-t="kumush"] { --c: #B9C0C8; }
+.lv-one[data-t="oltin"]  { --c: #FFC530; }
+.lv-one[data-t="olmos"]  { --c: #7FE7FF; }
 
 .lv-cel { display: flex; flex-direction: column; gap: 10px; }
 .lv-cel-m { display: flex; align-items: center; gap: 13px; padding: 12px; border-radius: var(--r-sm);
@@ -198,6 +212,6 @@
   .lv-mark-n { font-size: 18px; }
   .lv-mark.big { width: 66px; height: 66px; border-radius: 20px; }
   .lv-mark.big .lv-mark-n { font-size: 26px; }
-  .lv-grid { grid-template-columns: repeat(3, 1fr); }
+  .lv-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .lv-hero { gap: 10px; padding: 10px; }
 }

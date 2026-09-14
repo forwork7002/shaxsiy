@@ -176,7 +176,7 @@
   D.i18n.add({
     uz: {
       'lv.title': 'Daraja va nishonlar', 'lv.xp': 'ochko',
-      'lv.next': '{n}-darajagacha {x} ochko', 'lv.max': 'Eng yuqori daraja', 'lv.all': 'Barcha nishonlar',
+      'lv.next': '{n}-darajagacha {x}', 'lv.max': 'Eng yuqori daraja', 'lv.all': 'Barcha nishonlar',
       'lv.got': '{a} / {b} nishon', 'lv.left': 'yana {n}', 'lv.todayXp': 'bugun +{n}',
       'lv.newMedal': 'Yangi nishon!', 'lv.newLevel': '{n}-daraja', 'lv.close': 'Yopish',
       'lv.startTitle': 'Yo‘lingiz allaqachon boshlangan',
@@ -186,7 +186,7 @@
       'lv.secret': 'Sirli nishon', 'lv.secretHint': 'Sharti oldindan aytilmaydi. O‘z vaqtida o‘zi chiqadi.',
       'lv.u.kun': '{n} kun', 'lv.u.marta': '{n} marta', 'lv.u.ta': '{n} ta',
       'lv.t.bronza': 'Bronza', 'lv.t.kumush': 'Kumush', 'lv.t.oltin': 'Oltin', 'lv.t.olmos': 'Olmos',
-      'lv.have': 'Hozir: {n}', 'lv.gotOn': 'Olindi: {d}', 'lv.gotEarly': 'Boshidan bor edi',
+      'lv.have': 'Hozir: {n}', 'lv.gotOn': 'Olindi: {d}', 'lv.gotEarly': 'boshidan', 'lv.gotEarlyLong': 'boshidan bor edi',
 
       'lv.w.title': 'Haftalik sinov', 'lv.w.done': 'Bajarildi', 'lv.w.left': '{n} kun qoldi',
       'lv.w.jamaat': '{n} ta namozni jamoat bilan o‘qing',
@@ -238,7 +238,7 @@
     },
     uzk: {
       'lv.title': 'Даража ва нишонлар', 'lv.xp': 'очко',
-      'lv.next': '{n}-даражагача {x} очко', 'lv.max': 'Энг юқори даража', 'lv.all': 'Барча нишонлар',
+      'lv.next': '{n}-даражагача {x}', 'lv.max': 'Энг юқори даража', 'lv.all': 'Барча нишонлар',
       'lv.got': '{a} / {b} нишон', 'lv.left': 'яна {n}', 'lv.todayXp': 'бугун +{n}',
       'lv.newMedal': 'Янги нишон!', 'lv.newLevel': '{n}-даража', 'lv.close': 'Ёпиш',
       'lv.startTitle': 'Йўлингиз аллақачон бошланган',
@@ -248,7 +248,7 @@
       'lv.secret': 'Сирли нишон', 'lv.secretHint': 'Шарти олдиндан айтилмайди. Ўз вақтида ўзи чиқади.',
       'lv.u.kun': '{n} кун', 'lv.u.marta': '{n} марта', 'lv.u.ta': '{n} та',
       'lv.t.bronza': 'Бронза', 'lv.t.kumush': 'Кумуш', 'lv.t.oltin': 'Олтин', 'lv.t.olmos': 'Олмос',
-      'lv.have': 'Ҳозир: {n}', 'lv.gotOn': 'Олинди: {d}', 'lv.gotEarly': 'Бошидан бор эди',
+      'lv.have': 'Ҳозир: {n}', 'lv.gotOn': 'Олинди: {d}', 'lv.gotEarly': 'бошидан', 'lv.gotEarlyLong': 'бошидан бор эди',
 
       'lv.w.title': 'Ҳафталик синов', 'lv.w.done': 'Бажарилди', 'lv.w.left': '{n} кун қолди',
       'lv.w.jamaat': '{n} та намозни жамоат билан ўқинг',
@@ -300,7 +300,7 @@
     },
     ru: {
       'lv.title': 'Уровень и награды', 'lv.xp': 'очков',
-      'lv.next': 'до {n}-го уровня {x} очков', 'lv.max': 'Высший уровень', 'lv.all': 'Все награды',
+      'lv.next': 'до {n}-го уровня {x}', 'lv.max': 'Высший уровень', 'lv.all': 'Все награды',
       'lv.got': '{a} / {b} наград', 'lv.left': 'ещё {n}', 'lv.todayXp': 'сегодня +{n}',
       'lv.newMedal': 'Новая награда!', 'lv.newLevel': '{n}-й уровень', 'lv.close': 'Закрыть',
       'lv.startTitle': 'Ваш путь уже начался',
@@ -310,7 +310,7 @@
       'lv.secret': 'Тайная награда', 'lv.secretHint': 'Условие заранее не называется. Придёт само, в своё время.',
       'lv.u.kun': '{n} дней', 'lv.u.marta': '{n} раз', 'lv.u.ta': '{n} шт',
       'lv.t.bronza': 'Бронза', 'lv.t.kumush': 'Серебро', 'lv.t.oltin': 'Золото', 'lv.t.olmos': 'Алмаз',
-      'lv.have': 'Сейчас: {n}', 'lv.gotOn': 'Получена: {d}', 'lv.gotEarly': 'Была с самого начала',
+      'lv.have': 'Сейчас: {n}', 'lv.gotOn': 'Получена: {d}', 'lv.gotEarly': 'с начала', 'lv.gotEarlyLong': 'была с самого начала',
 
       'lv.w.title': 'Испытание недели', 'lv.w.done': 'Выполнено', 'lv.w.left': 'осталось {n} дн.',
       'lv.w.jamaat': 'Совершите {n} намазов с джамаатом',
@@ -734,8 +734,14 @@
   function cardInner() {
     const i = D.levels.info(), med = D.levels.medals();
     const on = med.filter((m) => m.on);
-    // yangi olingani oldinda: sana bo'yicha teskari, «boshidan» olinganlari oxirida
-    const recent = on.slice().sort((a, b) => String(b.got || '').localeCompare(String(a.got || ''))).slice(0, 6);
+    /* Lentaga har oiladan FAQAT BITTA — eng yuqori bosqichi. Oddiy saralashda
+       bir xil belgining uchta bosqichi yonma-yon tushardi (uchta bir xil olov)
+       va lenta «nima yig'dim» degan savolga javob bermay qolardi. */
+    const best = new Map();
+    for (const m of on) { const prev = best.get(m.fam); if (!prev || m.need > prev.need) best.set(m.fam, m); }
+    const recent = Array.from(best.values())
+      .sort((a, b) => String(b.got || '').localeCompare(String(a.got || '')) || b.need - a.need)
+      .slice(0, 6);
     const rest = on.length - recent.length;
     return `<button type="button" class="lv-hero" data-act="lvOpen" style="--c:${i.rank.c}" aria-label="${esc(t('lv.title'))}">
       ${markHtml(i.level, i.rank)}
@@ -780,7 +786,7 @@
     const sub = m.on ? (m.got === 0 ? t('lv.gotEarly') : m.got ? D.fmtDate(m.got, 'short') : tierName(m))
                      : hidden ? t('lv.secret') : t('lv.left', { n: D.fmtNum(left) });
     return `<button type="button" class="lv-cell${m.on ? ' on' : ''}" data-act="lvMedal" data-id="${esc(m.id)}">
-      ${medalHtml(m, 46)}
+      ${medalHtml(m, 42)}
       <b class="num">${esc(hidden ? '— — —' : needLabel(m))}</b>
       <span class="tiny muted">${esc(sub)}</span>
     </button>`;
@@ -823,11 +829,11 @@
     if (!m) return;
     const hidden = m.secret && !m.on;
     const line = m.on
-      ? (m.got === 0 ? t('lv.gotEarly') : m.got ? t('lv.gotOn', { d: D.fmtDate(m.got, 'long') }) : tierName(m))
+      ? (m.got === 0 ? t('lv.gotEarlyLong') : m.got ? t('lv.gotOn', { d: D.fmtDate(m.got, 'long') }) : tierName(m))
       : t('lv.left', { n: D.fmtNum(Math.max(0, m.need - m.cur)) });
     D.modal({
       title: hidden ? t('lv.secret') : famName(m.fam),
-      body: `<div class="lv-one">
+      body: `<div class="lv-one" data-t="${esc(m.tier)}">
         ${medalHtml(m, 104, ' pop')}
         <div class="lv-one-t">
           <b class="num">${esc(hidden ? t('lv.secretHint') : needLabel(m) + ' · ' + tierName(m))}</b>
