@@ -738,7 +738,12 @@
   D.act.tkQk = (el) => setF('newDate', el.dataset.q);
 
   // yozilayotgan qatorning ko'rinishi — rerender YO'Q (fokus yo'qolmasin)
-  D.act.tkPreview = (el) => { D.patch('tkPv', previewHtml(el && el.value)); };
+  D.act.tkPreview = (el) => {
+    // qator butunlay tozalansa bekor qilinganlar ham unutilsin — keyingi
+    // vazifa avvalgisining «bu chipni istamayman» qarori bilan yozilmasin
+    if (!(el && el.value.trim())) pvOff.clear();
+    D.patch('tkPv', previewHtml(el && el.value));
+  };
   D.act.tkPvOff = (el) => {
     pvOff.add(el.dataset.kind);
     const inp = document.getElementById('tkText');
@@ -751,11 +756,14 @@
     const raw = (inp ? inp.value : '').trim();
     if (!raw) { if (inp) inp.focus(); return; }
     const today = D.today();
-    const p = parse(raw, { today, skip: skipObj() });
-    const text = p.text || raw;                       // hammasi «o'qib» ketsa — xom matn qoladi
+    /* Hammasi «o'qib» ketib matn bo'sh qolsa — o'qish BUTUNLAY bekor qilinadi.
+       «ertaga» deb yozgan odam ertangi nomsiz vazifa emas, «ertaga» nomli
+       vazifa yozgan: nomi bo'lmagan qator ro'yxatda foydasiz. */
+    let p = parse(raw, { today, skip: skipObj() });
+    if (!p.text) p = { text: raw, date: undefined, time: null, priority: null, goalId: null, repeat: null };
     const q = F().newDate;
     const def = q === 'none' ? null : q === 'tomorrow' ? D.addDays(today, 1) : today;
-    const x = { id: D.uid('t'), text, date: p.date !== undefined ? p.date : def, done: false, doneAt: null,
+    const x = { id: D.uid('t'), text: p.text, date: p.date !== undefined ? p.date : def, done: false, doneAt: null,
       priority: p.priority || 2, createdAt: Date.now(), goalId: p.goalId || null };
     if (p.time) x.time = p.time;
     if (p.repeat) x.repeat = p.repeat;

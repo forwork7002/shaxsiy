@@ -313,6 +313,41 @@ console.log('\n16. Takrorlanuvchi vazifa bajarilganda');
   D.act.tkToggle({ dataset: { id: 'p1' } });
   eq('takrorsiz — nusxa yo‘q', D.S.tasks.length, 1);
 
+  /* Qo'shish yo'li — yozilgan qator haqiqatan vazifaga aylanishi. tkAdd
+     DOM dan o'qiydi, shuning uchun bitta soxta kiritish maydoni beramiz. */
+  const typeIn = (value) => {
+    const box = { value, focus: noop, tagName: 'INPUT', dataset: {} };
+    const old = document.getElementById;
+    document.getElementById = (id) => (id === 'tkText' ? box : null);
+    D.S.tasks = [];
+    D.act.tkAdd();
+    document.getElementById = old;
+    return D.S.tasks[0];
+  };
+  D.ui.filters.tasks = { newDate: 'today' };
+  {
+    const a = typeIn('ertaga soat 9 da shifokorga borish !');
+    eq('yozilgan qator vazifaga aylandi', a && a.text, 'shifokorga borish');
+    eq('  sanasi', a && a.date, plus(1));
+    eq('  vaqti', a && a.time, '09:00');
+    eq('  muhimligi', a && a.priority, 3);
+
+    const b = typeIn('ertaga');
+    eq('butun qator kalit so‘z bo‘lsa — nomi o‘sha bo‘ladi', b && b.text, 'ertaga');
+    eq('  va o‘qish bekor qilinadi (sukut sana)', b && b.date, TODAY);
+
+    const c = typeIn('oddiy vazifa');
+    eq('oddiy matn — sukut sana', c && c.date, TODAY);
+    ok('  ortiqcha maydon yozilmaydi', c && c.time === undefined && c.repeat === undefined, c);
+
+    D.ui.filters.tasks = { newDate: 'none' };
+    const d = typeIn('keyin qilaman');
+    eq('«Sanasiz» chipi tanlansa', d && d.date, null);
+    const e = typeIn('ertaga bo‘lsin');
+    eq('  lekin yozilgani chipdan ustun', e && e.date, plus(1));
+    D.ui.filters.tasks = { newDate: 'today' };
+  }
+
   // quyi vazifa asosiy vazifani bajarilgan QILMAYDI (levels.js ochkosi buzilmasin)
   D.S.tasks = [{ id: 'q1', text: 'Katta ish', date: TODAY, done: false, doneAt: null, priority: 2, createdAt: 1,
     sub: [{ id: 's1', text: 'a', done: false }] }];
