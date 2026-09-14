@@ -12,6 +12,61 @@
   D.on('me:changed', renderBrand);
   D.on('state:changed', D.debounce(renderBrand, 300));   // til almashsa nom ham almashadi
 
+  /* ------------------------------------------------------------------ */
+  /* OSMON — sahifa ambiyenti kun fazasiga ergashadi                     */
+  /*                                                                      */
+  /* <html data-phase="bomdod|quyosh|peshin|asr|shom|xufton|tun"> qo'yiladi,
+     qolganini CSS bajaradi (css/whoop-ui.css, 18-bo'lim). Faza namoz
+     vaqtlaridan keladi, ya'ni haqiqiy quyoshdan: ekran derazadagi osmon
+     bilan bir vaqtda o'zgaradi.
+
+     Ikkita narsa ataylab shunday:
+     1. Taymer INTERVAL emas, keyingi namozgacha bo'lgan vaqtga qo'yiladi.
+        Faza kuniga olti marta o'zgaradi — har daqiqada uyg'onib tekshirish
+        behuda ish bo'lardi. Yuqori chegara bir soat: yozning uzun oraliqlarida
+        ham soat siljishi yoki DST jimgina o'tib ketmasin.
+     2. Ilova orqadan qaytganda ham qayta hisoblanadi. Telefon uxlab
+        turganda setTimeout kechikadi yoki umuman ishlamaydi, ya'ni faqat
+        taymerga ishonib bo'lmaydi.
+
+     Joylashuv sozlanmagan bo'lsa sky() bo'sh satr qaytaradi va atribut
+     umuman qo'yilmaydi — ilova o'zining oddiy qora foni bilan qoladi. */
+  let skyTimer = 0, skyPrev = '', skyFade = 0;
+  function applySky() {
+    let ph = '';
+    try { ph = (D.prayer && D.prayer.sky) ? D.prayer.sky() : ''; } catch (e) { ph = ''; }
+    const el = document.documentElement;
+    if (ph) el.setAttribute('data-phase', ph);
+    else el.removeAttribute('data-phase');
+
+    /* Namoz kirganda fon bir lahza yorishadi (css: .sky-turn). Faqat faza
+       ALMASHGANDA — birinchi ochilishda skyPrev bo'sh, ya'ni ilova har
+       ishga tushganda yaltirab turmaydi. Klass animatsiya tugagach olib
+       tashlanadi, aks holda ikkinchi marta umuman ishlamas edi. */
+    if (skyPrev && ph && ph !== skyPrev) {
+      el.classList.remove('sky-turn');
+      void el.offsetWidth;                       // brauzer animatsiyani qaytadan boshlasin
+      el.classList.add('sky-turn');
+      clearTimeout(skyFade);
+      skyFade = setTimeout(() => el.classList.remove('sky-turn'), 2800);
+    }
+    skyPrev = ph;
+
+    clearTimeout(skyTimer);
+    let ms = 15 * 60000;
+    try {
+      const n = D.prayer && D.prayer.next && D.prayer.next();
+      // +2 soniya: chegaraning aynan ustida emas, ozgina keyin uyg'onamiz,
+      // aks holda next() hali eski fazani qaytarishi mumkin.
+      if (n && n.minsLeft > 0) ms = n.minsLeft * 60000 + 2000;
+    } catch (e) {}
+    skyTimer = setTimeout(applySky, Math.min(Math.max(ms, 30000), 3600000));
+  }
+  D.on('boot', applySky);
+  D.on('me:changed', applySky);
+  D.on('state:changed', D.debounce(applySky, 500));      // joylashuv yoki hisob usuli o'zgarsa
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) applySky(); });
+
   if ('serviceWorker' in navigator && location.protocol !== 'file:' && !window.DASH_NO_SW) {
     // Yangi nusxa chiqqanda sahifa o'zini o'zi yangilaydi. Bo'lmasa telefonga
     // o'rnatilgan ilova hech qachon yopilmaydi — service worker fonda yangilansa

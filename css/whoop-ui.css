@@ -233,7 +233,7 @@
    --------------------------------------------------------------------- */
 .top { padding: calc(env(safe-area-inset-top) + 18px) 18px 10px; }
 .top-txt { display: flex; flex-direction: column; }
-.top-sub { order: -1; margin: 0 0 5px; color: var(--text4); }
+.top-sub { order: -1; margin: 0 0 5px; color: var(--text3); }
 .top-title { font-size: 27px; font-weight: 700; letter-spacing: -.035em; line-height: 1.1; }
 .top-btn { border-radius: 50%; border: 1px solid var(--line2); background: var(--card2); }
 @media (max-width: 360px) { .top-title { font-size: 23px; } }
@@ -461,3 +461,92 @@ body, .inp, .sel, .ta, button, input, select, textarea {
    yo'qoladi. Yozuv 700 da qoladi. */
 .hero-num, .kpi-num, .arc-num, .top-title { font-weight: 800; }
 .ring-pct, .wh-ready-num, .stat-num, .td-kpi-val { font-weight: 700; }
+
+/* ---------------------------------------------------------------------
+   18. OSMON — ilovaning o'ziga xos qismi
+
+   Shu paytgacha bu fayl WHOOP tilini KO'CHIRDI. U ilovani jiddiy qildi,
+   lekin o'ziga xos qilmadi — WHOOP'ning o'zi ham shunday ko'rinadi.
+   Bu bo'lim boshqacha: uni boshqa hech bir fitnes ilovasi takrorlay
+   olmaydi, chunki ularda bu ma'lumot yo'q.
+
+   Sahifa foni kun fazasiga ergashadi, faza esa NAMOZ VAQTLARIDAN keladi
+   (js/prayer.js sky(), js/app.js applySky). Namoz vaqtlari astronomik —
+   bomdod tong yorishishi, shom quyosh botishi. Ya'ni ekran rangi
+   derazadan ko'rinadigan osmon bilan bir vaqtda o'zgaradi, va u qishda
+   ham, yozda ham to'g'ri bo'ladi. Soatga qarab yasalgan faza («18:00 dan
+   keyin kech») dekabrda ham iyunda ham bir xil bo'lardi.
+
+   UCH QAT'IY CHEGARA — busiz bu g'oya ilovani buzardi:
+
+   1. FAQAT FON. Halqa, zona, tugma, matn ranglariga tegmaydi. «Rang =
+      ma'lumot» qoidasi kuchda qoladi: yashil doim «yuqori zona» degani,
+      soat nechada bo'lishidan qat'i nazar. Fon esa ma'lumot emas — u
+      kontekst, ya'ni o'zgarishi mumkin.
+
+   2. KARTA ORTIDA, USTIDA EMAS. Karta foni (--card-solid) shaffofmas,
+      shuning uchun karta ustidagi yozuvning kontrasti umuman
+      o'zgarmaydi — ambiyent faqat kartalar ORASIDA ko'rinadi. Sahifa
+      foni ustida turadigan yagona matn — bo'lim sarlavhalari (--text3).
+      Eng to'q faza (shom) da ular 5.5:1 da qoladi, ya'ni AA dan yuqori.
+
+   3. YUQORIDAN PASTGA SO'NADI. Kuchi tepada, ekranning 62% ida esa nol.
+      Mayda yozuv ko'p bo'lgan quyi qism toza qora ustida qoladi.
+
+   Alfalar (eng kattasi .19, shom) shu uchtasiga qarab o'lchangan. Birinchi
+   urinishda ular .12 da edi va xavfsiz, lekin juda nozik — fazalarni
+   yonma-yon qo'yib solishtirgandagina farq bilinardi. Ko'tarish uchun
+   bitta narsa to'sqinlik qilardi: tepadagi sana yozuvi --text4 da edi va
+   u aynan ambiyent eng kuchli joyda turadi (eng to'q fazada 2.7:1 ga
+   tushardi). U --text3 ga ko'tarildi, shundan keyin fon ham ko'tarila
+   oldi: hozir eng yomon holatda sana 5.1:1, bo'lim sarlavhalari esa
+   gradient allaqachon so'ngan joyda, ya'ni deyarli toza qora ustida.
+   Yana ko'tarmoqchi bo'lsangiz avval shu ikkitasini qayta hisoblang.
+   --------------------------------------------------------------------- */
+body::after {
+  content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(118% 52% at 50% 0%, var(--wash1), transparent 62%),
+    radial-gradient(96% 40% at 50% 100%, var(--wash2), transparent 74%);
+}
+/* Bomdoddan oldin — eng chuqur payt, hali hech qaysi namoz kirmagan */
+[data-phase="tun"]    { --wash1: rgba(64,76,168,.15);  --wash2: rgba(40,44,110,.07); }
+/* Tong yorishishi — sovuq ko'k, kun hali boshlanmagan */
+[data-phase="bomdod"] { --wash1: rgba(78,108,214,.18); --wash2: rgba(120,96,190,.07); }
+/* Quyosh chiqqandan peshingacha — tiniq, salqin */
+[data-phase="quyosh"] { --wash1: rgba(56,150,214,.16); --wash2: rgba(90,180,200,.06); }
+/* Peshin — quyosh tepada, rang deyarli yo'q: kunning eng neytral payti */
+[data-phase="peshin"] { --wash1: rgba(150,170,196,.10); --wash2: rgba(120,140,170,.05); }
+/* Asr — yorug'lik qiyshayadi, oltin tus */
+[data-phase="asr"]    { --wash1: rgba(226,158,62,.16); --wash2: rgba(200,120,50,.06); }
+/* Shom — quyosh botishi, eng iliq va eng to'yingan payt */
+[data-phase="shom"]   { --wash1: rgba(236,112,66,.19); --wash2: rgba(170,60,90,.08); }
+/* Xufton — tun kirdi, binafsha */
+[data-phase="xufton"] { --wash1: rgba(108,88,206,.17); --wash2: rgba(60,54,150,.07); }
+
+/* Yorug' temada ambiyent oq fonni QORAYTIRADI, ya'ni bu yerda alfalar
+   pastroq: oq ustida ko'z rangni ancha tez ilg'aydi va 0.12 li tus allaqachon
+   «fon bo'yalgan» bo'lib ko'rinadi. */
+[data-theme="light"][data-phase="tun"]    { --wash1: rgba(64,76,168,.07);  --wash2: rgba(40,44,110,.04); }
+[data-theme="light"][data-phase="bomdod"] { --wash1: rgba(78,108,214,.08); --wash2: rgba(120,96,190,.04); }
+[data-theme="light"][data-phase="quyosh"] { --wash1: rgba(56,150,214,.08); --wash2: rgba(90,180,200,.04); }
+[data-theme="light"][data-phase="peshin"] { --wash1: rgba(150,170,196,.05); --wash2: rgba(120,140,170,.03); }
+[data-theme="light"][data-phase="asr"]    { --wash1: rgba(226,158,62,.09); --wash2: rgba(200,120,50,.04); }
+[data-theme="light"][data-phase="shom"]   { --wash1: rgba(236,112,66,.09); --wash2: rgba(170,60,90,.05); }
+[data-theme="light"][data-phase="xufton"] { --wash1: rgba(108,88,206,.08); --wash2: rgba(60,54,150,.04); }
+
+/* Namoz kirganda fon bir lahza yorishadi. Bu bildirishnoma emas — ovoz ham
+   yo'q, yozuv ham yo'q, hech narsani bosish kerak emas. Shunchaki xona
+   yorug'ligi o'zgargandek sezgi: qarab turgan odam payqaydi, qaramagan odam
+   hech narsa yo'qotmaydi. Faqat faza ALMASHGANDA ishlaydi, birinchi
+   ochilishda emas (js/app.js buni ajratadi). */
+@keyframes skyTurn {
+  0%   { filter: brightness(1); }
+  28%  { filter: brightness(2.2); }
+  100% { filter: brightness(1); }
+}
+html.sky-turn body::after { animation: skyTurn 2.6s var(--ease-out); }
+
+/* Kirish ekrani ham o'sha osmon ostida: u --wash1/--wash2 ni allaqachon
+   o'qiydi (app.css, .auth-gate::before), shuning uchun bu yerda qo'shimcha
+   qoida kerak emas — tokenlar almashgani yetadi. */

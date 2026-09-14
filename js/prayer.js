@@ -237,6 +237,26 @@
         return { id: 'bomdod', time: tomorrow.time, minsLeft: 24 * 60 - nowM + tomorrow.mins, current: cur || 'xufton', key };
       } catch (e) { return null; }
     },
+    /* Kun fazasi — ekran ambiyenti shundan chiziladi (css/whoop-ui.css, 18-bo'lim).
+       next() allaqachon joriy namoz oynasini biladi, bu yerda faqat bitta holat
+       nom oladi: bomdoddan OLDIN, ya'ni hali hech qaysi namoz kirmagan payt.
+       next() u yerda current: null qaytaradi va uni «tun» deb ataymiz.
+
+       Nega aynan namoz vaqtlari: ular astronomik, ya'ni haqiqiy quyoshga
+       bog'langan. Bomdod tong yorishishi, shom quyosh botishi — demak ekran
+       rangi derazadan ko'rinadigan osmon bilan bir vaqtda o'zgaradi. Soatga
+       qarab yasalgan faza (masalan «18:00 dan keyin kech») dekabrda ham,
+       iyunda ham bir xil bo'lardi — bu esa yo'q.
+
+       Xato bo'lsa bo'sh satr: chaqiruvchi shunda data-phase ni umuman
+       qo'ymaydi va ilova o'zining odatiy qora foni bilan qoladi. Joylashuv
+       sozlanmagan foydalanuvchida aynan shunday bo'ladi. */
+    sky(now) {
+      try {
+        const n = prayer.next(now);
+        return (n && n.current) || 'tun';
+      } catch (e) { return ''; }
+    },
     /* Odat nomidan namozni tanish. today.js va ibodat.js shu yagona jadvalni
        ishlatadi. Ilgari ikkalasida alohida jadval bor edi va ular bir xil emasdi:
          today.js  chegarasiz:        (bomdod|fajr|fadjr)
