@@ -237,6 +237,26 @@
         return { id: 'bomdod', time: tomorrow.time, minsLeft: 24 * 60 - nowM + tomorrow.mins, current: cur || 'xufton', key };
       } catch (e) { return null; }
     },
+    /* Odat nomidan namozni tanish. today.js va ibodat.js shu yagona jadvalni
+       ishlatadi. Ilgari ikkalasida alohida jadval bor edi va ular bir xil emasdi:
+         today.js  chegarasiz:        (bomdod|fajr|fadjr)
+         ibodat.js ikki tomondan:   \b(bomdod|fajr|fadjr)\b
+       Ozbekcha qoshimcha oladi, shuning uchun «Bomdodni jamoat bilan» Bugun
+       sahifasida tanilardi, Ibodatda esa yoq — bitta odat ikki ekranda ikki xil.
+       Chegarasizligi esa boshqa tomondan xato: (xufton|isha) «isha» harflari
+       uchragan istalgan nomga mos kelardi (masalan «oqishadi») va S.prayers ga
+       soxta yozuv kiritardi, u yerdan esa qazo hisobiga.
+       Togri qoida: chegara faqat BOSHIDA — qoshimchani qabul qiladi, soz
+       ichidagi tasodifiy moslikni rad etadi. */
+    NAME_RX: {
+      bomdod: /\b(bomdod|fajr|fadjr)/, peshin: /\b(peshin|zuhr|zuxr)/, asr: /\basr/,
+      shom: /\b(shom|maghrib|magrib)/, xufton: /\b(xufton|isha)/,
+    },
+    matchName(name) {
+      const n = D.translit && D.translit.norm ? D.translit.norm(name || '') : String(name || '').toLowerCase();
+      for (const id of D.PRAYERS) if (prayer.NAME_RX[id].test(n)) return id;
+      return null;
+    },
     // which waqt a timestamp falls in (for auto-classifying "on time" vs qaza)
     waqtAt(ts) {
       const p = D.nowTz(new Date(ts));

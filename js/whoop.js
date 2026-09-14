@@ -456,10 +456,13 @@
     const p = D.S.profile || {};
     const kg = num(p.weightKg) ?? num((W().body || {}).weightKg);
     const cm = num(p.heightCm) ?? num((W().body || {}).heightCm);
-    const age = num(p.age);
+    // ARCHITECTURE.md: yosh uchun yagona qoida — D.profileAge(). Ilgari bu yer
+    // num(p.age) ni oqirdi; onboarding esa birthYear yozadi va age null bolib
+    // qoladi, ya'ni quyidagi null tekshiruvi butun zaxira bahoni ochirib qoyardi.
+    const age = D.profileAge();
     if (kg === null || cm === null || age === null) return null;
     const bmr = 10 * kg + 6.25 * cm - 5 * age + (p.sex === 'f' ? -161 : 5);
-    const f = [1.2, 1.3, 1.375, 1.46, 1.55, 1.725][D.clamp(Math.round(+p.activity || 3), 0, 5)];
+    const f = D.activityFactor(p.activity);
     return Math.round(bmr * f);
   }
   D.whoop.tdee = tdeeEstimate;

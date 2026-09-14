@@ -227,10 +227,6 @@
   const SUBS = ['times', 'log', 'qaza', 'fasting'];
   const FTYPES = ['ramadan', 'sunnah', 'qaza', 'nafl'];
   const NEXT_OF = { bomdod: 'quyosh', peshin: 'asr', asr: 'shom', shom: 'xufton' };
-  const PRAYER_RX = {
-    bomdod: /\b(bomdod|fajr|fadjr)\b/, peshin: /\b(peshin|zuhr|zuxr)\b/, asr: /\basr\b/,
-    shom: /\b(shom|maghrib|magrib)\b/, xufton: /\b(xufton|isha)\b/,
-  };
   const PAGES = 604, JUZ = 30;
   // Bizning hisob islom.uz e'lon qilgan jadval bilan oxirgi marta solishtirilgan sana
   const VERIFIED = '2026-09-10';
@@ -263,8 +259,8 @@
       const map = {};
       for (const h of D.S.habits) {
         if (!h.active) continue;
-        const n = D.translit.norm(h.name);
-        for (const p of PR) if (!map[p] && PRAYER_RX[p].test(n)) { map[p] = h.id; break; }
+        const p = D.prayer.matchName(h.name);
+        if (p && !map[p]) map[p] = h.id;
       }
       phCache = { sig, map };
     }
