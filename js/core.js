@@ -1734,7 +1734,7 @@
     ['п', 'p'], ['р', 'r'], ['с', 's'], ['т', 't'], ['у', 'u'], ['ф', 'f'], ['э', 'e'], ['ъ', ''], ['ь', '']];
   D.translit = {
     toLatin: (s) => { s = String(s || '').toLowerCase(); for (const [c, l] of CYR) s = s.split(c).join(l); return s; },
-    norm: (s) => D.translit.toLatin(s).replace(/[ʼ’'`‘]/g, '').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim(),
+    norm: (s) => D.translit.toLatin(s).replace(/[ʼ’'`‘ʻ]/g, '').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim(),
   };
 
   /* ------------------------------------------------------------------ */
