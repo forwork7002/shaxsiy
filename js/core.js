@@ -518,7 +518,14 @@
         if (D.device.uid !== owner) { D.device.uid = owner; D.device.name = ''; D.saveDevice(); }
       }
       await D.meRefresh();   // Profil varag'i, Sozlash «Hisob», onboarding ismi — 'pull:ok' dan oldin
-      const localEmpty = !Object.keys(D.S.logs).length && !D.S.habits.length && !D.S.tasks.length;
+      // «Bu qurilmada hali hech narsa yo'q» degani — «odat va vazifa yo'q» degani EMAS.
+      // Avval shart !logs && !habits && !tasks edi. Odat yuritmaydigan, lekin ovqat,
+      // namoz, moliya va WHOOP yozadigan odam uchun bu shart HAR DOIM rost bo'lib
+      // qolardi, ya'ni har pull'da quyidagi tarmoq serverni normalize qilib D.S ni
+      // butunlay almashtirardi — hali yuborilmagan kun shu yerda yo'q bo'lardi.
+      // meta.updatedAt defaultState()da 0; D.save() uni har saqlashda yozadi.
+      // Demak !updatedAt = «bu qurilma hech qachon saqlamagan», aynan kerakli ma'no.
+      const localEmpty = !(+D.S.meta.updatedAt);
       if (remote && D.isOldFormat(remote)) {
         // server still holds the old Шахсий data.json → migrate once, keep local additions, push new format
         const migrated = D.migrateOld(remote);
