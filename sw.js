@@ -20,6 +20,7 @@ const ASSETS = [
   './css/settings.css',
   './css/onboard.css',
   './css/yusa-orb.css',
+  './css/levels.css',
   './css/whoop-ui.css',
   './js/core.js',
   './js/i18n.js',
@@ -39,6 +40,7 @@ const ASSETS = [
   './js/settings.js',
   './js/onboard.js',
   './js/yusa-orb.js',
+  './js/levels.js',
   './js/app.js',
 ];
 // Shriftlar o'z faylimizda. Nomi o'zgarmagunicha mazmuni ham o'zgarmaydi, shuning

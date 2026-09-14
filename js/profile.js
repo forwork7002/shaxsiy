@@ -112,6 +112,18 @@
     return `<div class="pf-save s-${esc(st)}">${D.ic(ic, 15)}<span>${esc(t(k))}</span>
       ${st === 'ok' ? '' : `<button type="button" class="btn ghost xs" data-act="pfSyncNow" ${busy ? 'disabled' : ''}>${esc(t('pf.saveNow'))}</button>`}</div>`;
   }
+  /** Daraja va nishonlar bloki (js/levels.js). Modul kelmagan bo'lsa — bo'shliq,
+      karta baribir chiziladi: profil nishonsiz ham to'liq ishlashi kerak. */
+  let waitingLevels = false;
+  function levelHtml() {
+    if (D.levels) { try { return D.levels.cardHtml(); } catch (e) { console.error('daraja', e); return ''; } }
+    if (!waitingLevels && D.loadLib) {
+      waitingLevels = true;
+      D.loadLib('levels').then(() => { waitingLevels = false; if (D.$('#pfRoot')) redraw(); });
+    }
+    return '';
+  }
+
   function inner() {
     const on = online(), me = D.me || {}, name = nameOf();
     const uid = me.uid || D.device.uid || '';
@@ -134,6 +146,7 @@
       <div class="pf-claim-t">${D.ic('key', 15)} ${esc(t('pf.claimTitle'))}</div>
       <p class="pf-claim-x">${esc(t('pf.claimText'))}</p>
       <button type="button" class="btn block" data-act="pfClaim" ${busy ? 'disabled' : ''}>${esc(t('pf.claimBtn'))}</button></div>` : ''}
+    ${levelHtml()}
     <div class="pf-stats">
       <div class="stat"><div class="stat-num num">${dayCount()}</div><div class="stat-label">${esc(t('pf.days'))}</div></div>
       <div class="stat"><div class="stat-num num">${D.activeHabits().length}</div><div class="stat-label">${esc(t('pf.habits'))}</div></div>

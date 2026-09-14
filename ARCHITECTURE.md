@@ -18,6 +18,7 @@ app/
   js/whoop.js       WHOOP snapshot client, per-day store, trends, readiness, workouts, bioAge; Соғлиқ sahifalarini shu modul chizadi
   js/profile.js     account sheet (D.profile): avatar (photo → /api/me/avatar, or initials), display name, provider/e-mail, stats, export, logout — opened from the header avatar button
   js/nova.js        AI mentor chat (uses D.ai.ask)
+  js/levels.js      daraja va nishonlar (D.levels): ochko holatdan hisoblanadi, `S.awards` faqat «qachon berildi» ni saqlaydi; profil kartasidagi blok + to'plam oynasi
   js/settings.js    Созлаш: general (profile incl. birth year / goal / WHOOP Age) · habits · food targets · prayer · finance · data
   js/history.js     Тарих: read-only archive browser over /api/history/* (month grid · year · chats · cards)
   js/onboard.js     first-entry wizard (D.onboard): name → sex → birth year → height → weight → activity → goal → WHOOP
@@ -190,6 +191,52 @@ Trigger at boot: `D.serverEnabled() && S.settings.onboarded !== true && !(S.prof
 Full-screen steps in the auth-gate style; finish → `profile.*`, `food.targets.auto = true`, `settings.onboarded = true`, `D.save()`.
 Everything it asks is editable later in Settings → Profil.
 
+## Daraja va nishonlar (js/levels.js)
+
+```js
+D.levels.info()      // {xp, level, have, need, pct, next, max, rank, st}
+D.levels.medals()    // [{id, fam, need, cur, done, got, on, pct, tier, ic}]
+D.levels.cardHtml()  // Sozlash › profil kartasi ichidagi blok (profile.js chaqiradi)
+D.levels.open()      // to'liq to'plam — pastki oyna
+D.levels.check()     // yangi nishon/daraja bo'lsa: S.awards ga yozadi va tabriklaydi
+```
+
+**Hech narsa sanalmaydi — hammasi qayta hisoblanadi.** Ochko ham, nishon sharti ham
+har safar `D.S` dan hisoblab chiqiladi (`collect()`, ~600 kunga 5 ms, `state:changed`
+gacha keshlanadi). `S.awards` da faqat **qaysi nishon qachon berilgani** yotadi. Sabab
+bitta: saqlangan hisoblagich ikki qurilma birlashganda qo'shilib ketardi, hisoblangan
+son esa har doim ma'lumotning o'ziga teng. Odam belgini olib tashlasa ochko kamayadi —
+bu to'g'ri. **Berilgan nishon esa qaytarib olinmaydi:** `got` dan hech narsa o'chmaydi,
+`D.merge` da esa erta sana yutadi (0 = «tizim yoqilgunga qadar», har qanday sanadan erta).
+
+**Daraja** 1..50, narxi `3.6·n^2.95` (bir kunlik realistik hosil 100–250 ochko):
+1 oy ≈ 9, 1 yil ≈ 23, 5 yil ≈ 40, 10 yil ≈ 50. Har besh daraja — **martaba**
+(Niyat · Qadam · Odat · Intizom · Sabr · Matonat · Barqarorlik · Mahorat · Kamolot · Nur),
+rangi sovuqdan issiqqa o'sadi, oxirgisi `var(--text)` (qattiq oq yorug' temada ko'rinmasdi).
+
+**Ochko manbalari** har birida kunlik chegara bilan (`XP` jadvali): odat belgisi 10 (kuniga ≤ 80),
+namoz jamoat 12 / yakka 8 / qazo 3 (+20 besh vaqt to'liq bo'lsa), zikr har 33 tasiga 2 (≤ 30),
+ro'za 40, vazifa 6 (≤ 36), maqsad 120, kitob kuni 12, ovqat kuni 10, WHOOP kuni 6,
+mashg'ulot 12 (≤ 24), suv me'yori 6, kundalik 6, shukr 5 (≤ 15), moliya kuni 5,
+hafta yakuni 25, **mukammal kun +50**. Chegaralar shuning uchun: ularsiz bitta bo'limni
+«sog'ib» daraja olish mumkin bo'lardi va daraja hayotni emas, bitta ekranni ko'rsatardi.
+
+**Nishonlar** — 16 oila, 49 ta bosqich (bronza · kumush · oltin · olmos). `id` = oila nomi + son
+(`kun365`, `namoz1000`) va u **hech qachon o'zgartirilmaydi**: `S.awards.got` ichida yozilgan.
+Yangi nishon qo'shish = `FAMS` ga bosqich qo'shish + `lv.f.*` / `lv.d.*` uchta tilda; o'lchov
+yangi bo'lsa `collect()` dagi `st` ga maydon va `FIELD` ga qator.
+
+**Birinchi ishga tushirish.** `awards.init` false bo'lsa hamma bajarilgan shart jimgina
+`got[id] = 0` bilan yoziladi va bitta umumiy oyna ko'rsatiladi — aks holda 600 kunlik
+tarixi bor odam bir vaqtda 28 ta tabrik olardi. Keyingi nishonlar bittalab tabriklanadi.
+`check()` **`D.pulled` dan oldin ishlamaydi**: bo'sh holat ustida «birinchi ishga tushirish»
+qilib qo'yilsa, odam butun tarixini nishonsiz ko'rardi va uni qaytarib bo'lmasdi.
+
+Yuklanishi: birinchi ekranga kerak emas, shuning uchun `core.js` dagi `LAZY_LIBS` orqali
+bo'sh vaqtda keladi (kechiktirilgan bo'limlar navbatidan keyin) va kelgach o'zi bir marta
+`check()` qiladi. CSS prefiksi `lv-`, amallar `lvOpen` / `lvOpenFromModal`.
+Sinov: `node tests/test_levels.js` (77 ta tekshiruv, haqiqiy `core.js` bilan).
+
 ## Kit classes (app.css)
 
 Layout: `.page`, `.section`, `.section-title`, `.grid2`, `.grid3`, `.row`, `.stack`
@@ -242,6 +289,7 @@ Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --
  nova:{ threads:[{id,ts,messages:[{role,content,ts}]}] },
  whoop:{ connected:false, lastSync, cache:{}, days:{ 'YYYY-MM-DD':{recovery,hrv,rhr,spo2,skin,sleepH,sleepPerf,sleepEff,sleepCons,resp,stages,bedTs,wakeTs,strain,kcal,hrAvg,hrMax} }, workouts:[{id,k,start,end,sport,strain,kcal,hrAvg,hrMax,meters,mins}], body:{heightCm,weightKg,maxHr} },
  ai:{ cards:{ '<section>':{day,text,ts} }, log:[{section,day,text,ts}] }
+ awards:{ got:{ '<medalId>': 'YYYY-MM-DD' | 0 }, level:n, init:bool }   // nishonlar — js/levels.js; 0 = tizim yoqilgunga qadar olingan
 }
 ```
 

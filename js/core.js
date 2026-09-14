@@ -115,6 +115,12 @@
       whoop: { connected: false, lastSync: null, cache: {}, days: {}, workouts: [], body: {} },
       // food.logs: {'YYYY-MM-DD': [meal]}; targets: auto=true → profildan hisoblanadi, aks holda qo'lda kiritilgan qiymatlar
       food: { logs: {}, targets: { kcal: null, p: null, c: null, f: null, auto: true } },
+      // Nishonlar (js/levels.js). Bu yerda FAQAT «qaysi nishon qachon berildi»
+      // turadi — ochko ham, daraja sharti ham holatdan qayta hisoblanadi.
+      // Hisoblagich saqlansa ikki qurilma birlashganda qo'shilib ketardi.
+      // got: {nishonId: 'YYYY-MM-DD' | 0 (tizim yoqilgunga qadar olingan)}
+      // level: oxirgi tabriklangan daraja · init: birinchi hisob bo'lib o'tganmi
+      awards: { got: {}, level: 0, init: false },
     };
   }
   D.defaultState = defaultState;
@@ -186,6 +192,15 @@
       n.food.logs[k].forEach((m) => { if (m && !m.id) m.id = D.uid('fd'); });
     }
     if (typeof n.food.targets.auto !== 'boolean') n.food.targets.auto = true;
+    // nishonlar: qiymat kun kaliti yoki 0. Tanimagan nishon id'si ham qoladi —
+    // kelajakda qo'shiladigan nishonni bu yerda o'chirib yuborish mumkin emas.
+    for (const k of Object.keys(n.awards.got)) {
+      const v = n.awards.got[k];
+      if (v === 0 || (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v))) continue;
+      n.awards.got[k] = 0;
+    }
+    n.awards.level = Math.max(0, Math.floor(+n.awards.level || 0));
+    n.awards.init = !!n.awards.init;
     n.meta.v = D.VERSION;
     return n;
   };
@@ -388,6 +403,26 @@
     out.whoop.days = Object.assign({}, r.whoop.days, l.whoop.days);
     out.whoop.workouts = unionById(l.whoop.workouts, r.whoop.workouts);
     out.whoop.connected = !!(l.whoop.connected || r.whoop.connected);
+    /* Nishonlar — birlashma, va sana ERTAROG'I yutadi. Berilgan nishon hech
+       qachon qaytarib olinmaydi: bu yagona joy bo'lib, u yerda «lokal g'olib»
+       qoidasi noto'g'ri bo'lardi — telefonda olingan nishon planshetdagi eski
+       nusxa bilan qo'shilganda yo'qolib ketardi. 0 = «tizim yoqilgunga qadar»,
+       ya'ni har qanday sanadan erta.
+       Ikkala manba oldindan o'zgaruvchiga olinadi: `out` ba'zan `r` ning o'zi
+       bo'ladi (server yangiroq bo'lsa), ya'ni `out.awards.got` ga yozish bilan
+       `r.awards.got` ham almashadi. Keyin solishtirish uchun o'qilsa allaqachon
+       birlashtirilgan jadval o'qilardi va natija qaysi tomon «remote» ekaniga
+       bog'liq chiqardi — aynan shu xato sinovda tutilgan. */
+    const rGot = r.awards.got, lGot = l.awards.got;
+    const got = Object.assign({}, rGot, lGot);
+    for (const k of Object.keys(got)) {
+      const a = rGot[k], b = lGot[k];
+      if (a === undefined || b === undefined) continue;
+      got[k] = a === 0 || b === 0 ? 0 : (String(a) < String(b) ? a : b);
+    }
+    out.awards.got = got;
+    out.awards.level = Math.max(+r.awards.level || 0, +l.awards.level || 0);
+    out.awards.init = !!(r.awards.init || l.awards.init);
     out.meta.deviceId = l.meta.deviceId;
     out.meta.updatedAt = Math.max(+r.meta.updatedAt || 0, +l.meta.updatedAt || 0, Date.now());
     return out;
@@ -1194,7 +1229,7 @@
         const h = Math.max(2, ((+v || 0) / mx) * (H - 2 * pad));
         const x = pad + i * colW + (colW - bw) / 2;
         const c = colors ? colors[i] : miss && miss[i] ? 'var(--danger)' : color;
-        s += `<rect x="${x.toFixed(1)}" y="${(H - pad - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${c}" opacity="${v ? 1 : 0.25}"><title>${D.esc(labels[i] || '')}: ${v}</title></rect>`;
+        s += `<rect x="${x.toFixed(1)}" y="${(H - pad - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(bw / 2, 5).toFixed(1)}" fill="${c}" opacity="${v ? 1 : 0.25}"><title>${D.esc(labels[i] || '')}: ${v}</title></rect>`;
       });
       s += '</svg>';
       if (labels.length) s += `<div class="spark-labels">${labels.map((l) => `<span>${D.esc(l)}</span>`).join('')}</div>`;
@@ -1327,13 +1362,18 @@
       Bittalab: hammasini birdan qo'shsak, el.async=false ularni ketma-ket, bo'linmaydigan
       bitta bo'lakda bajaradi (225 KB tahlil) va o'sha paytda bosilgan tugma javob bermaydi.
       Har fayldan keyin bo'sh vaqtni kutamiz, shunda oradagi bosishlar o'tib ketadi. */
+  /* Bo'lim emas, kutubxona, lekin birinchi ekranga ham kerak emas: u faqat
+     Sozlashdagi profil kartasida chiziladi. Navbatning oxirida keladi va
+     kelgach o'zi bir marta nishonlarni tekshiradi. */
+  const LAZY_LIBS = ['levels'];
   D.preloadViews = () => {
     const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
-    const queue = Object.keys(lazySrc);
+    const queue = Object.keys(lazySrc).map((id) => () => D.loadView(id))
+      .concat(LAZY_LIBS.map((name) => () => D.loadLib(name)));
     const next = () => {
-      const id = queue.shift();
-      if (!id) return;
-      D.loadView(id).then(() => {
+      const job = queue.shift();
+      if (!job) return;
+      job().then(() => {
         if (queue.length) return idle(next, { timeout: 1500 });
         // Navbat tugadi. Bir marta qayta chizamiz: kelgan fayllardan biri joriy ekranga
         // qo'shadigan narsa bergan bo'lishi mumkin (masalan ibodat.js dagi qazo bloki).
@@ -1546,10 +1586,25 @@
   /* O'rtadagi ko'tarilgan joyning indeksi. Bitta son — panelning chizilishi
      ham, CSS dagi doira ham shundan kelib chiqadi. */
   const MID = 2;
-  /* Yorliq belgisi — SVG emas, emoji. Beshta joyda chiziqli belgilar
-     kichrayib bir-biriga o'xshab qoladi; emoji rangli, ya'ni yorliqni
-     o'qimasdan ham tanib olasiz. Shrift --emoji tokenidan (tizimniki). */
-  const TAB_EM = { today: '🏠', prayer: '🕌', health: '🍽️', finance: '💰', tasks: '✅' };
+  /* Yorliq belgisi — chiziqli ikonka, bo'limning o'z `icon` maydonidan
+     (D.view() da beriladi). Yon panel allaqachon shuni chizardi, ya'ni endi
+     ikkala panel bitta belgini ko'rsatadi.
+
+     Bu yerda ilgari emoji turardi va sababi yozib qo'yilgandi: «beshta joyda
+     chiziqli belgilar kichrayib bir-biriga o'xshab qoladi; emoji rangli,
+     ya'ni yorliqni o'qimasdan ham tanib olasiz». E'tiroz o'rinli, lekin
+     ikkita narsa uni yopadi. Birinchisi — yozuv har doim belgining ostida
+     turadi, ya'ni tanish faqat shaklga tayanmaydi. Ikkinchisi va
+     muhimrog'i — butun ilovada endi rang MA'LUMOTni bildiradi: yashil
+     «yuqori zona», sariq «e'tibor ber». Beshta rangli emoji panelda
+     doimiy yonib turganda bu qoida buziladi — ular hech qanday o'lchov
+     bildirmasdan ko'zning rangga bo'lgan e'tiborini o'ziga tortadi.
+     Shakllar o'zi ham yetarlicha farqli: kalendar, machit, yurak, hamyon,
+     belgilangan katak.
+
+     Qaytarish kerak bo'lsa: bu yerga TAB_EM jadvalini qaytaring va quyidagi
+     renderNav dagi D.ic(...) o'rniga TAB_EM[id] ni qo'ying — boshqa joyga
+     tegmaydi. */
 
   D.renderTop = () => {
     const el = D.$('#top');
@@ -1632,7 +1687,7 @@
       try { b = BADGE[id] ? BADGE[id]() : 0; } catch (e) { b = 0; }
       const lab = D.esc(D.t('nav.' + id));
       return `<button class="nav-tab${mid ? ' nav-mid' : ''}${current === id ? ' on' : ''}" data-act="go" data-view="${id}" aria-label="${lab}">
-        <span class="nav-ic"><span class="nav-em">${TAB_EM[id] || ''}</span>${b ? `<i class="nav-badge num">${D.fmtNum(b)}</i>` : ''}</span>
+        <span class="nav-ic"><span class="nav-em">${D.ic(v.icon || 'grid', 22)}</span>${b ? `<i class="nav-badge num">${D.fmtNum(b)}</i>` : ''}</span>
         <span class="nav-lab">${lab}</span></button>`;
     };
     // Beshta yorliq bir xil yo'l bilan chiziladi — o'rtadagisining farqi

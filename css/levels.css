@@ -1,0 +1,106 @@
+/* ==== daraja va nishonlar — profil kartasidagi blok + to'plam oynasi ====
+   Rang bu yerda bezak emas: martaba rangi darajani, nishon rangi bosqichni
+   bildiradi. Ikkalasi ham `--c` orqali HTML dan keladi (js/levels.js), shuning
+   uchun bu faylda bitta ham qattiq rang yo'q. */
+
+.lv { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+
+/* ---- martaba belgisi: daraja raqami yonayotgan kvadratda ---- */
+.lv-mark { position: relative; width: 56px; height: 56px; flex: none; display: grid; place-items: center;
+  border-radius: 18px; color: var(--c, var(--text));
+  background: radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--c) 22%, transparent), transparent 72%);
+  border: 2px solid color-mix(in srgb, var(--c) 55%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 7%, transparent),
+              inset 0 0 20px color-mix(in srgb, var(--c) 16%, transparent); }
+.lv-mark-n { font-size: 22px; font-weight: 800; line-height: 1; letter-spacing: -.02em; color: var(--c); }
+.lv-mark.big { width: 78px; height: 78px; border-radius: 24px; }
+.lv-mark.big .lv-mark-n { font-size: 31px; }
+
+/* ---- profil kartasidagi qator ---- */
+.lv-hero { display: flex; align-items: center; gap: 13px; width: 100%; padding: 12px; text-align: left;
+  border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--inset); color: var(--text);
+  font: inherit; transition: background .15s, border-color .15s; }
+@media (hover: hover) { .lv-hero:hover { background: var(--hover); border-color: color-mix(in srgb, var(--c) 40%, var(--line)); } }
+.lv-hero:active { transform: scale(.995); }
+.lv-hero > svg:last-child { color: var(--text3); flex: none; }
+.lv-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.lv-rank { font-size: 17px; font-weight: 700; line-height: 1.15; color: var(--c, var(--text)); }
+.lv-motto { font-size: 12px; color: var(--text3); line-height: 1.25; overflow-wrap: anywhere; }
+.lv-sub { font-size: 12px; color: var(--text2); }
+.lv-sub b { color: var(--text); font-weight: 700; }
+
+/* ---- ilgarilash chizig'i ---- */
+.lv-bar { display: block; height: 5px; margin: 4px 0 2px; border-radius: var(--r-pill); background: var(--track); overflow: hidden; }
+.lv-bar > i { display: block; height: 100%; border-radius: inherit; background: var(--c, var(--text));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--c) 55%, transparent); transition: width .5s var(--ease-out); }
+
+/* ---- nishon belgisi ---- */
+.lv-chip { width: var(--s, 36px); height: var(--s, 36px); flex: none; display: grid; place-items: center;
+  border-radius: 50%; color: var(--text4); border: 1.5px solid var(--line2); background: var(--recess); }
+.lv-chip.on { color: var(--c); border-color: color-mix(in srgb, var(--c) 62%, transparent);
+  background: color-mix(in srgb, var(--c) 12%, transparent);
+  box-shadow: inset 0 0 12px color-mix(in srgb, var(--c) 20%, transparent); }
+
+/* olinmagan nishon ko'rinib turadi, lekin so'ngan: nimaga intilish kerakligini
+   yashirish motivatsiyani o'ldiradi, uni yorqin ko'rsatish esa aldaydi */
+.lv-chip:not(.on) svg { opacity: .55; }
+
+/* ---- kartadagi nishonlar qatori ---- */
+.lv-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.lv-strip-i { display: inline-flex; }
+.lv-more { font-size: 12px; font-weight: 700; color: var(--text3); padding: 0 2px; }
+.lv-strip .lv-count { margin-left: auto; }
+
+/* ---- to'plam oynasi ---- */
+.lv-sheet { display: flex; flex-direction: column; gap: 14px; }
+.lv-top { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: var(--r-sm);
+  border: 1px solid color-mix(in srgb, var(--c) 28%, var(--line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 9%, transparent), transparent 90%), var(--inset); }
+.lv-top-t { flex: 1; min-width: 0; }
+.lv-top .lv-rank { font-size: 19px; }
+.lv-how { margin: 0; }
+.lv-total { font-size: 13px; font-weight: 700; color: var(--text2); }
+
+.lv-fam { display: flex; flex-direction: column; gap: 8px; }
+.lv-fam-h { display: flex; align-items: baseline; gap: 7px; margin: 0; font-size: 14px; flex-wrap: wrap; }
+.lv-fam-h svg { color: var(--text3); align-self: center; flex: none; }
+.lv-fam-h b { font-weight: 700; }
+.lv-fam-g { display: grid; grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); gap: 8px; }
+
+.lv-item { position: relative; display: flex; align-items: center; gap: 9px; padding: 9px 10px; min-width: 0;
+  border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--recess); overflow: hidden; }
+.lv-item.on { border-color: color-mix(in srgb, var(--c, var(--line2)) 34%, var(--line)); background: var(--inset); }
+.lv-item-t { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.lv-item-t b { font-size: 13px; font-weight: 700; line-height: 1.2; }
+.lv-item-t span { line-height: 1.2; overflow-wrap: anywhere; }
+.lv-item-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: var(--track); }
+.lv-item-bar > i { display: block; height: 100%; background: var(--text3); }
+
+/* ---- tabrik oynasi ---- */
+.lv-cel { display: flex; flex-direction: column; gap: 8px; }
+.lv-cel-m { display: flex; align-items: center; gap: 11px; padding: 11px; border-radius: var(--r-sm);
+  border: 1px solid color-mix(in srgb, var(--c) 34%, var(--line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 10%, transparent), transparent), var(--inset); }
+.lv-cel-m b { font-size: 15px; font-weight: 700; }
+.lv-cel-m .small { margin-left: auto; text-align: right; flex: none; }
+.lv-cel-lv { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.lv-cel-lv b { display: block; font-size: 18px; font-weight: 700; color: var(--c); }
+.lv-cel-lv span { display: block; font-size: 13px; color: var(--text2); }
+
+/* ---- yorug' tema ----
+   Martaba ranglari qora fon uchun tanlangan (neon yashil, sariq, laym). Oq
+   fonda ular MATN sifatida o'qilmaydi — 1.6:1 gacha tushadi. To'ldirish va
+   chekka o'sha-o'shaligicha qoladi, faqat matn va ikonka qoraytiriladi:
+   shunda daraja rangi ma'nosini yo'qotmaydi, lekin ko'rinadi. */
+[data-theme="light"] .lv-rank,
+[data-theme="light"] .lv-mark-n,
+[data-theme="light"] .lv-cel-lv b { color: color-mix(in srgb, var(--c) 68%, #000); }
+[data-theme="light"] .lv-chip.on { color: color-mix(in srgb, var(--c) 74%, #000); }
+
+/* ---- tor ekran ---- */
+@media (max-width: 380px) {
+  .lv-mark { width: 48px; height: 48px; border-radius: 15px; }
+  .lv-mark-n { font-size: 19px; }
+  .lv-fam-g { grid-template-columns: 1fr 1fr; }
+  .lv-item { padding: 8px; gap: 7px; }
+}
