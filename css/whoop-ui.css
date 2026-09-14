@@ -12,9 +12,13 @@
    1. RANG = MA'LUMOT. Zona ranglari (yashil/sariq/qizil), ko'k zo'riqish,
       binafsha uyqu. Bosiladigan narsa rangsiz — oq yoki kulrang. Shuning
       uchun ekrandagi har bir rang dog'i biror o'lchovni bildiradi.
-   2. YORLIQ KICHIK, RAQAM KATTA. Yorliq 10px katta harflarda, keng
+   2. YORLIQ KICHIK, RAQAM KATTA. Yorliq 11px katta harflarda, keng
       oraliqda — u o'qilishi emas, TANILISHI kerak. Raqam esa uzoqdan
       o'qiladi: 40–52px, zich, jadval kengligida.
+      11px — QAT'IY QUYI CHEGARA, xohish emas. Ilova bo'ylab 9/9.5/10/10.5
+      larning hammasi ataylab chiqarib tashlangan. Bu yerga yangi yorliq
+      qo'shsangiz, o'lchamni 11 dan pasaytirmang: joy yetmasa harflar
+      orasini (letter-spacing) qisqartiring, shriftni emas.
    3. CHIZIQ QUTIDAN YAXSHI. Bo'lishni chegara emas, soch tolasidek
       chiziq va bo'shliq bajaradi. Qancha quti kam bo'lsa, shuncha
       ma'lumot ko'rinadi.
@@ -24,7 +28,7 @@
    1. MIKRO-YORLIQ
    Butun ilovada bitta yorliq uslubi. Ilgari o'nlab joyda o'nta xil
    o'lcham va oraliq bor edi (9.5/10/10.5/11/12px, .06–.13em) — ko'z
-   ularni boshqa-boshqa narsa deb o'qirdi. Endi bitta: 10px, .15em.
+   ularni boshqa-boshqa narsa deb o'qirdi. Endi bitta: 11px, .15em.
    --------------------------------------------------------------------- */
 .eyebrow, .stat-label, .kpi-label, .field-label, .hero-eyebrow,
 .section-title, .dashed, .wh-trend-name, .wh-ready-label, .td-kpi-lab,
@@ -608,7 +612,7 @@ html.sky-turn body::after { animation: skyTurn 2.6s var(--ease-out); }
    tanlov rangsiz belgilanadi. */
 .td-week { gap: 3px; margin-bottom: 18px; }
 .td-wd { gap: 4px; padding: 10px 0 8px; }
-.td-wd-l { font-size: 9px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--text4); }
+.td-wd-l { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text4); }
 .td-wd-n { font-size: 17px; font-weight: 700; letter-spacing: -.03em; color: var(--text2); }
 .td-wd.today .td-wd-n { color: var(--text); }
 [data-view="today"] .td-wd.on { box-shadow: inset 0 -2px 0 var(--text); }
@@ -645,16 +649,16 @@ html.sky-turn body::after { animation: skyTurn 2.6s var(--ease-out); }
 .td-strip2-item { gap: 5px; padding: 14px 12px; }
 .td-strip2-val { font-size: 24px; font-weight: 700; letter-spacing: -.04em; color: var(--text); }
 .td-strip2-val small { font-size: 13px; color: var(--text3); font-weight: 600; }
-.td-strip2-lab { font-size: 10px; font-weight: 600; letter-spacing: .13em;
+.td-strip2-lab { font-size: 11px; font-weight: 600; letter-spacing: .10em;
   text-transform: uppercase; color: var(--text3); }
 @media (max-width: 400px) {
   .td-strip2-val { font-size: 21px; }
-  .td-strip2-lab { letter-spacing: .09em; }
+  .td-strip2-lab { letter-spacing: .06em; }
   .td-grp-n { font-size: 18px; min-width: 38px; }
 }
 
 /* daraja kartasi — faqat tipografika, tuzilishiga tegilmadi */
-.lv-ch-h { font-size: 10px; letter-spacing: .13em; }
+.lv-ch-h { font-size: 11px; letter-spacing: .12em; }
 
 /* ---------------------------------------------------------------------
    20. NASR — jadval raqamlari jumlaga tushmasin
