@@ -878,7 +878,7 @@
     try {
       const text = typeof f.text === 'function' ? await f.text()
         : await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result || '')); r.onerror = () => rej(r.error || new Error('read')); r.readAsText(f); });
-      D.importJson(text);
+      await D.importJson(text);
     } catch (e) { D.toast(t('set.d.importFail', { msg: (e && e.message) || e }), { ms: 4000 }); }
   };
   D.act.setReset = async () => {
