@@ -360,3 +360,75 @@
 .auth-title { font-size: 15px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); }
 .auth-user.on { background: var(--btn-grad); color: var(--on-btn); }
 .auth-ic { border-radius: 50%; background: transparent; border: 1px solid color-mix(in srgb, var(--success) 40%, transparent); }
+
+/* ---------------------------------------------------------------------
+   15. MATERIAL — nega tekis qora yetarli emas
+
+   Birinchi urinishda hamma narsa mutlaq tekis edi: bitta qora, ustida
+   soch tolasidek chiziqlar. Tizim sifatida to'g'ri, ko'z uchun esa bo'sh —
+   egasining bahosi «juda oddiy» aynan shu haqda edi. WHOOP ham tekis
+   emas: uning kartasi yuqoridan pastga sal yorishadi va chekkasida
+   yorug'lik ushlab turadi, katta o'lchov ortida esa zona rangi xira
+   shu'la bo'lib yotadi.
+
+   Uch qatlam qo'shildi, uchalasi ham juda past kuchda — ularni alohida
+   payqash qiyin, lekin o'chirilsa ekran darrov qartadek yassilanadi:
+     1. Kartada vertikal gradient (2–3% farq) — yuza yo'nalish oladi.
+     2. Yuqori chekkada ichki yorug' chiziq — karta fonga yopishmaydi.
+     3. Bosh o'lchov ortida zona shu'lasi — rang ma'lumotdan KELIB CHIQADI,
+        ya'ni bu bezak emas: yashil shu'la «yuqori zona» deyapti.
+   --------------------------------------------------------------------- */
+.card, .hero, .modal, .sheet, .auth-card {
+  background-image: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,0) 42%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.055);
+}
+[data-theme="light"] .card, [data-theme="light"] .hero,
+[data-theme="light"] .modal, [data-theme="light"] .sheet, [data-theme="light"] .auth-card {
+  background-image: linear-gradient(180deg, rgba(255,255,255,.9), rgba(10,11,13,.012) 60%);
+  box-shadow: 0 1px 2px rgba(10,11,13,.04), 0 6px 20px -8px rgba(10,11,13,.10);
+}
+/* Yassi variant material olmaydi: u ataylab «karta emas» degan narsa. */
+.card.flat { background-image: none; box-shadow: none; }
+
+/* Zona shu'lasi — faqat bosh o'lchov kartasida. `--z` allaqachon zona rangini
+   tutib turadi (3-bo'lim), shuning uchun shu'la o'zi to'g'ri rangda keladi.
+   `radial-gradient` kartaning yuqori chap burchagida — halqa aynan o'sha
+   yerda turadi, ya'ni yorug'lik manbadan chiqqandek ko'rinadi. */
+.td-ready { background-image:
+    radial-gradient(74% 116% at 18% 0%, color-mix(in srgb, var(--z) 13%, transparent), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0) 46%); }
+[data-theme="light"] .td-ready { background-image:
+    radial-gradient(74% 116% at 18% 0%, color-mix(in srgb, var(--z) 11%, transparent), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,.9), rgba(10,11,13,.012) 60%); }
+
+/* ---------------------------------------------------------------------
+   16. SHKALA — bosh raqam yanada kattaroq, atrofida ko'proq havo
+
+   «Keng» degan talab shu yerda bajariladi. Karta ichidagi to'ldirish
+   17 -> 20px, bo'limlar orasi 26 -> 32px. Bosh raqam esa yana bir pog'ona
+   ko'tarildi: WHOOP'da u ekranning eng katta narsasi va qolgan hamma
+   narsa uning atrofida joylashadi.
+   --------------------------------------------------------------------- */
+.card, .hero { padding: 20px 18px; margin-bottom: 14px; }
+.divider { margin: 18px -18px; }
+.page { padding: 6px 18px 32px; }
+.section-title { margin: 32px 0 14px; }
+.hero-num { font-size: 58px; letter-spacing: -.05em; }
+.kpi-num { font-size: 52px; letter-spacing: -.05em; }
+.arc-num { font-size: 56px; letter-spacing: -.05em; }
+.arc-val { margin-top: -52px; }
+.ring-pct { font-size: 29px; }
+.td-kpi-val { font-size: 25px; }
+.stat { padding: 15px 13px 14px; }
+.stat-num { font-size: 27px; }
+.top-title { font-size: 30px; letter-spacing: -.04em; }
+@media (max-width: 400px) {
+  .card, .hero { padding: 17px 15px; }
+  .divider { margin: 16px -15px; }
+  .hero-num { font-size: 46px; } .kpi-num { font-size: 42px; }
+  .arc-num { font-size: 46px; } .arc-val { margin-top: -44px; }
+  .stat-num { font-size: 23px; } .td-kpi-val { font-size: 21px; }
+  .top-title { font-size: 25px; }
+}
+/* Kengroq ekranda sahifa ham kengayadi — «keng» talabi shu yerda ham. */
+@media (min-width: 960px) { .top, .page { max-width: 960px; } .page.wide { max-width: 1120px; } }
