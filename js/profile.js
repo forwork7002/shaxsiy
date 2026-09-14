@@ -240,7 +240,7 @@
   D.act.pfSyncNow = async () => {
     if (busy) return;
     busy = true; redraw();
-    try { await D.pull(); if (D.flush) await D.flush(); } catch (e) {}
+    try { await D.pull({ force: true }); if (D.flush) await D.flush(); } catch (e) {}
     busy = false; redraw();
   };
   // Egasi paroli bilan tasdiqlanadi, keyin eski nusxa hozirgi yozuvlar ustiga emas, yoniga qo'shiladi.

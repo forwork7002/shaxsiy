@@ -894,7 +894,7 @@
       'set.logoutQ2': 'Серверга юборилмаган ёзувлар бор. Чиқишдан олдин уларни юбориб кўрамиз; етмаса шу қурилмада сақланади ва қайтиб кирганингизда ўзи қўшилади. Чиқилсинми?' },
     ru: { 'set.account': 'Аккаунт', 'set.logout': 'Выйти', 'set.logoutQ': 'Выйти? Копия на этом устройстве будет удалена, данные на сервере сохранятся.',
       'set.logoutQ2': 'Есть записи, не отправленные на сервер. Перед выходом попробуем их отправить; если не выйдет — они останутся на этом устройстве и вернутся при следующем входе. Выйти?' } });
-  D.act.setSyncNow = async () => { await D.pull(); D.rerender(); };
+  D.act.setSyncNow = async () => { await D.pull({ force: true }); D.rerender(); };
   D.act.setExport = () => D.exportJson();
   D.act.setImportPick = () => { const i = D.$('#setImportInp'); if (i) i.click(); };
   D.act.setImportFile = async (el) => {

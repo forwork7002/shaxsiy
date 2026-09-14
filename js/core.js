@@ -174,8 +174,42 @@
   /* storage                                                             */
   /* ------------------------------------------------------------------ */
   function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
-  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { console.warn('ls', e); return false; } }
+  let lsWarned = false;
+  function lsSet(k, v) {
+    try { localStorage.setItem(k, JSON.stringify(v)); return true; }
+    catch (e) {
+      console.warn('ls', e);
+      // iOS Safari maxfiy rejimda HAR QANDAY yozuvga xato beradi, to'lgan xotira ham
+      // shu yerda tugaydi. Ilgari faqat console.warn edi — odam yozgani yo'qolayotganini
+      // bilmasdi. Bir marta aytamiz: har bosishda toast chiqmasin.
+      if (!lsWarned) { lsWarned = true; setTimeout(() => { try { D.toast(D.t('data.noStore'), { ms: 7000 }); } catch (x) {} }, 0); }
+      return false;
+    }
+  }
   D.lsGet = lsGet; D.lsSet = lsSet;
+
+  /* Holatni diskka yozish — to'plamli.
+     JSON.stringify(D.S) sinxron ishlaydi va holat o'sgani sayin qimmatlashadi.
+     Ilgari har bosish (odat belgilash, suv qo'shish) alohida to'liq yozuv edi:
+     ketma-ket o'nta belgi — o'nta to'liq serializatsiya, hammasi asosiy oqimda,
+     ya'ni telefonda har bosishda seziladigan kechikish. Endi 400 ms oynadagi
+     o'zgarishlar bitta yozuvga birlashadi; sahifa yashiringanda darrov yoziladi. */
+  let lsDirty = false, lsTimer = 0;
+  function saveLocalNow() {
+    if (lsTimer) { clearTimeout(lsTimer); lsTimer = 0; }
+    if (!lsDirty) return;
+    lsDirty = false;
+    lsSet(LS_KEY, D.S);
+  }
+  function saveLocalSoon() {
+    lsDirty = true;
+    if (!lsTimer) lsTimer = setTimeout(() => { lsTimer = 0; saveLocalNow(); }, 400);
+  }
+  /** Kutmasdan hoziroq yozish — sinxronlash va import kabi oqimlar uchun. */
+  function saveLocalForce() { lsDirty = true; saveLocalNow(); }
+  /** Kutayotgan yozuvni bekor qilish — chiqishda kalit o'chgach qayta yozilmasin. */
+  function saveLocalCancel() { lsDirty = false; if (lsTimer) { clearTimeout(lsTimer); lsTimer = 0; } }
+  D.saveLocalNow = saveLocalNow;
 
   D.ui = fill(lsGet(UI_KEY), { view: 'today', sub: {}, viewDate: null, filters: {}, collapsed: {} });
   D.saveUi = D.debounce(() => lsSet(UI_KEY, D.ui), 150);
@@ -232,7 +266,9 @@
   D.merge = (remote, local) => {
     const r = D.normalize(D.deep(remote)), l = local;
     const newer = (+r.meta.updatedAt || 0) > (+l.meta.updatedAt || 0) ? r : l;
-    const out = D.normalize(D.deep(newer));
+    // r allaqachon shu funksiyaga tegishli, normallashtirilgan nusxa — uni
+    // ustidan yozaversak bo'ladi. Faqat lokal g'olib bo'lganda nusxa kerak.
+    const out = newer === r ? r : D.normalize(D.deep(l));
     for (const k of DATE_MAPS) out[k] = Object.assign({}, r[k], l[k]);
     for (const k of ID_LISTS) out[k] = unionById(l[k], r[k]);
     out.finance.tx = unionById(l.finance.tx, r.finance.tx);
@@ -278,7 +314,7 @@
     } catch (e) {
       if (e && (e.message === 'stale' || e.message === 'empty_overwrite') && e.data && depth < 2) {
         D.S = D.merge(e.data, D.S);
-        lsSet(LS_KEY, D.S);
+        saveLocalForce();
         D.emit('state:changed');
         D.rerender();
         return pushNow(depth + 1);
@@ -295,13 +331,13 @@
 
   D.save = () => {
     D.S.meta.updatedAt = Date.now();
-    lsSet(LS_KEY, D.S);
+    saveLocalSoon();
     D.setSync(D.serverEnabled() ? 'wait' : 'local');
     pushServer();
     D.emit('state:changed');
   };
   // Persist without touching updatedAt (UI-only mutations of state).
-  D.saveQuiet = () => lsSet(LS_KEY, D.S);
+  D.saveQuiet = () => saveLocalSoon();
   // Butun holatni almashtirish (tozalash, import): serverdagi to'liq nusxa ustidan yozishga ataylab ruxsat.
   D.saveReplace = () => { replaceOnce = true; D.save(); };
 
@@ -358,15 +394,24 @@
     try { localStorage.removeItem(RESCUE_KEY + uid); } catch (e) {}
     D.S = D.merge(D.S, D.normalize(saved));   // yuborilmay qolgan yozuvlar ustun
     D.S.meta.updatedAt = Date.now();
-    lsSet(LS_KEY, D.S);
+    saveLocalForce();
     D.emit('state:changed');
     D.rerender();
     if (await pushNow()) D.toast(D.t('auth.restored'), { ms: 4000 });
   }
 
   // Pull from server at boot; server wins if newer, else push local.
-  D.pull = async () => {
-    if (!D.serverEnabled()) return false;
+  let pullBusy = null, pullAt = 0;
+  const PULL_GAP = 20000;
+  D.pull = (opts) => {
+    if (!D.serverEnabled()) return Promise.resolve(false);
+    if (pullBusy) return pullBusy;                       // allaqachon ketyapti — o'shani kutamiz
+    const force = !!(opts && opts.force);
+    if (!force && Date.now() - pullAt < PULL_GAP) return Promise.resolve(false);
+    pullBusy = pullRun().finally(() => { pullBusy = null; pullAt = Date.now(); });
+    return pullBusy;
+  };
+  async function pullRun() {
     try {
       D.setSync('wait');
       const remote = await D.api('/api/data');
@@ -393,7 +438,7 @@
         migrated.meta.deviceId = D.S.meta.deviceId;
         D.S = localEmpty ? migrated : D.merge(migrated, D.S);
         D.S.meta.updatedAt = Date.now();
-        lsSet(LS_KEY, D.S);
+        saveLocalForce();
         D.theme.apply(); D.renderNav();
         D.emit('state:changed');
         D.rerender();
@@ -403,12 +448,12 @@
         if (localEmpty && rU) {
           D.S = D.normalize(remote);
           if (!D.S.meta.deviceId) D.S.meta.deviceId = D.uid('dev');
-          lsSet(LS_KEY, D.S);
+          saveLocalForce();
           D.emit('state:changed');
           D.rerender();
         } else if (rU > lU) {
           D.S = D.merge(remote, D.S);
-          lsSet(LS_KEY, D.S);
+          saveLocalForce();
           D.emit('state:changed');
           D.rerender();
           pushServer();
@@ -427,7 +472,7 @@
       D.setSync('err');
       return false;
     }
-  };
+  }
   window.addEventListener('online', () => { if (D._pending) pushServer(); });
 
   /* ------------------------------------------------------------------ */
@@ -694,6 +739,21 @@
   D.act = {};
   D.act.toastUndo = () => { const el = D.$('#toast'); if (el && el._undo) { const f = el._undo; el._undo = null; el.classList.remove('show'); f(); } };
 
+  // iOS: fon skrollini qulflash (o'rnini eslab qolgan holda)
+  let lockY = 0, locked = 0;
+  function scrollLock() {
+    if (locked++) return;                       // ichma-ich oyna — bir marta qulflaymiz
+    lockY = window.scrollY || window.pageYOffset || 0;
+    document.body.style.top = -lockY + 'px';
+    document.body.classList.add('modal-open');
+  }
+  function scrollUnlock() {
+    if (!locked || --locked) return;
+    document.body.classList.remove('modal-open');
+    document.body.style.top = '';
+    window.scrollTo(0, lockY);
+  }
+
   D.modal = (o) => {
     const bg = D.$('#modalBg');
     const acts = (o.actions || [{ label: D.t('btn.close'), act: 'closeModal' }]).map((a) =>
@@ -703,7 +763,7 @@
       <div class="modal-body">${o.body || ''}</div>
       ${acts ? `<div class="modal-actions">${acts}</div>` : ''}</div>`;
     bg.classList.add('show');
-    document.body.classList.add('modal-open');
+    if (!bg._open) { bg._open = true; scrollLock(); }
     bg._onClose = o.onClose || null;
     if (o.onOpen) setTimeout(o.onOpen, 0);
     const f = bg.querySelector('input,textarea,select,button.btn');
@@ -713,7 +773,7 @@
     const bg = D.$('#modalBg');
     if (!bg || !bg.classList.contains('show')) return;
     bg.classList.remove('show');
-    document.body.classList.remove('modal-open');
+    if (bg._open) { bg._open = false; scrollUnlock(); }
     const f = bg._onClose; bg._onClose = null; bg.innerHTML = '';
     if (f) f();
   };
@@ -1068,7 +1128,7 @@
   document.addEventListener('input', (ev) => dispatch('data-input', ev));
   document.addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter' && !ev.shiftKey && ev.target.matches && ev.target.matches('input[data-enter]')) { ev.preventDefault(); const fn = D.act[ev.target.dataset.enter]; if (fn) fn(ev.target, ev); return; }
-    if (ev.key === 'Escape') { D.closeModal(); D.closeMore(); const p = D.$('#palette'); if (p) p.classList.remove('show'); }
+    if (ev.key === 'Escape') { D.closeModal(); D.closeMore(); D.search.close(); }
     if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'k') { ev.preventDefault(); D.search.open(); }
     if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'z' && !ev.target.matches('input,textarea,[contenteditable]')) { ev.preventDefault(); D.undo.pop(); }
   });
@@ -1081,9 +1141,16 @@
     register: (fn) => providers.push(fn),
     open() {
       const p = D.$('#palette'); if (!p) return;
+      if (p.classList.contains('show')) return;
       p.classList.add('show');
+      scrollLock();
       const inp = D.$('#paletteInp'); if (inp) { inp.value = ''; inp.focus(); }
       D.search.run('');
+    },
+    close() {
+      const p = D.$('#palette'); if (!p || !p.classList.contains('show')) return;
+      p.classList.remove('show');
+      scrollUnlock();
     },
     run(q) {
       const res = D.$('#paletteRes'); if (!res) return;
@@ -1099,9 +1166,9 @@
       res.innerHTML = items.length ? items.map((it, i) => `<button class="pal-item ${i === 0 ? 'on' : ''}" data-act="palGo" data-i="${i}">${it.icon ? D.ic(it.icon, 16) : ''}<span class="pal-label">${D.esc(it.label)}</span>${it.sub ? `<span class="pal-sub">${D.esc(it.sub)}</span>` : ''}</button>`).join('') : `<div class="empty">${D.t('search.empty')}</div>`;
     },
   };
-  D.act.palGo = (el) => { const it = D._paletteItems[+el.dataset.i]; D.$('#palette').classList.remove('show'); if (it && it.go) it.go(); };
+  D.act.palGo = (el) => { const it = (D._paletteItems || [])[+el.dataset.i]; D.search.close(); if (it && it.go) it.go(); };
   D.act.palInput = (el) => D.search.run(el.value);
-  D.act.palClose = () => D.$('#palette').classList.remove('show');
+  D.act.palClose = () => D.search.close();
   D.act.openSearch = () => D.search.open();
 
   // Cyrillic ↔ Latin transliteration for search (Uzbek)
@@ -1266,6 +1333,7 @@
         await new Promise((r) => setTimeout(r, 1400));
       }
       try { await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }); } catch (e) {}
+      saveLocalCancel();
       try { localStorage.removeItem(LS_KEY); localStorage.removeItem(UI_KEY); } catch (e) {}
       D.device.uid = ''; D.device.name = ''; D.saveDevice();
       D.me = null;
@@ -1286,11 +1354,15 @@
   /* ------------------------------------------------------------------ */
   D.exportJson = () => {
     const b = new Blob([JSON.stringify(D.S, null, 1)], { type: 'application/json' });
+    const url = URL.createObjectURL(b);
     const a = document.createElement('a');
-    a.href = URL.createObjectURL(b);
+    a.href = url;
     a.download = 'dash_' + D.today() + '.json';
+    a.rel = 'noopener';
+    // iOS Safari hujjatda turmagan havolaning click() ini e'tiborsiz qoldiradi
+    document.body.appendChild(a);
     a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 2000);
   };
   D.importJson = (text) => {
     let j;
@@ -1322,16 +1394,33 @@
     D.go(D.views[hash] ? hash : D.ui.view);
     D.setSync(D.serverEnabled() ? 'wait' : 'local');
     if (D._corrupt) D.toast(D.t('data.corrupt'), { ms: 6000 });
-    D.pull().finally(() => { if (D.loading) { D.loading = false; D.rerender(); } });
-    // header clock / day rollover
+    D.pull({ force: true }).finally(() => { if (D.loading) { D.loading = false; D.rerender(); } });
+    // header clock / day rollover — faqat sahifa ko'rinib turganda.
+    // Fondagi ilovada soatni yurgizishdan foyda yo'q: iOS baribir chizmaydi,
+    // lekin batareya va protsessor sarflanadi.
     let lastDay = D.today();
-    setInterval(() => {
+    let tickT = 0;
+    const onTick = () => {
       const k = D.today();
       if (k !== lastDay) { lastDay = k; D.emit('day:changed', k); D.rerender(); }
       D.emit('tick');
-    }, 30 * 1000);
+    };
+    const tickStart = () => { if (!tickT) tickT = setInterval(onTick, 30 * 1000); };
+    const tickStop = () => { if (tickT) { clearInterval(tickT); tickT = 0; } };
+    tickStart();
     window.addEventListener('focus', () => { if (D.serverEnabled()) D.pull(); });
-    document.addEventListener('visibilitychange', () => { if (!document.hidden) D.emit('tick'); });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        tickStop();
+        D.saveLocalNow();          // ilovadan chiqilmoqda — kutayotgan yozuv diskka
+      } else {
+        tickStart();
+        onTick();
+        if (D.serverEnabled()) D.pull();
+      }
+    });
+    // iOS'da beforeunload ishonchsiz; pagehide — yagona kafolatlangan nuqta.
+    window.addEventListener('pagehide', () => D.saveLocalNow());
     window.addEventListener('hashchange', () => { const h = location.hash.replace('#', ''); if (D.views[h] && h !== current) D.go(h); });
     D.emit('boot');
   };

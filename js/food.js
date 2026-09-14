@@ -239,6 +239,26 @@
     return u;
   }
 
+  let shownUrl = null, shownSrc = null, shownLen = -1;
+  function showUrl(dataUrl) {
+    if (!dataUrl) return '';
+    if (dataUrl.length === shownLen && dataUrl === shownSrc) return shownUrl;
+    dropShown();
+    shownSrc = dataUrl; shownLen = dataUrl.length;
+    try {
+      const i = dataUrl.indexOf(',');
+      const bin = atob(dataUrl.slice(i + 1));
+      const buf = new Uint8Array(bin.length);
+      for (let j = 0; j < bin.length; j++) buf[j] = bin.charCodeAt(j);
+      shownUrl = URL.createObjectURL(new Blob([buf], { type: dataUrl.slice(5, i).split(';')[0] || 'image/jpeg' }));
+    } catch (e) { shownUrl = dataUrl; }          // zaxira: baribir ko'rsatamiz
+    return shownUrl;
+  }
+  function dropShown() {
+    if (shownUrl && shownUrl !== shownSrc) { try { URL.revokeObjectURL(shownUrl); } catch (e) {} }
+    shownUrl = null; shownSrc = null; shownLen = -1;
+  }
+
   /* ------------------------------------------------------------------ */
   /* tahlil so'rovi                                                      */
   /* ------------------------------------------------------------------ */
@@ -294,7 +314,7 @@
     const inp = D.$('#fdText'); if (inp) inp.value = '';
     analyze({ image, preview: image, note });
   };
-  D.act.fdDismiss = () => { result = null; errorKind = null; pending = null; D.rerender(); };
+  D.act.fdDismiss = () => { result = null; errorKind = null; pending = null; dropShown(); D.rerender(); };
   D.act.fdRetry = () => { if (!pending) return; const p = pending; errorKind = null; analyze({ text: p.text, note: p.note, image: p.src === 'photo' ? p.preview : null, preview: p.preview }); };
   D.act.fdSaveRes = () => {
     if (!result) return;
@@ -470,7 +490,7 @@
   function analysisCard() {
     if (busy && pending) {
       return `<div class="card fd-res fd-busy" data-k="fd-busy">
-        ${pending.preview ? `<img class="fd-preview" src="${pending.preview}" alt="">` : ''}
+        ${pending.preview ? `<img class="fd-preview" src="${showUrl(pending.preview)}" alt="">` : ''}
         <div class="fd-busy-row">${D.ic('sparkles', 16)}<span>${esc(t('food.busy'))}</span><span class="ai-dots"><i></i><i></i><i></i></span></div>
         ${pending.text ? `<div class="tiny muted">${esc(cut(pending.text, 120))}</div>` : ''}
       </div>`;
@@ -490,7 +510,7 @@
     // model ovqat topmadi — nol raqamlarni ko'rsatishdan ko'ra shuni aytgan yaxshi
     if (!r.items.length && !r.total.kcal) {
       return `<div class="card fd-res" data-k="fd-none">
-        ${r.preview ? `<img class="fd-preview" src="${r.preview}" alt="">` : ''}
+        ${r.preview ? `<img class="fd-preview" src="${showUrl(r.preview)}" alt="">` : ''}
         <div class="banner"><span class="grow">${esc(t('food.notFood'))}</span></div>
         <div class="fd-res-acts">
           <button class="btn sm ghost" data-act="fdManual">${D.ic('edit', 14)} ${esc(t('food.manual'))}</button>
@@ -501,7 +521,7 @@
     // yorliq bo'lmasa bu karta kun xulosasiga o'xshab ketadi — ikkalasi ham halqasiz makro uchligi
     return `<div class="card fd-res" data-k="fd-result">
       <div class="fd-res-eyebrow">${D.ic('sparkles', 13)} ${esc(t('food.result'))}</div>
-      ${r.preview ? `<img class="fd-preview" src="${r.preview}" alt="">` : ''}
+      ${r.preview ? `<img class="fd-preview" src="${showUrl(r.preview)}" alt="">` : ''}
       <div class="fd-res-name">${esc(r.name)}${rough ? ` <span class="fd-rough">${esc(t('food.rough'))}</span>` : ''}</div>
       <div class="fd-big"><b class="num">${D.fmtNum(r.total.kcal)}</b><span>${esc(t('food.kcal'))}</span>${r.grams ? `<span class="fd-big-g num">${D.fmtNum(r.grams)} g</span>` : ''}</div>
       ${macroRow(r.total)}

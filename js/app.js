@@ -61,7 +61,7 @@
   D.on('state:changed', D.debounce(renderHeader, 300));
 
   // close palette on backdrop click
-  document.addEventListener('click', (ev) => { const p = D.$('#palette'); if (p && ev.target === p) p.classList.remove('show'); });
+  document.addEventListener('click', (ev) => { const p = D.$('#palette'); if (p && ev.target === p) D.search.close(); });
   document.addEventListener('keydown', (ev) => {
     const p = D.$('#palette');
     if (!p || !p.classList.contains('show')) return;
