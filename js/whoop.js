@@ -340,9 +340,14 @@
         return false;
       }
       pendingTries = 0;
+      const wasConnected = W().connected;
       const changed = applySnapshot(snap);
       // the server owns this data; persist locally without bumping updatedAt (no push, no 409 churn)
-      D.saveQuiet();
+      // Faqat o'zgarganda. Ilgari bu shartsiz edi: WHOOP hech narsa yangilamagan
+      // kunda ham har daqiqada butun blob JSON.stringify qilinib localStorage ga
+      // qayta yozilardi — telefonda bu sezilarli va doimiy yuk.
+      // wasConnected: ma'lumot bir xil bo'lsa ham, ulanish holati o'zgargan bo'lsa saqlaymiz.
+      if (changed || !wasConnected) D.saveQuiet();
       D.emit('whoop:updated', { changed });
       if ((changed || opts.force) && LIVE_VIEWS.has(D.current()) && quiet()) D.rerender();
       return changed;

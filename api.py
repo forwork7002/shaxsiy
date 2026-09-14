@@ -1103,8 +1103,13 @@ def load_data(uid: str) -> dict:
     f = user_file(uid)
     if not f.exists():
         # eski bitta-foydalanuvchi data.json bo'lsa — ko'chirib olamiz
+        # FAQAT egasiga. Ilgari shart yo'q edi: kimning fayli hali yaratilmagan
+        # bo'lsa, birinchi so'ragan odam eski data.json ni — ya'ni egasining butun
+        # hayot ma'lumotini — o'z hisobiga olib ketardi. Hisob ochish ochiq
+        # turgani uchun bu begona odam ham bo'lishi mumkin edi.
+        # Hozir serverda data.json yo'q, lekin zaxiradan tiklashda qaytib keladi.
         legacy = DATA_DIR / "data.json"
-        if legacy.exists() and not any(DATA_DIR.glob("*.json.migrated")):
+        if uid == "me" and legacy.exists() and not any(DATA_DIR.glob("*.json.migrated")):
             try:
                 d = json.loads(legacy.read_text(encoding="utf-8"))
                 legacy.rename(legacy.with_suffix(".json.migrated"))
@@ -1534,7 +1539,16 @@ def whoop_login():
         "client_id": WHOOP_ID, "redirect_uri": base_url() + "/api/whoop/callback",
         "response_type": "code", "scope": WHOOP_SCOPES, "state": state,
     })
-    return redirect(f"{WHOOP_AUTH}?{q}")
+    r = redirect(f"{WHOOP_AUTH}?{q}")
+    # Oqimni boshlagan brauzer uni tugatsin. Ilgari state faqat imzolangan edi:
+    # muddati yo'q va hech narsaga bog'lanmagan, ya'ni sizib ketgan bitta satr
+    # bilan boshqa odam o'z WHOOP hisobini SIZNING uid'ingizga ulab qo'yishi
+    # mumkin edi — tokenlar almashadi, dashboard begona biometrikani ko'rsatadi.
+    # Google oqimida bu g_st cookie'si bilan hal qilingan; shu naqsh.
+    # max_age=600 ayni paytda muddat vazifasini ham bajaradi.
+    r.set_cookie("w_st", nonce, max_age=600, httponly=True, samesite="Lax",
+                 secure=request.headers.get("X-Forwarded-Proto", "") == "https")
+    return r
 
 
 @app.get("/api/whoop/callback")
@@ -1548,6 +1562,12 @@ def whoop_callback():
         return "state noto'g'ri", 400
     if not hmac.compare_digest(sig, sign(uid + nonce)):
         return "state imzosi noto'g'ri", 400
+    # Imzo yetarli emas: u faqat «bu satrni biz yozganmiz» deydi, «shu brauzer
+    # boshlagan» demaydi. w_st cookie'si aynan shuni tekshiradi va 10 daqiqadan
+    # keyin o'zi o'chadi, ya'ni eski state ishlamay qoladi.
+    if not hmac.compare_digest(request.cookies.get("w_st", ""), nonce):
+        return ("Ulanish shu brauzerda boshlanmagan yoki 10 daqiqadan oshib ketdi. "
+                "Ilovaga qaytib, Sog'liq bo'limidan qaytadan «Ulash»ni bosing."), 400
     status, tok = http_json(WHOOP_TOKEN, {
         "grant_type": "authorization_code", "code": code,
         "redirect_uri": base_url() + "/api/whoop/callback",
@@ -1566,7 +1586,9 @@ def whoop_callback():
         )
     tok["expires_at"] = time.time() + int(tok.get("expires_in", 3600)) - 60
     whoop_save(uid, tok)
-    return redirect("/#health")
+    r = redirect("/#health")
+    r.delete_cookie("w_st")
+    return r
 
 
 def whoop_access(uid: str):
@@ -2059,8 +2081,19 @@ def whoop_snapshot():
         r = jsonify({"connected": True, "pending": True})
         r.headers["Cache-Control"] = "no-store"
         return r
-    etag = '"%s-%s"' % (snap.get("updatedAt", 0), snap.get("fetchedAt", 0) // 60000)
-    if request.headers.get("If-None-Match") == etag:
+    # ETag ma'lumotning o'ziga bog'lansin. Ilgari u fetchedAt // 60000 ni o'z ichiga
+    # olardi — u har POLL da yangilanadi, ya'ni tag har daqiqa o'zgarardi va 304 yo'li
+    # hech qachon ishlamasdi: mijoz har daqiqada butun snapshot'ni qayta olardi.
+    # snap["updatedAt"] esa faqat ma'lumot o'zgarganda yoziladi (_wh_tick: if changed),
+    # shuning uchun u to'g'ri versiya belgisi.
+    # fetchedAt butunlay olib tashlanmadi: mijozdagi freshness() 3 daqiqadan keyin
+    # "eskirgan" deb belgilaydi, shuning uchun 2 daqiqalik qadam bilan qoldiramiz —
+    # ko'rsatkich yolg'on gapirmaydi, to'liq javob esa soatiga 60 tadan 30 taga tushadi.
+    etag = '"%s-%s"' % (snap.get("updatedAt", 0), snap.get("fetchedAt", 0) // 120000)
+    # nginx: gzip_proxied any + gzip_min_length 512 — bu javob siqiladi va nginx
+    # ETag ga W/ prefiksini qo'shadi ("abc" -> W/"abc"). Shuning uchun == emas, in.
+    # (api.py dagi avatar yo'li buni allaqachon to'g'ri qiladi.)
+    if etag in request.headers.get("If-None-Match", ""):
         return Response(status=304, headers={"ETag": etag, "Cache-Control": "no-cache"})
     out = dict(snap)
     out["connected"] = True

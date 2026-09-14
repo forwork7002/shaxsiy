@@ -35,7 +35,11 @@ VERSION_GAP_S = 600           # 10 daqiqa ichidagi saqlashlar bitta versiyaga yo
 KEEP_ALL_DAYS, KEEP_DAILY_DAYS = 7, 400
 BACKUP_KEEP = 14
 DAY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-FACT_KINDS = ("health", "habits", "counts", "prayers", "note", "gratitude", "stack", "caffeine", "tasks", "food")
+# 2026-09-14: finance, dhikr, fasting, goals qo'shildi. Ular blobda bor edi, lekin
+# arxivga tushmasdi — ya'ni moliya yozuvi yoki ro'za kuni o'chirilsa, hech qayerda
+# izi qolmasdi. Arxiv o'qiladigan ekran qurilguncha ular jimgina to'planib turadi.
+FACT_KINDS = ("health", "habits", "counts", "prayers", "note", "gratitude", "stack", "caffeine", "tasks", "food",
+              "finance", "dhikr", "fasting", "goals")
 FOOD_MEAL_KEYS = ("id", "ts", "name", "grams", "kcal", "p", "c", "f", "photo", "items", "note", "src")   # surat baytlari hech qachon emas
 WHOOP_TS_KEY = {"cycle": "start", "recovery": "ts", "sleep": "end", "workout": "start"}   # _wh_merge bilan bir xil
 WHOOP_DAY_SHIFT_H = {"cycle": 12}   # mijoz (whoop.js/history.js) sikl kunini start+12h dan oladi — day_hint ham shunday
@@ -241,6 +245,32 @@ def _facts_of(blob: dict) -> dict:
             tasks.setdefault(day, []).append({k: x.get(k) for k in ("id", "text", "date", "doneAt", "priority", "goalId")})
     for day, v in tasks.items():
         put(day, "tasks", v)
+    # dhikr va fasting — kun-xarita, prayers bilan bir xil naqsh
+    for day, v in g("dhikr", dict).items():
+        if isinstance(v, dict):
+            put(day, "dhikr", v)
+    for day, v in g("fasting", dict).items():
+        if isinstance(v, dict):
+            put(day, "fasting", v)
+    # moliya: finance.tx[] — har yozuvda o'z sanasi bor
+    fin = blob.get("finance") if isinstance(blob.get("finance"), dict) else {}
+    fintx = {}
+    for x in (fin.get("tx") if isinstance(fin.get("tx"), list) else []):
+        if not isinstance(x, dict) or not _valid_day(x.get("date")):
+            continue
+        fintx.setdefault(x["date"], []).append({k: x.get(k) for k in ("id", "type", "amount", "cat", "note", "accountId")})
+    for day, v in fintx.items():
+        put(day, "finance", v)
+    # maqsadlar: tasks bilan bir xil — bajarilgan kuni bo'yicha
+    goals = {}
+    for x in g("goals", list):
+        if not isinstance(x, dict) or not x.get("done"):
+            continue
+        day = day_of_ms(x["doneAt"]) if x.get("doneAt") else None
+        if _valid_day(day):
+            goals.setdefault(day, []).append({k: x.get(k) for k in ("id", "text", "dir", "priority", "year", "doneAt")})
+    for day, v in goals.items():
+        put(day, "goals", v)
     # ovqat: food.logs[kun] = [taom]; surat faqat id sifatida qoladi (data: URL bo'lsa tashlab yuboriladi)
     food = blob.get("food") if isinstance(blob.get("food"), dict) else {}
     for day, v in (food.get("logs") if isinstance(food.get("logs"), dict) else {}).items():
