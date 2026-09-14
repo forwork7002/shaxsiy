@@ -20,6 +20,32 @@ if [ -z "$HOST" ]; then
 fi
 cd "$(dirname "$0")/.."
 
+# ─── O'ZGA QO'L TEKSHIRUVI ────────────────────────────────────────────
+# push.sh git'ni emas, PAPKANI yuboradi. Ya'ni commit qilinmagan, yarim
+# yozilgan fayl ham serverga ketadi. 2026-09-14 da bu ikki marta jonli
+# saytni buzdi: bir sessiya shrift chiqardi, ikkinchisining tugallanmagan
+# js/levels.js i qo'shilib ketdi va nishonlar bezaksiz qoldi.
+# Bu papkada bir vaqtda bir necha kishi (yoki Claude sessiyasi) ishlashi
+# mumkin, shuning uchun intizomga emas, to'siqqa tayanamiz.
+if git rev-parse --git-dir >/dev/null 2>&1 && [ "${ALLOW_DIRTY:-0}" != "1" ]; then
+  SHIP=(index.html app.css css js fonts icons manifest.json sw.js api.py requirements.txt deploy db.py legacy.py)
+  DIRTY="$(git status --porcelain -- "${SHIP[@]}" 2>/dev/null | sed 's/^...//' || true)"
+  # index.html ni push.sh ning o'zi har safar ?v= bilan qayta yozadi —
+  # o'sha izdan boshqa o'zgarish bo'lmasa, bu «o'zga qo'l» emas.
+  if [ -n "$DIRTY" ] && ! git diff -U0 -- index.html | grep -E '^[+-]' | grep -vE '^(\+\+\+|---)' | grep -vq '?v='; then
+    DIRTY="$(printf '%s\n' "$DIRTY" | grep -v '^index\.html$' || true)"
+  fi
+  if [ -n "$DIRTY" ]; then
+    echo "✗ TO'XTANG — saqlanmagan o'zgarish bor, u ham serverga ketadi:"
+    printf '%s\n' "$DIRTY" | sed 's/^/    /'
+    echo
+    echo "  Bu fayllar sizniki bo'lmasa — egasini toping, yubormang."
+    echo "  Sizniki bo'lsa — commit qiling, keyin qaytadan urinib ko'ring."
+    echo "  Ataylab shu holicha yuborish: ALLOW_DIRTY=1 $0 $*"
+    exit 1
+  fi
+fi
+
 # Ixtiyoriy fayllar: bo'lsa yuboriladi, bo'lmasa tar yiqilmaydi (legacy.py — bir martalik import)
 EXTRA=()
 for f in db.py legacy.py .env.example; do
