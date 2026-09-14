@@ -112,10 +112,6 @@
     },
   });
 
-  const PRAYER_RX = {
-    bomdod: /(bomdod|fajr|fadjr)/, peshin: /(peshin|zuhr|zuxr)/, asr: /\basr\b/,
-    shom: /(shom|maghrib|magrib)/, xufton: /(xufton|isha)/,
-  };
   // sunrise → night palette for the day ring (pct → rgb), lerped per channel
   const RING_PALETTE = [[0, [255, 216, 158]], [12.5, [255, 205, 121]], [25, [255, 227, 143]], [37.5, [255, 183, 106]], [50, [255, 149, 89]],
     [62.5, [243, 111, 79]], [75, [226, 93, 122]], [87.5, [123, 91, 176]], [100, [47, 58, 102]]];
@@ -141,8 +137,8 @@
       const map = {}, rev = {};
       for (const h of D.S.habits) {
         if (!h.active) continue;
-        const n = D.translit.norm(h.name);
-        for (const p of D.PRAYERS) if (!map[p] && PRAYER_RX[p].test(n)) { map[p] = h.id; rev[h.id] = p; break; }
+        const p = D.prayer.matchName(h.name);
+        if (p && !map[p]) { map[p] = h.id; rev[h.id] = p; }
       }
       phCache = { sig, map, rev };
     }

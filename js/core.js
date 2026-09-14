@@ -518,7 +518,14 @@
         if (D.device.uid !== owner) { D.device.uid = owner; D.device.name = ''; D.saveDevice(); }
       }
       await D.meRefresh();   // Profil varag'i, Sozlash «Hisob», onboarding ismi — 'pull:ok' dan oldin
-      const localEmpty = !Object.keys(D.S.logs).length && !D.S.habits.length && !D.S.tasks.length;
+      // «Bu qurilmada hali hech narsa yo'q» degani — «odat va vazifa yo'q» degani EMAS.
+      // Avval shart !logs && !habits && !tasks edi. Odat yuritmaydigan, lekin ovqat,
+      // namoz, moliya va WHOOP yozadigan odam uchun bu shart HAR DOIM rost bo'lib
+      // qolardi, ya'ni har pull'da quyidagi tarmoq serverni normalize qilib D.S ni
+      // butunlay almashtirardi — hali yuborilmagan kun shu yerda yo'q bo'lardi.
+      // meta.updatedAt defaultState()da 0; D.save() uni har saqlashda yozadi.
+      // Demak !updatedAt = «bu qurilma hech qachon saqlamagan», aynan kerakli ma'no.
+      const localEmpty = !(+D.S.meta.updatedAt);
       if (remote && D.isOldFormat(remote)) {
         // server still holds the old Шахсий data.json → migrate once, keep local additions, push new format
         const migrated = D.migrateOld(remote);
@@ -620,6 +627,17 @@
   D.today = () => D.dayKey();
   // Profil yoshi — bitta joyda: tug'ilgan yildan (har yangi yilda o'zi yangilanadi),
   // bo'lmasa eski `age` maydonidan. food.js, whoop.js, ai.js, settings.js shuni ishlatadi.
+  /* Faollik koeffitsienti — Mifflin-St Jeor ni TDEE ga aylantiradi.
+     Ilgari ikki nusxa bor edi va ular bir xil emasdi:
+       food.js  ACT = [1.2, 1.375, 1.55, 1.725, 1.9, 2.1]    -> faollik 3 da 1.725
+       whoop.js     = [1.2, 1.3, 1.375, 1.46, 1.55, 1.725]   -> faollik 3 da 1.46
+     Bitta odam, bitta sozlama, ikki ekranda ~450 kkal farq. food.js niki
+     saqlandi: aynan u kunlik kaloriya MAQSADINI belgilaydi, ya'ni uni
+     o'zgartirish foydalanuvchi yeydigan miqdorni o'zgartirardi. whoop.js dagi
+     esa faqat WHOOP kaloriya bermagan kun uchun zaxira baho.
+     Yorliqlar: 0 Harakatsiz · 1 Kam harakat · 2 Yengil · 3 O'rtacha · 4 Faol · 5 Juda faol. */
+  D.ACT_FACTORS = [1.2, 1.375, 1.55, 1.725, 1.9, 2.1];
+  D.activityFactor = (a) => D.ACT_FACTORS[D.clamp(Math.round(+a || 3), 0, 5)];
   D.profileAge = () => {
     const p = (D.S && D.S.profile) || {};
     const by = +p.birthYear;

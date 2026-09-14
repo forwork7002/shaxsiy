@@ -19,7 +19,7 @@
   color: transparent; display: grid; place-items: center; transition: background .14s, border-color .14s, color .14s; }
 .bk-tick.on { background: var(--accent); border-color: var(--accent); color: var(--ink-on-light); }
 .bk-tick:active { transform: scale(.93); }
-.bk-fin { flex: none; width: 40px; display: grid; place-items: center; color: var(--success); }
+.bk-fin { flex: none; width: 40px; display: grid; place-items: center; color: var(--success-text); }
 .bk-row.fin .bk-title { color: var(--text3); }
 .bk-add { margin-top: 6px; }
 .bk-del { margin-top: 6px; }

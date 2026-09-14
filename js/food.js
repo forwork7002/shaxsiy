@@ -135,7 +135,7 @@
   /* ------------------------------------------------------------------ */
   /* profil → me'yorlar                                                  */
   /* ------------------------------------------------------------------ */
-  const ACT = [1.2, 1.375, 1.55, 1.725, 1.9, 2.1];
+  // Jadval core.js da: D.ACT_FACTORS (whoop.js ham shuni oqiydi)
   const GOAL_ADJ = { lose: -400, keep: 0, gain: 300 };
   const ageOf = () => D.profileAge();   // tug'ilgan yil birinchi, eski `age` — zaxira (core.js)
   function weightOf() {
@@ -159,7 +159,7 @@
     const cm = heightOf(), age = ageOf();
     const approx = !cm || !age;
     const bmr = 10 * kg + 6.25 * (cm || 170) - 5 * (age || 30) + (p.sex === 'f' ? -161 : 5);
-    const act = ACT[D.clamp(Math.round(num(p.activity) ?? 3), 0, 5)];
+    const act = D.activityFactor(num(p.activity) ?? 3);
     const goal = GOAL_ADJ[p.goal] !== undefined ? p.goal : 'keep';
     const kcal = Math.max(1200, r0(bmr * act + GOAL_ADJ[goal]));
     const prot = r0(kg * (goal === 'gain' ? 2.0 : 1.6));

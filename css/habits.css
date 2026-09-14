@@ -21,7 +21,7 @@
 .hb-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; padding: 0; overflow: hidden; background: var(--line); }
 .hb-stat { background: var(--card-solid); padding: 13px 6px; text-align: center; }
 .hb-stat-v { font-size: 17px; font-weight: 600; letter-spacing: -.01em; color: var(--text); display: flex; align-items: center; justify-content: center; gap: 4px; }
-.hb-stat-v.accent { color: var(--accent); }
+.hb-stat-v.accent { color: var(--accent-text); }
 .hb-stat-l { font-size: 10.5px; color: var(--text3); margin-top: 3px; }
 
 /* ---------- jadval ----------
@@ -54,7 +54,7 @@
 
 .hb-th { flex: none; width: 26px; display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 9.5px; color: var(--text4); }
 .hb-th b { font-size: 11px; font-weight: 600; color: var(--text3); }
-.hb-th.today span, .hb-th.today b { color: var(--accent); }
+.hb-th.today span, .hb-th.today b { color: var(--accent-text); }
 
 .hb-emoji { flex: none; width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; font-size: 14px;
   font-family: var(--emoji); background: color-mix(in srgb, var(--c, var(--accent)) 16%, transparent); }
@@ -83,10 +83,10 @@
 
 /* ---------- hafta yakuni ---------- */
 .hb-rev-sum { text-align: center; }
-.hb-rev-pct { font-size: 34px; font-weight: 600; letter-spacing: -.03em; color: var(--accent); line-height: 1; }
+.hb-rev-pct { font-size: 34px; font-weight: 600; letter-spacing: -.03em; color: var(--accent-text); line-height: 1; }
 .hb-rev-lab { font-size: 12.5px; color: var(--text3); margin: 5px 0 12px; }
 .hb-rev-h { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
-.hb-rev-h .ic { color: var(--accent); }
+.hb-rev-h .ic { color: var(--accent-text); }
 .hb-rev .ta { min-height: 70px; }
 
 /* ---------- tahlil: yillik to'r ---------- */

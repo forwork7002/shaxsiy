@@ -45,7 +45,7 @@
 /* habits */
 .set-days { display: flex; gap: 4px; flex-wrap: wrap; }
 .set-day { width: 40px; height: 40px; padding: 0; border-radius: 10px; border: 1px solid var(--line2); background: var(--f-input); color: var(--text3); font-size: 11.5px; font-weight: 700; transition: all .15s; }
-.set-day.on { background: color-mix(in srgb, var(--success) 16%, transparent); border-color: var(--success); color: var(--success); box-shadow: 0 0 8px var(--success-glow); }
+.set-day.on { background: color-mix(in srgb, var(--success) 16%, transparent); border-color: var(--success); color: var(--success-text); box-shadow: 0 0 8px var(--success-glow); }
 .set-hab.off { opacity: .55; }
 .set-hab.off .li-text { color: var(--text2); }
 .set-edit { cursor: text; border-radius: 4px; padding: 1px 3px; margin: -1px -3px; transition: background .15s; font-weight: 600; }
@@ -112,7 +112,7 @@
 .set-time-rows { display: flex; flex-direction: column; gap: 8px; }
 .set-time-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--text3); }
 .set-time-row b { color: var(--text); font-weight: 500; }
-.set-time-ok { display: flex; align-items: center; gap: 7px; margin-top: 12px; font-size: 12.5px; color: var(--success); }
+.set-time-ok { display: flex; align-items: center; gap: 7px; margin-top: 12px; font-size: 12.5px; color: var(--success-text); }
 .set-time-warn { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; margin-top: 14px; padding: 12px 14px;
   border-radius: var(--r-sm); background: var(--inset); border: 1px solid var(--line2); font-size: 13px; color: var(--text); }
 .set-time-warn .small { color: var(--text3); }

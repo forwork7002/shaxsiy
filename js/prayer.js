@@ -220,22 +220,52 @@
         const p = D.nowTz(now);
         const key = D.keyOf(p.y, p.m, p.d);
         const nowM = p.h * 60 + p.min;
-        const list = prayer.list(key).filter((x) => x.id !== 'quyosh');
+        // Joriy vaqtni QUYOSH bilan birga sanaymiz, keyingi namozni esa usiz.
+        // Quyosh chiqishi bomdod oynasini YOPADI. Ilgari u ro'yxatdan butunlay
+        // chiqarib tashlanardi, shuning uchun soat 10:00 da ham «joriy vaqt: Bomdod»
+        // deb turardi — bomdod tugaganiga to'rt soat bo'lgan bo'lsa ham.
+        // ibodat.js dagi timesTable() allaqachon to'g'ri sanaydi (u quyoshni
+        // qoldiradi), ya'ni bitta ekranda jadval «Quyosh» qatorini joriy deb
+        // belgilab turgan paytda hero «Bomdod» derdi.
+        const full = prayer.list(key);
+        const list = full.filter((x) => x.id !== 'quyosh');
         let cur = null;
-        for (const x of list) if (x.mins <= nowM) cur = x.id;
+        for (const x of full) if (x.mins <= nowM) cur = x.id;
         const nx = list.find((x) => x.mins > nowM);
         if (nx) return { id: nx.id, time: nx.time, minsLeft: nx.mins - nowM, current: cur, key };
         const tomorrow = prayer.list(D.addDays(key, 1))[0];
         return { id: 'bomdod', time: tomorrow.time, minsLeft: 24 * 60 - nowM + tomorrow.mins, current: cur || 'xufton', key };
       } catch (e) { return null; }
     },
+    /* Odat nomidan namozni tanish. today.js va ibodat.js shu yagona jadvalni
+       ishlatadi. Ilgari ikkalasida alohida jadval bor edi va ular bir xil emasdi:
+         today.js  chegarasiz:        (bomdod|fajr|fadjr)
+         ibodat.js ikki tomondan:   \b(bomdod|fajr|fadjr)\b
+       Ozbekcha qoshimcha oladi, shuning uchun «Bomdodni jamoat bilan» Bugun
+       sahifasida tanilardi, Ibodatda esa yoq — bitta odat ikki ekranda ikki xil.
+       Chegarasizligi esa boshqa tomondan xato: (xufton|isha) «isha» harflari
+       uchragan istalgan nomga mos kelardi (masalan «oqishadi») va S.prayers ga
+       soxta yozuv kiritardi, u yerdan esa qazo hisobiga.
+       Togri qoida: chegara faqat BOSHIDA — qoshimchani qabul qiladi, soz
+       ichidagi tasodifiy moslikni rad etadi. */
+    NAME_RX: {
+      bomdod: /\b(bomdod|fajr|fadjr)/, peshin: /\b(peshin|zuhr|zuxr)/, asr: /\basr/,
+      shom: /\b(shom|maghrib|magrib)/, xufton: /\b(xufton|isha)/,
+    },
+    matchName(name) {
+      const n = D.translit && D.translit.norm ? D.translit.norm(name || '') : String(name || '').toLowerCase();
+      for (const id of D.PRAYERS) if (prayer.NAME_RX[id].test(n)) return id;
+      return null;
+    },
     // which waqt a timestamp falls in (for auto-classifying "on time" vs qaza)
     waqtAt(ts) {
       const p = D.nowTz(new Date(ts));
       const key = D.keyOf(p.y, p.m, p.d), nowM = p.h * 60 + p.min;
-      const list = prayer.list(key).filter((x) => x.id !== 'quyosh');
+      // next() bilan bir xil qoida: quyosh bomdod oynasini yopadi.
+      // Aks holda soat 09:00 dagi namoz bomdod vaqtida deb yozilib, qazo
+      // bo'lgani holda «vaqtida» deb belgilanardi.
       let cur = null;
-      for (const x of list) if (x.mins <= nowM) cur = x.id;
+      for (const x of prayer.list(key)) if (x.mins <= nowM) cur = x.id;
       return { key, waqt: cur };
     },
     // qibla bearing from settings location
@@ -398,14 +428,30 @@
     fmt(key) { const h = hijri.fromKey(key); return h ? `${h.d} ${D.t('hijri.months')[h.m - 1]} ${h.y}` : ''; },
     isRamadan(key) { const h = hijri.fromKey(key); return !!h && h.m === 9; },
     // sunnah fasting suggestions for a day
+    // Ro'za tutish man etilgan kunlar (ayyom an-nahy). Beshta:
+    //   1 Shavvol            — Iyd al-Fitr
+    //   10 Zulhijja          — Iyd al-Adho
+    //   11, 12, 13 Zulhijja  — tashriq kunlari
+    // sunnahFast() bulardan hech birida tavsiya bermasligi kerak. Ilgari berardi:
+    // 10-12 Zulhijja va 1 Shavvol dushanba yoki payshanbaga to'g'ri kelsa 'mon_thu'
+    // bo'lib chiqardi, 13 Zulhijja esa [13,14,15] sharti bilan 'ayyam_bid' bo'lardi.
+    forbiddenFast(key) {
+      const h = hijri.fromKey(key); if (!h) return null;
+      if (h.m === 10 && h.d === 1) return 'eid_fitr';
+      if (h.m === 12 && h.d === 10) return 'eid_adha';
+      if (h.m === 12 && h.d >= 11 && h.d <= 13) return 'tashriq';
+      return null;
+    },
     sunnahFast(key) {
       const h = hijri.fromKey(key); if (!h) return null;
+      if (hijri.forbiddenFast(key)) return null;   // man etilgan kun — tavsiya yo'q
       const dow = D.dowOf(key);
       if (h.m === 9) return 'ramadan';
       if ([13, 14, 15].includes(h.d)) return 'ayyam_bid';
       if (h.m === 12 && h.d === 9) return 'arafa';
       if (h.m === 1 && (h.d === 9 || h.d === 10)) return 'ashura';
-      if (h.m === 10 && h.d >= 2 && h.d <= 7) return 'shawwal';
+      // Shavvolning olti kuni — Iyddan keyingi istalgan kunlar, faqat 2-7 emas.
+      if (h.m === 10 && h.d >= 2) return 'shawwal';
       if (dow === 1 || dow === 4) return 'mon_thu';
       return null;
     },

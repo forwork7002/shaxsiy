@@ -12,7 +12,7 @@
 .fd-hero-msg { font-size: 14.5px; font-weight: 700; color: var(--text); line-height: 1.3; overflow-wrap: anywhere; }
 .fd-hero-msg.bad { color: var(--danger-text); }
 .fd-hero-burn { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text3); }
-.fd-hero-burn .ic { color: var(--warning); flex: none; }
+.fd-hero-burn .ic { color: var(--warning-text); flex: none; }
 .fd-tgt { margin-top: 2px; }
 
 /* me'yor oynasi: bir qator matn, ostida to'rtta raqam */
@@ -23,7 +23,7 @@
 .fd-tg-chip .u { font-size: 10px; color: var(--text3); margin-top: -2px; }
 /* aynan siz aytgan raqam ajralib tursin — qolgani undan hisoblangani */
 .fd-tg-chip.said { border-color: var(--line3); }
-.fd-tg-chip.said .num { color: var(--accent); }
+.fd-tg-chip.said .num { color: var(--accent-text); }
 .fd-tg-auto { margin-top: 10px; }
 
 /* ---- uchta makro: bir xil og'irlikda, uchtasi ham bir xil ko'rinishda ----
@@ -47,14 +47,14 @@
    ikkita tugma. Karta balandligi qasddan past — bu sahifaning asosiy ishi
    emas, kamera ostidan siljib ketmasligi kerak. */
 .fd-water { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
-.fd-water-ic { flex: none; display: inline-flex; color: var(--info); }
+.fd-water-ic { flex: none; display: inline-flex; color: var(--info-text); }
 .fd-water-l { flex: none; font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
 .fd-water-bar { flex: 1; min-width: 24px; }
 .fd-water-bar .bar-fill { background: var(--info); }
 .fd-water.full .fd-water-bar .bar-fill { background: var(--success); }
 .fd-water-n { flex: none; font-size: 13px; font-weight: 700; color: var(--text); }
 .fd-water-n small { font-size: 11px; font-weight: 500; color: var(--text3); }
-.fd-water.full .fd-water-n { color: var(--success); }
+.fd-water.full .fd-water-n { color: var(--success-text); }
 .fd-water-b { flex: none; width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line2);
   background: var(--inset); color: var(--text2); display: grid; place-items: center; transition: background .15s, color .15s; }
 .fd-water-b:active { background: var(--hover); color: var(--text); }
@@ -114,10 +114,10 @@
 
 /* ---- tahlil: rasm → nom → katta kkal → makrolar → tarkib → bitta maslahat ---- */
 .fd-busy-row { display: flex; align-items: center; gap: 10px; color: var(--text3); font-size: 13.5px; padding: 6px 0; }
-.fd-busy-row .ic { color: var(--violet); animation: aiPulse 1.4s ease-in-out infinite; }
+.fd-busy-row .ic { color: var(--violet-text); animation: aiPulse 1.4s ease-in-out infinite; }
 .fd-preview { width: 100%; max-height: 170px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--line); margin-bottom: 10px; display: block; }
 .fd-res-eyebrow { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
-.fd-res-eyebrow .ic { color: var(--violet); }
+.fd-res-eyebrow .ic { color: var(--violet-text); }
 .fd-res-name { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3; overflow-wrap: anywhere; }
 .fd-rough { font-size: 11px; font-weight: 600; color: var(--text3); white-space: nowrap; }
 .fd-big { display: flex; align-items: baseline; gap: 6px; margin: 4px 0 12px; }
@@ -130,7 +130,7 @@
 .fd-part .grow { overflow-wrap: anywhere; }
 .fd-part .num { color: var(--text3); white-space: nowrap; font-size: 11.5px; }
 .fd-advice { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--text2); line-height: 1.45; padding: 8px 10px; border-radius: var(--r-sm); background: var(--inset); border: 1px dashed var(--line2); margin: 12px 0 10px; }
-.fd-advice .ic { color: var(--info); flex: none; margin-top: 2px; }
+.fd-advice .ic { color: var(--info-text); flex: none; margin-top: 2px; }
 .fd-res-acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
 .fd-res-acts .btn.icon { margin-left: auto; }
 
