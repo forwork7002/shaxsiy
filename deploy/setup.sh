@@ -102,7 +102,27 @@ systemctl daemon-reload
 systemctl enable $SERVICE >/dev/null
 
 echo "▸ nginx…"
-cat > /etc/nginx/sites-available/$SERVICE <<NGINX
+# ┌────────────────────────────────────────────────────────────────────────┐
+# │ MAVJUD HTTPS SOZLAMASINI USTIGA YOZMAYMIZ.                             │
+# │                                                                        │
+# │ Quyidagi blok faqat HTTP (listen 80) sozlamasini yozadi. Agar serverda │
+# │ certbot allaqachon TLS qo'shgan bo'lsa, uni ustiga yozish quyidagiga   │
+# │ olib keladi: sayt 443 da javob bermay qoladi, api.py esa HSTS ni       │
+# │ max-age=15552000 (180 kun) bilan yuborgan — ya'ni saytga bir marta     │
+# │ kirgan HAR QANDAY brauzer 180 kun davomida HTTP ga tushishdan bosh     │
+# │ tortadi. Natija: sayt hamma uchun butunlay ochilmaydi, shu jumladan    │
+# │ tuzatmoqchi bo'lgan odam uchun ham.                                    │
+# │                                                                        │
+# │ Shuning uchun: TLS bor bo'lsa — tegilmaydi. Ataylab qayta yozish uchun │
+# │ FORCE_NGINX=1 ./deploy/setup.sh                                        │
+# └────────────────────────────────────────────────────────────────────────┘
+NGINX_CONF=/etc/nginx/sites-available/$SERVICE
+if [ -f "$NGINX_CONF" ] && grep -q "listen 443" "$NGINX_CONF" && [ "${FORCE_NGINX:-0}" != "1" ]; then
+  cp -a "$NGINX_CONF" "$NGINX_CONF.setup-$(date +%Y-%m-%d_%H%M%S).bak"
+  echo "  MAVJUD HTTPS SOZLAMASI SAQLANDI — ustiga yozilmadi (zaxira nusxasi olindi)."
+  echo "  Qayta yozish kerak bo'lsa: FORCE_NGINX=1 bash deploy/setup.sh"
+else
+cat > "$NGINX_CONF" <<NGINX
 server {
     listen 80;
     listen [::]:80;
@@ -165,6 +185,7 @@ server {
     }
 }
 NGINX
+fi
 ln -sf /etc/nginx/sites-available/$SERVICE /etc/nginx/sites-enabled/$SERVICE
 rm -f /etc/nginx/sites-enabled/default
 nginx -t >/dev/null && systemctl reload nginx
