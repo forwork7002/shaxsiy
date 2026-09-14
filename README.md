@@ -68,6 +68,15 @@ Ikkalasi ham arxivni ochib tekshiradi, lokal nusxalarni ham avlodlarga ajratadi 
 yoshini ko'rsatadi va 7 kundan oshsa qizil chiziq chiqaradi — jimgina to'xtagan zaxira
 zaxira emas. Tiklash: `./deploy/restore-backup.sh root@SERVER_IP <fayl.tgz>`.
 
+**Zaxirani tiklab ko'rish — oyiga bir marta.** Nusxa olinayotgani zaxira borligini anglatmaydi;
+zaxira faqat undan tiklanganda isbotlanadi:
+```bash
+./deploy/verify-backup.sh root@SERVER_IP ~/dash-zaxira/dash-....tgz
+```
+Jonli ma'lumotga tegmaydi: arxivni serverning `/tmp` ida ochadi, har bir odamning blobi
+o'qilishini, `dash.db` ning `integrity_check` dan o'tishini, siqilgan holat nusxalari
+ochilishini tekshiradi va nusxa jonli serverdan qancha orqada qolganini aytadi.
+
 **Ilovadan tashqariga.** Sozlash → Ma'lumot → **To'liq eksport (ZIP)**: holat, butun arxiv
 (o'chirilgan yozuvlar ham), profil va suratlar — hammasi oddiy JSON va JPG. Bu faylni o'qish
 uchun shu ilova kerak emas.
