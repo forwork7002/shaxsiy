@@ -145,6 +145,19 @@
 .lv-td-top { display: flex; align-items: baseline; gap: 8px; }
 .lv-td-xp { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--success-text); white-space: nowrap; }
 
+/* Bugun ekrani «jimjit va nafis» ko'rinishga o'tdi (css/today.css, 2026-09-14):
+   to'ldirilgan fon va qalin chegara o'rniga nozik ajratgich, bosh harfli mayda
+   yorliqlar oddiy yozuvga tushdi. Daraja qatori ham shunga ergashadi — aks holda
+   u tekis ekrandagi YAGONA quticha bo'lib, ko'z uni «boshqa narsa» deb o'qirdi.
+   Faqat shu ekranda: profil kartasidagi blok o'z holicha qoladi, u karta ichida. */
+[data-view="today"] .lv-ch { background: transparent; border: 0; border-top: 1px solid var(--line);
+  border-radius: 0; padding: 12px 0 0; }
+[data-view="today"] .lv-ch-ic { background: transparent; border: 1px solid var(--line2); }
+[data-view="today"] .lv-ch.done .lv-ch-ic { background: transparent;
+  border-color: color-mix(in srgb, var(--success) 45%, transparent); }
+[data-view="today"] .lv-ch-h { text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 600; }
+[data-view="today"] .lv-ch-x { font-size: 15px; }
+
 /* ------------------------------------------------------------------ */
 /* TO'PLAM OYNASI                                                      */
 /* ------------------------------------------------------------------ */
@@ -170,8 +183,8 @@
   overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
   /* Chekkalar so'nadi. Ularsiz yarim ko'ringan martaba nomi o'rtasidan kesilib,
      «ntizom» bo'lib qolardi — o'quvchiga bu xato bo'lib ko'rinadi. */
-  -webkit-mask: linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 22px), transparent);
-          mask: linear-gradient(90deg, transparent, #000 22px, #000 calc(100% - 22px), transparent); }
+  -webkit-mask: linear-gradient(90deg, transparent, #000 38px, #000 calc(100% - 38px), transparent);
+          mask: linear-gradient(90deg, transparent, #000 38px, #000 calc(100% - 38px), transparent); }
 .lv-rail::-webkit-scrollbar { display: none; }
 .lv-step { position: relative; flex: none; width: 76px; display: flex; flex-direction: column;
   align-items: center; gap: 4px; text-align: center; }
@@ -267,7 +280,9 @@
 /* ------------------------------------------------------------------ */
 [data-theme="light"] .lv-rank,
 [data-theme="light"] .lv-mark-n,
-[data-theme="light"] .lv-cel-lv b { color: color-mix(in srgb, var(--c) 68%, #000); }
+[data-theme="light"] .lv-cel-lv b,
+[data-theme="light"] .lv-step.now .lv-step-n,
+[data-theme="light"] .lv-step.now .lv-step-d b { color: color-mix(in srgb, var(--c) 68%, #000); }
 
 /* ------------------------------------------------------------------ */
 /* TOR EKRAN                                                           */
