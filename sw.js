@@ -1,32 +1,87 @@
 /* Service worker: cache-first app shell, network-first API. Bump CACHE on every release. */
-const CACHE = 'dash-v21';
+const CACHE = 'dash-v74';
+const V = '?v=' + CACHE.replace('dash-', '');
+const ASSETS = [
+  './app.css',
+  './css/fonts.css',
+  './css/sections.css',
+  './css/ai.css',
+  './css/whoop.css',
+  './css/profile.css',
+  './css/today.css',
+  './css/tasks.css',
+  './css/books.css',
+  './css/habits.css',
+  './css/health.css',
+  './css/finance.css',
+  './css/ibodat.css',
+  './css/yusa.css',
+  './css/food.css',
+  './css/settings.css',
+  './css/onboard.css',
+  './css/yusa-orb.css',
+  './js/core.js',
+  './js/i18n.js',
+  './js/prayer.js',
+  './js/ai.js',
+  './js/whoop.js',
+  './js/profile.js',
+  './js/today.js',
+  './js/tasks.js',
+  './js/books.js',
+  './js/habits.js',
+  './js/health.js',
+  './js/finance.js',
+  './js/ibodat.js',
+  './js/yusa.js',
+  './js/food.js',
+  './js/settings.js',
+  './js/onboard.js',
+  './js/yusa-orb.js',
+  './js/app.js',
+];
+// Shriftlar o'z faylimizda. Nomi o'zgarmagunicha mazmuni ham o'zgarmaydi, shuning
+// uchun ular ?v= siz keshlanadi — CSS ham aynan shu manzilni so'raydi.
+const FONTS = ['./fonts/plex-sans-latin.woff2', './fonts/plex-sans-latin-ext.woff2',
+  './fonts/plex-sans-cyrillic.woff2', './fonts/plex-sans-cyrillic-ext.woff2'];
 const SHELL = [
-  './', './index.html', './app.css', './css/sections.css', './css/ai.css', './css/whoop.css', './css/profile.css', './css/today.css', './css/tasks.css', './css/health.css', './css/finance.css', './css/ibodat.css', './css/nova.css', './css/food.css', './css/settings.css', './css/history.css', './css/onboard.css', './css/yusa.css', './manifest.json', './icons/icon.svg',
-  './js/core.js', './js/i18n.js', './js/prayer.js', './js/ai.js', './js/whoop.js', './js/profile.js', './js/today.js', './js/tasks.js', './js/health.js',
-  './js/finance.js', './js/ibodat.js', './js/nova.js', './js/food.js', './js/settings.js', './js/history.js', './js/onboard.js', './js/yusa.js', './js/app.js',
+  './', './index.html', './manifest.json', './icons/icon.svg',
+  // css/js manzillari ?v= bilan — index.html dagi teglar bilan aynan bir xil bo'lishi shart,
+  // aks holda SW keshi mos kelmaydi va offline ishlamaydi. push.sh ikkalasini sinxron tutadi.
+  ...ASSETS.map((u) => u + V),
+  ...FONTS,
 ];
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL).catch(() => {})).then(() => self.skipWaiting()));
+  // `cache: 'reload'` majburiy: addAll brauzerning HTTP keshidan o'qiy oladi va
+  // yangi CACHE eski fayllar bilan to'lib qolardi — deploydan keyin foydalanuvchi
+  // bir soatgacha eskisini ko'rar edi (2026-09-09 da aynan shu yuz berdi).
+  e.waitUntil(caches.open(CACHE).then((c) => Promise.all(
+    SHELL.map((u) => fetch(new Request(u, { cache: 'reload' }))
+      .then((r) => (r && r.ok ? c.put(u, r) : null)).catch(() => null))
+  )).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', (e) => {
-  e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE && k !== CACHE + '-fonts').map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
   if (e.request.method !== 'GET') return;
-  // Google Fonts: cache-first, so Nunito/Quicksand still render offline.
-  if (url.host === 'fonts.googleapis.com' || url.host === 'fonts.gstatic.com') {
-    e.respondWith(caches.open(CACHE + '-fonts').then((c) =>
-      c.match(e.request).then((hit) => hit || fetch(e.request).then((r) => { if (r && (r.ok || r.type === 'opaque')) c.put(e.request, r.clone()); return r; }).catch(() => hit))));
-    return;
-  }
   if (url.pathname.includes('/api/') || url.origin !== location.origin) {
     e.respondWith(fetch(e.request).catch(() => new Response('{"error":"offline"}', { status: 503, headers: { 'Content-Type': 'application/json' } })));
     return;
   }
   e.respondWith(
     caches.match(e.request).then((hit) => {
-      const net = fetch(e.request).then((r) => { if (r && r.ok) caches.open(CACHE).then((c) => c.put(e.request, r.clone())); return r; }).catch(() => hit);
+      // Klon SINXRON olinishi shart. caches.open() — va'da, uning .then'i keyingi
+      // mikrovazifada ishlaydi, o'sha paytga kelib `return r` javobni sahifaga berib
+      // bo'lgan va tanasi o'qilgan bo'ladi: r.clone() «Response body is already used»
+      // bilan yiqiladi. Oqibati ikkita edi — har so'rovda tutilmagan xato, va put()
+      // umuman bajarilmagani uchun kesh hech qachon yangilanmasdi, ya'ni
+      // stale-while-revalidate amalda «faqat keshdan» ga aylanib qolgandi.
+      const net = fetch(e.request).then((r) => {
+        if (r && r.ok) { const copy = r.clone(); caches.open(CACHE).then((c) => c.put(e.request, copy)); }
+        return r;
+      }).catch(() => hit);
       return hit || net;
     })
   );

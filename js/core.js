@@ -7,6 +7,33 @@
 
   const D = (window.D = {});
   D.VERSION = 2;
+  /* The ?v= this very file was served with. Deferred sections must ask for exactly the URL
+     the service worker precached (sw.js stores './js/tasks.js?v=vNN'), because its fetch
+     handler matches on the full request URL. Without the suffix every deferred section
+     missed the cache and cost a network round trip on the first open after each deploy —
+     and the miss then wrote a second, unversioned copy of each file into the cache. */
+  const VQ = (() => { const s = document.currentScript && document.currentScript.src || '';
+    const i = s.indexOf('?'); return i < 0 ? '' : s.slice(i); })();
+  /* Tezlik o'lchagichi. Manzilni SHU YERDA o'qish shart: D.go birinchi ish sifatida
+     hash'ni bo'lim nomiga almashtirib yuboradi, ya'ni keyin tekshirsak kech bo'ladi.
+     #tezlik — yoqadi va eslab qoladi; #tezlik-off — o'chiradi. */
+  const PERF = (() => {
+    try {
+      const h = location.hash;
+      if (h === '#tezlik-off') { localStorage.removeItem('dash.perf'); return false; }
+      if (h === '#tezlik') { localStorage.setItem('dash.perf', '1'); return true; }
+      return !!localStorage.getItem('dash.perf');
+    } catch (e) { return location.hash === '#tezlik'; }
+  })();
+  /* Yoqilgan bo'lsa — uzun vazifalarni SHU YERDA kuzata boshlaymiz. Keyinroq ro'yxatdan
+     o'tgan kuzatuvchi ochilishdagi vazifalarni ko'rmaydi, aynan ularni bilmoqchi edik. */
+  if (PERF) {
+    window.__perfLong = [];
+    try {
+      new PerformanceObserver((l) => l.getEntries().forEach((e) => window.__perfLong.push(e.duration)))
+        .observe({ type: 'longtask', buffered: true });
+    } catch (e) { /* Safari'da longtask yo'q */ }
+  }
   const LS_KEY = 'dash.v2';
   const UI_KEY = 'dash.ui';
   const DEV_KEY = 'dash.device';
@@ -57,14 +84,21 @@
       settings: {
         lang: 'uz', theme: 'dark', tz: 'Asia/Tashkent', dayStart: 0, wakeHour: 6, sleepHour: 23,
         currency: 'UZS', weightUnit: 'kg', waterMl: 250, waterTargetMl: null,
-        prayer: { lat: 41.2995, lng: 69.2401, fajr: 18, isha: 18, asr: 'hanafi',
+        // islom.uz'ning Toshkent koordinatasi va usuli — yaxlitlanmagan holda
+        prayer: { lat: 41.300872, lng: 69.241813, fajr: 15.5, isha: 15.5, asr: 'hanafi',
                   offsets: { bomdod: 0, quyosh: 0, peshin: 0, asr: 0, shom: 0, xufton: 0 }, hijriOffset: 0, notify: false },
-        caffeineLimit: 400, showAmounts: true, onboarded: false,
+        caffeineLimit: 400, onboarded: false,
       },
       // birthYear → yosh hisoblanadi; goal ovqat me'yorlari uchun; whoopAge/paceOfAging WHOOP ilovasidan qo'lda kiritiladi
       profile: { name: '', heightCm: null, weightKg: null, age: null, birthYear: null, sex: 'm', activity: 3, goal: 'keep',
                  whoopAge: null, paceOfAging: null, whoopAgeAt: null },
       habits: [], logs: {}, counts: {}, notes: {}, gratitude: [],
+      // Kitob va ko'rgan narsalar. Odatdan farqi: oxiri bor (jami bet/qism) va
+      // holati bor. Odatga o'xshashi: har kun belgilanadi, shuning uchun
+      // mediaLogs ham logs kabi kun kaliti bilan yuritiladi.
+      // media: [{id,kind:'kitob'|'korgan',title,author,total,unit,status:'now'|'done'|'later',done,createdAt,order}]
+      // mediaLogs: {'YYYY-MM-DD': {mediaId: nechta}}
+      media: [], mediaLogs: {},
       tasks: [], goals: [],
       prayers: {}, dhikr: {}, fasting: {},
       health: {},
@@ -73,7 +107,10 @@
       gym: { gyms: [], days: [], exercises: [], logs: {}, done: {}, split: { names: [], anchor: null } },
       finance: { tx: [], cats: [], budgets: {}, accounts: [], subs: [], snapshots: [], wishlist: [] },
       learn: [], reviews: [],
-      nova: { threads: [] },
+      // Hafta yakuni: {'YYYY-Www': {win, hard, next}} — Odat bo'limidagi «Hafta yakuni».
+      // Eski `reviews` massivi tegilmaydi: uning ichidagi yozuvlar shakli noma'lum.
+      weekly: {},
+      yusa: { threads: [] },
       ai: { cards: {}, log: [] },
       whoop: { connected: false, lastSync: null, cache: {}, days: {}, workouts: [], body: {} },
       // food.logs: {'YYYY-MM-DD': [meal]}; targets: auto=true → profildan hisoblanadi, aks holda qo'lda kiritilgan qiymatlar
@@ -93,6 +130,13 @@
     return target === undefined || target === null ? def : target;
   }
   D.normalize = (s) => {
+    // 2026-09-10: murabbiyning nomi «Nova» edi, endi hamma joyda «Yusa». Eski
+    // nusxalarda suhbatlar hali `nova` kalitida yotibdi — ularni bir marta
+    // ko'chirib olamiz, aks holda odam suhbatlarini yo'qotadi.
+    if (s && typeof s === 'object' && s.nova) {
+      if (!s.yusa) s.yusa = s.nova;
+      delete s.nova;
+    }
     const n = fill(s || {}, defaultState());
     // habit defaults
     n.habits.forEach((h, i) => {
@@ -108,6 +152,30 @@
       if (dl) h.doneLabel = dl; else delete h.doneLabel;
     });
     for (const k of Object.keys(n.logs)) if (!Array.isArray(n.logs[k]) || !n.logs[k].length) delete n.logs[k];
+    // kitob / ko'rgan
+    n.media.forEach((m, i) => {
+      if (!m.id) m.id = D.uid('m');
+      if (m.kind !== 'korgan') m.kind = 'kitob';
+      if (!['now', 'done', 'later'].includes(m.status)) m.status = 'now';
+      m.title = typeof m.title === 'string' ? m.title : '';
+      m.total = Math.max(0, Math.floor(+m.total || 0));
+      m.done = D.clamp(Math.floor(+m.done || 0), 0, m.total || 999999);
+      if (m.order === undefined) m.order = i;
+    });
+    // hafta yakuni: faqat uchta matn maydoni, qolgani tashlanadi
+    for (const k of Object.keys(n.weekly)) {
+      const o = n.weekly[k];
+      if (!o || typeof o !== 'object' || Array.isArray(o)) { delete n.weekly[k]; continue; }
+      const clean = {};
+      for (const f of ['win', 'hard', 'next']) if (typeof o[f] === 'string' && o[f].trim()) clean[f] = o[f].slice(0, 2000);
+      if (Object.keys(clean).length) n.weekly[k] = clean; else delete n.weekly[k];
+    }
+    for (const k of Object.keys(n.mediaLogs)) {
+      const o = n.mediaLogs[k];
+      if (!o || typeof o !== 'object' || Array.isArray(o) || !Object.keys(o).length) { delete n.mediaLogs[k]; continue; }
+      for (const id of Object.keys(o)) { const v = Math.floor(+o[id] || 0); if (v > 0) o[id] = v; else delete o[id]; }
+      if (!Object.keys(o).length) delete n.mediaLogs[k];
+    }
     n.tasks.forEach((t) => { if (!t.id) t.id = D.uid('t'); if (!t.priority) t.priority = 2; });
     n.goals.forEach((g) => { if (!g.id) g.id = D.uid('g'); if (!g.priority) g.priority = 2; if (!D.DIRS.includes(g.dir)) g.dir = 'shaxsiy'; });
     if (!n.finance.cats.length) n.finance.cats = defaultCats();
@@ -174,12 +242,26 @@
   /* storage                                                             */
   /* ------------------------------------------------------------------ */
   function lsGet(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (e) { return null; } }
-  function lsSet(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { console.warn('ls', e); return false; } }
+  /* Saqlash yiqilsa (kvota to'ldi, shaxsiy oyna, brauzer taqiqladi) — bu jim
+     o'tmasligi kerak: odam yozgan narsasi saqlangan deb o'ylab yuraveradi. */
+  let lsWarned = false;
+  function lsSet(k, v) {
+    try { localStorage.setItem(k, JSON.stringify(v)); return true; }
+    catch (e) {
+      console.warn('ls', e);
+      if (!lsWarned) { lsWarned = true; try { D.toast(D.t('err.storage'), { ms: 8000 }); } catch (e2) {} }
+      return false;
+    }
+  }
   D.lsGet = lsGet; D.lsSet = lsSet;
 
   D.ui = fill(lsGet(UI_KEY), { view: 'today', sub: {}, viewDate: null, filters: {}, collapsed: {} });
+  if (D.ui.view === 'nova') D.ui.view = 'yusa';                 // eski nom bilan yopilgan bo'lim
+  if (D.ui.sub && D.ui.sub.nova !== undefined) { D.ui.sub.yusa = D.ui.sub.nova; delete D.ui.sub.nova; }
   D.saveUi = D.debounce(() => lsSet(UI_KEY, D.ui), 150);
-  D.device = fill(lsGet(DEV_KEY), { novaKey: '', whoop: null, lockHash: '', uid: '', name: '', lastUser: '' });
+  D.device = fill(lsGet(DEV_KEY), { yusaKey: '', whoop: null, lockHash: '', uid: '', name: '', lastUser: '' });
+  if (!D.device.yusaKey && D.device.novaKey) D.device.yusaKey = D.device.novaKey;   // eski nomdagi API kalit
+  delete D.device.novaKey;
   D.saveDevice = () => lsSet(DEV_KEY, D.device);
 
   D.S = null;
@@ -198,31 +280,21 @@
   };
 
   let syncState = 'ok';
-  // The sync chip used to sit in the header permanently, and with no text yet it
-  // read as an empty capsule. Now it speaks only when it has something to say:
-  // amber while saving, red on failure, a bare grey dot when this device is the
-  // only copy, and a green confirmation that fades out on its own.
-  let syncHideT = null;
+  // Sarlavha satri olib tashlangach, sinxron chipi ham ketdi: ekran to'liq
+  // sahifaniki. Holat Profil va Sozlash varaqlarida ko'rinadi, saqlanmay
+  // qolgani esa bir marta xabar bo'lib chiqadi — jim qolib ketmasligi uchun.
   D.setSync = (s, msg) => {
+    const was = syncState;
     syncState = s;
     D.emit('sync:changed', s);
-    const box = D.$('#sync'), dot = D.$('#syncDot'), txt = D.$('#syncTxt');
-    if (!box || !dot || !txt) return;
-    clearTimeout(syncHideT);
-    dot.className = 'sync-dot ' + s;
-    box.className = 'sync s-' + s;
-    txt.textContent = s === 'local' ? '' : msg || D.t('sync.' + s);
-    // 'local' means no server is configured at all — a permanent grey dot for
-    // the normal state is just noise
-    box.hidden = s === 'local';
-    if (s === 'ok') syncHideT = setTimeout(() => { const b = D.$('#sync'); if (b && D.syncState() === 'ok') { b.classList.add('fade'); syncHideT = setTimeout(() => { b.hidden = true; b.classList.remove('fade'); }, 400); } }, 1400);
+    if (s === 'err' && was !== 'err') D.toast(msg || D.t('sync.failed'), { ms: 4000 });
   };
   D.syncState = () => syncState;
 
   // Merge a remote snapshot into local: union of date-keyed maps and id-arrays (local wins on conflict),
   // newer wins for settings/profile. Used when the server holds a newer copy than the one we branched from.
-  const DATE_MAPS = ['logs', 'counts', 'notes', 'health', 'prayers', 'dhikr', 'fasting'];
-  const ID_LISTS = ['habits', 'gratitude', 'tasks', 'goals', 'learn', 'reviews'];
+  const DATE_MAPS = ['logs', 'counts', 'notes', 'health', 'prayers', 'dhikr', 'fasting', 'mediaLogs', 'weekly'];
+  const ID_LISTS = ['habits', 'gratitude', 'tasks', 'goals', 'learn', 'reviews', 'media'];
   function unionById(a, b) {
     const out = [], seen = new Set();
     for (const x of a || []) if (x && x.id && !seen.has(x.id)) { seen.add(x.id); out.push(x); }
@@ -233,6 +305,15 @@
     const r = D.normalize(D.deep(remote)), l = local;
     const newer = (+r.meta.updatedAt || 0) > (+l.meta.updatedAt || 0) ? r : l;
     const out = D.normalize(D.deep(newer));
+    /* Kun xaritalari: kun kaliti butunligicha lokal nusxadan olinadi.
+       Ikki qavat birlashtirish (har kalit alohida) ko'rinishidan to'g'riroq —
+       ikki qurilmada bir kunda yozilgan narsalar saqlanib qolardi — lekin u
+       O'CHIRISHNI buzadi: belgini olib tashlash «kalitni yo'q qilish» degani,
+       birlashtirilsa esa olingan belgi serverdagi eski nusxadan qaytib
+       kelaveradi. Kunlik belgini olib tashlash — har kuni bo'ladigan ish;
+       bir kunda ikki qurilmadan yozish esa deyarli bo'lmaydi. Shuning uchun
+       tanlov o'chirish foydasiga: 556 kunlik tarixda «o'chmaydigan belgi»
+       «yo'qolgan belgi» dan ancha yomon. */
     for (const k of DATE_MAPS) out[k] = Object.assign({}, r[k], l[k]);
     for (const k of ID_LISTS) out[k] = unionById(l[k], r[k]);
     out.finance.tx = unionById(l.finance.tx, r.finance.tx);
@@ -251,7 +332,7 @@
     out.gym.done = Object.assign({}, r.gym.done, l.gym.done);
     out.gym.logs = Object.assign({}, r.gym.logs);
     for (const k of Object.keys(l.gym.logs || {})) out.gym.logs[k] = unionById(l.gym.logs[k], r.gym.logs[k]);
-    out.nova.threads = unionById(l.nova.threads, r.nova.threads);
+    out.yusa.threads = unionById(l.yusa.threads, r.yusa.threads);
     // ovqat: kun kaliti bo'yicha id-birlashma (lokal ustun), me'yorlar yangiroq tomondan (out allaqachon shunday)
     out.food.logs = Object.assign({}, r.food.logs);
     for (const k of Object.keys(l.food.logs || {})) out.food.logs[k] = unionById(l.food.logs[k], r.food.logs[k]);
@@ -266,14 +347,29 @@
   // Bitta yozuv. Server yangiroq (stale) yoki to'liqroq (empty_overwrite) nusxani qaytarsa —
   // uni birlashtirib qayta yuboramiz: shu sabab bo'sh holat to'liq nusxa ustidan yozilmaydi.
   let replaceOnce = false;
+  let saveSeq = 0, pushedSeq = 0;
+  /** Serverga yetkazilmagan o'zgarish bormi? (chiqishdan oldin tekshiriladi) */
+  D.dirty = () => saveSeq !== pushedSeq;
+  let pushMs = 60000;   // holat bir necha yuz kilobayt bo'lishi mumkin — sekin tarmoqqa vaqt beramiz
   async function pushNow(depth = 0) {
     if (!D.serverEnabled()) { D.setSync('local'); return false; }
+    /* Serverdagi nusxa shu sessiyada hali O'QILMAGAN bo'lsa — yozmaymiz.
+       Bu eng xavfli yo'l edi: yangi qurilmada localStorage bo'sh, D.pull()
+       tarmoq sababli yiqiladi, ilova bo'sh holat bilan ochiladi, odam bitta
+       odat belgilaydi — va o'sha bitta kunlik blob serverdagi 556 kunni
+       butunlay almashtirib yuborardi. Serverdagi «bo'sh holat» qalqoni ham
+       yordam bermasdi: blobda bitta odat bor, ya'ni u «bo'sh» emas.
+       Endi o'zgarish faqat qurilmada saqlanadi va pull o'tishi bilan
+       birlashtirilib yuboriladi. */
+    if (!D.pulled) { D.setSync('wait'); return false; }
     try {
-      const r = await D.api('/api/data' + (replaceOnce ? '?replace=1' : ''), { method: 'POST', body: JSON.stringify(D.S) });
+      const seq = saveSeq;                       // shu urinish qaysi holatni yubordi
+      const r = await D.api('/api/data' + (replaceOnce ? '?replace=1' : ''), { method: 'POST', body: JSON.stringify(D.S), timeout: pushMs });
       if (r && r.updated) D.S.meta.serverUpdated = r.updated;
       replaceOnce = false;
       D.setSync('ok');
       D._pending = false;
+      pushedSeq = seq;
       return true;
     } catch (e) {
       if (e && (e.message === 'stale' || e.message === 'empty_overwrite') && e.data && depth < 2) {
@@ -284,17 +380,27 @@
         return pushNow(depth + 1);
       }
       console.warn('sync', e);
+      // almashtirish niyati faqat qayta urinishlar zanjirida saqlanadi: aks holda bayroq
+      // keyingi begona saqlashga o'tib, serverdagi to'liq nusxani himoya qiladigan
+      // `empty_overwrite` qalqonini aylanib o'tardi.
+      replaceOnce = false;
       D._pending = true;
       D.setSync('err');
       return false;
     }
   }
   const pushServer = D.debounce(() => pushNow(), 700);
-  /** Kechiktirmay hoziroq yuborish — chiqishdan oldin. true = server qabul qildi. */
-  D.flush = () => pushNow();
+  /** Kechiktirmay hoziroq yuborish — chiqishdan oldin. true = server qabul qildi.
+      ms — shu urinishning muddati: chiqayotgan odam jim serverni uzoq kutib turmasin. */
+  D.flush = async (ms) => {
+    const prev = pushMs;
+    if (ms) pushMs = ms;
+    try { return await pushNow(); } finally { pushMs = prev; }
+  };
 
   D.save = () => {
     D.S.meta.updatedAt = Date.now();
+    saveSeq++;
     lsSet(LS_KEY, D.S);
     D.setSync(D.serverEnabled() ? 'wait' : 'local');
     pushServer();
@@ -309,12 +415,32 @@
   D.tg = (window.Telegram && window.Telegram.WebApp) || null;
   D.serverEnabled = () => !!(D.tg && D.tg.initData) || window.DASH_SERVER === true || /[?&]server=1/.test(location.search);
 
+  // Har bir so'rovning muddati bor. Muddatsiz fetch tarmoq javob bermay qolganda abadiy kutadi:
+  // tugma «yuklanmoqda» holatida qotib qoladi, kirish oynasi ochilmaydi — ilova muzlagandek ko'rinadi.
+  const REQ_MS = 20000;
+  D.fetchTimed = (url, opts = {}, ms = REQ_MS) => {
+    if (typeof AbortController !== 'function') return fetch(url, opts);
+    const c = new AbortController();
+    const timer = setTimeout(() => c.abort(), ms);
+    // Chaqiruvchining o'z signali ham saqlanadi. Ilgari u {...opts, signal: c.signal}
+    // bilan jimgina ustiga yozilardi: ai.js o'ziga 90 soniya bergan deb o'ylardi,
+    // amalda esa shu yerdagi 20 soniya ishlardi va har bir tahlil uzilardi.
+    if (opts.signal) {
+      if (opts.signal.aborted) c.abort();
+      else opts.signal.addEventListener('abort', () => c.abort(), { once: true });
+    }
+    return fetch(url, { ...opts, signal: c.signal })
+      .catch((e) => { throw e && e.name === 'AbortError' ? new Error('timeout') : e; })
+      .finally(() => clearTimeout(timer));
+  };
+
   D.api = async (path, opts = {}) => {
     const h = { 'Content-Type': 'application/json' };
     if (D.tg && D.tg.initData) h['X-Telegram-Init-Data'] = D.tg.initData;
+    const { timeout, ...rest } = opts;
     // credentials: the passcode session lives in an HttpOnly cookie
-    const r = await fetch(path, { credentials: 'same-origin', ...opts, headers: { ...h, ...(opts.headers || {}) } });
-    if (r.status === 401 && !opts._retry) {
+    const r = await D.fetchTimed(path, { credentials: 'same-origin', ...rest, headers: { ...h, ...(rest.headers || {}) } }, timeout || REQ_MS);
+    if (r.status === 401 && !rest._retry) {
       let j = null;
       try { j = await r.clone().json(); } catch (e) {}
       if (j && j.passcode) {
@@ -337,7 +463,7 @@
   D.meRefresh = async () => {
     if (!D.serverEnabled()) return null;
     try {
-      const r = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' });
+      const r = await D.fetchTimed('/api/me', { credentials: 'same-origin', cache: 'no-store' }, 10000);
       if (r.status === 401) { const had = !!D.me; D.me = null; if (had) D.emit('me:changed'); return null; }
       if (!r.ok) return D.me;
       const j = await r.json();
@@ -355,10 +481,16 @@
     if (!uid) return;
     const saved = lsGet(RESCUE_KEY + uid);
     if (!saved || !saved.meta) return;
+    try {
+      D.S = D.merge(D.S, D.normalize(saved));   // yuborilmay qolgan yozuvlar ustun
+      D.S.meta.updatedAt = Date.now();
+      lsSet(LS_KEY, D.S);
+    } catch (e) {
+      // birlashtirish yiqilsa blob o'z joyida qoladi — bu yagona nusxa, o'chirmaymiz
+      console.warn('rescue', e); if (D.logError) D.logError(e);
+      return;
+    }
     try { localStorage.removeItem(RESCUE_KEY + uid); } catch (e) {}
-    D.S = D.merge(D.S, D.normalize(saved));   // yuborilmay qolgan yozuvlar ustun
-    D.S.meta.updatedAt = Date.now();
-    lsSet(LS_KEY, D.S);
     D.emit('state:changed');
     D.rerender();
     if (await pushNow()) D.toast(D.t('auth.restored'), { ms: 4000 });
@@ -369,7 +501,7 @@
     if (!D.serverEnabled()) return false;
     try {
       D.setSync('wait');
-      const remote = await D.api('/api/data');
+      const remote = await D.api('/api/data', { timeout: 60000 });
       // Another person signed in on this device: their server copy replaces what is here,
       // and nothing local is ever pushed into their account.
       const owner = remote && remote.meta && remote.meta.owner;
@@ -385,7 +517,7 @@
         D.S.meta.owner = owner;
         if (D.device.uid !== owner) { D.device.uid = owner; D.device.name = ''; D.saveDevice(); }
       }
-      await D.meRefresh();   // header avatari, Sozlash «Hisob», onboarding ismi — 'pull:ok' dan oldin
+      await D.meRefresh();   // Profil varag'i, Sozlash «Hisob», onboarding ismi — 'pull:ok' dan oldin
       const localEmpty = !Object.keys(D.S.logs).length && !D.S.habits.length && !D.S.tasks.length;
       if (remote && D.isOldFormat(remote)) {
         // server still holds the old Шахсий data.json → migrate once, keep local additions, push new format
@@ -420,6 +552,12 @@
       await restoreRescue();
       D.setSync('ok');
       D.pulled = true;          // server nusxasi shu sessiyada kamida bir marta o'qildi
+      // Serverdagi nusxada mavzu ham, til ham boshqacha bo'lishi mumkin.
+      // Ilgari faqat ro'yxat qayta chizilardi: yangi qurilmada odam qayta
+      // yuklamaguncha noto'g'ri rangda o'tirardi.
+      D.theme.apply();
+      document.documentElement.lang = D.lang() === 'ru' ? 'ru' : 'uz';
+      D.renderNav();
       D.emit('pull:ok');
       return true;
     } catch (e) {
@@ -428,7 +566,7 @@
       return false;
     }
   };
-  window.addEventListener('online', () => { if (D._pending) pushServer(); });
+  window.addEventListener('online', () => { if (D._pending || D.dirty()) pushServer(); });
 
   /* ------------------------------------------------------------------ */
   /* dates (all in settings.tz)                                          */
@@ -449,6 +587,29 @@
     return { y: +o.year, m: +o.month, d: +o.day, h: +o.hour % 24, min: +o.minute, s: +o.second, dow };
   }
   D.nowTz = (date) => partsIn((D.S && D.S.settings.tz) || 'Asia/Tashkent', date || new Date());
+
+  /* Ilova qaysi vaqt bilan hisoblaydi — buni foydalanuvchi ko'rib turishi kerak.
+     Kun chegarasi, namoz vaqtlari, uyqu va butun tarix kalitlari shu mintaqaga
+     bog'liq: mintaqa almashsa, 556 kunlik tarixning kalitlari ham siljiydi.
+     Shuning uchun u HECH QACHON o'zi almashmaydi — faqat farqni ko'rsatamiz. */
+  D.tzInfo = () => {
+    const tz = (D.S && D.S.settings.tz) || 'Asia/Tashkent';
+    let device = '';
+    try { device = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { device = ''; }
+    const p = D.nowTz();
+    // Siljish — o'sha mintaqadagi soatni UTC bilan solishtirib topiladi
+    let offset = '';
+    try {
+      const now = new Date();
+      const asUtc = Date.UTC(p.y, p.m - 1, p.d, p.h, p.min, p.s);
+      const mins = Math.round((asUtc - now.getTime()) / 60000);
+      const sign = mins < 0 ? '−' : '+';
+      const a = Math.abs(mins);
+      offset = 'UTC' + sign + Math.floor(a / 60) + (a % 60 ? ':' + D.pad2(a % 60) : '');
+    } catch (e) { offset = ''; }
+    return { tz, device, offset, clock: D.fmtTime(p.h, p.min), same: !device || device === tz,
+             city: tz.split('/').pop().replace(/_/g, ' ') };
+  };
   D.keyOf = (y, m, d) => y + '-' + D.pad2(m) + '-' + D.pad2(d);
   D.dayKey = (date) => {
     const p = D.nowTz(date);
@@ -530,7 +691,6 @@
   /* ------------------------------------------------------------------ */
   D.fmtNum = (n, d) => { n = +n || 0; return (d !== undefined ? +n.toFixed(d) : n).toLocaleString('ru-RU'); };
   D.fmtMoney = (n, opts = {}) => {
-    if (D.S && D.S.settings.showAmounts === false && !opts.force) return '•••';
     const cur = opts.currency || (D.S ? D.S.settings.currency : 'UZS');
     const v = Math.round(+n || 0);
     const sign = v < 0 ? '−' : '';
@@ -620,7 +780,7 @@
   D.SPHERE_EMOJI = SPHERE_EMOJI;
   D.habitEmoji = (h) => (h && h.emoji) || SPHERE_EMOJI[h && h.sphere] || SPHERE_EMOJI.boshqa;
 
-  // tick/count mutators shared by Bugun, Vazifa and the palette. None of them save or rerender — callers do.
+  // tick/count mutators shared by Bugun and Vazifa. None of them save or rerender — callers do.
   const targetOf = (h) => (h && h.target && +h.target.n > 0 ? +h.target.n : 0);
   function setLog(k, id, on) {
     const arr = D.S.logs[k] || [];
@@ -629,6 +789,36 @@
     if (!on && i >= 0) arr.splice(i, 1);
     if (arr.length) D.S.logs[k] = arr; else delete D.S.logs[k];
   }
+  /* Kitob va ko'rgan narsalar — belgilashning YAGONA joyi.
+     Uchta joydan chaqiriladi (Kitoblar sahifasi, Bugun ro'yxati, kun jadvali).
+     Ilgari mantiq faqat books.js da edi: Bugun'dan belgilanganda bet soni
+     o'zgarmay, Kitoblar'dan belgilanganda o'zgarardi — bir xil amal ikki xil
+     natija berardi va betlar yo'qolardi. */
+  D.media = {
+    find: (id) => D.S.media.find((m) => m.id === id) || null,
+    on: (id, day) => +((D.S.mediaLogs[day] || {})[id]) > 0,
+    /** Belgini teskari qiladi. Bet hisobi va holat ham shu yerda yuritiladi.
+        Saqlash va qayta chizishni chaqiruvchi qiladi. */
+    toggle(id, day) {
+      const m = D.media.find(id);
+      if (!m || !day) return false;
+      const o = D.S.mediaLogs[day] || (D.S.mediaLogs[day] = {});
+      const was = +o[id] > 0;
+      if (was) {
+        delete o[id];
+        if (m.perDay) m.done = D.clamp(m.done - m.perDay, 0, m.total || 999999);
+        // Tugagan deb belgilangan kitob belgisi olinganda yana o'qilayotganga qaytadi
+        if (m.status === 'done' && m.total && m.done < m.total) m.status = 'now';
+      } else {
+        o[id] = 1;
+        if (m.perDay) m.done = D.clamp(m.done + m.perDay, 0, m.total || 999999);
+        if (m.total && m.done >= m.total) m.status = 'done';
+      }
+      if (!Object.keys(o).length) delete D.S.mediaLogs[day];
+      return !was;
+    },
+  };
+
   D.habits = {
     // plain habit: flip S.logs[day] membership; targeted habit: done = counts ≥ target. Returns the new done state.
     toggle(h, day) {
@@ -694,10 +884,13 @@
   D.act = {};
   D.act.toastUndo = () => { const el = D.$('#toast'); if (el && el._undo) { const f = el._undo; el._undo = null; el.classList.remove('show'); f(); } };
 
+  // Tugmalar qatori — oyna ham, pastki oyna ham shuni ishlatadi
+  const actionsHtml = (list) => list.map((a) =>
+    `<button class="btn ${a.primary ? '' : 'ghost'} ${a.danger ? 'danger' : ''}" data-act="${a.act}" ${a.data ? Object.entries(a.data).map(([k, v]) => `data-${k}="${D.esc(v)}"`).join(' ') : ''}>${D.esc(a.label)}</button>`).join('');
+
   D.modal = (o) => {
     const bg = D.$('#modalBg');
-    const acts = (o.actions || [{ label: D.t('btn.close'), act: 'closeModal' }]).map((a) =>
-      `<button class="btn ${a.primary ? '' : 'ghost'} ${a.danger ? 'danger' : ''}" data-act="${a.act}" ${a.data ? Object.entries(a.data).map(([k, v]) => `data-${k}="${D.esc(v)}"`).join(' ') : ''}>${D.esc(a.label)}</button>`).join('');
+    const acts = actionsHtml(o.actions || [{ label: D.t('btn.close'), act: 'closeModal' }]);
     bg.innerHTML = `<div class="modal" role="dialog" aria-modal="true" aria-label="${D.esc(o.title || '')}">
       <div class="modal-head"><div class="modal-title">${D.esc(o.title || '')}</div><button class="modal-close" data-act="closeModal" aria-label="close">×</button></div>
       <div class="modal-body">${o.body || ''}</div>
@@ -729,16 +922,40 @@
   });
   D.act.confirmYes = () => { const r = D._confirmRes; D._confirmRes = null; const bg = D.$('#modalBg'); bg._onClose = null; D.closeModal(); r && r(true); };
   D.act.confirmNo = () => { D.closeModal(); };
-  D.sheet = (html, opts = {}) => D.modal({ title: opts.title || '', body: html, actions: opts.actions || [], onOpen: opts.onOpen, onClose: opts.onClose, noFocus: opts.noFocus });
-  D.prompt = (o = {}) => new Promise((res) => {
-    D.modal({
-      title: o.title || '', body: `<input class="inp" id="promptInp" value="${D.esc(o.value || '')}" placeholder="${D.esc(o.placeholder || '')}" data-enter="promptOk">`,
-      actions: [{ label: D.t('btn.cancel'), act: 'closeModal' }, { label: o.ok || D.t('btn.ok'), act: 'promptOk', primary: true }],
-      onClose: () => res(null),
-    });
-    D._promptRes = res;
-  });
-  D.act.promptOk = () => { const v = (D.$('#promptInp') || {}).value; const r = D._promptRes; D._promptRes = null; D.$('#modalBg')._onClose = null; D.closeModal(); r && r(v); };
+  /* Pastki oyna — telefonda ekran ostidan suriladi, kompyuterda odatdagi oyna.
+     Modaldan farqi: markazga emas, barmoq yetadigan joyga chiqadi va fonni
+     bosib yopiladi. Android'da tanlov shu usulda so'raladi. */
+  D.closeSheet = () => {
+    const bg = D.$('#sheetBg'), sh = D.$('#sheet');
+    if (!sh || !sh.classList.contains('show')) return;
+    sh.classList.remove('show');
+    if (bg) bg.classList.remove('show');
+    const fn = sh._onClose; sh._onClose = null;
+    if (fn) try { fn(); } catch (e) { console.error(e); }
+  };
+  D.act.closeSheet = () => D.closeSheet();
+  D.sheet = (html, opts = {}) => {
+    const bg = D.$('#sheetBg'), sh = D.$('#sheet');
+    if (!bg || !sh) return D.modal({ title: opts.title || '', body: html, actions: opts.actions || [], onOpen: opts.onOpen, onClose: opts.onClose, noFocus: opts.noFocus });
+    sh.innerHTML = `<i class="sheet-grip"></i>${opts.title ? `<h3 class="sheet-title">${D.esc(opts.title)}</h3>` : ''}<div class="sheet-body">${html}</div>`
+      + (opts.actions && opts.actions.length ? `<div class="sheet-actions">${actionsHtml(opts.actions)}</div>` : '');
+    sh._onClose = opts.onClose || null;
+    bg.classList.add('show');
+    /* Brauzer boshlang'ich holatni (translateY(101%)) chizib olishi kerak,
+       aks holda sirg'alish o'rniga sakrash bo'ladi. Buni majburiy layout
+       bilan qilamiz, requestAnimationFrame bilan emas: rAF kechiksa yoki
+       umuman chaqirilmasa (fonga tushgan ilova, ba'zi webview'lar) sinf
+       qo'yilmay qolardi — natijada fon qorayadi, oyna esa ekran ostida
+       ko'rinmay turaveradi. Bitta kichik element uchun bir marta o'lchov —
+       arzon va ishonchli. */
+    void sh.offsetHeight;
+    sh.classList.add('show');
+    if (opts.onOpen) setTimeout(() => { try { opts.onOpen(); } catch (e) { console.error(e); } }, 0);
+  };
+
+  /* Paneldagi kamera tugmasi olib tashlandi: o'rtadagi joy endi Ovqat
+     bo'limining o'zi. Kamera yo'qolgani yo'q — Ovqat sahifasining birinchi
+     kartasi aynan u (food.js › capture), ya'ni bitta bosish o'rniga ikkita. */
 
   /* ------------------------------------------------------------------ */
   /* icons (Lucide-style stroke SVG, currentColor)                       */
@@ -828,6 +1045,50 @@
         </svg>
         <div class="ring-val"><div class="ring-pct num">${label !== '' ? label : Math.round(p) + '%'}</div>${sub ? `<div class="ring-sub">${sub}</div>` : ''}</div></div>`;
     },
+    /* Kun jadvali — Excel'dagi habit tracker'ning o'zi: har qator bitta ish,
+       har ustun bitta kun, o'ng chekkada oylik hisob. Ikki joyda ishlatiladi
+       (Bugun — odat va kitob, Ibodat — besh namoz), shuning uchun ko'rinish
+       shu yerda bitta bo'lib turadi: ikki xil jadval ikki xil tilda gapirmasin.
+
+       rows: [{ lab, cells: [{cls, title, attrs}], n, total }]
+       days: kun kalitlari massivi (chapdan o'ngga) */
+    tracker({ days = [], rows = [], head = true }) {
+      const n = days.length || 1;
+      let h = '';
+      if (head) {
+        h = '<div class="trk-corner l"></div>';
+        for (const k of days) {
+          const d = +k.slice(8);
+          // Har beshinchi kun raqamlanadi: o'ttizta raqam sig'maydi, sig'sa ham o'qilmaydi
+          h += `<div class="trk-h">${d === 1 || d % 5 === 0 ? d : ''}</div>`;
+        }
+        h += '<div class="trk-corner r"></div>';
+      }
+      const body = rows.map((r) => {
+        const cells = r.cells.map((c) =>
+          `<button class="trk-cell ${c.cls || ''}" ${c.attrs || ''} title="${D.esc(c.title || '')}"></button>`).join('');
+        const pct = r.total ? D.clamp((r.n / r.total) * 100, 0, 100) : 0;
+        return `<div class="trk-lab" title="${D.esc(r.lab)}">${D.esc(r.lab)}</div>${cells}
+          <div class="trk-n num"><i style="width:${pct.toFixed(0)}%"></i><span>${D.fmtNum(r.n || 0)}</span></div>`;
+      }).join('');
+      return `<div class="trk-scroll"><div class="trk" style="--n:${n}">${h}${body}</div></div>`;
+    },
+    /* Bo'lakli yoy — bitta katta raqam uchun. Halqadan farqi: yarim doira,
+       ya'ni raqam o'rtada emas, ostida turadi va uzoqdan o'qiladi; bo'laklar
+       esa qancha qolganini sanab ko'rsatadi. Foizni og'zaki o'qish oson bo'lsin
+       uchun bo'laklar soni 15 — har biri taxminan 6,7 %. */
+    arc({ pct = 0, n = 15, color = 'var(--accent)', track = 'var(--line2)', label = '', sub = '', cap = '', id = '' }) {
+      const p = D.clamp(pct, 0, 100), on = Math.round((n * p) / 100);
+      let seg = '';
+      for (let i = 0; i < n; i++) {
+        const a = -84 + i * (168 / (n - 1));
+        seg += `<rect x="93.5" y="8" width="13" height="27" rx="6.5" transform="rotate(${a.toFixed(2)} 100 100)" fill="${i < on ? color : track}"/>`;
+      }
+      return `<div class="arc-wrap"${id ? ` id="${id}"` : ''}>
+        <svg class="arc" viewBox="0 0 200 112" role="img" aria-label="${D.esc(String(label || Math.round(p) + '%'))}">${seg}</svg>
+        <div class="arc-val"><div class="arc-num num">${label !== '' ? label : Math.round(p) + '%'}</div>${sub ? `<div class="arc-sub">${sub}</div>` : ''}</div>
+        ${cap ? `<div class="arc-cap">${cap}</div>` : ''}</div>`;
+    },
     bars({ values = [], labels = [], color = 'var(--success)', height = 70, target = null, max = null, colors = null, miss = null }) {
       const n = values.length || 1, W = 280, H = height, pad = 4, colW = (W - 2 * pad) / n, bw = colW * 0.68;
       const mx = max || Math.max(1, ...values.map((v) => +v || 0), target || 0);
@@ -905,36 +1166,167 @@
   D.viewList = () => Object.values(D.views).sort((a, b) => (a.order || 0) - (b.order || 0));
   let current = null;
 
-  D.go = (id, sub) => {
+  /* ------------------------------------------------------------------ */
+  /* Kechiktirilgan bo'limlar                                            */
+  /* Bu to'rttasi «Yana» panelida yashaydi va birinchi ekran ularning    */
+  /* hech biriga murojaat qilmaydi — Bugun faqat food / ibodat / whoop / */
+  /* ai ni chaqiradi. Shu sabab index.html ularni yuklamaydi: bu yerda   */
+  /* nav uchun yetadigan stub turadi (yorliqlar i18n.js da, ya'ni nav    */
+  /* birinchi kadrdan to'liq), haqiqiy fayl esa birinchi render'dan      */
+  /* keyin bo'sh vaqtda fonda keladi va D.view() bilan stub ustiga       */
+  /* yoziladi. Foydalanuvchi undan oldin bossa — skelet ko'rsatiladi va  */
+  /* o'sha bitta fayl kutiladi.                                          */
+  /* O'lchov (2026-09-09): 257 KB xom / 75 KB gzip sovuq startdan chiqdi. */
+  /* ------------------------------------------------------------------ */
+  const LAZY = [
+    { id: 'finance',  icon: 'wallet',   order: 30, primary: false },
+    { id: 'tasks',    icon: 'checkSq',  order: 50, nav: true, primary: false },
+    // Odat va Kitob — Vazifa ichidagi sahifalar. Bo'lim sifatida ro'yxatda
+    // qoladi (eski #habits havolasi ishlashi uchun), lekin nav: false —
+    // ya'ni na pastki panelda, na yon panelda o'z yorlig'i bo'lmaydi.
+    { id: 'books',    icon: 'book',     order: 60, nav: false, primary: false },
+    { id: 'habits',   icon: 'fire',     order: 15, nav: false, primary: false },
+    { id: 'yusa',     icon: 'sparkles', order: 70, nav: true, primary: false },
+    { id: 'settings', icon: 'gear',     order: 90, nav: true, primary: false },
+  ];
+  /* Sog'liq / Ibodat / ai / profile / onboard / yusa-orb ni ham shu yerga ko'chirib
+     ko'rildi (228 KB, birinchi ekran ularning bayti bilan ishlamaydi). Navbatma-navbat
+     uch tur o'lchovda YUTUQ CHIQMADI — uch turdan ikkitasida eager variant tezroq bo'ldi,
+     birinchi chizishgacha ketgan skript vaqti ham eager foydasiga (161 ms / 257 ms).
+     Sababi: V8 chaqirilmagan funksiyani to'liq kompilyatsiya qilmaydi, ya'ni «o'qilmagan»
+     228 KB bayt soni ko'rsatganchalik qimmat emas. Qayta urinmang — avval o'lchang. */
+  const lazySrc = {}, lazyLoad = {};
+  for (const m of LAZY) {
+    lazySrc[m.id] = (m.src || ('js/' + m.id + '.js')) + VQ;
+    D.views[m.id] = Object.assign({}, m, { stub: true, render: () => skeleton() });
+  }
+  /** Bitta faylni qo'shadi. Takroriy chaqiruv o'sha va'dani qaytaradi. */
+  const scriptCache = {};
+  D.loadScript = (src) => {
+    if (!scriptCache[src]) {
+      scriptCache[src] = new Promise((res) => {
+        const el = document.createElement('script');
+        el.src = src;
+        el.async = false;                    // kiritilish tartibida bajarilsin
+        el.onload = () => res(true);
+        el.onerror = () => { console.error('fayl yuklanmadi', src); res(false); };
+        document.head.appendChild(el);
+      });
+    }
+    return scriptCache[src];
+  };
+  /** Bo'lim emas, kutubxona: D.loadLib('profile'). Manzil preload bilan bir xil
+      bo'lishi shart (?v= ham) — aks holda fayl ikki marta yuklanadi. */
+  D.loadLib = (name) => D.loadScript('js/' + name + '.js' + VQ);
+  /** Bitta kechiktirilgan bo'limni yuklaydi. Takroriy chaqiruv o'sha va'dani qaytaradi. */
+  D.loadView = (id) => {
+    if (!lazySrc[id]) return Promise.resolve(false);
+    if (!lazyLoad[id]) {
+      const src = lazySrc[id];
+      lazyLoad[id] = D.loadScript(src).then((ok) => { if (ok) delete lazySrc[id]; return ok; });
+    }
+    return lazyLoad[id];
+  };
+  /** Qolganini fonda olib qo'yish — bosilganda kutish bo'lmasin.
+      Bittalab: hammasini birdan qo'shsak, el.async=false ularni ketma-ket, bo'linmaydigan
+      bitta bo'lakda bajaradi (225 KB tahlil) va o'sha paytda bosilgan tugma javob bermaydi.
+      Har fayldan keyin bo'sh vaqtni kutamiz, shunda oradagi bosishlar o'tib ketadi. */
+  D.preloadViews = () => {
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
+    const queue = Object.keys(lazySrc);
+    const next = () => {
+      const id = queue.shift();
+      if (!id) return;
+      D.loadView(id).then(() => {
+        if (queue.length) return idle(next, { timeout: 1500 });
+        // Navbat tugadi. Bir marta qayta chizamiz: kelgan fayllardan biri joriy ekranga
+        // qo'shadigan narsa bergan bo'lishi mumkin (masalan ibodat.js dagi qazo bloki).
+        // Har fayldan keyin chizish — o'n bitta ortiqcha to'liq render, o'lchab ko'rildi.
+        D.renderNav(); D.rerender();
+      });
+    };
+    next();
+  };
+
+  // Ko'chgan bo'limlarning eski manzillari. Eski havolalar, #hash lar va
+  // saqlangan D.ui.view baribir ishlashi kerak: yangilanishdan keyin odam
+  // oxirgi ko'rgan ekranida qolsin, yorlig'i yonib turgan holda.
+  //   Ovqat   — Ovqat bo'limining birinchi sahifasi (ilgari alohida bo'lim)
+  //   Odat    — Vazifa bo'limining sahifasi
+  //   Kitob   — Vazifa bo'limining sahifasi
+  const ALIAS = { food: ['health', 'ovqat'], habits: ['tasks', 'habits'], books: ['tasks', 'books'] };
+  /** '#food' yoki '#habits' ni mavjud bo'lim va bo'limchaga aylantiradi.
+      null — bunday bo'lim yo'q. Eski manzilning bo'limchasi o'z uyasiga
+      yoziladi: '#habits/tahlil' → Vazifa › Odat, Odatning ichida esa «Tahlil». */
+  const resolveView = (h, sub) => {
+    const al = ALIAS[h];
+    if (!al) return D.views[h] ? [h, sub] : null;
+    if (sub && D.views[h] && D.ui.sub[h] !== sub) { D.ui.sub[h] = sub; D.saveUi(); }
+    return al.slice();
+  };
+  D.go = (id, sub, opts = {}) => {
+    const al = ALIAS[id];
+    if (al) {
+      // Eski manzilning bo'limchasi o'z uyasida qoladi: '#habits/tahlil' →
+      // Vazifa › Odat, va Odatning ichida ham o'sha «Tahlil» ochiladi.
+      // D.ui.sub bo'lim kesimida saqlanadi, ya'ni ikkalasi bir-biriga tegmaydi.
+      if (sub !== undefined && D.views[id] && D.ui.sub[id] !== sub) { D.ui.sub[id] = sub; D.saveUi(); }
+      id = al[0]; sub = al[1];
+    }
     if (!D.views[id]) id = 'today';
     if (sub !== undefined) D.ui.sub[id] = sub;
+    if (TABS.indexOf(id) >= 0) D.ui.from = id;
     if (current && current !== id && D.views[current].unmount) { try { D.views[current].unmount(); } catch (e) { console.error(e); } }
     const changed = current !== id;
     current = id;
     D.ui.view = id;
     D.saveUi();
-    if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+    // Manzilda bo'limcha ham turadi (#prayer/log) — havola aniq sahifani ochsin.
+    // Bo'lim almashganda tarixga YANGI yozuv qo'shiladi: shundagina telefonning
+    // orqaga ishorasi oldingi bo'limga qaytaradi. Ilgari har safar replaceState
+    // edi, ya'ni butun sessiyada bitta yozuv bo'lib, orqaga ishorasi odamni
+    // ilovadan chiqarib yuborardi. Tarixdan kelgan chaqiruvda (popstate) esa
+    // yangi yozuv qo'shilmaydi — aks holda orqaga qaytish cheksiz aylanardi.
+    const cur = D.ui.sub[id];
+    const want = '#' + id + (cur ? '/' + cur : '');
+    if (location.hash !== want) {
+      if (changed && !opts.fromHistory) history.pushState({ dash: 1 }, '', want);
+      else history.replaceState(history.state, '', want);
+    }
     D.renderNav();
+    D.renderTop();
     D.rerender();
+    // Stub — skelet chiqdi; fayl kelgach haqiqiy bo'lim o'z o'rniga chiziladi.
+    if (D.views[id].stub) D.loadView(id).then((ok) => { if (ok && current === id) { D.renderNav(); D.rerender(); } });
     if (changed) {
       window.scrollTo(0, 0);
       // Play the section-enter animation once per navigation — never on an ordinary
       // rerender, otherwise ticking a habit would re-animate the whole page.
       const root = D.$('#view');
       if (root) {
-        root.classList.remove('view-enter');
-        void root.offsetWidth;            // restart the animation
+        // D.rerender() has just replaced #view's children, so the animation targets
+        // (#view.view-enter > *) are brand-new nodes: they start animating the moment the
+        // class matches and there is nothing to "restart". The old remove + read
+        // offsetWidth + add dance forced a full synchronous layout of the just-built view
+        // from inside the tap handler — measured at 4x CPU throttle, dropping it cut the
+        // blocking part of a section switch from 26ms to 16ms.
         root.classList.add('view-enter');
         clearTimeout(D._enterT);
         D._enterT = setTimeout(() => root.classList.remove('view-enter'), 460);
       }
       D.emit('view:changed', id);
     }
-    D.closeMore();
   };
   D.current = () => current;
   D.sub = (id, fallback) => (D.ui.sub[id] !== undefined ? D.ui.sub[id] : fallback);
-  D.setSub = (id, v) => { D.ui.sub[id] = v; D.saveUi(); D.rerender(); };
+  D.setSub = (id, v) => {
+    D.ui.sub[id] = v; D.saveUi();
+    // Manzil ham ergashadi: sahifa qayta yuklansa yoki havola ulashilsa,
+    // o'sha bo'limcha ochilishi kerak. Bu tarixga yozuv qo'shmaydi —
+    // bo'limcha almashuvi «yangi sahifa» emas.
+    if (id === current) { const w = '#' + id + '/' + v; if (location.hash !== w) history.replaceState(history.state, '', w); }
+    D.rerender();
+  };
   D.act.go = (el) => D.go(el.dataset.view, el.dataset.sub);
   D.act.sub = (el) => D.setSub(el.dataset.view || current, el.dataset.sub);
 
@@ -946,6 +1338,10 @@
       <div class="skel-rows">${'<div class="skel skel-row"></div>'.repeat(3)}</div></div>
     <div class="card skel-card">${'<div class="skel skel-row"></div>'.repeat(5)}</div>
     <div class="skel-note">${D.esc(D.t('loading'))}</div>`;
+  /* Kechiktirilgan fayl kutilayotganda bo'lim o'rniga turadigan shakl. Endi
+     uni bo'limlar ham chaqiradi: Vazifa ichidagi Odat va Kitob sahifalari
+     boshqa fayldan keladi, ya'ni ular ham xuddi shu kutishni ko'rsatadi. */
+  D.skeleton = skeleton;
 
   /* ------------------------------------------------------------------ */
   /* DOM morphing                                                        */
@@ -1001,11 +1397,14 @@
 
   const scratch = () => (D._scratch || (D._scratch = document.createElement('div')));
 
+  // Oxirgi chizilgan bo'lim — morph kerakmi yoki to'g'ridan-to'g'ri almashtirishmi, shu hal qiladi.
+  let painted = null;
+
   D.rerender = () => {
     const v = D.views[current];
     const root = D.$('#view');
     if (!v || !root) return;
-    if (D.loading) { root.innerHTML = skeleton(); return; }
+    if (D.loading) { painted = null; root.innerHTML = skeleton(); return; }
     let html;
     try { html = v.render(); } catch (e) {
       console.error('render', current, e);
@@ -1017,28 +1416,132 @@
     document.documentElement.setAttribute('data-section', current);
     const next = scratch();
     next.innerHTML = html;
-    try { patchChildren(root, next); } catch (e) { console.error('morph', e); root.innerHTML = html; }
+    // Boshqa bo'limga o'tilganda ikki daraxtda umumiy narsa yo'q, lekin morph baribir
+    // har bir tugunni isEqualNode bilan solishtirib chiqadi — ya'ni butun shoxni qayta
+    // aylanadi. O'lchov (telefon tezligida, Vazifa bo'limi): morph 391 ms, oddiy
+    // almashtirish 20 ms. Saqlaydigan narsa ham yo'q: bo'lim almashsa sahifa boshiga
+    // qaytadi. Morph faqat bir bo'lim ichidagi yangilanishda kerak — u yerda u
+    // aylantirish o'rnini, fokusni va yozilayotgan matnni joyida qoldiradi.
+    if (painted !== current) root.replaceChildren(...next.childNodes);
+    else try { patchChildren(root, next); } catch (e) { console.error('morph', e); root.innerHTML = html; }
+    painted = current;
     next.textContent = '';
     if (v.mount) { try { v.mount(root); } catch (e) { console.error('mount', current, e); D.logError(e); } }
-    // No scrollTo here: morphing leaves the tree standing, so the position never
-    // moved, and calling scrollTo mid-momentum is itself a source of jank.
+    // Bu yerda scrollTo yo'q: bir bo'lim ichidagi yangilanishda o'rin joyida qolishi kerak,
+    // bo'lim almashganda esa D.go o'zi sahifa boshiga qaytaradi.
+    D.renderTop();
+    D.renderNav();          // yorliqdagi belgi bugungi holatga ergashadi
     D.emit('view:rendered', current);
   };
   D.patch = (id, html) => { const el = document.getElementById(id); if (el) el.innerHTML = html; };
 
+  /* ------------------------------------------------------------------ */
+  /* CHROME — tepa panel · pastki panel                                  */
+  /* Pastki panelda beshta joy va hammasi haqiqiy bo'lim: o'rtadagisi ham */
+  /* tugma emas, yorliq. Qaysi beshtasi ekani shu ro'yxatda turadi —      */
+  /* view.primary emas, chunki tartib ham, soni ham qat'iy.              */
+  /* O'rtasi — TABS[2], ko'tarilgan doira. Eng ko'p ochiladigan bo'lim shu */
+  /* joyga qo'yiladi: bosh barmoq ekranning markaziga eng oson yetadi.    */
+  /* ------------------------------------------------------------------ */
+  /* Yorliqqa kirmagan bo'limlar yo'qolgani yo'q, boshqa eshikdan kiriladi:
+     Sozlash — tepa o'ngdagi profil surati (uning birinchi kartasi profil),
+     Odat va Kitob — Vazifa ichidagi sahifalar, Yusa AI — suzuvchi to'garak. */
+  const TABS = ['today', 'prayer', 'health', 'finance', 'tasks'];
+  /* O'rtadagi ko'tarilgan joyning indeksi. Bitta son — panelning chizilishi
+     ham, CSS dagi doira ham shundan kelib chiqadi. */
+  const MID = 2;
+  /* Yorliq belgisi — SVG emas, emoji. Beshta joyda chiziqli belgilar
+     kichrayib bir-biriga o'xshab qoladi; emoji rangli, ya'ni yorliqni
+     o'qimasdan ham tanib olasiz. Shrift --emoji tokenidan (tizimniki). */
+  const TAB_EM = { today: '🏠', prayer: '🕌', health: '🍽️', finance: '💰', tasks: '✅' };
+
+  D.renderTop = () => {
+    const el = D.$('#top');
+    if (!el) return;
+    const v = D.views[current] || {};
+    const isTab = TABS.indexOf(current) >= 0;
+    let title = '', sub = '';
+    try { title = v.title ? v.title() : D.t('nav.' + current); } catch (e) { title = D.t('nav.' + current); }
+    try { sub = v.subtitle ? v.subtitle() : ''; } catch (e) { sub = ''; }
+    // Chap burchak — faqat ichki sahifada, orqaga qaytish uchun. Yorliqda u bo'sh:
+    // yorliqdan qaytadigan joy yo'q, panel o'zi turibdi.
+    const left = isTab ? ''
+      : `<button class="top-btn" data-act="back" aria-label="${D.esc(D.t('btn.back'))}">${D.ic('chevL', 19)}</button>`;
+    /* Hammasi bitta qatorda: chapda bo'lim nomi va uning ostida sana, o'ngda
+       profil surati. Ilgari nom qatorning OSTIDA, alohida katta sarlavha
+       bo'lib turardi — har sahifada qo'shimcha 44 px joy yeyardi va ekranning
+       tepasi ikkiga bo'linardi. Endi panel bitta.
+       Bo'lim boshqaruvi (sana strelkalari) bu yerdan olib tashlandi: kun
+       tanlash har bo'limning o'z sahifasida — Asosiyda kun chizig'i,
+       Ovqatda 7 kunlik chizma, Ibodatda sahifaning o'z strelkalari. */
+    el.innerHTML = `<div class="top-row">${left}
+        <div class="top-txt"><h1 class="top-title">${D.esc(title)}</h1>${sub ? `<p class="top-sub">${sub}</p>` : ''}</div>
+        <button class="top-btn top-avatar" data-act="openProfile" aria-label="${D.esc(D.t('nav.settings'))}">${avatarMini()}</button></div>`;
+  };
+  // Profil surati hali kelmagan bo'lsa ham bir narsa turishi kerak — bosh harf.
+  function avatarMini() {
+    try { if (D.profile && D.profile.avatarHtml) return D.profile.avatarHtml(38, 'pf-av'); } catch (e) {}
+    return '<i class="top-av"></i>';
+  }
+  D.act.openProfile = () => { if (D.profile && D.profile.open) D.profile.open(); else D.go('settings'); };
+  /* Orqaga. Ilgari bu D.go chaqirardi, ya'ni tarixga OLDINGA yozuv qo'shardi:
+     tugmani bosib qaytgan odam telefonning orqaga ishorasini bosganda yana
+     o'sha sahifaga qaytib kirardi. Endi tarixning o'zidan chekinamiz — ikkala
+     yo'l bir tomonga qaraydi. Tarixda o'z yozuvimiz bo'lmasa (to'g'ridan-to'g'ri
+     havola bilan kirilgan) oxirgi yorliqqa qaytamiz. */
+  D.act.back = () => {
+    if (history.state && history.state.dash) { history.back(); return; }
+    D.go(TABS.indexOf(D.ui.from) >= 0 ? D.ui.from : 'today', undefined, { fromHistory: true });
+  };
+
+  /* Panelning o'zida bugungi holat ko'rinib tursin: «Odat» yorlig'ida bugun
+     nechta ish qolgani yoziladi. Hammasi bajarilganda raqam yo'qoladi — belgi
+     ish qolganda kerak, bajarilgandan keyin esa faqat shovqin.
+     Hisob core'da: modul kechiktirib yuklanadi, belgi esa birinchi kadrdan
+     to'g'ri turishi kerak. */
+  const BADGE = {
+    tasks() {
+      const td = D.today();
+      let n = 0;
+      try {
+        const logs = new Set(D.S.logs[td] || []), counts = D.S.counts[td] || {};
+        for (const h of D.activeHabits()) {
+          if (!D.habitDue(h, td)) continue;
+          const q = h.target && h.target.n ? +h.target.n : 0;
+          if (!(q ? (+counts[h.id] || 0) >= q : logs.has(h.id))) n++;
+        }
+        const ml = D.S.mediaLogs[td] || {};
+        for (const m of D.S.media) if (m.status === 'now' && !(+ml[m.id] > 0)) n++;
+        // Vazifa yorlig'i endi uchta sahifani (vazifa · odat · kitob) qamrab
+        // oladi, ya'ni belgi ham uchalasini sanaydi. Kechikkani ham qo'shiladi:
+        // o'tgan kunning bajarilmagan ishi bugun ham qolgan ish.
+        for (const x of D.S.tasks) if (!x.done && x.date && x.date <= td) n++;
+      } catch (e) { return 0; }
+      return n;
+    },
+  };
+
   D.renderNav = () => {
     const nav = D.$('#nav'), side = D.$('#side');
-    const list = D.viewList().filter((v) => v.nav !== false);
-    const primary = list.filter((v) => v.primary !== false).slice(0, 4);
-    const more = list.filter((v) => !primary.includes(v));
-    const btn = (v) => `<button class="nav-tab ${current === v.id ? 'on' : ''}" data-act="go" data-view="${v.id}" aria-label="${D.esc(D.t('nav.' + v.id))}">${D.ic(v.icon, 22)}<span>${D.esc(D.t('nav.' + v.id))}</span></button>`;
-    if (nav) nav.innerHTML = primary.map(btn).join('') + `<button class="nav-tab ${more.some((v) => v.id === current) ? 'on' : ''}" data-act="toggleMore" aria-label="${D.t('nav.more')}">${D.ic('grid', 22)}<span>${D.t('nav.more')}</span></button>`;
-    const moreEl = D.$('#more');
-    if (moreEl) moreEl.innerHTML = `<div class="more-grid">${more.map((v) => `<button class="more-tile ${current === v.id ? 'on' : ''}" data-act="go" data-view="${v.id}">${D.ic(v.icon, 24)}<span>${D.esc(D.t('nav.' + v.id))}</span></button>`).join('')}</div>`;
-    if (side) side.innerHTML = list.map((v) => `<button class="side-tab ${current === v.id ? 'on' : ''}" data-act="go" data-view="${v.id}">${D.ic(v.icon, 18)}<span>${D.esc(D.t('nav.' + v.id))}</span></button>`).join('');
+    const btn = (id, mid) => {
+      const v = D.views[id];
+      if (!v) return '';
+      let b = 0;
+      try { b = BADGE[id] ? BADGE[id]() : 0; } catch (e) { b = 0; }
+      const lab = D.esc(D.t('nav.' + id));
+      return `<button class="nav-tab${mid ? ' nav-mid' : ''}${current === id ? ' on' : ''}" data-act="go" data-view="${id}" aria-label="${lab}">
+        <span class="nav-ic"><span class="nav-em">${TAB_EM[id] || ''}</span>${b ? `<i class="nav-badge num">${D.fmtNum(b)}</i>` : ''}</span>
+        <span class="nav-lab">${lab}</span></button>`;
+    };
+    // Beshta yorliq bir xil yo'l bilan chiziladi — o'rtadagisining farqi
+    // faqat ko'rinishda (CSS dagi .nav-mid), bosilishi boshqalarniki bilan bir xil.
+    if (nav) nav.innerHTML = TABS.map((id, i) => btn(id, i === MID)).join('');
+    // Kata ekranda yon panel qoladi va u yerda hamma bo'lim ko'rinadi —
+    // u yerda joy siqilmaydi, yashirishning ma'nosi yo'q.
+    if (side) side.innerHTML = D.viewList().filter((v) => v.nav !== false)
+      .map((v) => `<button class="side-tab ${current === v.id ? 'on' : ''}" data-act="go" data-view="${v.id}">${D.ic(v.icon, 18)}<span>${D.esc(D.t('nav.' + v.id))}</span></button>`).join('');
   };
-  D.act.toggleMore = () => { const m = D.$('#more'); if (m) m.classList.toggle('show'); };
-  D.closeMore = () => { const m = D.$('#more'); if (m) m.classList.remove('show'); };
+  D.closeMore = () => {};
 
   /* ------------------------------------------------------------------ */
   /* event delegation                                                    */
@@ -1054,76 +1557,27 @@
     return true;
   }
   document.addEventListener('click', (ev) => {
-    const more = D.$('#more');
-    if (more && more.classList.contains('show') && !ev.target.closest('#more') && !ev.target.closest('[data-act=toggleMore]')) D.closeMore();
     const bg = D.$('#modalBg');
     if (bg && ev.target === bg) { D.closeModal(); return; }
-    // Qidiruv oynasi butun ekranni egallaydi va ichida yopish tugmasi yo'q —
-    // telefonda Escape ham yo'q, fonni bosmasa undan chiqib bo'lmasdi.
-    const pal = D.$('#palette');
-    if (pal && ev.target === pal) { D.act.palClose(); return; }
+    const sbg = D.$('#sheetBg');
+    if (sbg && ev.target === sbg) { D.closeSheet(); return; }
     dispatch('data-act', ev);
   });
   document.addEventListener('change', (ev) => dispatch('data-change', ev));
   document.addEventListener('input', (ev) => dispatch('data-input', ev));
   document.addEventListener('keydown', (ev) => {
     if (ev.key === 'Enter' && !ev.shiftKey && ev.target.matches && ev.target.matches('input[data-enter]')) { ev.preventDefault(); const fn = D.act[ev.target.dataset.enter]; if (fn) fn(ev.target, ev); return; }
-    if (ev.key === 'Escape') { D.closeModal(); D.closeMore(); const p = D.$('#palette'); if (p) p.classList.remove('show'); }
-    if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'k') { ev.preventDefault(); D.search.open(); }
+    if (ev.key === 'Escape') { D.closeModal(); D.closeSheet(); }
     if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'z' && !ev.target.matches('input,textarea,[contenteditable]')) { ev.preventDefault(); D.undo.pop(); }
   });
 
-  /* ------------------------------------------------------------------ */
-  /* search / command palette                                            */
-  /* ------------------------------------------------------------------ */
-  const providers = [];
-  D.search = {
-    register: (fn) => providers.push(fn),
-    open() {
-      const p = D.$('#palette'); if (!p) return;
-      p.classList.add('show');
-      const inp = D.$('#paletteInp'); if (inp) { inp.value = ''; inp.focus(); }
-      D.search.run('');
-    },
-    run(q) {
-      const res = D.$('#paletteRes'); if (!res) return;
-      q = (q || '').trim();
-      let items = [];
-      for (const v of D.viewList()) if (v.nav !== false) items.push({ label: D.t('nav.' + v.id), sub: D.t('search.view'), icon: v.icon, score: 1, go: () => D.go(v.id) });
-      for (const f of providers) { try { items = items.concat(f(q) || []); } catch (e) { console.error(e); } }
-      const nq = D.translit.norm(q);
-      if (nq) items = items.map((it) => ({ ...it, score: D.translit.score(it.label, nq) + (it.sub ? D.translit.score(it.sub, nq) * 0.3 : 0) })).filter((it) => it.score > 0);
-      items.sort((a, b) => b.score - a.score);
-      items = items.slice(0, 30);
-      D._paletteItems = items;
-      res.innerHTML = items.length ? items.map((it, i) => `<button class="pal-item ${i === 0 ? 'on' : ''}" data-act="palGo" data-i="${i}">${it.icon ? D.ic(it.icon, 16) : ''}<span class="pal-label">${D.esc(it.label)}</span>${it.sub ? `<span class="pal-sub">${D.esc(it.sub)}</span>` : ''}</button>`).join('') : `<div class="empty">${D.t('search.empty')}</div>`;
-    },
-  };
-  D.act.palGo = (el) => { const it = D._paletteItems[+el.dataset.i]; D.$('#palette').classList.remove('show'); if (it && it.go) it.go(); };
-  D.act.palInput = (el) => D.search.run(el.value);
-  D.act.palClose = () => D.$('#palette').classList.remove('show');
-  D.act.openSearch = () => D.search.open();
-
-  // Cyrillic ↔ Latin transliteration for search (Uzbek)
+  // Cyrillic ↔ Latin transliteration (Uzbek) — ro'yxatlarni saralash uchun
   const CYR = [['ё', 'yo'], ['ю', 'yu'], ['я', 'ya'], ['ч', 'ch'], ['ш', 'sh'], ['ц', 'ts'], ['ғ', 'g'], ['қ', 'q'], ['ў', 'o'], ['ҳ', 'h'], ['х', 'x'], ['ж', 'j'],
     ['а', 'a'], ['б', 'b'], ['в', 'v'], ['г', 'g'], ['д', 'd'], ['е', 'e'], ['з', 'z'], ['и', 'i'], ['й', 'y'], ['к', 'k'], ['л', 'l'], ['м', 'm'], ['н', 'n'], ['о', 'o'],
     ['п', 'p'], ['р', 'r'], ['с', 's'], ['т', 't'], ['у', 'u'], ['ф', 'f'], ['э', 'e'], ['ъ', ''], ['ь', '']];
   D.translit = {
     toLatin: (s) => { s = String(s || '').toLowerCase(); for (const [c, l] of CYR) s = s.split(c).join(l); return s; },
     norm: (s) => D.translit.toLatin(s).replace(/[ʼ’'`‘]/g, '').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim(),
-    score(label, nq) {
-      const nl = D.translit.norm(label);
-      if (!nl) return 0;
-      if (nl === nq) return 100;
-      if (nl.startsWith(nq)) return 80;
-      if (nl.includes(nq)) return 60;
-      // all query words present
-      const words = nq.split(' ');
-      if (words.every((w) => nl.includes(w))) return 40;
-      // subsequence
-      let i = 0; for (const c of nl) if (c === nq[i]) i++;
-      return i === nq.length ? 15 : 0;
-    },
   };
 
   /* ------------------------------------------------------------------ */
@@ -1137,18 +1591,21 @@
       authPending = new Promise(async (resolve) => {
         // what the server offers: named accounts, the owner's passcode, Google, open registration
         let cfg = { named: false, passcode: true, google: false, register: false, invite: false, googleInvite: false, googleSeen: false };
-        try { const r = await fetch('/api/auth/config', { credentials: 'same-origin', cache: 'no-store' }); if (r.ok) cfg = Object.assign(cfg, await r.json()); } catch (e) {}
+        // muddatsiz kutilsa kirish oynasi umuman chizilmasdi — server jim qolsa ham oyna ochiladi
+        try { const r = await D.fetchTimed('/api/auth/config', { credentials: 'same-origin', cache: 'no-store' }, 8000); if (r.ok) cfg = Object.assign(cfg, await r.json()); } catch (e) {}
         const tgId = D.tg && D.tg.initData && D.tg.initDataUnsafe && D.tg.initDataUnsafe.user && D.tg.initDataUnsafe.user.id;
         const askName = !!(cfg.named || cfg.register);
         const canLogin = !!(cfg.named || cfg.passcode || cfg.register);
         let mode = 'login';
-        let name = D.device.lastUser || '';
+        // maydon endi email so'raydi: eski ism (2026-09-10 gacha) tortib kelinmasin
+        let name = /^[^\s@]+@[^\s@]+$/.test(D.device.lastUser || '') ? D.device.lastUser : '';
         const box = document.createElement('div');
         box.className = 'auth-gate';
         document.body.appendChild(box);
         const t = D.t, esc = D.esc;
         const errKey = (code, status) => ({
-          name_taken: 'auth.e.taken', weak_pass: 'auth.e.weak', bad_name: 'auth.e.name', mismatch: 'auth.e.mismatch',
+          name_taken: 'auth.e.taken', email_taken: 'auth.e.taken', weak_pass: 'auth.e.weak', bad_name: 'auth.e.name',
+          bad_email: 'auth.e.email', mismatch: 'auth.e.mismatch', full: 'auth.e.full',
           bad_invite: 'auth.e.invite', closed: 'auth.e.closed', too_many: 'auth.e.many', bad_pass: 'auth.bad',
         })[code] || (status === 401 ? 'auth.bad' : 'auth.err');
         // Google oqimi boshqa tabda yoki iOS ichki brauzerida tugagan, sahifa bfcache'dan qaytgan
@@ -1157,7 +1614,7 @@
         const check = async () => {
           if (finished || checking) return;
           checking = true;
-          try { const r = await fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' }); if (r.ok) done(await r.json()); } catch (e) {}
+          try { const r = await D.fetchTimed('/api/me', { credentials: 'same-origin', cache: 'no-store' }, 8000); if (r.ok) done(await r.json()); } catch (e) {}
           checking = false;
         };
         const onVis = () => { if (!document.hidden) check(); };
@@ -1181,7 +1638,9 @@
           const reg = mode === 'register', goog = mode === 'google';
           const sub = goog ? 'auth.gInviteSub' : reg ? 'auth.regSub' : askName ? 'auth.sub2' : 'auth.sub';
           const gBtn = cfg.google ? `<button type="button" class="btn auth-btn auth-google">${D.ic('globe', 16)} ${esc(t('auth.google'))}</button>` : '';
-          box.innerHTML = `<form class="auth-card" autocomplete="on">
+          // novalidate: eski (ism bilan ochilgan) hisob type=email maydonida brauzer tekshiruviga
+          // urilib qolmasin — xatoni o'zimiz, o'z tilimizda aytamiz
+          box.innerHTML = `<form class="auth-card" autocomplete="on" novalidate>
             <div class="auth-ic">${D.ic(reg ? 'plus' : goog ? 'globe' : 'user', 26)}</div>
             <div class="auth-title">${esc(t(goog ? 'auth.google' : reg ? 'auth.regTitle' : 'auth.title'))}</div>
             <p class="auth-sub">${esc(t(sub))}</p>
@@ -1192,8 +1651,9 @@
             <button class="btn auth-btn" type="submit">${D.ic('globe', 16)} ${esc(t('auth.gGo'))}</button>
             <p class="auth-switch"><button type="button" class="auth-link">${esc(t('auth.back'))}</button></p>` : ''}
             ${!goog && !reg && gBtn ? `${gBtn}<p class="auth-hint">${esc(t('auth.gSub'))}</p>${canLogin ? `<div class="auth-or">${esc(t('auth.or'))}</div>` : ''}` : ''}
-            ${!goog && (reg || askName) ? `<input class="inp auth-inp auth-name" type="text" name="username" autocomplete="username" autocapitalize="words"
-                   maxlength="40" value="${esc(name)}" placeholder="${esc(t('auth.name'))}" aria-label="${esc(t('auth.name'))}">` : ''}
+            ${!goog && (reg || askName) ? `<input class="inp auth-inp auth-name" type="email" name="email" autocomplete="email" autocapitalize="off"
+                   autocorrect="off" spellcheck="false" inputmode="email" maxlength="190" value="${esc(name)}"
+                   placeholder="${esc(t('auth.email'))}" aria-label="${esc(t('auth.email'))}">` : ''}
             ${!goog && (reg || canLogin) ? `<input class="inp auth-inp auth-pass" type="password" name="password" autocomplete="${reg ? 'new-password' : 'current-password'}"
                    placeholder="${esc(t('auth.ph'))}" aria-label="${esc(t('auth.ph'))}">` : ''}
             ${reg ? `<input class="inp auth-inp auth-pass2" type="password" name="password2" autocomplete="new-password"
@@ -1232,14 +1692,17 @@
             const v = pass.value;
             if (!v) return;
             if (reg) {
-              if (name.length < 2) return fail('auth.e.name');
-              if (v.length < 6) return fail('auth.e.weak');
+              if (!/^[^\s@]+@[^\s@.]+(\.[^\s@.]+)+$/.test(name)) return fail('auth.e.email');
+              if (v.length < 8) return fail('auth.e.weak');
               if (pass2 && pass2.value !== v) return fail('auth.e.mismatch');
             }
             btn.disabled = true; err.hidden = true;
             try {
-              const body = reg ? { user: name, pass: v, pass2: pass2 ? pass2.value : v, invite: inv ? inv.value.trim() : '' } : { pass: v, user: name };
-              const r = await fetch(reg ? '/api/register' : '/api/login', {
+              // kirishda ikkalasi ham ketadi: email bo'lsa server email bo'yicha, bo'lmasa ism bo'yicha
+              // qidiradi (2026-09-10 dan oldin ism bilan ochilgan hisoblar kiraversin)
+              const body = reg ? { email: name, pass: v, pass2: pass2 ? pass2.value : v, invite: inv ? inv.value.trim() : '' }
+                : { pass: v, email: name, user: name };
+              const r = await D.fetchTimed(reg ? '/api/register' : '/api/login', {
                 method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
               });
               const j = await r.json().catch(() => ({}));
@@ -1258,14 +1721,14 @@
     async logout() {
       const uid = (D.me && D.me.uid) || D.device.uid || '';
       let safe = true;
-      if (D.serverEnabled() && D._pending) { try { safe = await D.flush(); } catch (e) { safe = false; } }
+      if (D.serverEnabled() && (D._pending || D.dirty())) { try { safe = await D.flush(9000); } catch (e) { safe = false; } }
       if (!safe && uid) {
         // server javob bermadi — yozuvlar shu qurilmada qoladi va qaytib kirilganda o'z-o'zidan qo'shiladi
         lsSet(RESCUE_KEY + uid, D.S);
         D.toast(D.t('auth.unsent'), { ms: 4000 });
         await new Promise((r) => setTimeout(r, 1400));
       }
-      try { await fetch('/api/logout', { method: 'POST', credentials: 'same-origin' }); } catch (e) {}
+      try { await D.fetchTimed('/api/logout', { method: 'POST', credentials: 'same-origin' }, 8000); } catch (e) {}
       try { localStorage.removeItem(LS_KEY); localStorage.removeItem(UI_KEY); } catch (e) {}
       D.device.uid = ''; D.device.name = ''; D.saveDevice();
       D.me = null;
@@ -1316,14 +1779,18 @@
     document.documentElement.lang = D.lang() === 'ru' ? 'ru' : 'uz';
     D.theme.apply();
     if (D.tg) { try { D.tg.ready(); D.tg.expand(); if (D.tg.disableVerticalSwipes) D.tg.disableVerticalSwipes(); } catch (e) {} }
-    const hash = location.hash.replace('#', '');
+    const [hash, hashSub] = location.hash.replace('#', '').split('/');
+    const boot0 = resolveView(hash, hashSub);
     const empty = !Object.keys(D.S.logs).length && !D.S.habits.length && !D.S.tasks.length && !D.S.finance.tx.length;
     D.loading = empty && D.serverEnabled();
-    D.go(D.views[hash] ? hash : D.ui.view);
+    // Birinchi manzil tarixga YANGI yozuv qo'shmaydi: qo'shsa, ilova ochilishi
+    // bilan bitta «o'lik» orqaga bosish paydo bo'lardi (u hech qayerga olib
+    // bormaydi, chunki ikkala yozuv ham bir xil sahifa).
+    D.go(boot0 ? boot0[0] : D.ui.view, boot0 ? boot0[1] : undefined, { fromHistory: true });
     D.setSync(D.serverEnabled() ? 'wait' : 'local');
     if (D._corrupt) D.toast(D.t('data.corrupt'), { ms: 6000 });
     D.pull().finally(() => { if (D.loading) { D.loading = false; D.rerender(); } });
-    // header clock / day rollover
+    // soat / kun almashuvi
     let lastDay = D.today();
     setInterval(() => {
       const k = D.today();
@@ -1332,7 +1799,22 @@
     }, 30 * 1000);
     window.addEventListener('focus', () => { if (D.serverEnabled()) D.pull(); });
     document.addEventListener('visibilitychange', () => { if (!document.hidden) D.emit('tick'); });
-    window.addEventListener('hashchange', () => { const h = location.hash.replace('#', ''); if (D.views[h] && h !== current) D.go(h); });
+    // Orqaga / oldinga — tarixdan kelgan chaqiruv, shuning uchun yangi yozuv qo'shilmaydi
+    window.addEventListener('hashchange', () => {
+      const [h, sb] = location.hash.replace('#', '').split('/');
+      const r = resolveView(h, sb);
+      if (!r) return;
+      const sub = r[1];
+      if (r[0] !== current || (sub && D.ui.sub[r[0]] !== sub)) D.go(r[0], sub, { fromHistory: true });
+    });
     D.emit('boot');
+    // Birinchi ekran chizilib bo'ldi — endi bo'sh vaqtda qolgan bo'limlarni olib qo'yamiz.
+    const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 1500));
+    // Ikki kadr kutamiz: requestIdleCallback bo'sh oqimda BIRINCHI CHIZISHDAN OLDIN ham
+    // ishga tushishi mumkin, va o'shanda kechiktirilgan fayllar aynan chizishni kechiktiradi.
+    // O'lchandi: shu qator qo'shilmasa, kechiktirish yutuq o'rniga ~300 ms zarar berardi.
+    requestAnimationFrame(() => requestAnimationFrame(() => idle(() => D.preloadViews(), { timeout: 4000 })));
+    // Tezlik o'lchagichi — faqat so'ralganda. Oddiy ochilishda bu fayl so'ralmaydi.
+    if (PERF) D.loadScript('js/perf.js' + VQ);
   };
 })();

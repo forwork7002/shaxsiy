@@ -9,7 +9,7 @@
 # =====================================================================
 set -euo pipefail
 HOST="${1:-}"; CMD="${2:-door}"; WHO="${3:-}"
-[ -z "$HOST" ] && { echo "Foydalanish: $0 root@SERVER_IP [pass Ism | list]"; exit 1; }
+[ -z "$HOST" ] && { echo "Foydalanish: $0 root@SERVER_IP [door | list | pass <email> | del <email>]"; exit 1; }
 APP="${SHAXSIY_APP:-/opt/shaxsiy}"
 
 # remote_py "<python manbasi>" ["<keyin bajariladigan buyruq>"] — stdin python'ga o'tadi
@@ -23,8 +23,9 @@ import json, pathlib, sys
 f = pathlib.Path(sys.argv[1]) / 'data/users.json'
 d = json.loads(f.read_text()) if f.exists() else {}
 print("Ro'yxatdan o'tganlar:", len(d))
-for r in d.values():
-    print(' ', r['name'], '->', r['uid'], r.get('createdAt', '')[:10])
+for k, r in d.items():
+    door = 'google' if not r.get('hash') else 'parol'
+    print(' ', k, '->', r['uid'], r.get('createdAt', '')[:10], door)
 PY
 )
 
@@ -54,6 +55,26 @@ print('MA_REGISTER=' + reg, '| MA_INVITE:', ('%d belgi' % len(inv)) if inv else 
 PY
 )
 
+PY_DEL=$(cat <<'PY'
+import json, pathlib, sys
+who = sys.stdin.readline().strip().lower()
+app = pathlib.Path(sys.argv[1])
+f = app / 'data/users.json'
+d = json.loads(f.read_text()) if f.exists() else {}
+rec = d.pop(who, None) or d.pop(who.casefold(), None)
+if not rec:
+    sys.exit("Bunday hisob yo'q: " + who)
+f.write_text(json.dumps(d, ensure_ascii=False, indent=1)); f.chmod(0o600)
+uid = rec['uid']
+moved = []
+for p in sorted((app / 'data').glob(uid + '.*')):
+    p.rename(p.with_name(p.name + '.deleted'))
+    moved.append(p.name)
+print("\u2713 hisob o'chirildi:", who, '->', uid)
+print('  fayllar saqlanib qoldi (.deleted):', ', '.join(moved) or "yo'q")
+PY
+)
+
 case "$CMD" in
   list)
     remote_py "$PY_LIST" < /dev/null
@@ -63,6 +84,12 @@ case "$CMD" in
     printf 'Yangi parol %s uchun (ko'"'"'rinmaydi): ' "$WHO"; read -rs PW; echo
     [ "${#PW}" -lt 6 ] && { echo "Parol kamida 6 ta belgi"; exit 1; }
     printf '%s\n%s\n' "$WHO" "$PW" | remote_py "$PY_PASS"
+    ;;
+  del)
+    [ -z "$WHO" ] && { echo "Kimni? $0 $HOST del <email>"; exit 1; }
+    printf "Hisob va uning ma'lumotlari o'chiriladi: %s\nDavom etamizmi? [ha/yo'q]: " "$WHO"
+    read -r YN; [ "$YN" = "ha" ] || { echo "Bekor qilindi"; exit 1; }
+    printf '%s\n' "$WHO" | remote_py "$PY_DEL"
     ;;
   door)
     echo "Hisob ochish eshigi:"

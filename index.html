@@ -12,76 +12,63 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="app.css">
-<link rel="stylesheet" href="css/sections.css">
-<link rel="stylesheet" href="css/ai.css">
-<link rel="stylesheet" href="css/whoop.css">
-<link rel="stylesheet" href="css/profile.css">
-<link rel="stylesheet" href="css/today.css">
-<link rel="stylesheet" href="css/tasks.css">
-<link rel="stylesheet" href="css/health.css">
-<link rel="stylesheet" href="css/finance.css">
-<link rel="stylesheet" href="css/ibodat.css">
-<link rel="stylesheet" href="css/nova.css">
-<link rel="stylesheet" href="css/food.css">
-<link rel="stylesheet" href="css/settings.css">
-<link rel="stylesheet" href="css/history.css">
-<link rel="stylesheet" href="css/onboard.css">
-<link rel="stylesheet" href="css/yusa.css">
+<link rel="preload" as="font" type="font/woff2" href="fonts/plex-sans-cyrillic.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/plex-sans-latin.woff2" crossorigin>
+<link rel="stylesheet" href="css/fonts.css?v=v74">
+<link rel="stylesheet" href="app.css?v=v74">
+<link rel="stylesheet" href="css/sections.css?v=v74">
+<link rel="stylesheet" href="css/ai.css?v=v74">
+<link rel="stylesheet" href="css/whoop.css?v=v74">
+<link rel="stylesheet" href="css/profile.css?v=v74">
+<link rel="stylesheet" href="css/today.css?v=v74">
+<link rel="stylesheet" href="css/tasks.css?v=v74">
+<link rel="stylesheet" href="css/books.css?v=v74">
+<link rel="stylesheet" href="css/habits.css?v=v74">
+<link rel="stylesheet" href="css/health.css?v=v74">
+<link rel="stylesheet" href="css/finance.css?v=v74">
+<link rel="stylesheet" href="css/ibodat.css?v=v74">
+<link rel="stylesheet" href="css/yusa.css?v=v74">
+<link rel="stylesheet" href="css/food.css?v=v74">
+<link rel="stylesheet" href="css/settings.css?v=v74">
+<link rel="stylesheet" href="css/onboard.css?v=v74">
+<link rel="stylesheet" href="css/yusa-orb.css?v=v74">
 </head>
 <body>
 <div class="app">
   <aside class="side" id="sideWrap">
-    <div class="side-brand"><h1 class="dash-title">Shaxsiy</h1></div>
+    <div class="side-brand"><h1 class="dash-title" id="sideTitle">Shaxsiy</h1></div>
     <nav id="side" aria-label="Sections"></nav>
   </aside>
   <div class="main">
-    <header class="header" id="header">
-      <span class="sync" id="sync" hidden><span class="sync-dot" id="syncDot"></span><span class="sync-txt" id="syncTxt"></span></span>
-      <div class="h-actions">
-        <button class="h-btn" data-act="openSearch" aria-label="Search" title="Ctrl+K"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
-        <button class="h-btn" data-act="toggleTheme" aria-label="Theme" id="themeBtn"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg></button>
-        <button class="h-btn h-avatar" id="hAvatar" data-act="openProfile" aria-label="Profil" hidden></button>
-      </div>
-    </header>
+    <header class="top" id="top"></header>
     <main class="page" id="view" aria-live="polite"></main>
   </div>
 </div>
 
-<div class="more" id="more"></div>
 <nav class="nav" id="nav" aria-label="Main tabs"></nav>
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
 
 <div class="modal-bg" id="modalBg"></div>
 <div class="toast" id="toast" role="status"></div>
-<div class="palette" id="palette">
-  <div class="pal">
-    <input class="inp" id="paletteInp" data-input="palInput" placeholder="Qidirish… (Ctrl+K)" autocomplete="off">
-    <div class="pal-res" id="paletteRes"></div>
-  </div>
-</div>
-
-<script defer src="js/core.js"></script>
-<script defer src="js/i18n.js"></script>
-<script defer src="js/prayer.js"></script>
-<script defer src="js/ai.js"></script>
-<script defer src="js/whoop.js"></script>
-<script defer src="js/profile.js"></script>
-<script defer src="js/today.js"></script>
-<script defer src="js/tasks.js"></script>
-<script defer src="js/health.js"></script>
-<script defer src="js/finance.js"></script>
-<script defer src="js/ibodat.js"></script>
-<script defer src="js/nova.js"></script>
-<script defer src="js/food.js"></script>
-<script defer src="js/settings.js"></script>
-<script defer src="js/history.js"></script>
-<script defer src="js/onboard.js"></script>
-<script defer src="js/yusa.js"></script>
-<script defer src="js/app.js"></script>
+<!-- Bu yerda atigi ettita fayl bor. Qolgani birinchi ekranga umuman tegmaydi:
+     core.js ularni stub sifatida ro'yxatga oladi (Moliya, Vazifa, Yusa AI, Sozlash,
+     Sog'liq, Ibodat) yoki oddiy fayl sifatida biladi (ai, profile, onboard, yusa-orb), va
+     birinchi render'dan keyin bo'sh vaqtda bittalab yuklaydi. O'lchandi: birinchi chizishga
+     kerak bo'lgan JS 485 KB dan tushdi. Bu yerga yangi <script> qo'shishdan oldin o'ylang —
+     u har ochilishda hammaning telefonida o'qiladi. -->
+<script defer src="js/core.js?v=v74"></script>
+<script defer src="js/i18n.js?v=v74"></script>
+<script defer src="js/prayer.js?v=v74"></script>
+<script defer src="js/ai.js?v=v74"></script>
+<script defer src="js/whoop.js?v=v74"></script>
+<script defer src="js/profile.js?v=v74"></script>
+<script defer src="js/today.js?v=v74"></script>
+<script defer src="js/health.js?v=v74"></script>
+<script defer src="js/ibodat.js?v=v74"></script>
+<script defer src="js/food.js?v=v74"></script>
+<script defer src="js/onboard.js?v=v74"></script>
+<script defer src="js/yusa-orb.js?v=v74"></script>
+<script defer src="js/app.js?v=v74"></script>
 </body>
 </html>

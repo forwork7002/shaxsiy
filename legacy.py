@@ -62,7 +62,7 @@ def default_state() -> dict:
         'gym': {'gyms': [], 'days': [], 'exercises': [], 'logs': {}, 'done': {}, 'split': {'names': [], 'anchor': None}},
         'finance': {'tx': [], 'cats': [], 'budgets': {}, 'accounts': [], 'subs': [], 'snapshots': [], 'wishlist': []},
         'learn': [], 'reviews': [],
-        'nova': {'threads': []},
+        'yusa': {'threads': []},
         'ai': {'cards': {}, 'log': []},
         'whoop': {'connected': False, 'lastSync': None, 'cache': {}, 'days': {}, 'workouts': [], 'body': {}},
     }
@@ -252,7 +252,7 @@ def _union_by_id(a, b) -> list:
 
 def _empty_blob(b) -> bool:
     return not isinstance(b, dict) or not b or not any(
-        b.get(k) for k in ID_LISTS + DATE_MAPS + ['finance', 'gym', 'nova', 'caffeine', 'stack'])
+        b.get(k) for k in ID_LISTS + DATE_MAPS + ['finance', 'gym', 'yusa', 'caffeine', 'stack'])
 
 
 def merge_into(existing, migrated) -> dict:

@@ -1,0 +1,185 @@
+/* ==== today ==== */
+/* date stepper */
+
+/* day card: ring + prayers */
+
+/* habits */
+.td-hab-emoji { display: inline-block; width: 22px; margin-right: 4px; font-size: 15px; line-height: 1; text-align: center; vertical-align: -1px; }
+.td-step { display: flex; align-items: center; gap: 2px; flex: none; }
+.td-step-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line2); background: var(--glass); color: var(--text); display: inline-flex; align-items: center; justify-content: center; transition: background .15s; }
+.td-step-btn:hover { background: var(--hover); }
+.td-step-val { min-width: 42px; text-align: center; font-weight: 700; color: var(--text); font-size: 13px; }
+.td-step-val small { color: var(--text3); font-weight: 600; font-size: 11px; }
+
+/* tasks */
+.td-add { margin-top: 10px; }
+.td-add .btn.sq { width: 44px; height: 44px; }
+
+/* quick strip */
+
+/* note */
+
+/* gratitude */
+.td-insp { padding: 10px 12px; margin-bottom: 10px; border-radius: var(--r-sm); border: 1px dashed var(--line2); background: linear-gradient(135deg, color-mix(in srgb, var(--qalb) 10%, transparent), transparent 70%); }
+.td-insp .eyebrow { display: flex; align-items: center; gap: 4px; }
+.td-insp-text { font-size: 13.5px; color: var(--text2); margin-top: 4px; line-height: 1.45; overflow-wrap: anywhere; }
+.td-grat-ic { color: var(--qalb); display: inline-flex; margin-top: 3px; flex: none; }
+
+/* ---- Bugun: fokus ro'yxati (28 ta odat devori o'rniga) ---- */
+.td-more { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 42px; margin-top: 6px;
+  border: 1px dashed var(--line2); border-radius: var(--r-sm); background: transparent; color: var(--text3);
+  font-size: 12px; font-weight: 700; letter-spacing: .01em; transition: color .18s, border-color .18s, background .18s; }
+.td-more:hover { color: var(--text); border-color: var(--line3); background: var(--glass); border-style: solid; }
+.td-more .ic { transition: transform .22s var(--ease-out); }
+.td-more.open .ic { transform: rotate(180deg); }
+
+/* hero uses the section accent, so the old flat card look goes away */
+
+/* qaza reminder — a debt you cannot see is a debt you never repay */
+
+/* ==================================================================== */
+/* Bugun 2.0 — tepada bitta katta raqam, ostida uchta kontekstli KPI     */
+/* ==================================================================== */
+
+/* --- tayyorlik hero (WHOOP tiklanishi) --- */
+.td-ready { --z: var(--line3); cursor: pointer; padding: 16px 16px 14px; transition: border-color .2s, transform .1s; }
+.td-ready:active { transform: scale(.995); }
+.td-ready.z-good { --z: var(--success); }
+.td-ready.z-warn { --z: var(--warning); }
+.td-ready.z-bad  { --z: var(--danger-text); }
+/* Karta oddiy karta bo'lib qoladi — zona rangi yoyda va holat so'zida.
+   Ilgari fon ham, chegara ham zonaga bo'yalardi: uchta rang bitta gapni
+   uch marta aytardi va karta qolganlaridan boshqacha ko'rinardi. */
+
+.td-ready-state { font-size: 19px; font-weight: 700; letter-spacing: .01em; line-height: 1.1; margin-top: 5px; color: var(--z); }
+.td-fresh { font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--text4); margin-left: 5px; }
+.td-fresh.stale { color: var(--warning); }
+
+/* uch ustunli KPI qatori — har birida raqam va SHAXSIY o'rtachadan farq */
+.td-kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 14px; padding-top: 13px; border-top: 1px solid var(--line); }
+.td-kpi { --c: var(--text3); display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.td-kpi.z-good { --c: var(--success); }
+.td-kpi.z-warn { --c: var(--warning); }
+.td-kpi.z-bad  { --c: var(--danger-text); }
+.td-kpi-lab { font-size: 9.5px; font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--text3);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.td-kpi-val { font-size: 20px; font-weight: 700; letter-spacing: -.03em; color: var(--text); line-height: 1.05; overflow-wrap: anywhere; }
+.td-kpi-val small { font-size: 11px; color: var(--text3); font-weight: 600; margin-left: 1px; }
+/* Davomiylik «7 soat 12 daq» ko'rinishida keladi — mono shrift bunga juda keng va
+   qiymatni ikki qatorga bo'lib yuboradi, shuning uchun bu yerda proporsional shrift. */
+.td-kpi-val.dur { font-family: var(--font); font-size: 15px; line-height: 1.2; letter-spacing: -.015em; }
+.td-kpi-d { font-size: 11px; font-weight: 700; color: var(--c); line-height: 1.3; overflow-wrap: anywhere; }
+@media (max-width: 380px) {
+  .td-ready-top { gap: 12px; }
+  .td-ready-state { font-size: 17px; }
+  .td-kpi-val { font-size: 18px; }
+  .td-kpi-val.dur { font-size: 13.5px; }
+  .td-kpis { gap: 6px; }
+}
+
+/* --- kun chizig'i: uyg'onishdan uyquga bitta ingichka qator --- */
+
+/* --- namoz kartasi --- */
+
+/* --- xulosa plitkalari: to'rtta, kengda bir qatorda --- */
+
+/* --- fokus ro'yxati: odat + vazifa bitta joyda --- */
+/* kechikkanlar ogohlantirishi: bitta qator, bitta raqam, bitta tugma */
+
+/* --- kun yakuni: izoh + shukr --- */
+.td-wrap-sep { height: 1px; margin: 16px 0 14px; background: var(--line); }
+.td-wrap-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.td-wrap-head .title { flex: 1; min-width: 0; }
+
+/* ---------------------------------------------------------------------
+   KUN RO'YXATI — namoz, odat, suv va vazifa bitta ro'yxatda.
+   Har qatorda chap chekkada rangli nuqta turini aytadi, yonida belgi,
+   o'ngda vaqt yoki hisob. Qator butunlay bosiladi: telefonda kichkina
+   kvadratni topish emas, barmoq tushgan joy ishlashi kerak.
+   --------------------------------------------------------------------- */
+.td-day { padding: 16px 16px 10px; }
+.td-day-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 6px; }
+.td-day-title { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+.td-day-prog { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text3); }
+.td-day-bar { width: 52px; }
+.td-day-bar .bar-fill { background: var(--accent); }
+.td-day.all-done .td-day-bar .bar-fill { background: var(--success); }
+
+.td-rows { display: flex; flex-direction: column; }
+.td-row { display: flex; align-items: center; gap: 11px; width: 100%; padding: 11px 0; border: 0; border-top: 1px solid var(--line);
+  background: transparent; color: var(--text); text-align: left; font: inherit; }
+.td-row:first-child { border-top: 0; }
+.td-kind { flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--track, var(--line3)); }
+.td-row.k-namoz .td-kind { background: var(--success); }
+.td-row.k-odat  .td-kind { background: var(--ruh); }
+.td-row.k-suv   .td-kind { background: var(--info); }
+.td-row.k-ish   .td-kind { background: var(--accent); }
+.td-row.k-kitob .td-kind { background: var(--warning); }
+.td-tick { flex: none; width: 24px; height: 24px; border-radius: 9px; border: 1.6px solid var(--line2); display: grid; place-items: center;
+  color: transparent; transition: background .14s, border-color .14s, color .14s; }
+.td-row.done .td-tick { background: var(--accent); border-color: var(--accent); color: var(--ink-on-light); }
+.td-row.k-namoz.done .td-tick { background: var(--success); border-color: var(--success); }
+.td-row-body { flex: 1; min-width: 0; }
+.td-row-name { display: block; font-size: 14.5px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-row.done .td-row-name { color: var(--text3); text-decoration: line-through; text-decoration-color: var(--line3); }
+.td-row-sub { display: block; font-size: 11.5px; color: var(--text3); margin-top: 1px; }
+.td-row-right { flex: none; display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 500; color: var(--text2); }
+.td-row-n small { color: var(--text3); font-weight: 400; }
+.td-row-plus { width: 30px; height: 30px; border-radius: 10px; border: 1px solid var(--line2); background: var(--inset); color: var(--text2);
+  display: grid; place-items: center; }
+.td-row-plus:active { background: var(--hover); color: var(--text); }
+.td-row:active .td-tick { transform: scale(.92); }
+
+/* Kun yakuni — ro'yxat ostidagi bitta qator, pastki oynani ochadi */
+/* Ro'yxat ostidagi uchta jimgina qator — to'liq sahifalarga eshik.
+   Telefonda pastki panelda ular uchun joy yo'q (to'rtta yorliq va kamera),
+   shuning uchun kirish shu yerdan: ro'yxatning aynan o'zidan, u yerda
+   vazifa ham, kitob ham qator bo'lib turibdi. */
+.td-links { border-top: 1px solid var(--line); margin-top: 4px; }
+.td-link { display: flex; align-items: center; gap: 9px; width: 100%; padding: 11px 0; border: 0; border-top: 1px solid var(--line);
+  background: transparent; color: var(--text3); font-size: 13.5px; font-weight: 500; text-align: left; }
+.td-link:first-child { border-top: 0; }
+.td-link span { flex: 1; }
+.td-link:active { color: var(--text); }
+.td-wrap-count { text-align: right; margin-top: 4px; }
+
+/* Ikkita raqam — kun oxirida qaraladigani */
+.td-strip2 { display: flex; gap: 10px; }
+.td-strip2-item { flex: 1; display: flex; flex-direction: column; gap: 2px; padding: 13px 14px; border-radius: var(--r-sm);
+  border: 1px solid var(--line); background: var(--card-bg); color: var(--text); text-align: left; }
+.td-strip2-item:active { background: var(--hover); }
+.td-strip2-val { font-size: 16px; font-weight: 600; letter-spacing: -.01em; }
+.td-strip2-val small { font-size: 11px; color: var(--text3); font-weight: 400; }
+.td-strip2-lab { font-size: 11px; color: var(--text3); }
+
+/* Tayyorlik kartasi — yoy markazda, ostida holat va maslahat */
+.td-ready { position: relative; text-align: center; padding: 16px 16px 14px; }
+.td-ready-eyebrow { display: block; text-align: left; }
+.td-ready .arc-cap { line-height: 1.45; }
+.td-ready .td-kpis { margin-top: 14px; }
+.td-ready .arc-num small { font-size: 15px; color: var(--text3); font-weight: 500; }
+/* Soat ulanmagan kun: zona rangi yo'q, shuning uchun kartaga iliq urg'u beriladi */
+.td-ready.td-day-arc { --z: var(--accent); }
+
+/* Uyqu qarzi — hero ostidagi bitta jimgina qator. Ilgari bu sinfga hech qanday
+   qoida yo'q edi: qator KPI larning tagiga 14px matn bo'lib yopishib qolardi. */
+.td-hero-foot { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 12px; padding-top: 10px;
+  border-top: 1px solid var(--line); font-size: 11.5px; color: var(--text3); }
+.td-hero-foot .ic { color: var(--text3); flex: none; }
+
+/* ---------------------------------------------------------------------
+   HAFTA CHIZIG'I — yetti kun bir qatorda, sahifaning eng tepasida.
+   Kartaga o'ralmagan: u sahifaning boshqaruvi, mazmuni emas.
+   --------------------------------------------------------------------- */
+.td-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 14px; }
+.td-wd { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 9px 0 7px; border: 1px solid transparent;
+  border-radius: var(--r-sm); background: transparent; color: var(--text3); }
+.td-wd-l { font-size: 10px; font-weight: 500; letter-spacing: .02em; }
+.td-wd-n { font-size: 15px; font-weight: 600; color: var(--text2); line-height: 1.1; }
+.td-wd-dot { width: 4px; height: 4px; border-radius: 50%; background: transparent; }
+.td-wd-dot.on { background: var(--text4); }
+.td-wd.today .td-wd-n { color: var(--text); }
+.td-wd.on { background: var(--accent); border-color: var(--accent); }
+.td-wd.on .td-wd-l, .td-wd.on .td-wd-n { color: var(--ink-on-light); }
+.td-wd.on .td-wd-dot.on { background: var(--ink-on-light); opacity: .7; }
+.td-wd[disabled] { opacity: .3; }

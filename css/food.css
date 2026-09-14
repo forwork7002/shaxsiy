@@ -1,6 +1,5 @@
 /* ==== food (Ovqat) ==== prefix fd-, tokens only, 360 px ga sig'adi
    Tartib: kun xulosasi (halqa + 3 makro) → rasm tugmasi → tahlil → taomlar → 7 kun */
-.fd-nav .fd-return { border: 0; background: transparent; color: var(--info); font-size: 11px; font-weight: 700; padding: 0; cursor: pointer; }
 .fd-extra .sep, .fd-part .sep, .fd-day-n .sep { color: var(--text3); margin: 0 5px; }
 
 /* ---- kun xulosasi: chapda kkal halqasi, o'ngda bitta oddiy jumla ---- */
@@ -9,12 +8,23 @@
 .fd-hero .ring-pct { font-size: 21px; }
 .fd-hero .ring-sub { font-size: 11px; color: var(--text3); font-weight: 600; }
 .fd-hero-side { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
-.fd-hero-lab { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); }
+.fd-hero-lab { font-size: 10.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); }
 .fd-hero-msg { font-size: 14.5px; font-weight: 700; color: var(--text); line-height: 1.3; overflow-wrap: anywhere; }
 .fd-hero-msg.bad { color: var(--danger-text); }
 .fd-hero-burn { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text3); }
 .fd-hero-burn .ic { color: var(--warning); flex: none; }
 .fd-tgt { margin-top: 2px; }
+
+/* me'yor oynasi: bir qator matn, ostida to'rtta raqam */
+.fd-tg-prev { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
+.fd-tg-chip { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 9px 4px; border-radius: var(--r-xs); border: 1px solid transparent; background: var(--inset); text-align: center; min-width: 0; }
+.fd-tg-chip .lab { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text3); }
+.fd-tg-chip .num { font-size: 16px; font-weight: 700; color: var(--text2); }
+.fd-tg-chip .u { font-size: 10px; color: var(--text3); margin-top: -2px; }
+/* aynan siz aytgan raqam ajralib tursin — qolgani undan hisoblangani */
+.fd-tg-chip.said { border-color: var(--line3); }
+.fd-tg-chip.said .num { color: var(--accent); }
+.fd-tg-auto { margin-top: 10px; }
 
 /* ---- uchta makro: bir xil og'irlikda, uchtasi ham bir xil ko'rinishda ----
    chiziqli variant — kun me'yoriga nisbatan; nuqtali (flat) — bitta taom uchun */
@@ -22,36 +32,98 @@
 .fd-macros-flat .fd-macro-val { margin-bottom: 0; }
 .fd-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 .fd-macro { min-width: 0; }
-.fd-macro-lab { font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fd-macro-lab { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fd-macro-val { font-size: 15px; font-weight: 700; color: var(--text); margin: 1px 0 5px; white-space: nowrap; }
 .fd-macro-val small { font-size: 11px; font-weight: 600; color: var(--text3); }
 
 /* tola · shakar · tuz — AI bergan bo'lsa bitta jimgina qator */
 .fd-extra { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--text3); }
-.fd-extra b { font-family: var(--mono); color: var(--text2); font-weight: 700; }
+.fd-extra b { font-family: var(--num); color: var(--text2); font-weight: 700; }
 
-/* ---- rasm tugmasi: bo'limning asosiy ishi ---- */
+/* ---- suv: bitta qator, ikkita tugma ----
+   Suv ilgari Asosiy sahifada turardi va o'sha sahifadagi yagona bosiladigan
+   narsa bo'lib qolgandi. U ham ichiladigan narsa — shuning uchun kkal bilan
+   bir sahifada, xulosa ostida. Bitta qator: nomi, chizig'i, hisobi va
+   ikkita tugma. Karta balandligi qasddan past — bu sahifaning asosiy ishi
+   emas, kamera ostidan siljib ketmasligi kerak. */
+.fd-water { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
+.fd-water-ic { flex: none; display: inline-flex; color: var(--info); }
+.fd-water-l { flex: none; font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
+.fd-water-bar { flex: 1; min-width: 24px; }
+.fd-water-bar .bar-fill { background: var(--info); }
+.fd-water.full .fd-water-bar .bar-fill { background: var(--success); }
+.fd-water-n { flex: none; font-size: 13px; font-weight: 700; color: var(--text); }
+.fd-water-n small { font-size: 11px; font-weight: 500; color: var(--text3); }
+.fd-water.full .fd-water-n { color: var(--success); }
+.fd-water-b { flex: none; width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line2);
+  background: var(--inset); color: var(--text2); display: grid; place-items: center; transition: background .15s, color .15s; }
+.fd-water-b:active { background: var(--hover); color: var(--text); }
+.fd-water-b[disabled] { opacity: .35; }
+@media (max-width: 360px) { .fd-water { gap: 7px; padding: 10px; } .fd-water-b { width: 32px; height: 32px; } }
+
+/* ---- rasm tugmasi: bo'limning asosiy ishi ----
+   Bo'lim rangi qattiq plita bo'lib emas, shisha bo'lib keladi: karta fonining
+   ustida bo'lim rangi tiniq qatlam sifatida yotadi, yuqori qirrasi yorug',
+   zatvor doirasi orqasida yumshoq nur, chetida rangli shu'la. Til `.hero`
+   bilan bir xil (sections.css) — o'sha yerdagi rang aralashtirish usuli.
+
+   #view va :not() lar bejiz emas: sections.css dagi
+   `#view .btn:not(.ghost):not(.danger):not(.icon)` shu tugmaning fonini
+   bosib ketadi, shuning uchun bu yerda aynan shu og'irlik takrorlanadi.
+   Yozuv rangi ham qaytariladi — shisha ustida qora siyoh o'qilmaydi. */
 .fd-cap { padding: 12px; }
-.fd-shot { height: 52px; font-size: 14px; cursor: pointer; }
+.fd-shot { height: 56px; gap: 11px; font-size: 14.5px; border-radius: var(--r); cursor: pointer;
+  position: relative; overflow: hidden; }
+#view .fd-shot:not(.ghost):not(.danger):not(.icon) { color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--sec) 42%, var(--card-line));
+  background:
+    linear-gradient(205deg, color-mix(in srgb, var(--sec) 32%, transparent) 0%, color-mix(in srgb, var(--sec) 11%, transparent) 46%, transparent 78%),
+    var(--card-solid);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.30), 0 12px 30px rgba(0,0,0,.40),
+    0 0 34px -12px color-mix(in srgb, var(--sec) 70%, transparent); }
+[data-theme="light"] #view .fd-shot:not(.ghost):not(.danger):not(.icon) { color: var(--text);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 10px 24px rgba(46,42,36,.10),
+    0 0 30px -12px color-mix(in srgb, var(--sec) 50%, transparent); }
+/* zatvor orqasidagi nur — doira shishaning ichida yoritilgandek turadi */
+.fd-shot::after { content: ''; position: absolute; left: 4px; top: 50%; width: 150px; height: 150px; margin-top: -75px;
+  border-radius: 50%; pointer-events: none; filter: blur(24px);
+  background: radial-gradient(circle, color-mix(in srgb, var(--sec) 34%, transparent), transparent 70%); }
+.fd-shot > span { position: relative; z-index: 1; }
+.fd-shot .fd-lens { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
+  background: radial-gradient(circle at 36% 26%, rgba(255,255,255,.24), rgba(255,255,255,.03) 62%), rgba(0,0,0,.30);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.32), inset 0 0 0 1px rgba(255,255,255,.11), 0 1px 3px rgba(0,0,0,.4);
+  transition: transform .18s var(--ease-spring), box-shadow .18s; }
+.fd-shot:hover .fd-lens { box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 0 0 1px rgba(255,255,255,.2), 0 1px 3px rgba(0,0,0,.4); }
+.fd-shot:active .fd-lens { transform: scale(.86); }
 .fd-shot .ic { flex: none; }
+[data-theme="light"] .fd-shot .fd-lens { background: radial-gradient(circle at 36% 26%, rgba(255,255,255,.95), rgba(255,255,255,.4) 62%), color-mix(in srgb, var(--sec) 12%, transparent);
+  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px color-mix(in srgb, var(--sec) 26%, transparent), 0 1px 3px color-mix(in srgb, var(--sec) 20%, transparent); }
+@media (prefers-reduced-motion: reduce) { .fd-shot .fd-lens { transition: none; } .fd-shot:active .fd-lens { transform: none; } }
 .fd-cap-row { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
 .fd-cap-row .fd-text { flex: 1; min-width: 0; }
 .fd-cap-row label.btn { cursor: pointer; }
-.fd-cap-row .fd-send { color: var(--ink-on-light); }
+/* «tahlil» tugmasi ham shu shishadan — aks holda kichkina qattiq kvadrat
+   o'zidan kattaroq asosiy tugmadan balandroq qichqiradi */
+#view .fd-send:not(.ghost):not(.danger):not(.icon) { color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--sec) 34%, var(--card-line));
+  background: linear-gradient(150deg, color-mix(in srgb, var(--sec) 22%, transparent), color-mix(in srgb, var(--sec) 7%, transparent) 70%), var(--card-solid);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 4px 14px rgba(0,0,0,.30); }
+[data-theme="light"] #view .fd-send:not(.ghost):not(.danger):not(.icon) { color: var(--text);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 4px 12px rgba(46,42,36,.08); }
 @media (max-width: 380px) { .fd-cap { padding: 10px; } .fd-cap-row { gap: 5px; } .fd-cap-row .btn.sq { width: 38px; height: 38px; } }
 
 /* ---- tahlil: rasm → nom → katta kkal → makrolar → tarkib → bitta maslahat ---- */
 .fd-busy-row { display: flex; align-items: center; gap: 10px; color: var(--text3); font-size: 13.5px; padding: 6px 0; }
 .fd-busy-row .ic { color: var(--violet); animation: aiPulse 1.4s ease-in-out infinite; }
 .fd-preview { width: 100%; max-height: 170px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--line); margin-bottom: 10px; display: block; }
-.fd-res-eyebrow { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+.fd-res-eyebrow { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
 .fd-res-eyebrow .ic { color: var(--violet); }
 .fd-res-name { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3; overflow-wrap: anywhere; }
 .fd-rough { font-size: 11px; font-weight: 600; color: var(--text3); white-space: nowrap; }
 .fd-big { display: flex; align-items: baseline; gap: 6px; margin: 4px 0 12px; }
-.fd-big b { font-family: var(--mono); font-size: 30px; font-weight: 700; color: var(--text); line-height: 1.1; }
+.fd-big b { font-family: var(--num); font-size: 30px; font-weight: 700; color: var(--text); line-height: 1.1; }
 .fd-big span { font-size: 13px; color: var(--text3); font-weight: 600; }
-.fd-big-g { margin-left: auto; font-family: var(--mono); }
+.fd-big-g { margin-left: auto; font-family: var(--num); }
 .fd-parts { margin-top: 12px; padding-top: 4px; border-top: 1px solid var(--line); }
 .fd-part { display: flex; gap: 10px; align-items: baseline; font-size: 12.5px; color: var(--text2); padding: 6px 0; border-bottom: 1px solid var(--line); }
 .fd-part:last-child { border-bottom: 0; }
@@ -79,8 +151,8 @@
 .fd-day:hover { background: var(--hover); }
 .fd-day.on { background: var(--inset); color: var(--text); font-weight: 700; }
 .fd-day-n { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fd-day-k { font-family: var(--mono); white-space: nowrap; min-width: 84px; text-align: right; }
-.fd-day-p { font-family: var(--mono); color: var(--text3); min-width: 42px; text-align: right; white-space: nowrap; font-size: 11.5px; }
+.fd-day-k { font-family: var(--num); white-space: nowrap; min-width: 84px; text-align: right; }
+.fd-day-p { font-family: var(--num); color: var(--text3); min-width: 42px; text-align: right; white-space: nowrap; font-size: 11.5px; }
 
 /* ---- tahrir oynasi ---- */
 .fd-ed-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 10px; }
@@ -90,4 +162,6 @@
 .fd-ed-item:last-child { border-bottom: 0; }
 
 /* ---- Bugun bo'limidagi plitka ---- */
-.fd-tile .val { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Kun xulosasi endi yoy o'lchagichda — yon ustun o'rniga bitta markaz */
+.fd-hero-act { display: flex; justify-content: center; margin-top: 12px; }
