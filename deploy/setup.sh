@@ -48,16 +48,15 @@ if [ ! -f "$APP_DIR/.env" ]; then
   # Sukut bo'yicha YOPIQ: MA_REGISTER yozilmasa ilova hisob ochishni ochiq qoldiradi,
   # ya'ni saytni topgan har kim o'ziga hisob ochardi. Shaxsiy dashboard uchun bu
   # ataylab tanlanadigan narsa — shuning uchun bu yerda 0 bilan boshlanadi.
-  umask 077
+  ( umask 077
   {
     echo "# Bu fayl setup.sh tomonidan yaratildi. To'ldirish uchun deploy/ dagi"
     echo "# set-*.sh skriptlaridan foydalaning (qiymatlar ekranga chiqmaydi)."
     echo "# Hamma sozlama ro'yxati: .env.example"
     echo "MA_REGISTER=0"
-    echo "MA_SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' 
-')"
+    echo "MA_SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -dc 'a-f0-9')"
     echo "PORT=8081"
-  } > "$APP_DIR/.env"
+  } > "$APP_DIR/.env" )
   echo "  ✓ $APP_DIR/.env yaratildi (hisob ochish YOPIQ, sessiya kaliti yozildi)"
 else
   echo "  · mavjud .env tegilmadi"
