@@ -432,3 +432,32 @@
 }
 /* Kengroq ekranda sahifa ham kengayadi — «keng» talabi shu yerda ham. */
 @media (min-width: 960px) { .top, .page { max-width: 960px; } .page.wide { max-width: 1120px; } }
+
+/* ---------------------------------------------------------------------
+   17. RAQAMLAR TEKIS TURSIN — Onest bilan bu majburiy
+
+   Plex raqamlari tug'ilishidan bir xil kenglikda edi, ya'ni `.num` klassi
+   amalda bekor turardi. Onest boshqacha: raqamlari o'nta xil kenglikda
+   (363..665 birlik), demak har yangilanishda ustun sakraydi — soat
+   "19:11" dan "19:12" ga o'tganda butun qator siljiydi.
+
+   Shuning uchun tabular-nums bu yerda KLASSGA emas, BUTUN ILOVAGA
+   beriladi. Sababi oddiy: ilovada `D.fmtNum` 123 joyda chaqiriladi,
+   `.num` esa 164 joyda yozilgan — ikkisi mos kelmaydi, ya'ni klassga
+   tayanish "qaysidir joyda esdan chiqqan" degani. Global qoida esa
+   hech narsani esdan chiqarmaydi.
+
+   Yozuv uchun zarari yo'q: bu asbob paneli, unda raqam jumla ichida
+   emas, ustunda yashaydi.
+   --------------------------------------------------------------------- */
+body, .inp, .sel, .ta, button, input, select, textarea {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Onest'ning vazn o'qi 900 gacha yetadi (Plex'da 700 edi) — eng katta
+   raqamlar shu yangi joyni egallaydi. Faqat ULAR: sarlavha ham 800 ga
+   chiqsa, sahifada ikkita "eng qattiq" narsa paydo bo'ladi va ierarxiya
+   yo'qoladi. Yozuv 700 da qoladi. */
+.hero-num, .kpi-num, .arc-num, .top-title { font-weight: 800; }
+.ring-pct, .wh-ready-num, .stat-num, .td-kpi-val { font-weight: 700; }

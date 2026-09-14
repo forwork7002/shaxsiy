@@ -51,14 +51,33 @@
   --title-grad: linear-gradient(180deg,#FFFFFF 0%,#9AA0A8 130%);
   --wash1: transparent; --wash2: transparent; --wash3: transparent; --grain: transparent;
   --ruh: #4FB8F5; --aql: #16EC06; --qalb: #FF6E8A; --tana: #FF9F1C; --boshqa: #8A9099; --aralash: #8B7BFF;
-  /* Butun ilova — bitta oila: IBM Plex Sans (o'zgaruvchan 100–700, css/fonts.css).
+  /* Butun ilova — bitta oila: Onest (o'zgaruvchan 100–900, css/fonts.css).
      Sarlavha ham, matn ham, raqam ham shundan; farq faqat vazn va o'lchamda.
-     Uch narsa uchun tanlandi: raqamlari o'zidan bir xil kenglikda (ustunlar tekis,
-     "11 daq" da bo'shliq yo'q), kirill bilan lotin bir usta qo'lidan chiqqan
-     (Quicksand'da kirill umuman yo'q edi — sarlavhalar jimgina Nunito'ga qulardi),
-     va mayda yozuv qorong'i fonda ochiq qoladi.
-     Mono endi faqat kodda: u har qurilmada boshqacha edi, raqamlar shu sabab har xil chiqardi. */
-  --font: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+     Ilgari bu yerda IBM Plex Sans turardi va sababi yozilgandi: raqamlari
+     o'zidan bir xil kenglikda, kirill bilan lotin bir ustadan, mayda yozuv
+     ochiq. Hammasi to'g'ri edi, lekin bitta narsa e'tibordan chetda qolgan —
+     O'ZBEK APOSTROFI. Plex'da U+02BB 600 birlik joy egallaydi (1000 birlikli
+     em da), ichidagi belgi esa atigi 118: qolgani bo'sh havo. Bosh harf "O"
+     708 ekanini hisobga olsak, apostrof deyarli bir harf kengligida turadi va
+     "O'zbekiston" ekranda "O ' zbekiston" bo'lib, so'z ikkiga bo'linib
+     ko'rinadi. o' va g' — o'zbek lotinchasining eng ko'p uchraydigan
+     birikmalari (o'z, ko'p, bo'ldi, g'oya, to'liq), ya'ni nuqson deyarli har
+     bir jumlada takrorlanadi. Onest'da o'sha belgi 261 birlik, ikki tomoni
+     teng (68/67) — so'z yaxlit qoladi.
+
+     Almashtirishdan yutqazilgan yagona narsa — Plex raqamlari tug'ilishidan
+     bir xil kenglikda edi, Onest'niki esa yo'q (10 xil kenglik, 363..665).
+     Buning o'rniga Onest'da `tnum` xususiyati bor va u ishlaydi, shuning
+     uchun css/whoop-ui.css da tabular-nums BUTUN ILOVAGA global qilib
+     berilgan — `.num` klassi yozilmagan joylar ham tekis turadi.
+
+     Qo'shimcha yutuq: vazn o'qi 700 emas, 900 gacha — katta raqamlar uchun
+     yangi pog'ona ochildi. x-balandlik ham kattaroq (527 va 516), ya'ni
+     11px li yozuv kichraymadi.
+     Plex zaxirada qoldi: Onest yuklanmasa, matn baribir to'g'ri ko'rinadi.
+     Mono faqat kodda: u har qurilmada boshqacha edi. */
+  --font: "Onest", "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   --num: var(--font);
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
