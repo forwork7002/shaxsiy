@@ -45,13 +45,20 @@ const ASSETS = [
 ];
 // Shriftlar o'z faylimizda. Nomi o'zgarmagunicha mazmuni ham o'zgarmaydi, shuning
 // uchun ular ?v= siz keshlanadi — CSS ham aynan shu manzilni so'raydi.
-// Ikkala oila ham: css/fonts.css ikkalasini e'lon qiladi va qaysi biri ishlatilishi
-// app.css dagi tokenga bog'liq. Offline'da ikkalasi ham tayyor turishi kerak — token
-// o'zgarganda foydalanuvchi internetsiz qolsa, shrift tushib qolmasin.
-// Jami 261 KB, lekin brauzer faqat sahifadagi harflarga mos subsetni so'raydi.
-const FONTS = ['./fonts/plex-sans-latin.woff2', './fonts/plex-sans-latin-ext.woff2',
-  './fonts/plex-sans-cyrillic.woff2', './fonts/plex-sans-cyrillic-ext.woff2',
-  './fonts/onest-latin.woff2', './fonts/onest-latin-ext.woff2',
+// Faqat Onest keshlanadi — ilova shu bilan yoziladi (app.css --font).
+//
+// Nega IBM Plex bu yerda yo'q, garchi u --font da zaxira bo'lib tursa ham:
+// ilovaning o'z matnlarida ishlatiladigan ASCII dan tashqari 104 ta belgi
+// sanab chiqildi va ikkala oila bilan solishtirildi (2026-09-14, fontTools).
+// Natija: Plex Onest qoplamaydigan BIRORTA belgini ham qoplamaydi. Ikkalasida
+// ham yo'q o'n bitta belgi bor (Δ λ φ ₂ → ↔ ≈ ≤ ≥ ⏳ ─) — ular baribir tizim
+// shriftidan keladi. Ya'ni Plex keshda turib hech qachon ishlatilmasdi, lekin
+// har versiyada 130 KB ni majburan tortib, har bir qurilmada joy egallardi.
+// Bir kunda v74 dan v83 gacha chiqqan loyihada bu sezilarli narx.
+// Plex --font stekida va serverda qoladi: internet bo'lsa, Onest yiqilgan
+// taqdirda brauzer uni oladi. Internetsiz zaxira — system-ui, u har doim bor
+// va hech narsa yuklamaydi.
+const FONTS = ['./fonts/onest-latin.woff2', './fonts/onest-latin-ext.woff2',
   './fonts/onest-cyrillic.woff2', './fonts/onest-cyrillic-ext.woff2'];
 const SHELL = [
   './', './index.html', './manifest.json', './icons/icon.svg',
