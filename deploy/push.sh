@@ -65,6 +65,29 @@ else
   echo "▸ OGOHLANTIRISH: sw.js dan CACHE o'qilmadi — ?v= yangilanmadi"
 fi
 
+# ─── ORQAGA QAYTISH TEKSHIRUVI ────────────────────────────────────────
+# Bu loyihada bir nechta klon bor (masalan ~/projects/shaxsiy-f4, u v77
+# lineyasida qotib qolgan). Eski klondan push.sh ishlatilsa jonli sayt
+# jimgina o'nlab versiya orqaga tashlanadi — bugungi buzilishdan ancha
+# yomonroq. Shuning uchun serverdagi versiyani so'raymiz va pastga
+# tushishga yo'l qo'ymaymiz. Ataylab qaytarish kerak bo'lsa (masalan
+# yomon chiqarishni bekor qilish): ALLOW_DOWNGRADE=1.
+if [ -n "$VER" ]; then
+  LIVE="$(ssh "$HOST" "sed -n \"s/^const CACHE = 'dash-v\(.*\)';/\1/p\" $APP_DIR/sw.js" 2>/dev/null || true)"
+  NEWN="${VER#v}"
+  if printf '%s' "$LIVE" | grep -qE '^[0-9]+$' && printf '%s' "$NEWN" | grep -qE '^[0-9]+$'; then
+    if [ "$NEWN" -lt "$LIVE" ] && [ "${ALLOW_DOWNGRADE:-0}" != "1" ]; then
+      echo "✗ TO'XTANG — serverda v$LIVE turibdi, siz v$NEWN yuboryapsiz."
+      echo "    Bu papka eskirgan klon bo'lishi mumkin. Avval: git pull"
+      echo "    Ataylab qaytarish: ALLOW_DOWNGRADE=1 $0 $*"
+      exit 1
+    fi
+    [ "$NEWN" -eq "$LIVE" ] && echo "▸ DIQQAT: serverda ham v$LIVE — sw.js dagi CACHE ko'tarilmagan, brauzer eski keshni beradi"
+  else
+    echo "▸ (serverdagi versiya o'qilmadi — orqaga qaytish tekshirilmadi)"
+  fi
+fi
+
 echo "▸ Yuborilmoqda → $HOST:$APP_DIR"
 tar czf - \
   --exclude='.venv' --exclude='data' --exclude='certs' --exclude='__pycache__' \
