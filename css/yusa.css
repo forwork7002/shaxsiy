@@ -86,7 +86,7 @@
 .yu-chips::-webkit-scrollbar { display: none; }
 .yu-chip { flex: none; min-height: 40px; padding: 8px 12px; cursor: pointer; color: var(--text2); }
 .yu-chip svg { color: var(--success); }
-.yu-chip:hover { background: var(--hover); border-color: var(--line3); color: var(--text); }
+@media (hover: hover) { .yu-chip:hover { background: var(--hover); border-color: var(--line3); color: var(--text); } }
 .yu-chip:disabled { opacity: .5; cursor: default; }
 
 /* composer */
@@ -99,7 +99,7 @@
 .yu-toggle { width: 100%; border: 0; background: transparent; cursor: pointer; min-height: 40px; padding: 0; text-align: left; font-family: inherit; }
 .yu-toggle .ic { transition: transform .2s; color: var(--text3); }
 .yu-toggle.open .ic { transform: rotate(180deg); }
-.yu-toggle:hover { color: var(--text2); }
+@media (hover: hover) { .yu-toggle:hover { color: var(--text2); } }
 
 /* thread list */
 .yu-th { cursor: pointer; min-height: 52px; }
@@ -113,5 +113,5 @@
 .yu-stat .stat-num small { font-size: 11px; color: var(--text3); font-weight: 600; margin-left: 1px; }
 .yu-stat .stat-num.good { color: var(--success); } .yu-stat .stat-num.warn { color: var(--warning); } .yu-stat .stat-num.bad { color: var(--danger-text); }
 .yu-ctx-note { margin-top: 8px; }
-@media (max-width: 400px) { .yu-ctx { grid-template-columns: repeat(2, 1fr); } .yu-name { font-size: 20px; } .yu-orb { width: 52px; height: 52px; } .yu-head-row { gap: 10px; } .yu-msg { max-width: 96%; } }
-@media (min-width: 960px) { .yu-feed { max-height: 62vh; } }
+@media (max-width: 400px){ .yu-ctx { grid-template-columns: repeat(2, 1fr); } .yu-name { font-size: 20px; } .yu-orb { width: 52px; height: 52px; } .yu-head-row { gap: 10px; } .yu-msg { max-width: 96%; } }
+@media (min-width: 960px){ .yu-feed { max-height: 62vh; } }

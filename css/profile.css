@@ -11,14 +11,14 @@
 .pf-cam { position: absolute; right: -4px; bottom: -2px; width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 2px solid var(--bg3);
   background: var(--btn-grad); color: var(--ink-on-light); display: grid; place-items: center; box-shadow: var(--sh-btn); transition: transform .1s, filter .15s; }
 .pf-cam::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; }   /* 44 px bosish maydoni */
-.pf-cam:hover { filter: brightness(1.06); }
+@media (hover: hover) { .pf-cam:hover { filter: brightness(1.06); } }
 .pf-cam:active { transform: scale(.94); }
 .pf-cam:disabled { opacity: .5; cursor: progress; }
 
 /* ism — bosilsa tahrir; tahrirda inline input + Saqlash */
 .pf-name-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; max-width: 100%; min-height: 40px; padding: 4px 12px;
   border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text); font: inherit; }
-button.pf-name-btn:hover { background: var(--hover); }
+@media (hover: hover) { button.pf-name-btn:hover { background: var(--hover); } }
 .pf-name-btn svg { color: var(--text3); flex: none; }
 .pf-name { font-size: 20px; font-weight: 700; line-height: 1.2; color: var(--text); overflow-wrap: anywhere; }
 .pf-name.muted { color: var(--text3); font-weight: 600; }

@@ -137,13 +137,7 @@ def _reg_load() -> dict:
 
 
 def _reg_save(d: dict):
-    tmp = USERS_FILE.with_suffix(".tmp")
-    tmp.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
-    try:
-        os.chmod(tmp, 0o600)
-    except OSError:
-        pass
-    tmp.replace(USERS_FILE)
+    _atomic_write(USERS_FILE, json.dumps(d, ensure_ascii=False, indent=1))
 
 
 def _pw_hash(pw: str, salt: str, it: int = PW_ITER) -> str:
@@ -306,6 +300,35 @@ def _file_lock(name: str):
             fh.close()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 (DATA_DIR / "backups").mkdir(exist_ok=True)
+
+
+_TMP_TAG = f"{os.getpid()}"
+
+
+def _atomic_write(p: Path, data, mode: int = 0o600) -> None:
+    """Faylni butunligicha almashtiradi. data — str yoki bytes.
+
+    Vaqtinchalik nom noyob (jarayon + tasodifiy), yozilgani fsync bilan diskka
+    majburlanadi, so'ng bitta atomar rename. Ilgari nom qat'iy edi, shuning uchun
+    ikkita ishchi bir-birining yarim yozilgan faylini nashr qilib yuborardi."""
+    tmp = p.with_name(f"{p.name}.{_TMP_TAG}.{secrets.token_hex(5)}.tmp")
+    binary = isinstance(data, (bytes, bytearray))
+    try:
+        with open(tmp, "wb" if binary else "w", **({} if binary else {"encoding": "utf-8"})) as fh:
+            fh.write(data)
+            fh.flush()
+            os.fsync(fh.fileno())
+        try:
+            os.chmod(tmp, mode)
+        except OSError:
+            pass
+        os.replace(tmp, p)
+    except BaseException:
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
 
 
 def _private(p: Path) -> Path:
@@ -932,11 +955,7 @@ def who_load(uid: str) -> dict:
 
 
 def who_save(uid: str, who: dict):
-    f = who_file(uid)
-    tmp = f.with_name(f.name + ".tmp")
-    tmp.write_text(json.dumps(who, ensure_ascii=False), encoding="utf-8")
-    _private(tmp)   # ichida email bor
-    tmp.replace(f)
+    _atomic_write(who_file(uid), json.dumps(who, ensure_ascii=False))   # ichida email bor
 
 
 def who_touch(uid: str, **fields):
@@ -1004,13 +1023,7 @@ def _avatar_write(uid: str, raw: bytes) -> int:
     """Atomar yozadi (tmp + replace); mtime (soniya) = versiya, oldingisidan albatta katta (ETag / ?v= uchun)."""
     f = avatar_file(uid)
     prev = int(f.stat().st_mtime) if f.is_file() else 0
-    tmp = f.with_name(f.name + ".tmp")
-    tmp.write_bytes(raw)
-    try:
-        os.chmod(tmp, 0o600)
-    except OSError:
-        pass
-    tmp.replace(f)
+    _atomic_write(f, raw)
     if int(f.stat().st_mtime) <= prev:
         os.utime(f, (prev + 1, prev + 1))
     return int(f.stat().st_mtime)
@@ -1168,10 +1181,11 @@ def whoop_file(uid: str) -> Path:
 
 
 def whoop_save(uid: str, tok: dict):
-    """WHOOP tokenlari — faqat serverda va faqat ilova o'qiy oladigan qilib (0600)."""
-    f = whoop_file(uid)
-    f.write_text(json.dumps(tok), encoding="utf-8")
-    _private(f)
+    """WHOOP tokenlari — faqat serverda va faqat ilova o'qiy oladigan qilib (0600).
+
+    Ilgari fayl joyida qayta yozilardi: yozuv yarmida uzilish bo'lsa token
+    o'qib bo'lmas holga kelardi va WHOOP butunlay uzilib qolardi."""
+    _atomic_write(whoop_file(uid), json.dumps(tok))
 
 
 def whoop_tokens(uid: str):
@@ -1846,10 +1860,7 @@ def _snap_read(uid: str):
 
 def _snap_write(uid: str, snap: dict):
     f = whoop_cache_file(uid)
-    tmp = f.with_suffix(".tmp")
-    tmp.write_text(json.dumps(snap, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    _private(tmp)   # sog'liq ko'rsatkichlari
-    tmp.replace(f)
+    _atomic_write(f, json.dumps(snap, ensure_ascii=False, separators=(",", ":")))   # sog'liq ko'rsatkichlari
     _wh_mem[uid] = (f.stat().st_mtime, snap)
 
 
@@ -2120,6 +2131,26 @@ _whoop_poll_start()
 
 # ═══════════════════════ Yusa AI ═══════════════════════
 
+# Tashqi AI so'rovining eng uzun muddati. gunicorn --timeout dan ANCHA past
+# bo'lishi shart, aks holda ishchi so'rov o'rtasida o'ldiriladi.
+AI_TIMEOUT = int(os.environ.get("MA_AI_TIMEOUT", "60"))
+
+# Bitta hisob uchun soatiga nechta AI so'rovi. 0 — cheklov yo'q.
+AI_HOURLY_MAX = int(os.environ.get("MA_AI_HOURLY", "80"))
+
+
+def ai_quota_ok(uid: str) -> bool:
+    """Shu hisob oxirgi soatda chegaradan oshdimi. Hisob .fails.json da,
+    flock ostida — ikkala gunicorn ishchisi bitta sanoqni ko'radi."""
+    if AI_HOURLY_MAX <= 0:
+        return True
+    n = _fails_count(f"aiq|{uid}", 3600, add=True)
+    if n > AI_HOURLY_MAX:
+        log.warning("AI soatlik chegarasi oshdi (%s): %d", uid, n)
+        return False
+    return True
+
+
 _ai_client = None
 
 
@@ -2127,7 +2158,9 @@ def ai_client():
     global _ai_client
     if _ai_client is None:
         import anthropic  # lazily — kutubxona bo'lmasa server baribir ishlaydi
-        _ai_client = anthropic.Anthropic(api_key=AI_KEY, timeout=90.0)
+        # max_retries ataylab past: SDK sukut bo'yicha ikki marta qayta uriniladi
+        # (90 s × 3 = 270 s) va bu gunicorn chegarasidan ikki barobar oshardi.
+        _ai_client = anthropic.Anthropic(api_key=AI_KEY, timeout=float(AI_TIMEOUT), max_retries=1)
     return _ai_client
 
 
@@ -2141,7 +2174,7 @@ def ai_budget(v) -> int:
     return max(AI_MIN_TOKENS, min(n, AI_MAX_TOKENS))
 
 
-def ai_openai(system: str, msgs: list, max_tokens: int, timeout: float = 120):
+def ai_openai(system: str, msgs: list, max_tokens: int, timeout: float = None):
     """OpenAI chat completions. (natija, None) yoki (None, (xato, status)).
     gpt-5 oilasi `max_tokens` va `temperature`ni rad etadi — faqat `max_completion_tokens` yuboriladi.
     msgs[].content matn yoki content-parts ro'yxati (text + image_url) bo'lishi mumkin."""
@@ -2152,7 +2185,7 @@ def ai_openai(system: str, msgs: list, max_tokens: int, timeout: float = 120):
     req = urllib.request.Request(OPENAI_BASE + "/chat/completions", data=json.dumps(body).encode("utf-8"), method="POST",
                                  headers={"Authorization": "Bearer " + OPENAI_KEY, "Content-Type": "application/json", "User-Agent": USER_AGENT})
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with urllib.request.urlopen(req, timeout=timeout if timeout is not None else AI_TIMEOUT) as r:
             j = json.loads(r.read().decode("utf-8") or "{}")
     except urllib.error.HTTPError as e:
         raw = e.read().decode("utf-8", "replace")[:400]
@@ -2199,6 +2232,8 @@ def ai():
         return err
     if not AI_PROVIDER:
         return jsonify({"error": "ai_not_configured"}), 501
+    if not ai_quota_ok(uid):
+        return jsonify({"error": "ai_rate_limited"}), 429
     prep, bad = ai_request(request.get_json(silent=True) or {})
     if bad:
         return jsonify({"error": bad[0]}), bad[1]
@@ -2236,7 +2271,7 @@ def ai():
         return jsonify({"error": "ai_failed"}), 500
 
 
-def ai_openai_stream(system: str, msgs: list, max_tokens: int, timeout: float = 120):
+def ai_openai_stream(system: str, msgs: list, max_tokens: int, timeout: float = None):
     """OpenAI oqimi. (ochiq javob, None) yoki (None, (xato, status)).
     Ulanish generatorgacha ochiladi: aks holda birinchi bayt yozilgandan keyin
     xatoni oddiy JSON bilan qaytarib bo'lmasdi — mijoz yarim ochilgan oqimni
@@ -2249,7 +2284,7 @@ def ai_openai_stream(system: str, msgs: list, max_tokens: int, timeout: float = 
     req = urllib.request.Request(OPENAI_BASE + "/chat/completions", data=json.dumps(body).encode("utf-8"), method="POST",
                                  headers={"Authorization": "Bearer " + OPENAI_KEY, "Content-Type": "application/json", "User-Agent": USER_AGENT})
     try:
-        return urllib.request.urlopen(req, timeout=timeout), None
+        return urllib.request.urlopen(req, timeout=timeout if timeout is not None else AI_TIMEOUT), None
     except urllib.error.HTTPError as e:
         raw = e.read().decode("utf-8", "replace")[:400]
         try:
@@ -2276,6 +2311,8 @@ def ai_stream():
         return err
     if AI_PROVIDER != "openai":
         return jsonify({"error": "stream_unsupported"}), 501
+    if not ai_quota_ok(uid):
+        return jsonify({"error": "ai_rate_limited"}), 429
     prep, bad = ai_request(request.get_json(silent=True) or {})
     if bad:
         return jsonify({"error": bad[0]}), bad[1]
@@ -2474,6 +2511,8 @@ def food_analyze():
         return err
     if not AI_PROVIDER:
         return jsonify({"error": "ai_not_configured"}), 501
+    if not ai_quota_ok(uid):
+        return jsonify({"error": "ai_rate_limited"}), 429
     if request.content_length and request.content_length > FOOD_MAX_REQ:
         return jsonify({"error": "too_large"}), 413
     body = request.get_json(silent=True) or {}
@@ -2523,10 +2562,7 @@ def food_analyze():
         photo = "fp_" + secrets.token_hex(8)
         f = food_dir(uid) / (photo + ".jpg")
         try:
-            tmp = f.with_suffix(".tmp")
-            tmp.write_bytes(img[0])
-            os.chmod(tmp, 0o600)
-            tmp.replace(f)
+            _atomic_write(f, img[0])
         except OSError as e:
             log.warning("Ovqat surati saqlanmadi: %s", e)
             photo = None

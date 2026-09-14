@@ -29,7 +29,7 @@
 .wh-ready-text { display: block; font-size: 13px; color: var(--text); line-height: 1.35; margin-top: 2px; }
 .wh-ready-side { display: flex; gap: 10px; flex: none; font-size: 11px; color: var(--text3); text-align: right; }
 .wh-ready-side b { display: block; font-family: var(--num); font-size: 13px; color: var(--text2); font-weight: 700; }
-@media (max-width: 400px) { .wh-ready-side { gap: 0; } .wh-ready-side span:first-child:not(:last-child) { display: none; } }
+@media (max-width: 400px){ .wh-ready-side { gap: 0; } .wh-ready-side span:first-child:not(:last-child) { display: none; } }
 
 .wh-auto { font-size: 11px; color: var(--info); display: inline-flex; align-items: center; gap: 4px; }
 
@@ -70,7 +70,7 @@
   background: color-mix(in srgb, var(--success) 45%, transparent); pointer-events: none;
   animation: whBreathe 2.4s ease-out infinite; }
 @keyframes whBreathe { 0% { transform: scale(1); opacity: 1; } 70%, 100% { transform: scale(3); opacity: 0; } }
-@media (prefers-reduced-motion: reduce) { .wh-fresh.live i::after, .wh-dot::after { animation: none; opacity: 0; } }
+@media (prefers-reduced-motion: reduce){ .wh-fresh.live i::after, .wh-dot::after { animation: none; opacity: 0; } }
 
 /* live strain row inside the hero */
 .wh-strain { margin-top: 16px; padding: 12px 13px; border-radius: 14px; background: var(--glass); border: 1px solid var(--line); }
@@ -149,7 +149,7 @@
 .wh-body-row b { color: var(--text); font-weight: 700; text-align: right; word-break: break-all; }
 .wh-body-row b small { font-size: 11px; font-weight: 600; color: var(--text3); margin-left: 2px; }
 .wh-body-link { border: 0; background: transparent; padding: 2px 4px; margin: -2px 0; color: var(--info); font-size: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; border-radius: 6px; cursor: pointer; }
-.wh-body-link:hover { background: var(--hover); }
+@media (hover: hover) { .wh-body-link:hover { background: var(--hover); } }
 
 /* WHOOP Age / Pace of Aging — ilovadan ko'chirilgan ikki raqam */
 .wh-body-big { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -189,7 +189,7 @@
 .wh-vt-row > b:last-child { text-align: right; font-weight: 700; color: var(--text2); white-space: nowrap; }
 .wh-vt-row > b:last-child.good { color: var(--success); }
 .wh-vt-row > b:last-child.bad { color: var(--danger-text); }
-@media (max-width: 430px) {
+@media (max-width: 430px){
   .wh-vt-row { grid-template-columns: 1.2fr 1fr .9fr; }
   .wh-vt-row > span:nth-child(3) { grid-column: 2; grid-row: 2; text-align: left; font-size: 11px; }
   .wh-vt-row > b:last-child { grid-column: 3; grid-row: 1 / span 2; align-self: center; }
@@ -199,7 +199,7 @@
 /* ==== Tayyorlik: ixcham tana kartasi ==== */
 .wh-bd-who { margin: -2px 0 10px; }
 .wh-bd-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-@media (max-width: 520px) { .wh-bd-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px){ .wh-bd-grid { grid-template-columns: 1fr 1fr; } }
 .wh-bd-cell { display: flex; flex-direction: column; gap: 3px; padding: 12px 10px; border-radius: 13px; background: var(--row-bg); border: 1px solid var(--row-line); min-width: 0; }
 .wh-bd-cell b { font-family: var(--num); font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; color: var(--text); }
 .wh-bd-cell b small { font-size: 11px; font-weight: 600; color: var(--text3); margin-left: 2px; }
@@ -225,6 +225,6 @@
 .wh-bd-why { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px;
   padding: 9px 12px; border: 1px solid var(--line2); border-radius: var(--r-sm); background: transparent;
   color: var(--text2); font-size: 12px; font-weight: 600; letter-spacing: .03em; min-height: 38px; cursor: pointer; transition: background .15s, color .15s; }
-.wh-bd-why:hover { background: var(--hover); color: var(--text); }
+@media (hover: hover) { .wh-bd-why:hover { background: var(--hover); color: var(--text); } }
 .wh-bd-why svg { transition: transform .2s; color: var(--text3); }
 .wh-bd-why[aria-expanded="true"] svg { transform: rotate(180deg); }

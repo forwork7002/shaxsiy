@@ -32,18 +32,18 @@
 /* «Kechikkanlarni bugunga surish» — sarlavhaning o'zida, o'ng chekkada */
 .tk-hd-b { flex: none; min-height: 32px; padding: 6px 11px; border-radius: var(--r-pill); font-family: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer;
   color: var(--warning); border: 1px solid color-mix(in srgb, var(--warning) 38%, transparent); background: color-mix(in srgb, var(--warning) 9%, transparent); transition: background .15s; }
-.tk-hd-b:hover { background: color-mix(in srgb, var(--warning) 18%, transparent); }
+@media (hover: hover) { .tk-hd-b:hover { background: color-mix(in srgb, var(--warning) 18%, transparent); } }
 
 /* yig'iladigan «Bajarilgan» sarlavhasi */
 .tk-fold { cursor: pointer; user-select: none; }
-.tk-fold:hover .tk-hd-l { color: var(--text2); }
+@media (hover: hover) { .tk-fold:hover .tk-hd-l { color: var(--text2); } }
 .tk-hd-x { display: inline-flex; flex: none; color: var(--text4); }
 .tk-hd-x .ic { transition: transform .25s var(--ease-out); }
 .tk-fold.open .tk-hd-x .ic { transform: rotate(180deg); }
 
 .tk-ok { display: flex; align-items: center; gap: 7px; padding: 12px 2px; font-size: 13px; font-weight: 600; color: var(--success); }
 .tk-more { width: 100%; min-height: 42px; margin-top: 4px; border: 0; background: transparent; color: var(--text3); font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 10px; }
-.tk-more:hover { background: var(--hover); color: var(--text); }
+@media (hover: hover) { .tk-more:hover { background: var(--hover); color: var(--text); } }
 .tk-sub { margin-top: 4px; font-size: 12px; color: var(--text4); }
 .tk-hint { padding: 0 10px; font-size: 11.5px; line-height: 1.5; color: var(--text4); text-align: center; }
 .tk-hint.in { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); text-align: left; }
@@ -54,7 +54,7 @@
 .tk-sw + .tk-sw { border-top: 1px solid var(--line); }
 .tk .li.tk-r { position: relative; z-index: 1; margin: 0; padding: 10px 2px 10px 11px; gap: 12px; min-height: 50px;
   background: transparent; border: 0; border-radius: 12px; transition: transform .22s var(--ease-out), background .2s, opacity .3s; }
-.tk .li.tk-r:hover { background: var(--hover); }
+@media (hover: hover) { .tk .li.tk-r:hover { background: var(--hover); } }
 .tk .li.tk-r.done { opacity: .5; background: transparent; }
 .tk-r-t { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 500; line-height: 1.35; cursor: text; }
 .tk-r.done .tk-r-t { font-weight: 400; }
@@ -66,12 +66,12 @@
 /* sana tugmasi — bosilsa vazifa oynasi ochiladi */
 .tk-r-w { flex: none; display: inline-flex; align-items: center; justify-content: center; min-width: 36px; min-height: 36px; padding: 6px 8px; border: 0; border-radius: 10px;
   background: transparent; color: var(--text3); font-family: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
-.tk-r-w:hover { background: var(--hover); color: var(--text); }
+@media (hover: hover) { .tk-r-w:hover { background: var(--hover); color: var(--text); } }
 .tk-r-w.empty { color: var(--text4); }
 .tk-r-w.bad { color: var(--danger-text); }
 .tk-r-x { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 0; border-radius: 10px;
   background: transparent; color: var(--text4); cursor: pointer; opacity: .3; transition: opacity .15s, color .15s, background .15s; }
-.tk-r-x:hover { opacity: 1; color: var(--danger-text); background: var(--hover); }
+@media (hover: hover) { .tk-r-x:hover { opacity: 1; color: var(--danger-text); background: var(--hover); } }
 @media (hover: hover) and (pointer: fine) { .tk-r-x { opacity: 0; } .tk-r:hover .tk-r-x, .tk-r-x:focus-visible { opacity: 1; } }
 
 .tk-r.over .tk-r-t { color: var(--text); }
@@ -92,7 +92,7 @@
 .tk-h { display: flex; align-items: center; gap: 11px; padding: 11px 2px; border-top: 1px solid var(--line); border-radius: 12px; transition: background .15s; }
 .tk-hd + .tk-h { border-top: 0; }
 .tk-h.tap { cursor: pointer; user-select: none; }
-.tk-h.tap:hover { background: var(--hover); }
+@media (hover: hover) { .tk-h.tap:hover { background: var(--hover); } }
 .tk-em { flex: none; width: 22px; text-align: center; font-family: var(--emoji); font-size: 17px; line-height: 1; }
 .tk-h-b { flex: 1; min-width: 0; }
 .tk-h-top { display: flex; align-items: center; gap: 8px; }
@@ -108,7 +108,7 @@
 .tk-hc { flex: none; display: flex; align-items: center; gap: 3px; }
 .tk-step { width: 30px; height: 30px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px;
   border: 1px solid var(--line2); background: var(--glass); color: var(--text); cursor: pointer; transition: background .15s, border-color .15s; }
-.tk-step:hover { background: var(--hover); border-color: var(--line3); }
+@media (hover: hover) { .tk-step:hover { background: var(--hover); border-color: var(--line3); } }
 .tk-step:disabled { opacity: .3; cursor: default; }
 .tk-hc-n { min-width: 42px; text-align: center; font-size: 12.5px; font-weight: 700; color: var(--text2); font-family: var(--num); }
 .tk-hc-n small { font-size: 10.5px; font-weight: 600; color: var(--text4); }
@@ -143,14 +143,14 @@
   .tk { --tk-pad: 18px; }
   .tk-h { padding: 9px 4px; }
 }
-@media (max-width: 480px) {
+@media (max-width: 480px){
   .tk-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; overflow: visible; padding-bottom: 0; }
   .tk-tabs button { width: 100%; min-width: 0; padding-left: 8px; padding-right: 8px; }
   .tk { --tk-pad: 12px; }
   .tk-hd { gap: 8px; }
   .tk-strip i { max-width: 14px; }
 }
-@media (max-width: 380px) {
+@media (max-width: 380px){
   .tk-new-y { flex-basis: 74px; }
   .tk-hc-n { min-width: 36px; }
 }
