@@ -132,10 +132,17 @@
   padding: 13px 12px 12px; }
 .stat-label { margin-top: 7px; }
 .stat-sub { font-size: 11px; color: var(--text4); margin-top: 4px; }
-.zone { top: 11px; right: 11px; width: 6px; height: 6px; }
-.zone.z-good { background: var(--z-high); box-shadow: 0 0 9px var(--success-glow); }
-.zone.z-warn { background: var(--z-mid); box-shadow: 0 0 9px var(--warning-glow); }
-.zone.z-bad  { background: var(--z-low); box-shadow: 0 0 9px color-mix(in srgb, var(--danger) 70%, transparent); }
+/* Zona belgisi nuqtadan TASMAga aylandi: katakchaning tepasida chetdan chetga
+   ingichka chiziq. Nuqta burchakda turganda uni topish uchun qarash kerak edi
+   va uchta katakcha yonma-yon bo'lsa, uchta nuqta chalkashardi. Tasma esa
+   periferik ko'rinadi — raqamni o'qishdan oldin holat allaqachon ma'lum.
+   Kartaning tepasidagi zona tasmasi bilan bitta til (3-bo'lim). */
+.zone { top: 0; left: 0; right: 0; width: auto; height: 2px; border-radius: 0;
+  background: var(--line2); box-shadow: none; }
+.stat { overflow: hidden; }
+.zone.z-good { background: var(--z-high); box-shadow: 0 0 10px -2px var(--success-glow); }
+.zone.z-warn { background: var(--z-mid); box-shadow: 0 0 10px -2px var(--warning-glow); }
+.zone.z-bad  { background: var(--z-low); box-shadow: 0 0 10px -2px color-mix(in srgb, var(--danger) 70%, transparent); }
 
 /* ---------------------------------------------------------------------
    6. CHIZIQLI GRAFIKALAR
@@ -248,8 +255,16 @@
 .nav-lab { font-size: 11px; letter-spacing: .12em; }
 .nav-ic { padding: 4px 14px; border-radius: 0; background: transparent; }
 .nav-tab.on .nav-ic { background: transparent; }
-.nav-em { font-size: 20px; opacity: .32; }
+/* Belgi endi SVG (core.js, renderNav). `display: flex` shart — span ichidagi
+   svg matn qatori sifatida joylashsa, ostida harf pastligicha bo'sh joy
+   qoladi va belgi yozuvga nisbatan bir-ikki piksel yuqorida osilib turadi. */
+.nav-em { display: flex; font-size: 0; opacity: .38; }
+.nav-em .ic { stroke-width: 1.9; }
 .nav-tab.on .nav-em { opacity: 1; }
+.nav-tab.on .nav-em .ic { stroke-width: 2.2; }
+/* Ko'tarilgan doira oq (yorug' temada qora) — belgisi ham unga teskari
+   bo'lishi kerak, aks holda oq ustida oq chiziq ko'rinmay qoladi. */
+.nav-tab.nav-mid .nav-em { color: var(--on-btn); opacity: 1; }
 .nav-tab.on::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
   width: 26px; height: 2px; background: var(--text); }
 .nav-badge { background: var(--z-low); color: #fff; font-weight: 700; box-shadow: 0 0 0 2px var(--nav); }
@@ -258,7 +273,7 @@
 .nav-tab.nav-mid .nav-ic { width: 54px; height: 54px; margin-top: -24px; padding: 0;
   border-radius: 50%; background: var(--btn-grad); box-shadow: 0 10px 26px rgba(0,0,0,.6); }
 .nav-tab.nav-mid::before { display: none; }
-.nav-mid .nav-em { font-size: 23px; opacity: 1; }
+.nav-tab.nav-mid .nav-em .ic { width: 24px; height: 24px; stroke-width: 2.1; }
 
 /* ---------------------------------------------------------------------
    11. YON PANEL (kengroq ekran)
