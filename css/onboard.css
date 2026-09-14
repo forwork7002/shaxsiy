@@ -9,7 +9,7 @@
 .ob-dots i.done { background: color-mix(in srgb, var(--success) 55%, transparent); }
 .ob-dots i.on { width: 22px; border-radius: 4px; background: var(--success); box-shadow: 0 0 8px var(--success-glow); }
 
-.ob-q { font-family: var(--font-display); font-size: 19px; font-weight: 700; color: var(--text); text-align: center; line-height: 1.3; }
+.ob-q { font-size: 19px; font-weight: 700; color: var(--text); text-align: center; line-height: 1.3; }
 .ob-body { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .ob-hint { font-size: 12.5px; color: var(--text3); text-align: center; line-height: 1.45; margin: 0; }
 .ob-hint-lg { font-size: 13.5px; color: var(--text2); margin-bottom: 4px; }
@@ -19,10 +19,10 @@
 .ob-inp.ob-text { font-size: 18px; }
 .ob-inp.bad { border-color: var(--danger-text); }
 .ob-num-wrap { position: relative; width: 100%; }
-.ob-num-wrap .ob-inp { font-family: var(--font-display); font-size: 30px; font-weight: 700; padding-right: 56px; padding-left: 56px; -moz-appearance: textfield; }
+.ob-num-wrap .ob-inp { font-size: 30px; font-weight: 700; padding-right: 56px; padding-left: 56px; -moz-appearance: textfield; }
 .ob-num-wrap .ob-inp::-webkit-outer-spin-button, .ob-num-wrap .ob-inp::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .ob-unit { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 13px; font-weight: 700; color: var(--text3); pointer-events: none; }
-.ob-age { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: var(--success); min-height: 20px; text-align: center; }
+.ob-age { font-size: 15px; font-weight: 700; color: var(--success); min-height: 20px; text-align: center; }
 .ob-seg { margin: 0 auto; }
 
 /* katta tanlov tugmalari (jins, maqsad) */

@@ -2,14 +2,14 @@
    food.js — Ovqat: kunlik ovqat jurnali.
    rasm yoki matn → /api/food/analyze (OpenAI) → kkal · oqsil · uglevod · yog' (+ tola · shakar · tuz)
    Ko'rinish: kun halqasi va uchta makro chizig'i → rasm tugmasi → tahlil → taomlar → 7 kunlik grafik.
-   Me'yorlar profildan (Mifflin-St Jeor × faollik ± maqsad). Rasm baytlari holatda saqlanmaydi —
+   Me'yorlar profildan (Mifflin-St Jeor × faollik ± maqsad) yoki gap bilan: «2200 kkal, 150 g oqsil».
+   Rasm baytlari holatda saqlanmaydi —
    server /api/food/photo/<id> orqali beradi.
-   D.food.tile(k) · dayTotals(k) · targets() · recalcTargets()
+   D.food.page(k) · dayTotals(k) · targets() · recalcTargets() · parseTargets(matn) · fillTargets(o)
    ===================================================================== */
 (function () {
   'use strict';
   const esc = D.esc, t = D.t;
-  const VIEW = 'food';
   // MAX_BYTES serverdagi FOOD_MAX_BYTES (1 500 000) dan kichik — base64 so'rov chegaraga tegmasin
   const MAX_SIDE = 1024, JPEG_Q = 0.82, MAX_BYTES = 1400000;
 
@@ -19,7 +19,7 @@
       'food.eaten': 'yeyildi', 'food.kcal': 'kkal',
       'food.protein': 'Oqsil', 'food.carbs': 'Uglevod', 'food.fat': "Yog'",
       'food.burned': 'WHOOP {n} kkal sarfladi',
-      'food.left': 'Yana {n} kkal yeyish mumkin', 'food.over': "Me'yordan {n} kkal oshdi", 'food.noTarget': "Me'yor yo'q — profilga vazn kiriting",
+      'food.left': 'Yana {n} kkal yeyish mumkin', 'food.over': "Me'yordan {n} kkal oshdi", 'food.ofTarget': "me'yor {n} kkal",
       'food.meals': 'Taomlar', 'food.empty': "Bu kunda hali taom yozilmagan — yuqorida rasmga oling yoki yozing",
       'food.ph': 'yoki taomni yozing…', 'food.camera': 'Ovqatni rasmga oling', 'food.gallery': 'Galereya', 'food.send': 'Tahlil',
       'food.busy': 'Tahlil qilinmoqda…', 'food.result': 'Tahlil natijasi', 'food.rough': 'taxminiy',
@@ -31,18 +31,25 @@
       'food.name': 'Taom', 'food.grams': 'Gramm', 'food.note': 'Izoh', 'food.items': 'Tarkibi',
       'food.newMeal': "Taom qo'shish", 'food.editMeal': 'Taomni tahrirlash', 'food.deleted': "Taom o'chirildi", 'food.saved': 'Taom saqlandi',
       'food.targets': "Me'yorlar",
-      'food.searchMeal': 'Taom', 'food.time': 'soat',
+      'food.setTarget': "Me'yoringizni yozing", 'food.tgTitle': "Kunlik me'yoringiz",
+      'food.tgPh': "2200 kkal, 150 g oqsil",
+      'food.tgHint': "Shunchaki yozib qo'ying: «2200» ham, «2200 kkal, 150 g oqsil» ham bo'ladi. Aytmaganingiz kaloriyadan hisoblanadi.",
+      'food.tgAutoNow': "Hozir profil bo'yicha hisoblanmoqda",
+      'food.tgReset': "Profil bo'yicha hisoblansin", 'food.tgNoNum': "Raqam topilmadi — masalan «2200 kkal» deb yozing",
+      'food.tgSaved': "Me'yor saqlandi",
+      'food.time': 'soat',
       'food.gramsHint': 'Gramm o\'zgarsa makrolar mutanosib qayta hisoblanadi',
       'food.tooBig': 'Rasm juda katta', 'food.notFood': "Rasmda ovqat ko'rinmadi — boshqa rasm oling yoki taomni yozing.",
       'food.fib': 'Tola', 'food.sug': 'Shakar', 'food.salt': 'Tuz',
       'food.week': "So'nggi 7 kun", 'food.avgDay': "kunlik o'rtacha", 'food.weekEmpty': "Bu haftada hali yozuv yo'q",
+      'food.water': 'Suv', 'food.waterUnit': 'stakan',
     },
     uzk: {
       'nav.food': 'Овқат',
       'food.eaten': 'ейилди', 'food.kcal': 'ккал',
       'food.protein': 'Оқсил', 'food.carbs': 'Углевод', 'food.fat': 'Ёғ',
       'food.burned': 'WHOOP {n} ккал сарфлади',
-      'food.left': 'Яна {n} ккал ейиш мумкин', 'food.over': 'Меъёрдан {n} ккал ошди', 'food.noTarget': 'Меъёр йўқ — профилга вазн киритинг',
+      'food.left': 'Яна {n} ккал ейиш мумкин', 'food.over': 'Меъёрдан {n} ккал ошди', 'food.ofTarget': 'меъёр {n} ккал',
       'food.meals': 'Таомлар', 'food.empty': 'Бу кунда ҳали таом ёзилмаган — юқорида расмга олинг ёки ёзинг',
       'food.ph': 'ёки таомни ёзинг…', 'food.camera': 'Овқатни расмга олинг', 'food.gallery': 'Галерея', 'food.send': 'Таҳлил',
       'food.busy': 'Таҳлил қилинмоқда…', 'food.result': 'Таҳлил натижаси', 'food.rough': 'тахминий',
@@ -54,18 +61,25 @@
       'food.name': 'Таом', 'food.grams': 'Грамм', 'food.note': 'Изоҳ', 'food.items': 'Таркиби',
       'food.newMeal': 'Таом қўшиш', 'food.editMeal': 'Таомни таҳрирлаш', 'food.deleted': 'Таом ўчирилди', 'food.saved': 'Таом сақланди',
       'food.targets': 'Меъёрлар',
-      'food.searchMeal': 'Таом', 'food.time': 'соат',
+      'food.setTarget': 'Меъёрингизни ёзинг', 'food.tgTitle': 'Кунлик меъёрингиз',
+      'food.tgPh': '2200 ккал, 150 г оқсил',
+      'food.tgHint': 'Шунчаки ёзиб қўйинг: «2200» ҳам, «2200 ккал, 150 г оқсил» ҳам бўлади. Айтмаганингиз калориядан ҳисобланади.',
+      'food.tgAutoNow': 'Ҳозир профил бўйича ҳисобланмоқда',
+      'food.tgReset': 'Профил бўйича ҳисоблансин', 'food.tgNoNum': 'Рақам топилмади — масалан «2200 ккал» деб ёзинг',
+      'food.tgSaved': 'Меъёр сақланди',
+      'food.time': 'соат',
       'food.gramsHint': 'Грамм ўзгарса макролар мутаносиб қайта ҳисобланади',
       'food.tooBig': 'Расм жуда катта', 'food.notFood': 'Расмда овқат кўринмади — бошқа расм олинг ёки таомни ёзинг.',
       'food.fib': 'Тола', 'food.sug': 'Шакар', 'food.salt': 'Туз',
       'food.week': 'Сўнгги 7 кун', 'food.avgDay': 'кунлик ўртача', 'food.weekEmpty': 'Бу ҳафтада ҳали ёзув йўқ',
+      'food.water': 'Сув', 'food.waterUnit': 'стакан',
     },
     ru: {
       'nav.food': 'Еда',
       'food.eaten': 'съедено', 'food.kcal': 'ккал',
       'food.protein': 'Белки', 'food.carbs': 'Углеводы', 'food.fat': 'Жиры',
       'food.burned': 'WHOOP сжёг {n} ккал',
-      'food.left': 'Можно съесть ещё {n} ккал', 'food.over': 'Норма превышена на {n} ккал', 'food.noTarget': 'Нет нормы — укажите вес в профиле',
+      'food.left': 'Можно съесть ещё {n} ккал', 'food.over': 'Норма превышена на {n} ккал', 'food.ofTarget': 'норма {n} ккал',
       'food.meals': 'Приёмы пищи', 'food.empty': 'За этот день ещё ничего не записано — сфотографируйте или опишите выше',
       'food.ph': 'или опишите еду…', 'food.camera': 'Сфотографируйте еду', 'food.gallery': 'Галерея', 'food.send': 'Анализ',
       'food.busy': 'Анализирую…', 'food.result': 'Результат анализа', 'food.rough': 'примерно',
@@ -77,11 +91,18 @@
       'food.name': 'Блюдо', 'food.grams': 'Граммы', 'food.note': 'Заметка', 'food.items': 'Состав',
       'food.newMeal': 'Добавить блюдо', 'food.editMeal': 'Изменить блюдо', 'food.deleted': 'Блюдо удалено', 'food.saved': 'Блюдо сохранено',
       'food.targets': 'Нормы',
-      'food.searchMeal': 'Блюдо', 'food.time': 'время',
+      'food.setTarget': 'Укажите свою норму', 'food.tgTitle': 'Ваша дневная норма',
+      'food.tgPh': '2200 ккал, 150 г белка',
+      'food.tgHint': 'Просто напишите: подойдёт и «2200», и «2200 ккал, 150 г белка». Что не указали — посчитается от калорий.',
+      'food.tgAutoNow': 'Сейчас считается по профилю',
+      'food.tgReset': 'Считать по профилю', 'food.tgNoNum': 'Число не найдено — напишите, например, «2200 ккал»',
+      'food.tgSaved': 'Норма сохранена',
+      'food.time': 'время',
       'food.gramsHint': 'При изменении граммов макросы пересчитываются пропорционально',
       'food.tooBig': 'Фото слишком большое', 'food.notFood': 'На фото не видно еды — сделайте другое фото или опишите блюдо.',
       'food.fib': 'Клетчатка', 'food.sug': 'Сахар', 'food.salt': 'Соль',
       'food.week': 'Последние 7 дней', 'food.avgDay': 'в среднем за день', 'food.weekEmpty': 'На этой неделе ещё нет записей',
+      'food.water': 'Вода', 'food.waterUnit': 'стакан',
     },
   });
 
@@ -161,6 +182,68 @@
     }
     return { kcal: num(tg.kcal), p: num(tg.p), c: num(tg.c), f: num(tg.f), auto: false };
   };
+  /* --- me'yorni gap bilan yozish: «2200 kkal, 150 g oqsil» ------------ */
+  /* Chegaralar settings.js FD_KEYS bilan bir xil — ikkala joyda ham bitta qoida. */
+  const TG_LIM = { kcal: [800, 6000], p: [20, 400], c: [20, 800], f: [10, 300] };
+  /* So'z → qaysi raqam. Apostrof va bosh harflar tashlanadi: «Yog'» ham «yog» bo'ladi. */
+  const TG_WORD = {
+    kcal: ['kkal', 'kcal', 'kaloriya', 'kaloriyalar', 'kalori', 'ккал', 'калория', 'калории', 'калорий', 'каллория', 'каллорий'],
+    p: ['oqsil', 'oqsillar', 'protein', 'proteyn', 'оқсил', 'оксил', 'белок', 'белки', 'белка', 'белков'],
+    c: ['uglevod', 'uglevodlar', 'carb', 'carbs', 'углевод', 'углеводы', 'углеводов', 'карбо'],
+    f: ['yog', 'yogi', 'fat', 'ёғ', 'ег', 'жир', 'жиры', 'жиров', 'жира'],
+  };
+  /* «150 g oqsil» — raqam bilan so'z orasida turishi mumkin bo'lgan o'lchov so'zlari. */
+  const TG_UNIT = new Set(['g', 'gr', 'gm', 'gram', 'gramm', 'grammm', 'г', 'гр', 'грам', 'грамм']);
+  const TG_KEY = (() => { const m = {}; for (const k of Object.keys(TG_WORD)) for (const w of TG_WORD[k]) m[w] = k; return m; })();
+
+  /** Matndan kunlik me'yorni o'qiydi. Topilmagan raqam — null. */
+  D.food.parseTargets = (text) => {
+    const out = { kcal: null, p: null, c: null, f: null };
+    let s = String(text || '').toLowerCase().replace(/[ʻʼ‘’'`´]/g, '');
+    if (!s.trim()) return out;
+    s = s.replace(/(\d)[\s ](?=\d{3}(?!\d))/g, '$1');   // «2 200» → 2200
+    s = s.replace(/(\d{1,3})[.,](\d{3})(?!\d)/g, '$1$2');    // «2,200» → 2200
+    const toks = [];
+    const re = /(\d+(?:[.,]\d+)?)|([\p{L}]+)/gu;
+    for (let m; (m = re.exec(s)); ) {
+      if (m[1] !== undefined) toks.push({ n: +m[1].replace(',', '.'), used: false });
+      else toks.push({ w: m[2] });
+    }
+    const isNum = (i) => i >= 0 && i < toks.length && toks[i].n !== undefined && !toks[i].used;
+    const take = (i) => { toks[i].used = true; return toks[i].n; };
+    const unit = (i) => i >= 0 && i < toks.length && toks[i].w !== undefined && TG_UNIT.has(toks[i].w);
+    // avval nomi aytilgan raqamlar: «150 g oqsil» ham, «oqsil 150 g» ham
+    for (let i = 0; i < toks.length; i++) {
+      const k = toks[i].w !== undefined ? TG_KEY[toks[i].w] : null;
+      if (!k || out[k] !== null) continue;
+      if (isNum(i - 1)) out[k] = take(i - 1);
+      else if (unit(i - 1) && isNum(i - 2)) out[k] = take(i - 2);
+      else if (isNum(i + 1)) out[k] = take(i + 1);
+      else if (unit(i + 1) && isNum(i + 2)) out[k] = take(i + 2);
+    }
+    // qolgan yolg'iz raqam — kaloriya (odam ko'pincha shunchaki «2200» deb yozadi)
+    if (out.kcal === null) for (const x of toks) if (x.n !== undefined && !x.used && x.n >= 500 && x.n <= 9000) { out.kcal = x.n; break; }
+    for (const k of Object.keys(out)) if (out[k] !== null) out[k] = Math.round(D.clamp(out[k], TG_LIM[k][0], TG_LIM[k][1]));
+    return out;
+  };
+
+  /** O'qilgan me'yorni to'liq holga keltiradi: aytilmagan makro kkal dan chiqadi. */
+  D.food.fillTargets = (got) => {
+    const cur = D.food.targets();
+    const kcal = got.kcal !== null ? got.kcal : num(cur.kcal);
+    const out = { kcal, p: got.p, c: got.c, f: got.f };
+    if (got.kcal === null) {   // faqat makro aytildi — qolganiga tegmaymiz
+      for (const k of ['p', 'c', 'f']) if (out[k] === null) out[k] = num(cur[k]);
+      return out;
+    }
+    if (!kcal) return out;
+    const kg = weightOf(), goal = (D.S.profile || {}).goal;
+    if (out.p === null) out.p = kg ? r0(kg * (goal === 'gain' ? 2.0 : 1.6)) : r0((kcal * 0.2) / 4);
+    if (out.f === null) out.f = r0((kcal * 0.25) / 9);
+    if (out.c === null) out.c = Math.max(0, r0((kcal - out.p * 4 - out.f * 9) / 4));
+    return out;
+  };
+
   // kkal/makrolar doim, tola·shakar·tuz — faqat hech bo'lmasa bitta taomda bo'lsa
   const EXTRA = ['fib', 'sug', 'salt'];
   D.food.dayTotals = (k) => {
@@ -175,6 +258,55 @@
     }
     return out;
   };
+  /* ------------------------------------------------------------------ */
+  /* SUV                                                                  */
+  /*                                                                      */
+  /* Suv Asosiy sahifada turardi va u yerdagi yagona bosiladigan narsa    */
+  /* bo'lib qolgandi. U ham ichiladigan narsa, shuning uchun kkal bilan   */
+  /* bir sahifada: Asosiy'da endi faqat raqami ko'rinadi.                 */
+  /* Me'yor — sozlamadagi qo'lda kiritilgani, bo'lmasa vazndan 35 ml/kg   */
+  /* va faollik/jins/yosh qo'shimchalari; stakanga bo'linadi.             */
+  /* ------------------------------------------------------------------ */
+  function waterTargetMl() {
+    const st = D.S.settings, pr = D.S.profile || {};
+    const manual = +st.waterTargetMl || 0;
+    if (manual > 0) return manual;
+    let kg = +pr.weightKg || 0;
+    if (!kg) {
+      let best = '';
+      for (const [d, h] of Object.entries(D.S.health || {})) if (h && +h.weight > 0 && d > best) { best = d; kg = +h.weight; }
+      if (!kg) kg = 70;
+    }
+    const act = D.clamp(pr.activity === null || pr.activity === undefined ? 3 : +pr.activity || 0, 0, 5);
+    return Math.round(kg * 35 + act * 100 + (pr.sex === 'm' ? 200 : 0) + ((+pr.age || 0) >= 50 ? 100 : 0));
+  }
+  /** { n, goal, pct } — ichilgan stakan, kunlik me'yor va ulushi. */
+  D.food.water = (k) => {
+    const day = k || key();
+    const n = +((D.S.health[day] || {}).water) || 0;
+    const ml = Math.max(50, +D.S.settings.waterMl || 250);
+    const goal = Math.max(1, Math.ceil(waterTargetMl() / ml));
+    return { n, goal, pct: D.clamp((n / goal) * 100, 0, 100) };
+  };
+  D.act.fdWater = (el) => {
+    const day = key();
+    const h = D.S.health[day] || (D.S.health[day] = { weight: null, sleep: null, bed: null, wake: null, water: 0, mood: null, tags: [], note: '' });
+    h.water = Math.max(0, (+h.water || 0) + (+el.dataset.d || 0));
+    try { if (D.tg && D.tg.HapticFeedback) D.tg.HapticFeedback.impactOccurred('light'); } catch (e) { /* noop */ }
+    D.save(); D.rerender();
+  };
+  function waterCard(k) {
+    const w = D.food.water(k);
+    return `<div class="card fd-water ${w.n >= w.goal ? 'full' : ''}">
+      <span class="fd-water-ic">${D.ic('droplet', 16)}</span>
+      <span class="fd-water-l">${esc(t('food.water'))}</span>
+      <span class="bar thin fd-water-bar"><i class="bar-fill" style="width:${w.pct.toFixed(0)}%"></i></span>
+      <span class="fd-water-n num">${D.fmtNum(w.n)}<small> / ${D.fmtNum(w.goal)}</small></span>
+      <button class="fd-water-b" data-act="fdWater" data-d="-1" aria-label="−1 ${esc(t('food.waterUnit'))}" ${w.n ? '' : 'disabled'}>${D.ic('minus', 15)}</button>
+      <button class="fd-water-b" data-act="fdWater" data-d="1" aria-label="+1 ${esc(t('food.waterUnit'))}">${D.ic('plus', 15)}</button>
+    </div>`;
+  }
+
   /** Kunning WHOOP sarfi: bugun jonli sikl, boshqa kunlar — sikl kkal. */
   function burned(k) {
     if (!D.whoop || !D.S.whoop || !D.S.whoop.connected) return null;
@@ -253,7 +385,7 @@
       if (o.image) body.image = o.image;
       if (o.text) body.text = o.text;
       if (o.note) body.note = o.note;
-      const r = await D.api('/api/food/analyze', { method: 'POST', body: JSON.stringify(body) });
+      const r = await D.api('/api/food/analyze', { method: 'POST', body: JSON.stringify(body), timeout: 90000 });   // AI javobi sekin bo'lishi mumkin
       const items = (Array.isArray(r.items) ? r.items : []).map(cleanItem);
       const rt = r.total && typeof r.total === 'object' ? r.total : {};
       const total = num(rt.kcal) !== null ? { kcal: r0(rt.kcal), p: +D.round(num(rt.p) ?? 0, 1), c: +D.round(num(rt.c) ?? 0, 1), f: +D.round(num(rt.f) ?? 0, 1) } : sumItems(items);
@@ -376,29 +508,45 @@
     D.remove(meals(k), id, { label: meal ? t('food.deleted') + ': ' + meal.name : t('food.deleted') });
   };
 
-  // me'yorlar (auto / qo'lda) bitta joyda tahrirlanadi — Sozlamalar → Ovqat (settings.js FD_KEYS chegaralari bilan)
-  D.act.fdTargets = () => D.go('settings', 'food');
+  /* ------------------------------------------------------------------ */
+  /* me'yor oynasi: bir qatorga gap bilan yoziladi                       */
+  /* Aniq to'rtta katak Sozlamalar → Profil ichida qoladi.               */
+  /* ------------------------------------------------------------------ */
+  const TG_ROW = [['kcal', 'food.kcal', ''], ['p', 'food.protein', 'g'], ['c', 'food.carbs', 'g'], ['f', 'food.fat', 'g']];
+  /* Yozilmagan paytda ham to'rtta raqam turadi — hozirgi me'yor. Yozganingiz yorishadi. */
+  function tgPreview(text) {
+    const got = D.food.parseTargets(text), full = D.food.fillTargets(got);
+    return TG_ROW.map(([k, lab, u]) => {
+      const v = num(full[k]);
+      return `<div class="fd-tg-chip${got[k] !== null ? ' said' : ''}"><span class="lab">${esc(t(lab))}</span><b class="num">${v === null ? '—' : D.fmtNum(r0(v))}</b>${u && v !== null ? `<span class="u">${u}</span>` : ''}</div>`;
+    }).join('');
+  }
+  D.act.fdTargets = () => {
+    const cur = D.food.targets();
+    const body = `<input class="inp fd-tg-inp" id="fdTgInp" maxlength="120" placeholder="${esc(t('food.tgPh'))}" data-input="fdTgIn" data-enter="fdTgSave" autocomplete="off">
+      <div class="help">${esc(t('food.tgHint'))}</div>
+      <div class="fd-tg-prev" id="fdTgPrev">${tgPreview('')}</div>
+      ${cur.auto ? `<div class="small muted fd-tg-auto">${esc(t('food.tgAutoNow'))}</div>` : ''}`;
+    const actions = [{ label: t('btn.cancel'), act: 'closeModal' }];
+    if (!cur.auto && computeTargets()) actions.push({ label: t('food.tgReset'), act: 'fdTgAuto' });
+    actions.push({ label: t('btn.save'), act: 'fdTgSave', primary: true });
+    D.modal({ title: t('food.tgTitle'), body, actions });
+  };
+  D.act.fdTgIn = (el) => { const box = D.$('#fdTgPrev'); if (box) box.innerHTML = tgPreview(el.value); };
+  D.act.fdTgSave = () => {
+    const el = D.$('#fdTgInp');
+    const got = D.food.parseTargets(el ? el.value : '');
+    if (got.kcal === null && got.p === null && got.c === null && got.f === null) { D.toast(t('food.tgNoNum')); return; }
+    const full = D.food.fillTargets(got), tg = F().targets;
+    tg.kcal = num(full.kcal); tg.p = num(full.p); tg.c = num(full.c); tg.f = num(full.f);
+    tg.auto = false;   // gap bilan aytildi — avto o'chadi (Sozlamalardagi kabi)
+    D.save(); D.closeModal(); D.toast(t('food.tgSaved')); D.rerender();
+  };
+  D.act.fdTgAuto = () => { F().targets.auto = true; D.food.recalcTargets(); D.save(); D.closeModal(); D.rerender(); };
 
   /* ------------------------------------------------------------------ */
   /* ko'rinish                                                           */
   /* ------------------------------------------------------------------ */
-  function dateNav(k, today) {
-    let hint = '';
-    if (today) hint = t('common.today'); else if (k === D.addDays(D.today(), -1)) hint = t('common.yesterday');
-    return `<div class="date-nav fd-nav">
-      <button class="btn ghost sq" data-act="fdShift" data-n="-1" aria-label="${esc(t('btn.back'))}">${D.ic('chevL')}</button>
-      <div class="label">${esc(D.fmtDate(k, 'weekday'))}<span class="sub">${esc(hint)}${today ? '' : ` · <button class="fd-return" data-act="fdToday">${esc(t('btn.today'))}</button>`}</span></div>
-      <button class="btn ghost sq" data-act="fdShift" data-n="1" ${today ? 'disabled' : ''} aria-label="${esc(t('btn.today'))}">${D.ic('chevR')}</button>
-    </div>`;
-  }
-  D.act.fdShift = (el) => {
-    const nk = D.addDays(key(), +el.dataset.n || 0);
-    if (nk > D.today()) return;
-    D.ui.viewDate = nk === D.today() ? null : nk;
-    D.saveUi(); D.rerender();
-  };
-  D.act.fdToday = () => { D.ui.viewDate = null; D.saveUi(); D.rerender(); };
-
   /* Makro uchligi — kun xulosasida ham, bitta taom tahlilida ham bir xil ko'rinish.
      Me'yor bo'lsa chiziq me'yorga nisbatan, bo'lmasa taomdagi kaloriya ulushiga. */
   const MACROS = [['p', 'food.protein', 'var(--info)'], ['c', 'food.carbs', 'var(--warning)'], ['f', 'food.fat', 'var(--violet)']];
@@ -435,18 +583,16 @@
     const kPct = tg.kcal ? (tot.kcal / tg.kcal) * 100 : 0;
     const col = !tg.kcal ? 'var(--text3)' : kPct > 115 ? 'var(--danger-text)' : kPct > 100 ? 'var(--warning)' : 'var(--success)';
     const left = tg.kcal ? tg.kcal - tot.kcal : null;
-    const msg = left === null ? t('food.noTarget') : left >= 0 ? t('food.left', { n: D.fmtNum(left) }) : t('food.over', { n: D.fmtNum(-left) });
+    const msg = left === null ? '' : left >= 0 ? t('food.left', { n: D.fmtNum(left) }) : t('food.over', { n: D.fmtNum(-left) });
     const burn = burned(k);
+    // Kunning bosh raqami — yoy o'lchagichda: uzoqdan o'qiladi va qancha
+    // qolganini bo'laklarning o'zi ko'rsatadi.
     return `<div class="card fd-sum">
-      <div class="fd-hero">
-        ${D.chart.ring({ pct: kPct, size: 112, stroke: 9, color: col, label: D.fmtNum(tot.kcal), sub: tg.kcal ? `/ ${D.fmtNum(tg.kcal)}` : esc(t('food.kcal')) })}
-        <div class="fd-hero-side">
-          <div class="fd-hero-lab">${esc(t('food.kcal'))} ${esc(t('food.eaten'))}</div>
-          <div class="fd-hero-msg ${left !== null && left < 0 ? 'bad' : ''}">${esc(msg)}</div>
-          ${burn !== null ? `<div class="fd-hero-burn">${D.ic('fire', 13)}<span>${esc(t('food.burned', { n: D.fmtNum(burn) }))}</span></div>` : ''}
-          <button class="btn xs ghost fd-tgt" data-act="fdTargets">${D.ic('target', 12)} ${esc(t('food.targets'))}</button>
-        </div>
-      </div>
+      ${D.chart.arc({ pct: kPct, color: col,
+        label: `${D.fmtNum(tot.kcal)}<small> ${esc(t('food.kcal'))}</small>`,
+        sub: tg.kcal ? esc(t('food.ofTarget', { n: D.fmtNum(tg.kcal) })) : '',
+        cap: [left === null ? '' : esc(msg), burn !== null ? esc(t('food.burned', { n: D.fmtNum(burn) })) : ''].filter(Boolean).join(' <span class="sep">·</span> ') })}
+      <div class="fd-hero-act"><button class="btn xs ghost fd-tgt" data-act="fdTargets">${D.ic('target', 12)} ${esc(t(left === null ? 'food.setTarget' : 'food.targets'))}</button></div>
       ${macroBars(tot, tg)}
       ${extraLine(tot)}
     </div>`;
@@ -457,7 +603,7 @@
   function capture() {
     const off = busy ? 'disabled' : '';
     return `<div class="card fd-cap" data-k="fd-cap">
-      <label class="btn block fd-shot">${D.ic('camera', 20)} <span>${esc(t('food.camera'))}</span>
+      <label class="btn block fd-shot"><span class="fd-lens">${D.ic('camera', 17)}</span><span>${esc(t('food.camera'))}</span>
         <input type="file" accept="image/*" capture="environment" data-change="fdPhoto" hidden ${off}></label>
       <div class="fd-cap-row">
         <label class="btn ghost sq" title="${esc(t('food.gallery'))}" aria-label="${esc(t('food.gallery'))}">${D.ic('grid', 18)}<input type="file" accept="image/*" data-change="fdPhoto" hidden ${off}></label>
@@ -593,58 +739,25 @@
     D.saveUi(); D.rerender();
   };
 
-  /* ------------------------------------------------------------------ */
-  /* Bugun uchun plitka                                                  */
-  /* ------------------------------------------------------------------ */
-  D.food.tile = (k) => {
-    k = k || key();
-    const tot = D.food.dayTotals(k), tg = D.food.targets();
-    if (!tot && !tg.kcal) return '';
-    const e = tot ? tot.kcal : 0, pct = tg.kcal ? (e / tg.kcal) * 100 : 0;
-    const zone = !tg.kcal ? '' : pct > 115 ? 'z-bad' : pct > 100 ? 'z-warn' : e ? 'z-good' : '';
-    return `<div class="bento-tile td-tile fd-tile" data-act="go" data-view="food" role="button" tabindex="0">
-      <i class="zone ${zone}"></i>
-      <div class="val">${D.fmtNum(e)}<span class="td-tile-of">${tg.kcal ? `/${D.fmtNum(tg.kcal)}` : ''} ${esc(t('food.kcal'))}</span></div>
-      <div class="lab">${D.ic('apple', 12)} ${esc(t('nav.food'))}</div>
-      <div class="sub num">${esc(t('food.protein'))} ${tot ? r0(tot.p) : 0}${tg.p ? `/${tg.p}` : ''} g</div>
-    </div>`;
+
+  D.on('day:changed', () => { if (D.current() === 'health') D.rerender(); });
+
+  /* Ovqat endi alohida bo'lim emas — Tana bo'limining birinchi sahifasi.
+     Sana chizig'ini Tana o'zi qo'yadi (uchala sahifada bitta chiziq turishi
+     kerak), shuning uchun bu yerda faqat sahifa mazmuni qaytadi. */
+  D.food.page = (day) => {
+    const td = D.today();
+    if (D.ui.viewDate && D.ui.viewDate >= td) { D.ui.viewDate = null; D.saveUi(); }
+    const k = day || key();
+    return safe(() => summary(k)) + safe(() => waterCard(k)) + safe(() => capture())
+      + safe(() => analysisCard()) + safe(() => mealList(k)) + safe(() => weekCard(k));
   };
-
-  /* ------------------------------------------------------------------ */
-  /* qidiruv: so'nggi taomlar                                            */
-  /* ------------------------------------------------------------------ */
-  D.search.register((q) => {
-    const out = [], seen = new Set();
-    const days = Object.keys(F().logs).sort().reverse().slice(0, 30);
-    for (const k of days) for (const m of meals(k)) {
-      if (!m.name || seen.has(m.name)) continue;
-      seen.add(m.name);
-      out.push({ label: m.name, sub: t('food.searchMeal') + ' · ' + D.fmtDate(k) + ` · ${r0(m.kcal)} ${t('food.kcal')}`, icon: 'apple', go: () => { D.ui.viewDate = k === D.today() ? null : k; D.saveUi(); D.go(VIEW); } });
-      if (out.length >= 20) return out;
-    }
-    return out;
-  });
-
-  D.on('day:changed', () => { if (D.current() === VIEW) D.rerender(); });
-
-  D.view({
-    id: VIEW, icon: 'apple', order: 25, nav: true, primary: true,
-    render() {
-      const td = D.today();
-      if (D.ui.viewDate && D.ui.viewDate >= td) { D.ui.viewDate = null; D.saveUi(); }
-      const k = key(), today = k === td;
-      return safe(() => dateNav(k, today)) + safe(() => summary(k)) + safe(() => capture())
-        + safe(() => analysisCard()) + safe(() => mealList(k)) + safe(() => weekCard(k));
-    },
-    mount() {},
-    unmount() {},
-  });
 
   // Enter/Space on the meal rows (core delegates clicks only)
   document.addEventListener('keydown', (ev) => {
     if (ev.key !== 'Enter' && ev.key !== ' ') return;
     const el = ev.target;
-    if (!el || !el.matches || !el.matches('.fd-meal[data-act], .fd-tile[data-act], .fd-day[data-act]')) return;
+    if (!el || !el.matches || !el.matches('.fd-meal[data-act], .fd-day[data-act]')) return;
     ev.preventDefault(); el.click();
   });
 })();

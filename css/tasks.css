@@ -1,200 +1,165 @@
-/* ==== tasks ==== (prefix tk- · checklist board: Hafta · Oy · Streak + Vazifalar · Maqsadlar) */
+/* ==== tasks ==== (prefix tk- · uchta checklist: Vazifalar · Odatlar · Maqsadlar)
 
-/* sub-tab segment — five tabs must fit a 360px phone */
-.tk-seg button { min-height: 40px; padding: 8px 6px; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; }
+   Qoida: qator = katakcha + nom. Ramka yo'q, faqat ingichka ajratuvchi chiziq.
+   Sana, muhimlik, maqsad — qatorni bosganda ochiladigan oynada.
+   ------------------------------------------------------------------ */
 
-/* ---------- day cards (Notion-like: white card, thin line, air) ---------- */
-.tk-row { display: flex; gap: 10px; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;
-  margin: 0 calc(-1 * var(--tk-pad)) 12px; padding: 2px var(--tk-pad) 10px; scrollbar-width: none; }
-.tk { --tk-pad: 16px; }
-.tk-row::-webkit-scrollbar { display: none; }
-.tk-card { --tk-cw: 84%; flex: 0 0 var(--tk-cw); max-width: 320px; min-width: 0; scroll-snap-align: start; scroll-margin-left: var(--tk-pad); display: flex; flex-direction: column;
-  background: var(--card-solid); border: 1px solid var(--card-line); border-radius: var(--r); padding: 14px 14px 12px; box-shadow: var(--sh-card);
-  transition: border-color .2s; }
-.tk-card.today { border-color: var(--line3); }
-.tk-card.all { border-color: color-mix(in srgb, var(--success) 45%, var(--card-line)); }
-.tk-ch { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
-.tk-ch-l { font-size: 15px; font-weight: 700; color: var(--text2); letter-spacing: -.01em; }
-.tk-card.today .tk-ch-l { color: var(--text); }
-.tk-ch-d { font-size: 11px; color: var(--text4); }
-.tk-cb { flex: 1; display: flex; flex-direction: column; gap: 2px; min-height: 0; }
-/* phones: cards run their full height (the row snaps, the page scrolls). ≥700px a long list scrolls inside the card so the footer ring
-   (the Notion cue) stays on screen; no scrollbar chrome, and no overscroll trap — when the list ends the page takes over. */
-.tk-cb { margin: 0 -6px; padding: 0 6px; scrollbar-width: none; }
-.tk-cb::-webkit-scrollbar { display: none; }
-@media (min-width: 700px) { .tk-card { max-height: calc(100vh - 220px); } .tk-cb { overflow-y: auto; } .tk-sheet .tk-card { max-height: none; } .tk-sheet .tk-cb { overflow: visible; } }
-.tk-sep { height: 1px; background: var(--line); margin: 6px 0; }
-.tk-none { font-size: 12px; color: var(--text3); padding: 10px 0; }
-.tk-em { font-family: var(--font-em); font-size: 16px; line-height: 1; flex: none; width: 20px; text-align: center; }
+.tk { --tk-pad: 14px; }
+.tk-seg button { min-height: 44px; font-size: 13px; }
 
-/* a habit line: check · emoji · name (· n/target · +1) */
-.tk-hb, .tk-tk { display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 4px 4px 4px 2px; margin: 0 -4px 0 -2px; border-radius: var(--r-xs); font-size: 13.5px; color: var(--text); transition: background .15s, opacity .2s; }
-.tk-hb.tap { cursor: pointer; user-select: none; }
-.tk-hb.tap:hover, .tk-tk:hover { background: var(--hover); }
-.tk-hb .chk, .tk-tk .chk { width: 20px; height: 20px; border-radius: 6px; }
-.tk-hb .chk.on::after, .tk-tk .chk:checked::after { left: 6px; top: 2px; width: 5px; height: 9px; }
-.tk-hb-name, .tk-tk-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
-.tk-hb.done, .tk-tk.done { opacity: .55; }
-.tk-hb.done .tk-hb-name, .tk-tk.done .tk-tk-text { text-decoration: line-through; text-decoration-color: var(--text3); font-weight: 500; }
-.tk-hb-n { font-size: 12px; font-weight: 700; color: var(--text2); flex: none; }
-.tk-hb-n small { font-size: 10px; color: var(--text3); font-weight: 600; }
-.tk-plus { width: 32px; height: 32px; cursor: pointer; flex: none; border-radius: 9px; border: 1px solid var(--line2); background: var(--glass); color: var(--text); display: inline-flex; align-items: center; justify-content: center; transition: background .15s; }
-.tk-plus:hover { background: var(--hover); border-color: var(--line3); }
-.tk-plus:disabled { opacity: .35; cursor: default; }
-.tk-tk-text { cursor: pointer; font-weight: 500; }
-.tk-pd { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--text4); }
-.tk-pd.p2 { background: var(--warning); } .tk-pd.p3 { background: var(--danger); }
+/* ---------- yangi qator qo'shish ---------- */
+.tk-new { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.tk-new-i { flex: 1; min-height: 50px; font-size: 15.5px; border-radius: 14px; }
+.tk-new-y { flex: 0 0 86px; min-height: 50px; border-radius: 14px; font-size: 14px; }
+.tk-new-b { width: 50px; height: 50px; border-radius: 14px; }
+.tk-new.sm .tk-new-i { min-height: 42px; font-size: 14px; border-radius: 11px; }
+.tk-new.sm .tk-new-b { width: 42px; height: 42px; border-radius: 11px; }
 
-/* inline «+ vazifa» (never rerenders on input; Enter commits) */
-.tk-inl { width: 100%; margin-top: 6px; padding: 7px 6px; border: 0; border-bottom: 1px dashed var(--line2); background: transparent; color: var(--text); font-size: 13px; font-family: inherit; outline: none; border-radius: 0; transition: border-color .2s; }
-.tk-inl::placeholder { color: var(--text4); }
-.tk-inl:focus { border-bottom-color: var(--focus); border-bottom-style: solid; }
+/* ---------- guruh sarlavhasi: nom · chiziq (yoki progress) · son ---------- */
+.tk-list { padding: 6px var(--tk-pad) 12px; }
+.tk-hd { display: flex; align-items: center; gap: 10px; min-height: 30px; margin: 20px 0 4px; }
+.tk-hd:first-child { margin-top: 6px; }
+.tk-hd-l { flex: none; font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); }
+.tk-hl { flex: 1; height: 1px; background: linear-gradient(90deg, var(--line2), transparent); }
+.tk-hb-bar { flex: 1; height: 4px; min-width: 30px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.tk-hb-bar i { display: block; height: 100%; border-radius: 3px; background: var(--success); transition: width .45s var(--ease-out); }
+.tk-hd-n { flex: none; font-size: 11.5px; font-weight: 700; color: var(--text3); }
+.tk-hd.now .tk-hd-l { color: var(--text); }
+.tk-hd.now .tk-hd-n { color: var(--text2); }
+.tk-hd.bad .tk-hd-l, .tk-hd.bad .tk-hd-n { color: var(--danger-text); }
+.tk-hd.bad .tk-hl { background: linear-gradient(90deg, color-mix(in srgb, var(--danger) 30%, transparent), transparent); }
 
-/* footer ring + count */
-.tk-cf { display: flex; align-items: center; gap: 8px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
-.tk-cf .ring-val { display: none; }
-.tk-cf-n { font-size: 12px; font-weight: 700; color: var(--text3); }
-.tk-card.all .tk-cf-n { color: var(--success); }
+/* «Kechikkanlarni bugunga surish» — sarlavhaning o'zida, o'ng chekkada */
+.tk-hd-b { flex: none; min-height: 32px; padding: 6px 11px; border-radius: var(--r-pill); font-family: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer;
+  color: var(--warning); border: 1px solid color-mix(in srgb, var(--warning) 38%, transparent); background: color-mix(in srgb, var(--warning) 9%, transparent); transition: background .15s; }
+.tk-hd-b:hover { background: color-mix(in srgb, var(--warning) 18%, transparent); }
 
-/* ---------- Tezkor tugmalar ---------- */
-.tk-quick { padding: 14px; }
-.tk-pills { display: flex; flex-wrap: wrap; gap: 8px; }
-.tk-pill { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 7px 14px 7px 10px; border-radius: var(--r-pill); border: 1px solid var(--line2); background: var(--glass); color: var(--text2); font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; max-width: 100%; transition: background .15s, color .15s, border-color .15s, transform .1s; }
-.tk-pill > span:not(.tk-em) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tk-pill:hover { border-color: var(--line3); color: var(--text); }
-.tk-pill:active { transform: scale(.97); }
-.tk-pill.on { background: var(--success); border-color: var(--success); color: var(--ink-on-light); box-shadow: 0 0 12px var(--success-glow); }
-.tk-pill .tk-em { width: auto; }
-.tk-pill-n { font-size: 11px; opacity: .8; }
+/* yig'iladigan «Bajarilgan» sarlavhasi */
+.tk-fold { cursor: pointer; user-select: none; }
+.tk-fold:hover .tk-hd-l { color: var(--text2); }
+.tk-hd-x { display: inline-flex; flex: none; color: var(--text4); }
+.tk-hd-x .ic { transition: transform .25s var(--ease-out); }
+.tk-fold.open .tk-hd-x .ic { transform: rotate(180deg); }
 
-/* ---------- Oy ---------- */
-.tk-cal { padding: 14px 12px 12px; }
-.tk-mnav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
-.tk-mtitle { font-size: 15px; font-weight: 700; color: var(--text); text-transform: capitalize; }
-.tk-dow, .tk-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.tk-dow { margin-bottom: 6px; font-family: var(--mono); font-size: 10px; font-weight: 700; letter-spacing: .06em; color: var(--text3); text-align: center; text-transform: uppercase; }
-.tk-dow span:nth-child(6), .tk-dow span:nth-child(7) { color: var(--text4); }
-.tk-pad { display: block; }
-/* cells reuse Tarix's .hs-cell / .hs-dn (history.css) — only the button-specific bits are here */
-.tk-cell { font-family: inherit; cursor: pointer; }
-.tk-cell.future { cursor: default; }
-.tk-cell small { font-size: 9px; font-weight: 600; opacity: .8; line-height: 1; }
-.tk-msum { margin-top: 12px; }
-.tk-msum .stat-num { display: inline-flex; align-items: center; gap: 2px; }
-.tk-msum .stat-num .ic { color: var(--warning); }
-@media (min-width: 720px) { .tk-cell { aspect-ratio: auto; height: 58px; } .tk-cell .hs-dn { font-size: 13px; } }
+.tk-ok { display: flex; align-items: center; gap: 7px; padding: 12px 2px; font-size: 13px; font-weight: 600; color: var(--success); }
+.tk-more { width: 100%; min-height: 42px; margin-top: 4px; border: 0; background: transparent; color: var(--text3); font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 10px; }
+.tk-more:hover { background: var(--hover); color: var(--text); }
+.tk-sub { margin-top: 4px; font-size: 12px; color: var(--text4); }
+.tk-hint { padding: 0 10px; font-size: 11.5px; line-height: 1.5; color: var(--text4); text-align: center; }
+.tk-hint.in { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); text-align: left; }
+@media (hover: hover) and (pointer: fine) { .tk-hint:not(.in) { display: none; } }
 
-/* day card inside the Oy sheet */
-.tk-sheet .tk-card { --tk-cw: 100%; max-width: none; box-shadow: none; }
+/* ---------- qator ---------- */
+.tk-sw { position: relative; list-style: none; }
+.tk-sw + .tk-sw { border-top: 1px solid var(--line); }
+.tk .li.tk-r { position: relative; z-index: 1; margin: 0; padding: 10px 2px 10px 11px; gap: 12px; min-height: 50px;
+  background: transparent; border: 0; border-radius: 12px; transition: transform .22s var(--ease-out), background .2s, opacity .3s; }
+.tk .li.tk-r:hover { background: var(--hover); }
+.tk .li.tk-r.done { opacity: .5; background: transparent; }
+.tk-r-t { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 500; line-height: 1.35; cursor: text; }
+.tk-r.done .tk-r-t { font-weight: 400; }
 
-/* ---------- Streak ---------- */
-.tk-sk { padding: 14px; }
-.tk-sk-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.tk-sr { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--line); }
-.tk-sr:first-of-type { border-top: 0; }
-.tk-sr .tk-em { font-size: 18px; width: 24px; }
-.tk-sr-body { flex: 1; min-width: 0; }
-.tk-sr-name { font-size: 13.5px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 5px; }
-.tk-strip { display: flex; gap: 3px; }
-.tk-strip i { flex: 1 1 0; max-width: 9px; height: 7px; border-radius: 2px; background: var(--line2); }
-.tk-strip i.on { background: var(--success); }
-.tk-strip i.miss { background: color-mix(in srgb, var(--danger) 45%, transparent); }
-.tk-strip i.open { background: transparent; border: 1px solid var(--line3); }
-.tk-strip i.off { opacity: .35; }
-.tk-sr-nums { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex: none; min-width: 52px; }
-.tk-sr-nums .streak { font-size: 14px; }
-.tk-sr-best { font-size: 11px; color: var(--text3); font-weight: 700; }
-.tk-sr-best small { font-weight: 500; font-family: var(--font); }
+/* muhimlik: faqat «juda muhim» belgilanadi — chap chekkadagi ingichka chiziq */
+.tk-r.p3::before { content: ''; position: absolute; left: 0; top: 15px; width: 3px; height: 20px; border-radius: 2px; background: var(--danger); }
+.tk-r.p3.done::before { background: var(--text4); }
 
-/* ---------- Vazifalar / Maqsadlar (management tabs) ---------- */
-.tk-add .input-row { align-items: stretch; }
-.tk-add .btn.sq { height: auto; min-height: 42px; }
-.tk-opts { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
-.tk-opts .tk-date { flex: 1 1 120px; max-width: 190px; min-height: 40px; }
-.tk-opts .tk-goalsel { flex: 2 1 150px; min-height: 40px; }
-.tk-opts .tk-year { flex: 0 1 96px; min-height: 40px; }
-.tk-opts .tk-dirtag { margin-left: auto; padding: 6px 10px; max-width: 46%; overflow: hidden; text-overflow: ellipsis; }
-.tk-prio button { min-height: 40px; min-width: 44px; letter-spacing: -2px; line-height: 1; padding-left: 8px; padding-right: 6px; }
-.tk-prio button.on { box-shadow: inset 0 1px 0 rgba(255,255,255,.4); }
-.tk-stats { margin-bottom: 12px; }
-.tk-stats .stat-sub { font-size: 10.5px; }
-.tk-tabs button { min-height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 4px; }
-.tk-tabs button .num { font-size: 11px; opacity: .75; }
-.tk-tabs button.on .num { opacity: .85; }
-.tk-tabs button.tk-tab-bad:not(.on) { color: var(--danger-text); border-color: color-mix(in srgb, var(--danger) 38%, transparent); background: color-mix(in srgb, var(--danger) 8%, transparent); }
-.tk-push { display: inline-flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 12px; min-height: 42px; color: var(--warning); border-color: color-mix(in srgb, var(--warning) 45%, transparent); }
-.tk-push:hover { color: var(--warning); background: color-mix(in srgb, var(--warning) 10%, transparent); }
-.tk-list { padding: 8px 12px 10px; }
-.tk-list .section-title { margin: 8px 0 8px; }
-.tk-list .section-title.tk-bad { color: var(--danger-text); }
-.tk-list .section-title.tk-bad::before { background: var(--danger-text); }
-.tk-list .list:last-child .li:last-child { margin-bottom: 4px; }
-.tk-gh-btn { width: 100%; background: transparent; border: 0; padding: 6px 0; cursor: pointer; min-height: 40px; font-family: inherit; }
-.tk-gh-btn .ic { color: var(--text3); transition: transform .25s var(--ease-out); }
-.tk-gh-btn.open .ic { transform: rotate(180deg); }
-.tk-gh-btn:hover { color: var(--text2); }
-.tk-list .empty.small { padding: 8px; }
-.tk-list .dashed { margin: 4px 0 6px; min-height: 40px; }
-.tk .li { padding: 8px 6px 8px 12px; }
-.tk-over { border-color: color-mix(in srgb, var(--danger) 30%, var(--line)); }
-.tk-over .chk { border-color: color-mix(in srgb, var(--danger) 55%, var(--line3)); }
-.tk-stars { font-size: 11px; letter-spacing: -3px; padding: 8px 6px 8px 2px; margin: -8px 0; cursor: pointer; user-select: none; flex: none; display: inline-flex; align-items: center; min-height: 40px; }
-.tk-meta-tap { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; cursor: pointer; min-height: 40px; padding: 8px 4px; margin: -8px 0; }
-.tk-goaltag { margin-top: 4px; min-width: 0; max-width: 100%; cursor: pointer; display: flex; }
-.tk-goaltag .tag { gap: 4px; max-width: 100%; min-width: 0; }
-.tk-tag-txt { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.tk-acts { display: flex; align-items: center; gap: 0; flex: none; margin-right: -2px; }
-.tk-acts .btn.icon, .tk-acts .li-del { width: 40px; height: 40px; padding: 0; border-radius: 10px; }
-.tk-acts .btn.icon { color: var(--text3); }
-.tk-acts .btn.icon:hover { color: var(--success); }
-.li-text.editing { outline: 1px solid var(--line3); border-radius: 6px; padding: 2px 6px; margin: -2px -6px; background: var(--f-input-focus); cursor: text; text-decoration: none; }
-.li-text[data-act] { cursor: text; }
+/* sana tugmasi — bosilsa vazifa oynasi ochiladi */
+.tk-r-w { flex: none; display: inline-flex; align-items: center; justify-content: center; min-width: 36px; min-height: 36px; padding: 6px 8px; border: 0; border-radius: 10px;
+  background: transparent; color: var(--text3); font-family: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
+.tk-r-w:hover { background: var(--hover); color: var(--text); }
+.tk-r-w.empty { color: var(--text4); }
+.tk-r-w.bad { color: var(--danger-text); }
+.tk-r-x { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border: 0; border-radius: 10px;
+  background: transparent; color: var(--text4); cursor: pointer; opacity: .3; transition: opacity .15s, color .15s, background .15s; }
+.tk-r-x:hover { opacity: 1; color: var(--danger-text); background: var(--hover); }
+@media (hover: hover) and (pointer: fine) { .tk-r-x { opacity: 0; } .tk-r:hover .tk-r-x, .tk-r-x:focus-visible { opacity: 1; } }
+
+.tk-r.over .tk-r-t { color: var(--text); }
+.li-text.editing { outline: 1px solid var(--line3); border-radius: 6px; padding: 2px 6px; margin: -2px -6px; background: var(--f-input-focus); text-decoration: none; }
 .tk .li.hl { animation: tkHl 2.4s var(--ease-out) forwards; }
-@keyframes tkHl { 0%, 60% { background: color-mix(in srgb, var(--warning) 14%, transparent); box-shadow: inset 3px 0 0 0 var(--warning); } 100% { background: var(--inset); box-shadow: none; } }
+@keyframes tkHl { 0%, 60% { background: color-mix(in srgb, var(--warning) 16%, transparent); box-shadow: inset 3px 0 0 0 var(--warning); } 100% { background: transparent; box-shadow: none; } }
 
-/* goals: KPI card, year pills, rows */
-.tk-kpi-row { align-items: center; gap: 16px; }
-.tk-kpi .kpi { margin-top: 6px; }
-.tk-dirs { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--line); }
-.tk-dirs .hbar { margin: 5px 0; font-size: 12px; }
-.tk-dirs .hbar-label { width: 104px; }
-.tk-dirs .hbar-val { min-width: 44px; }
-.tk-years { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-.tk-years .pill { cursor: pointer; min-height: 40px; padding: 6px 12px; font-family: inherit; gap: 6px; }
-.tk-years .pill .num { font-size: 10.5px; }
-.tk-years .pill.on .num { color: inherit; opacity: .8; }
-.tk-years .pill:hover { border-color: var(--line3); color: var(--text); }
-.tk-goal { align-items: flex-start; }
-.tk-goal > .chk { margin-top: 4px; }
-.tk-goal .tk-acts { margin-top: -4px; }
-.tk-gmeter { display: inline-flex; align-items: center; gap: 6px; flex: 1 1 120px; min-width: 120px; max-width: 180px; }
-.tk-gbar { flex: 1 1 auto; min-width: 60px; }
-.tk-gcount { font-size: 11px; color: var(--text2); flex: none; }
-.tk-expand .ic { transition: transform .25s var(--ease-out); }
-.tk-expand.open .ic { transform: rotate(180deg); }
-.tk-pill-btn { cursor: pointer; font-family: inherit; padding: 4px 10px; min-height: 40px; margin: -7px 0; }
-.tk-pill-btn:hover { filter: brightness(1.1); }
-.tk-gx { margin-top: 10px; padding-top: 10px; border-top: 1px dashed var(--line2); }
-.tk-gx .input-row { margin-top: 6px; }
-.tk-gx .input-row .btn.sm { min-height: 40px; min-width: 40px; }
-.tk-mini .li { padding: 6px 6px 6px 10px; min-height: 40px; margin-bottom: 4px; background: var(--recess); }
-.tk-mini .li-text { font-size: 13px; }
-.tk-mini .li-meta { font-size: 11px; }
-.tk-mini .chk { width: 20px; height: 20px; border-radius: 6px; }
-.tk-mini .chk:checked::after, .tk-mini .chk.on::after { left: 6px; top: 2px; width: 5px; height: 9px; }
-.tk-mini .tk-acts .li-del { width: 40px; height: 40px; }
+/* surish: chapga — o'chirish, o'ngga — ertaga/bugunga */
+.tk-r.sw { transition: background .2s; background: var(--card-solid); cursor: grabbing; }
+.tk-swh { position: absolute; top: 0; bottom: 0; z-index: 0; display: flex; align-items: center; gap: 6px; padding: 0 18px; font-size: 12px; font-weight: 700; opacity: 0; transition: opacity .15s; }
+.tk-swh.l { right: 0; color: var(--danger-text); }
+.tk-swh.r { left: 0; color: var(--success); }
+.tk-r.sw ~ .tk-swh { opacity: .4; }
+.tk-r.sw-l ~ .tk-swh.l, .tk-r.sw-r ~ .tk-swh.r { opacity: 1; }
+
+/* ---------- Odatlar ---------- */
+.tk-hcard { padding: 12px var(--tk-pad) 12px; }
+.tk-h { display: flex; align-items: center; gap: 11px; padding: 11px 2px; border-top: 1px solid var(--line); border-radius: 12px; transition: background .15s; }
+.tk-hd + .tk-h { border-top: 0; }
+.tk-h.tap { cursor: pointer; user-select: none; }
+.tk-h.tap:hover { background: var(--hover); }
+.tk-em { flex: none; width: 22px; text-align: center; font-family: var(--emoji); font-size: 17px; line-height: 1; }
+.tk-h-b { flex: 1; min-width: 0; }
+.tk-h-top { display: flex; align-items: center; gap: 8px; }
+.tk-h-n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; font-weight: 600; color: var(--text); }
+.tk-h.done .tk-h-n { font-weight: 500; color: var(--text2); text-decoration: line-through; text-decoration-color: var(--text4); }
+.tk-h-bot { display: flex; align-items: center; gap: 12px; margin-top: 7px; }
+.tk-strip { display: flex; gap: 3px; flex: 1; min-width: 0; }
+.tk-strip i { flex: 1 1 0; max-width: 18px; height: 6px; border-radius: 2px; background: var(--line2); }
+.tk-strip i.on { background: var(--success); }
+.tk-strip i.miss { background: color-mix(in srgb, var(--danger) 40%, transparent); }
+.tk-strip i.open { background: transparent; box-shadow: inset 0 0 0 1px var(--line3); }
+.tk-strip i.off { opacity: .3; }
+.tk-hc { flex: none; display: flex; align-items: center; gap: 3px; }
+.tk-step { width: 30px; height: 30px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px;
+  border: 1px solid var(--line2); background: var(--glass); color: var(--text); cursor: pointer; transition: background .15s, border-color .15s; }
+.tk-step:hover { background: var(--hover); border-color: var(--line3); }
+.tk-step:disabled { opacity: .3; cursor: default; }
+.tk-hc-n { min-width: 42px; text-align: center; font-size: 12.5px; font-weight: 700; color: var(--text2); font-family: var(--num); }
+.tk-hc-n small { font-size: 10.5px; font-weight: 600; color: var(--text4); }
+
+/* ---------- Maqsadlar ---------- */
+.tk-tabs { margin-bottom: 12px; }
+.tk-tabs button { min-height: 40px; }
+.tk-tabs button .num { font-size: 11px; opacity: .7; }
+.tk-gn { flex: none; font-size: 11.5px; font-weight: 700; color: var(--text3); }
+.tk-gn.full { color: var(--success); }
+.tk-gy { flex: none; font-size: 11px; font-weight: 600; color: var(--text4); }
+.tk-goal > .tk-r-w .ic { transition: transform .25s var(--ease-out); }
+.tk-goal > .tk-r-w.open .ic { transform: rotate(180deg); }
+/* ochilgan maqsad: bog'langan vazifalar qatorning ostida, butun kenglikda */
+.tk-gx { margin: 0 0 10px 36px; padding: 8px 0 0; border-top: 1px dashed var(--line2); }
+.tk-gx-h { margin-bottom: 2px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text4); }
+.tk-gx .tk-new { margin: 6px 0 0; }
+.tk-gx .tk-sw + .tk-sw { border-top: 1px solid var(--line); }
+.tk .li.tk-r.tk-mini { min-height: 42px; padding: 6px 2px 6px 9px; gap: 9px; }
+.tk-mini .tk-r-t { font-size: 13.5px; }
+.tk-mini .chk { width: 21px; height: 21px; border-radius: 7px; }
+.tk-mini .chk:checked::after { left: 6px; top: 2px; width: 5px; height: 10px; }
+.tk-mini .tk-r-w { min-width: 32px; min-height: 32px; }
+.tk-mini.p3::before { top: 11px; height: 18px; }
+
+/* muhimlik tanlagichi (vazifa oynasida) */
+.tk-prio button { min-height: 40px; min-width: 46px; letter-spacing: -2px; line-height: 1; padding-left: 9px; padding-right: 7px; }
+.tk-prio button.on { box-shadow: inset 0 1px 0 rgba(255,255,255,.4); }
 
 /* ---------- breakpoints ---------- */
-@media (min-width: 700px) { .tk-card { --tk-cw: calc((100% - 20px) / 3); max-width: none; }
-  .tk-hb, .tk-tk { min-height: 32px; font-size: 13px; } .tk-hb-name { font-weight: 500; } }
-@media (min-width: 960px) { .tk { --tk-pad: 28px; } }
+@media (min-width: 700px) {
+  .tk { --tk-pad: 18px; }
+  .tk-h { padding: 9px 4px; }
+}
 @media (max-width: 480px) {
   .tk-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; overflow: visible; padding-bottom: 0; }
   .tk-tabs button { width: 100%; min-width: 0; padding-left: 8px; padding-right: 8px; }
-  .tk-opts .tk-date { max-width: none; }
-  .tk-opts .tk-goalsel { flex-basis: 100%; }
-  .tk-opts .tk-year { flex: 0 1 84px; }
-  .tk-seg button { padding: 8px 4px; font-size: 11.5px; }
   .tk { --tk-pad: 12px; }
+  .tk-hd { gap: 8px; }
+  .tk-strip i { max-width: 14px; }
 }
-@media (max-width: 400px) { .tk-cal { padding: 12px 8px 10px; } .tk-grid, .tk-dow { gap: 3px; } .tk-cell { min-height: 38px; padding: 4px 1px 3px; } .tk-cell .hs-dn { font-size: 11px; } }
+@media (max-width: 380px) {
+  .tk-new-y { flex-basis: 74px; }
+  .tk-hc-n { min-width: 36px; }
+}
+
+/* ---------- ichkaridagi sahifalar ----------
+   Vazifa bo'limining Odat va Kitob sahifalari o'z tanlagichi bilan keladi
+   (habits.js › jadval·guruh·yakun·tahlil, books.js › kitob·ko'rgan), ya'ni
+   ekranda ikki qator tanlagich ustma-ust tushadi. Ichkarisi maydaroq va
+   chegarasiz: qaysi biri bo'lim, qaysi biri sahifa ekani shundan ko'rinadi. */
+.tk .hb-seg, .tk .bk-seg { margin: -2px 0 12px; padding: 0; gap: 2px; background: transparent; border: 0; }
+.tk .hb-seg button, .tk .bk-seg button { min-height: 34px; padding: 7px 10px; font-size: 12px; }
+#view .tk .hb-seg button.on, #view .tk .bk-seg button.on { background: var(--accent-soft); color: var(--accent); }

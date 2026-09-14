@@ -45,4 +45,4 @@ curl -s http://127.0.0.1:8081/api/health; echo
 EOS
 )
 printf '%s\n%s\n%s\n' "$PROV" "$KEY" "$MODEL" | remote_bash "$HOST" "$REMOTE"
-echo "✓ AI yoqildi — «Tahlil qil» va Nova endi shu provayder bilan ishlaydi."
+echo "✓ AI yoqildi — «Tahlil qil» va Yusa AI endi shu provayder bilan ishlaydi."

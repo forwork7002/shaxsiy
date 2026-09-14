@@ -3,7 +3,7 @@
 Arxiv — SQLite (data/dash.db).
 
 Mijoz butun holatni bitta JSON blob sifatida saqlaydi (data/<uid>.json). O'sha blob tahrir uchun
-haqiqat manbai; bu fayl esa O'TMISH uchun haqiqat manbai: har saqlashdan kunlik faktlar, Nova
+haqiqat manbai; bu fayl esa O'TMISH uchun haqiqat manbai: har saqlashdan kunlik faktlar, Yusa AI
 chatlari, AI kartalari; har WHOOP tortishidan normallashgan yozuvlar (snapshot 120 kunga
 qirqilsa ham bu yerda abadiy qoladi). Ilova mantig'i bu yerdan hech narsani o'chirmaydi —
 faqat deleted_at (chatlar) / gone_at (kunlik faktlar) belgisi qo'yiladi (state_versions ni
@@ -280,7 +280,7 @@ def _existing(c, uid: str) -> dict:
 
 
 def archive_state(uid: str, blob: dict, now=None) -> dict:
-    """Blobdan kunlik faktlar, Nova chatlari va AI kartalarini arxivga yozadi. Bitta tranzaksiya.
+    """Blobdan kunlik faktlar, Yusa AI chatlari va AI kartalarini arxivga yozadi. Bitta tranzaksiya.
     Faqat xeshi o'zgargan qatorlar yoziladi. Qaytaradi: nechta qator yozildi."""
     if not isinstance(blob, dict):
         return {}
@@ -311,9 +311,9 @@ def archive_state(uid: str, blob: dict, now=None) -> dict:
         if gone_f:
             c.executemany("UPDATE day_facts SET gone_at=? WHERE uid=? AND day=? AND kind=? AND gone_at IS NULL", gone_f)
             st["gone"] = len(gone_f)
-        # ── Nova chatlari ──
-        nova = blob.get("nova") if isinstance(blob.get("nova"), dict) else {}
-        threads = [t for t in (nova.get("threads") if isinstance(nova.get("threads"), list) else []) if isinstance(t, dict) and t.get("id")]
+        # ── Yusa AI chatlari ──
+        yusa = blob.get("yusa") if isinstance(blob.get("yusa"), dict) else {}
+        threads = [t for t in (yusa.get("threads") if isinstance(yusa.get("threads"), list) else []) if isinstance(t, dict) and t.get("id")]
         present = []
         for th in threads:
             tid = str(th["id"])
@@ -718,7 +718,7 @@ def version(uid: str, vid) -> dict:
 
 
 def restore_thread(uid: str, thread_id: str):
-    """Arxivdagi chat → blob nova.threads ko'rinishida ({id, ts, messages:[{role,content,ts}]})."""
+    """Arxivdagi chat → blob yusa.threads ko'rinishida ({id, ts, messages:[{role,content,ts}]})."""
     t = chat(uid, thread_id)
     if not t:
         return None

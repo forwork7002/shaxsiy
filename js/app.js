@@ -1,80 +1,49 @@
-/* Boot: header, theme toggle, palette wiring, service worker */
+/* Boot: yon panel nomi, service worker */
 (function () {
   'use strict';
 
-  D.act.toggleTheme = () => {
-    const cur = document.documentElement.getAttribute('data-theme');
-    D.theme.set(cur === 'dark' ? 'light' : 'dark');
-    D.toast(D.t(cur === 'dark' ? 'theme.light' : 'theme.dark'));
-  };
-
-  function renderHeader() {
-    const k = D.today();
-    const title = D.S.profile.name ? D.S.profile.name : D.t('app.title');
-    const t1 = D.$('#hTitle'), t2 = D.$('#sideTitle');
-    if (t1) t1.textContent = title;
-    if (t2) t2.textContent = title;
-    const d = D.$('#hDate'), sd = D.$('#sideDate');
-    // the year is dead weight in a header you read every day
-    if (d) d.textContent = D.fmtDate(k, 'weekday');
-    if (sd) sd.textContent = D.fmtDate(k, 'weekday');
-    const hj = D.$('#hHijri');
-    if (hj && D.hijri) {
-      const h = D.hijri.fromKey(k);
-      hj.textContent = h ? `${h.d} ${D.t('hijri.months')[h.m - 1]}` : '';
-    }
-    // the next prayer is the most glanced-at line in the app — give it its own
-    // row, and let tapping it open the times
-    const hp = D.$('#hPrayer');
-    if (hp && D.prayer) {
-      let nx = null;
-      try { nx = D.prayer.next(); } catch (e) { nx = null; }
-      // inside Ibodat the section has its own countdown; two would be one too many
-      hp.hidden = !nx || D.current() === 'prayer';
-      if (nx) {
-        hp.innerHTML = `<span class="hp-ic">${D.ic('mosque', 13)}</span>
-          <span class="hp-name">${D.esc(D.t('prayer.' + nx.id))}</span>
-          <span class="hp-time num">${D.esc(nx.time)}</span>
-          <span class="hp-left num">${D.esc(D.fmtMins(nx.minsLeft))}</span>`;
-      }
-    }
-    const tb = D.$('#themeBtn');
-    if (tb) tb.innerHTML = D.ic(document.documentElement.getAttribute('data-theme') === 'dark' ? 'sun' : 'moon', 20);
-    // profil tugmasi: faqat server va kirgan odam bo'lganda; rasm yoki bosh harflar (profile.js)
-    const av = D.$('#hAvatar');
-    if (av) {
-      const on = !!(D.serverEnabled() && D.me && D.profile);
-      av.hidden = !on;
-      const h = on ? D.profile.avatarHtml(40, 'h-avatar') : '';
-      if (av._h !== h) { av.innerHTML = h; av._h = h; }
-      if (on) av.title = D.t('pf.title');
-    }
-    const pi = D.$('#paletteInp');
-    if (pi) pi.placeholder = D.t('search.placeholder');
+  // yon paneldagi nom — tilga qarab (sarlavha satri yo'q: ekran to'liq sahifaniki)
+  function renderBrand() {
+    const sb = D.$('#sideTitle');
+    if (sb) sb.textContent = D.t('app.title');
   }
 
-  D.on('boot', renderHeader);
-  D.on('me:changed', renderHeader);
-  D.on('tick', renderHeader);
-  D.on('day:changed', renderHeader);
-  D.on('view:changed', renderHeader);
-  D.on('state:changed', D.debounce(renderHeader, 300));
-
-  // close palette on backdrop click
-  document.addEventListener('click', (ev) => { const p = D.$('#palette'); if (p && ev.target === p) p.classList.remove('show'); });
-  document.addEventListener('keydown', (ev) => {
-    const p = D.$('#palette');
-    if (!p || !p.classList.contains('show')) return;
-    const items = D.$$('.pal-item', p);
-    if (!items.length) return;
-    let i = items.findIndex((x) => x.classList.contains('on'));
-    if (ev.key === 'ArrowDown') { ev.preventDefault(); items[i]?.classList.remove('on'); items[(i + 1) % items.length].classList.add('on'); }
-    else if (ev.key === 'ArrowUp') { ev.preventDefault(); items[i]?.classList.remove('on'); items[(i - 1 + items.length) % items.length].classList.add('on'); }
-    else if (ev.key === 'Enter') { ev.preventDefault(); (items[i] || items[0]).click(); }
-  });
+  D.on('boot', renderBrand);
+  D.on('me:changed', renderBrand);
+  D.on('state:changed', D.debounce(renderBrand, 300));   // til almashsa nom ham almashadi
 
   if ('serviceWorker' in navigator && location.protocol !== 'file:' && !window.DASH_NO_SW) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+    // Yangi nusxa chiqqanda sahifa o'zini o'zi yangilaydi. Bo'lmasa telefonga
+    // o'rnatilgan ilova hech qachon yopilmaydi — service worker fonda yangilansa
+    // ham ekranda eski kesh turaveradi. 2026-09-10 da bir kun oldin olib
+    // tashlangan «Kofein / Qo'shimchalar» qatori shu sababdan ko'rinib turgandi.
+    const hadWorker = !!navigator.serviceWorker.controller;
+    let reloading = false, lastCheck = 0;
+    const typing = () => {
+      const el = document.activeElement;
+      return !!(el && (el.isContentEditable || el.tagName === 'INPUT' || el.tagName === 'TEXTAREA'));
+    };
+    const refresh = () => {
+      if (reloading) return;
+      if (typing()) { setTimeout(refresh, 3000); return; }   // yozib turgan odamni bo'lmaymiz
+      reloading = true;
+      location.reload();
+    };
+    // yangi worker boshqaruvni olganda — ya'ni rostdan yangi nusxa tayyor bo'lganda
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadWorker) refresh(); });
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').then((reg) => {
+        if (!reg) return;
+        // ilova orqadan qaytganda yangi nusxa bor-yo'qligini so'raymiz (daqiqada bir marta)
+        const check = () => {
+          if (document.hidden || Date.now() - lastCheck < 60000) return;
+          lastCheck = Date.now();
+          reg.update().catch(() => {});
+        };
+        document.addEventListener('visibilitychange', check);
+        window.addEventListener('focus', check);
+      }).catch(() => {});
+    });
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', D.boot, { once: true });

@@ -62,7 +62,10 @@ User=$APP_USER
 Group=$APP_USER
 WorkingDirectory=$APP_DIR
 EnvironmentFile=$APP_DIR/.env
-ExecStart=$APP_DIR/.venv/bin/gunicorn -w 2 -b 127.0.0.1:8081 --no-control-socket --timeout 120 --access-logfile - api:app
+# --threads: AI so'rovi 10-30 soniya davom etadi. Ipsiz (sync) ishchi shu paytda
+# boshqa hech narsani bajara olmasdi — ikkinchi bo'lim tahlili yoki oddiy /api/data
+# navbatda turardi va foydalanuvchiga AI yana ham sekinroq ko'rinardi.
+ExecStart=$APP_DIR/.venv/bin/gunicorn -w 2 --threads 8 -b 127.0.0.1:8081 --no-control-socket --timeout 120 --access-logfile - api:app
 Restart=always
 RestartSec=3
 # ilova faqat o'z papkasiga yozadi
@@ -100,14 +103,36 @@ server {
     # Statik fayllar to'g'ridan-to'g'ri nginx'dan — faqat shu uchta papka. Ilgari qoida
     # kengaytma bo'yicha edi (~* \.(css|js|…)\$) va $APP_DIR ichidagi ISTALGAN .js/.css
     # faylni ilovaning oq ro'yxatini chetlab o'tib berardi (2026-09-09 tekshiruvi).
-    location ^~ /js/    { root $APP_DIR; try_files \$uri @app; expires 1h; add_header Cache-Control "public, must-revalidate"; }
-    location ^~ /css/   { root $APP_DIR; try_files \$uri @app; expires 1h; add_header Cache-Control "public, must-revalidate"; }
-    location ^~ /icons/ { root $APP_DIR; try_files \$uri @app; expires 1h; add_header Cache-Control "public, must-revalidate"; }
-    location = /app.css { root $APP_DIR; try_files \$uri @app; expires 1h; add_header Cache-Control "public, must-revalidate"; }
+    # `expires -1` = Cache-Control: no-cache — brauzer ETag bilan tekshiradi (odatda 304),
+    # shuning uchun deploy darrov yetib boradi. Ilgari `expires 1h` edi va yangi JS
+    # foydalanuvchiga bir soatgacha ko'rinmasdi (2026-09-09).
+    location ^~ /js/    { root $APP_DIR; try_files \$uri @app; expires -1; }
+    location ^~ /css/   { root $APP_DIR; try_files \$uri @app; expires -1; }
+    location ^~ /icons/ { root $APP_DIR; try_files \$uri @app; expires -1; }
+    # Shriftlar: nomi o'zgarmasa mazmuni ham o'zgarmaydi — uzoq keshlansa bo'ladi.
+    location ^~ /fonts/ { root $APP_DIR; try_files \$uri @app; expires 1y; add_header Cache-Control "public, immutable"; }
+    location = /app.css { root $APP_DIR; try_files \$uri @app; expires -1; }
     location = /sw.js        { root $APP_DIR; add_header Cache-Control "no-cache"; try_files \$uri @app; }
     location = /manifest.json { root $APP_DIR; add_header Cache-Control "no-cache"; try_files \$uri @app; }
 
     location / { try_files /dev/null @app; }
+
+    # AI javobi oqim bilan keladi (SSE). Bu yerda bufer bo'lmasligi shart: aks holda
+    # nginx bo'laklarni to'plab, javobni oxirida bir yo'la berardi — oqimning butun
+    # ma'nosi yo'qolardi. proxy_http_version 1.1 — HTTP/1.0 da chunked yo'q.
+    location = /api/ai/stream {
+        proxy_pass http://127.0.0.1:8081;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_set_header Connection "";
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header X-Forwarded-Host \$host;
+        proxy_read_timeout 180s;
+    }
 
     location @app {
         proxy_pass http://127.0.0.1:8081;

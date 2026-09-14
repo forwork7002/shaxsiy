@@ -18,12 +18,11 @@
   /* i18n — one compact table [uz, uzk, ru] expanded into three tables    */
   /* ------------------------------------------------------------------ */
   const T = {
+    'hl.sub.ovqat': ['Ovqat', 'Овқат', 'Еда'],
     'hl.sub.ready': ['Tayyorlik', 'Тайёрлик', 'Готовность'],
     'hl.sub.sleep': ['Uyqu', 'Уйқу', 'Сон'],
     'hl.sub.strain': ["Zo'riqish", 'Зўриқиш', 'Нагрузка'],
     'hl.ago': ['{n} kun oldin', '{n} кун олдин', '{n} дн. назад'],
-    'hl.day.prev': ['Oldingi kun', 'Олдинги кун', 'Предыдущий день'],
-    'hl.day.next': ['Keyingi kun', 'Кейинги кун', 'Следующий день'],
     // Tarix bo'limi arxivdagi eski teglarni shu nomlar bilan ko'rsatadi —
     // Sog'liqda teg qo'yish yo'q, lekin yozilganlari o'qiladi.
     'hl.tag.uyqusiz': ['Uyqusiz', 'Уйқусиз', 'Недосып'],
@@ -41,66 +40,64 @@
     'hl.wh.notConfigured': ['Serverda WHOOP kalitlari sozlanmagan', 'Серверда WHOOP калитлари созланмаган', 'На сервере не настроены ключи WHOOP'],
     'hl.wh.disconnectQ': ["WHOOP ulanishini uzasizmi? Keshdagi ma'lumotlar o'chadi.", 'WHOOP уланишини узасизми? Кешдаги маълумотлар ўчади.', 'Отключить WHOOP? Кэшированные данные будут удалены.'],
     'hl.wh.disconnected': ['WHOOP uzildi', 'WHOOP узилди', 'WHOOP отключён'],
-    'hl.off.title': ["Bu sahifa WHOOP bilan ishlaydi", 'Бу саҳифа WHOOP билан ишлайди', 'Эта страница работает от WHOOP'],
-    'hl.off.text': [
-      "Tiklanish, HRV, tinch puls, uyqu bosqichlari, zo'riqish va mashg'ulotlar — hammasi soatdan o'zi keladi. Qo'lda hech narsa kiritmaysiz.",
-      'Тикланиш, HRV, тинч пульс, уйқу босқичлари, зўриқиш ва машғулотлар — ҳаммаси соатдан ўзи келади. Қўлда ҳеч нарса киритмайсиз.',
-      'Восстановление, HRV, пульс покоя, фазы сна, нагрузка и тренировки приходят с часов сами. Вручную ничего вводить не нужно.',
-    ],
   };
   const TABLES = { uz: {}, uzk: {}, ru: {} };
   for (const k of Object.keys(T)) { TABLES.uz[k] = T[k][0]; TABLES.uzk[k] = T[k][1]; TABLES.ru[k] = T[k][2]; }
   D.i18n.add(TABLES);
 
   const esc = D.esc;
-  const SUBS = ['ready', 'sleep', 'strain'];
-  // eski bo'limchalar (kun · vazn · suv · tana) Tayyorlikka yig'ildi
-  const MOVED = { day: 'ready', weight: 'ready', water: 'ready', body: 'ready' };
+  // Ovqat birinchi turadi: kunda bir necha marta ochiladigan yagona sahifa shu.
+  const SUBS = ['ovqat', 'ready', 'sleep', 'strain'];
+  // eski bo'limchalar (kun · vazn · suv · tana) Tayyorlikka yig'ildi;
+  // «food» — eski alohida bo'limdan kelgan havolalar
+  const MOVED = { day: 'ready', weight: 'ready', water: 'ready', body: 'ready', food: 'ovqat' };
 
   const viewKey = () => { const k = D.ui.viewDate; return k && k <= D.today() ? k : D.today(); };
   const whoopOn = () => !!(D.whoop && D.S.whoop && D.S.whoop.connected);
-  const aiCard = (section) => { if (!D.ai || typeof D.ai.card !== 'function') return ''; try { return D.ai.card(section); } catch (e) { return ''; } };
 
   /* ------------------------------------------------------------------ */
   /* render                                                              */
   /* ------------------------------------------------------------------ */
-  function dayNav(k) {
-    const today = D.today(), ago = D.daysBetween(k, today);
-    const subLabel = ago === 0 ? D.t('common.today') : ago === 1 ? D.t('common.yesterday') : D.t('hl.ago', { n: ago });
-    return `<div class="date-nav">
-      <button class="btn ghost sq" data-act="hlDate" data-n="-1" aria-label="${esc(D.t('hl.day.prev'))}">${D.ic('chevL', 20)}</button>
-      <div class="label">${esc(D.fmtDate(k, 'weekday'))}<span class="sub">${esc(subLabel)}${ago ? ` · <button class="hl-link" data-act="hlDateToday">${esc(D.t('btn.today'))}</button>` : ''}</span></div>
-      <button class="btn ghost sq" data-act="hlDate" data-n="1" ${ago === 0 ? 'disabled' : ''} aria-label="${esc(D.t('hl.day.next'))}">${D.ic('chevR', 20)}</button></div>`;
-  }
-
-  /** Soat ulanmagan — uchala bo'limcha ham shuni ko'rsatadi. */
-  function offline() {
-    return `<div class="card hl-off"><div class="title">${D.ic('bolt', 18)} ${esc(D.t('hl.off.title'))}</div>
-      <p class="help">${esc(D.t('hl.off.text'))}</p></div>`;
-  }
-
-  // Tayyorlik: kun holati (hero) → aniq o'lchovlar jadvali → tendensiya → tana
+  // Tayyorlik: kun holati (hero) → aniq o'lchovlar jadvali → tendensiya → tana.
+  // Tendensiya, tana va yosh o'sha kunga emas, bugungi holatga tegishli — sana
+  // chizig'i o'tgan kunda turganda ularni ko'rsatish yolg'on bo'lardi, shuning
+  // uchun ular faqat bugun ko'rinadi.
   function renderReady(k) {
-    return D.whoop.hero(k) + D.whoop.vitals(k) + D.whoop.trendCard() + D.whoop.bodyCard();
+    const today = k === D.today();
+    return D.whoop.hero(k) + D.whoop.vitals(k) + (today ? D.whoop.trendCard() + D.whoop.bodyCard() : '');
   }
   function renderSleep(k) { return D.whoop.sleepPage(k); }
   function renderStrain(k) { return D.whoop.strainPage(k); }
 
-  const PAGES = { ready: renderReady, sleep: renderSleep, strain: renderStrain };
-  const AI_OF = { ready: 'health', sleep: 'sleep', strain: 'strain' };
+  const renderOvqat = (k) => (D.food && D.food.page ? D.food.page(k) : '');
+  const PAGES = { ovqat: renderOvqat, ready: renderReady, sleep: renderSleep, strain: renderStrain };
 
-  function render() {
-    let sub = D.sub('health', 'ready');
-    sub = MOVED[sub] || (SUBS.includes(sub) ? sub : 'ready');
-    const seg = `<div class="seg hl-seg">${SUBS.map((s) => `<button class="${sub === s ? 'on' : ''}" data-act="sub" data-view="health" data-sub="${s}">${esc(D.t('hl.sub.' + s))}</button>`).join('')}</div>`;
-    const k = viewKey();
-    // Tana bo'limi kunga bog'liq emas, qolgan ikkitasi kunga bog'liq — sana chizig'i hamma joyda turadi
-    const body = whoopOn() ? PAGES[sub](k) : offline();
-    const ai = whoopOn() ? aiCard(AI_OF[sub]) : '';
-    return `<div class="hl">${seg}${dayNav(k)}${body}${ai}${D.whoop.footer()}</div>`;
+  /* Saqlangan bo'limcha eskirgan yoki mavjud bo'lmasligi mumkin (eski `food`,
+     yoki soat uzilganda qolib ketgan `sleep`). Uni faqat ko'rsatishda niqoblash
+     yetmaydi: boshqa modullar ham D.ui.sub.health ni o'qiydi (Yusa to'garagi
+     shu sababli Ovqat sahifasida Tayyorlikni tahlil qilardi). Shuning uchun
+     tuzatilgan qiymat holatga ham qaytib yoziladi. */
+  function curSub() {
+    const raw = D.sub('health', 'ovqat');
+    let sub = MOVED[raw] || (SUBS.includes(raw) ? raw : 'ovqat');
+    // Soat ulanmagan bo'lsa WHOOP sahifalarining uchalasi ham bo'sh — Ovqatga qaytaramiz.
+    if (!whoopOn() && sub !== 'ovqat') sub = 'ovqat';
+    if (sub !== raw) { D.ui.sub.health = sub; D.saveUi(); }
+    return sub;
   }
 
-  D.act.hlDate = (el) => { const k = D.addDays(viewKey(), +el.dataset.n || 0); D.ui.viewDate = k >= D.today() ? null : k; D.saveUi(); D.rerender(); };
+  function render() {
+    const sub = curSub();
+    // Soat ulanmagan: faqat Ovqat yorlig'i ko'rsatiladi, qolgan uchtasi bir xil
+    // bo'sh sahifaga olib borardi. Nima bo'layotganini footer'dagi ulanish kartasi aytadi.
+    const tabs = whoopOn() ? SUBS : ['ovqat'];
+    const seg = tabs.length > 1
+      ? `<div class="seg hl-seg">${tabs.map((s) => `<button class="${sub === s ? 'on' : ''}" data-act="sub" data-view="health" data-sub="${s}">${esc(D.t('hl.sub.' + s))}</button>`).join('')}</div>`
+      : '';
+    const k = viewKey();
+    return `<div class="hl">${seg}${PAGES[sub](k)}${whoopOn() ? D.whoop.footer() : D.whoop.bodyCard() + D.whoop.footer()}</div>`;
+  }
+
   D.act.hlDateToday = () => { D.ui.viewDate = null; D.saveUi(); D.rerender(); };
 
   /* ------------------------------------------------------------------ */
@@ -114,7 +111,7 @@
     if (D.tg && D.tg.openLink) { try { D.tg.openLink(url); return; } catch (e) {} }
     location.href = url;
   };
-  const whoopErr = (e) => { const m = String((e && e.message) || e); return m === 'not_connected' ? D.t('hl.wh.notConnected') : m === 'whoop_not_configured' ? D.t('hl.wh.notConfigured') : D.t('hl.wh.err', { e: m.slice(0, 60) }); };
+  const whoopErr = (e) => { const m = String((e && e.message) || e); return m === 'not_connected' ? D.t('hl.wh.notConnected') : m === 'whoop_not_configured' ? D.t('hl.wh.notConfigured') : m === 'timeout' ? D.t('err.timeout') : D.t('hl.wh.err', { e: m.slice(0, 60) }); };
   D.act.hlWhoopDisconnect = async () => {
     const ok = await D.confirm({ title: D.t('hl.wh.disconnect'), text: D.t('hl.wh.disconnectQ'), ok: D.t('hl.wh.disconnect'), danger: true });
     if (!ok) return;
@@ -153,8 +150,18 @@
   /* ------------------------------------------------------------------ */
   /* view                                                                */
   /* ------------------------------------------------------------------ */
+  /* Sarlavha ochiq sahifaga ergashadi: birinchi sahifada bo'limning o'z nomi
+     («Ovqat»), qolganida o'sha sahifaning nomi («Uyqu», «Zo'riqish»). Ilgari
+     sarlavha doim bo'lim nomi, izoh qatori esa sahifa nomi edi — ochilishida
+     «Ovqat» ustida «Ovqat · Bugun» deb takrorlanardi. Endi izohda faqat sana. */
   D.view({
     id: 'health', icon: 'heart', order: 20, nav: true, primary: true,
+    title() { const s = curSub(); return s === 'ovqat' ? D.t('nav.health') : D.t('hl.sub.' + s); },
+    subtitle() {
+      const k = viewKey(), ago = D.daysBetween(k, D.today());
+      const day = ago === 0 ? D.t('common.today') : ago === 1 ? D.t('common.yesterday') : D.fmtDate(k, 'weekday');
+      return esc(day) + (ago ? ` · <button class="top-link" data-act="hlDateToday">${esc(D.t('btn.today'))}</button>` : '');
+    },
     render,
   });
 })();

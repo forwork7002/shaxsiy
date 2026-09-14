@@ -4,91 +4,43 @@
    shu tokenlarga tayanadi, shuning uchun yangi bo'lim qo'shish = 4 qator.
    ===================================================================== */
 
-/* ---------- per-section accents ----------
-   Declared on <html data-section> (not on #view) so the fixed nav and header can use them too.
-   core.js stamps both data-section on <html> and data-view on #view. */
-:root { --sec: var(--success); --sec2: var(--info); --sec-soft: rgba(107,227,164,.10); }
-[data-section="today"] { --sec: #F2A65A; --sec2: #E0654E; --sec-soft: rgba(242,166,90,.11); }
-[data-section="health"] { --sec: #5FD6B4; --sec2: #7DD3FC; --sec-soft: rgba(95,214,180,.11); }
-[data-section="finance"] { --sec: #E8C468; --sec2: #A9D96B; --sec-soft: rgba(232,196,104,.11); }
-[data-section="prayer"] { --sec: #6BE3A4; --sec2: #9BE7C4; --sec-soft: rgba(107,227,164,.11); }
-[data-section="food"] { --sec: #F5A38C; --sec2: #A9D96B; --sec-soft: rgba(245,163,140,.11); }
-[data-section="tasks"] { --sec: #9BB7F5; --sec2: #A78BFA; --sec-soft: rgba(155,183,245,.11); }
-[data-theme="light"][data-section="today"] { --sec: #C86B2E; --sec2: #B4472F; --sec-soft: rgba(200,107,46,.10); }
-[data-theme="light"][data-section="health"] { --sec: #24947A; --sec2: #2C7FA8; --sec-soft: rgba(36,148,122,.10); }
-[data-theme="light"][data-section="finance"] { --sec: #9A7A1E; --sec2: #5E8A2A; --sec-soft: rgba(154,122,30,.10); }
-[data-theme="light"][data-section="prayer"] { --sec: #2C8B5A; --sec2: #3F9E72; --sec-soft: rgba(44,139,90,.10); }
-[data-theme="light"][data-section="food"] { --sec: #C25A3C; --sec2: #5E8A2A; --sec-soft: rgba(194,90,60,.10); }
-[data-theme="light"][data-section="tasks"] { --sec: #3C63B8; --sec2: #6B4FC0; --sec-soft: rgba(60,99,184,.10); }
+/* ---------- urg'u rang — bitta ----------
+   Ilgari har bo'lim o'z rangida edi: Bugun to'q sariq, Sog'liq yashil, Moliya
+   sariq, Ibodat yashil… Natijada bitta ilova beshta rangga bo'linib ketardi va
+   bir xil tugma bir sahifada yashil, boshqasida sariq bo'lardi — ro'yxati yo'q
+   bo'lim esa (Kitoblar) umuman boshqa rangga tushib qolardi.
+   Endi urg'u bitta: --accent. Ma'no bildiradigan ranglar (yashil — bajarildi,
+   sariq — ogohlantirish, qizil — xato) o'z joyida qoladi; ular urg'u emas.
+   --sec / --sec2 / --sec-soft tokenlari saqlandi: ularga tayanadigan modullar bor. */
+:root { --sec: var(--accent); --sec2: var(--accent); --sec-soft: var(--accent-soft); }
 
-/* the ambient page wash picks up the section colour too */
-[data-section="today"]   { --wash1: rgba(242,166,90,.35); }
-[data-section="health"]  { --wash1: rgba(95,214,180,.31); }
-[data-section="finance"] { --wash1: rgba(232,196,104,.31); --wash3: color-mix(in srgb, var(--sec) 26%, transparent); }
-[data-section="prayer"]  { --wash1: rgba(107,227,164,.31); }
-[data-section="food"]    { --wash1: rgba(245,163,140,.31); }
-[data-section="tasks"]   { --wash1: rgba(155,183,245,.30); }
-body::before { transition: background 1.2s ease; }
+/* Bo'lim rangi endi faqat bitta joyda ko'rinadi — bosilgan yorliqda */
+#view .seg button.on { background: var(--accent); color: var(--ink-on-light); }
+#view .tabs button.on { background: var(--accent); border-color: var(--accent); color: var(--ink-on-light); }
+#view .section-title::before { background: var(--accent); opacity: .9; }
+#view .card-head > .title > .ic { color: var(--accent); }
+#view .btn:not(.ghost):not(.danger):not(.icon) { background: var(--btn-grad); color: var(--ink-on-light); }
 
-/* section colour flows into the shared kit without touching each module */
-#view .seg button.on { background: var(--sec); color: #08110D; }
-[data-theme="light"] #view .seg button.on { color: #fff; }
-#view .tabs button.on { background: var(--sec); border-color: var(--sec); color: #08110D; }
-[data-theme="light"] #view .tabs button.on { color: #fff; }
-#view .section-title::before { background: var(--sec); opacity: .9; }
-#view .card-head > .title > .ic { color: var(--sec); }
-#view .btn:not(.ghost):not(.danger):not(.icon) { background: linear-gradient(180deg, var(--sec), color-mix(in srgb, var(--sec) 82%, #000)); color: #08110D; }
-[data-theme="light"] #view .btn:not(.ghost):not(.danger):not(.icon) { color: #fff; }
-.nav-tab.on { color: var(--sec); }
-.nav-tab.on svg { color: var(--sec); }
-.nav-tab.on { transition: color .25s ease; }
-
-/* ---------- hero: one big block that says what this section is about ---------- */
-/* The hero is the section's face: deeper glass, the accent bled through it, and a lit top edge. */
-.hero { position: relative; overflow: hidden; border-radius: var(--r-lg); padding: 20px; margin-bottom: 14px; transform: translateZ(0);
-  background: linear-gradient(155deg, color-mix(in srgb, var(--sec) 17%, transparent) 0%, color-mix(in srgb, var(--sec) 5%, transparent) 40%, transparent 72%), var(--card-solid);
-  border: 1px solid color-mix(in srgb, var(--sec) 26%, var(--card-line));
-  box-shadow: 0 18px 50px rgba(0,0,0,.45), 0 0 0 1px rgba(255,255,255,.02) inset,
-              0 0 40px -18px color-mix(in srgb, var(--sec) 60%, transparent); }
-[data-theme="light"] .hero { box-shadow: 0 12px 34px rgba(46,42,36,.10), 0 0 34px -16px color-mix(in srgb, var(--sec) 45%, transparent); }
-.hero::after { content: ''; position: absolute; width: 220px; height: 220px; right: -70px; top: -110px; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle, color-mix(in srgb, var(--sec) 26%, transparent), transparent 70%); filter: blur(26px); }
+/* ---------- hero ----------
+   Bo'limning bosh bloki. Ilgari uning ichida rangli gradient, chetida yorug'lik
+   halqasi va ostida katta soya bor edi — uchalasi ham shaffof karta uchun
+   o'ylangan. To'q va yassi kartada ular faqat shovqin, shuning uchun hero endi
+   oddiy kartaning o'zi: farq faqat ichidagi raqamning kattaligida. */
+.hero { position: relative; overflow: hidden; border-radius: var(--r); padding: 18px; margin-bottom: 14px;
+  background: var(--card-solid); border: 1px solid var(--card-line); }
 .hero > * { position: relative; }
-.hero-eyebrow { font-size: 10px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: color-mix(in srgb, var(--sec) 78%, var(--text3)); }
+.hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); }
 .hero-main { display: flex; align-items: center; gap: 16px; margin-top: 8px; }
-.hero-num { font-family: var(--mono); font-size: 42px; font-weight: 800; letter-spacing: -.045em; line-height: 1; color: var(--text); }
-.hero-num small { font-size: 15px; font-weight: 700; letter-spacing: 0; margin-left: 2px; color: var(--text3); }
+.hero-num { font-family: var(--num); font-size: 38px; font-weight: 600; letter-spacing: -.03em; line-height: 1; color: var(--text); }
+.hero-num small { font-size: 15px; font-weight: 400; letter-spacing: 0; margin-left: 2px; color: var(--text3); }
 .hero-body { flex: 1; min-width: 0; }
-.hero-title { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -.01em; line-height: 1.25; }
+.hero-title { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -.01em; line-height: 1.25; }
 .hero-sub { font-size: 12.5px; color: var(--text3); margin-top: 3px; line-height: 1.4; }
 .hero-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
-.hero-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: var(--r-pill); font-size: 11.5px; font-weight: 700;
-  background: color-mix(in srgb, var(--sec) 13%, transparent); border: 1px solid color-mix(in srgb, var(--sec) 26%, transparent); color: var(--sec); white-space: nowrap; }
+.hero-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: var(--r-pill); font-size: 11.5px; font-weight: 500;
+  background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent); color: var(--accent); white-space: nowrap; }
 .hero-chip.mute { background: var(--inset); border-color: var(--line); color: var(--text3); }
-@media (max-width: 400px) { .hero { padding: 15px; } .hero-num { font-size: 36px; } }
-
-/* ---------- bento: big block + small blocks, instead of a stack of equals ---------- */
-.bento { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
-.bento .b-wide { grid-column: span 2; }
-.bento-tile { position: relative; display: flex; flex-direction: column; justify-content: center; gap: 3px; min-height: 78px; padding: 13px 14px;
-  border-radius: 14px; background: var(--card-solid); border: 1px solid var(--card-line); text-align: left; color: inherit;
-  box-shadow: 0 6px 18px rgba(0,0,0,.22);
-  transition: border-color .18s ease, background .18s ease, transform .12s ease, box-shadow .18s ease; }
-[data-theme="light"] .bento-tile { box-shadow: 0 4px 14px rgba(46,42,36,.06); }
-.bento-tile::before { content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 1px; pointer-events: none;
-  background: linear-gradient(90deg, transparent, var(--sheen), transparent); opacity: .7; }
-button.bento-tile { cursor: pointer; }
-button.bento-tile:hover { border-color: color-mix(in srgb, var(--sec) 34%, transparent); background: var(--hover); }
-button.bento-tile:active { transform: scale(.985); }
-.bento-tile .lab { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); display: flex; align-items: center; gap: 5px; }
-.bento-tile .lab .ic { color: var(--sec); opacity: .9; }
-.bento-tile .val { font-family: var(--mono); font-size: 22px; font-weight: 700; letter-spacing: -.03em; color: var(--text); line-height: 1.05; }
-.bento-tile .val small { font-size: 11px; color: var(--text3); font-weight: 600; margin-left: 1px; }
-.bento-tile .sub { font-size: 11px; color: var(--text3); }
-.bento-tile .mini { position: absolute; right: 10px; bottom: 8px; width: 46px; opacity: .55; }
-.bento-tile.on { border-color: color-mix(in srgb, var(--sec) 40%, transparent); background: var(--sec-soft); }
-.bento-tile.on .val { color: var(--sec); }
-@media (max-width: 340px) { .bento { grid-template-columns: 1fr; } .bento .b-wide { grid-column: span 1; } }
+@media (max-width: 400px) { .hero { padding: 15px; } .hero-num { font-size: 34px; } }
 
 /* ---------- section-specific character ---------- */
 /* Moliya reads like a ledger: mono numbers, tighter rows */
@@ -109,7 +61,7 @@ button.bento-tile:active { transform: scale(.985); }
 #view.view-enter > *:nth-child(4) { animation-delay: .09s; }
 #view.view-enter > *:nth-child(n+5) { animation-delay: .11s; }
 @keyframes secIn { from { opacity: 0; transform: translate3d(0, 10px, 0); } to { opacity: 1; transform: none; } }
-.card, .bento-tile, .hero { will-change: auto; }
+.card, .hero { will-change: auto; }
 .li, .pill, .btn, .seg button, .tabs button { transition: background .16s ease, color .16s ease, border-color .16s ease, transform .1s ease; }
-.li:active, .bento-tile:active { transform: scale(.995); }
+.li:active { transform: scale(.995); }
 @media (prefers-reduced-motion: reduce) { #view.view-enter > * { animation: none !important; } }

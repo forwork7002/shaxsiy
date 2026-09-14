@@ -1,8 +1,10 @@
 /* =====================================================================
-   Profil — Play Store hisob varag'i uslubida: avatar, ism, hisob, statistika, chiqish.
+   Profil — avatar, ism, hisob, statistika, chiqish. Alohida varaq emas:
+   Sozlash sahifasining eng tepasidagi karta (2026-09-10 dan). Sarlavha
+   satridagi kichik avatar bilan birga varaq ham ketdi — profil bitta joyda.
    Kutubxona (D.view yo'q), whoop.js dan keyin yuklanadi.
-   D.profile.open()               — varaq (D.sheet)
-   D.profile.avatarHtml(px, cls)  — <img> yoki bosh harflar: header / varaq / Sozlash «Hisob»
+   D.profile.cardHtml()           — Sozlashdagi karta (settings.js chaqiradi)
+   D.profile.avatarHtml(px, cls)  — <img> yoki bosh harflar
    D.profile.initials(name)  D.profile.hue(uid)
    Server: GET/POST /api/me, GET/POST/DELETE /api/me/avatar — D.me va D.meRefresh core.js'da.
    ===================================================================== */
@@ -12,45 +14,45 @@
 
   D.i18n.add({
     uz: {
-      'pf.title': 'Profil', 'pf.noName': 'Ism kiritilmagan', 'pf.editName': 'Ismni tahrirlash', 'pf.namePh': 'Ismingiz', 'pf.saved': 'Saqlandi',
-      'pf.prov.google': 'Google hisobi', 'pf.prov.password': 'Ism va parol bilan', 'pf.prov.owner': 'Egasi', 'pf.prov.env': 'Asosiy hisob', 'pf.prov.local': 'Faqat shu qurilmada',
+      'pf.noName': 'Ism kiritilmagan', 'pf.editName': 'Ismni tahrirlash', 'pf.namePh': 'Ismingiz', 'pf.saved': 'Saqlandi',
+      'pf.prov.google': 'Google hisobi', 'pf.prov.password': 'Email va parol bilan', 'pf.prov.owner': 'Egasi', 'pf.prov.env': 'Asosiy hisob', 'pf.prov.local': 'Faqat shu qurilmada',
       'pf.since': '{d} dan beri', 'pf.days': 'Kunlar', 'pf.habits': 'Odatlar', 'pf.whoopOff': 'ulanmagan',
-      'pf.details': "Profil ma'lumotlari", 'pf.export': "Ma'lumotni yuklab olish", 'pf.logout': 'Chiqish',
+      'pf.logout': 'Chiqish',
       'pf.photo': 'Rasm tanlash', 'pf.removePhoto': 'Rasmni olib tashlash', 'pf.uploading': 'Yuklanmoqda…',
       'pf.private': "Ma'lumotlaringiz faqat sizning hisobingizda saqlanadi — boshqa hech kim ko'rmaydi.",
       'pf.e.name': "Ism 1–40 ta belgi: harf, raqam, bo'sh joy", 'pf.e.image': "Rasmni o'qib bo'lmadi", 'pf.e.big': 'Rasm juda katta', 'pf.e.net': 'Server bilan aloqa yo‘q',
       'pf.saveOk': 'Hammasi hisobingizda saqlangan', 'pf.saveWait': 'Saqlanmoqda…', 'pf.saveErr': 'Serverga yetmadi — qayta urinib ko‘ring',
       'pf.saveLocal': 'Faqat shu qurilmada saqlanadi', 'pf.saveNow': 'Hozir saqlash',
-      'pf.me': 'Men', 'pf.edit': 'O‘zgartirish', 'pf.noData': 'kiritilmagan',
-      'pf.claimTitle': 'Eski ma’lumotingiz turibdi', 'pf.claimText': 'Bu serverda avvalgi hisobda yig‘ilgan yozuvlar bor. Egasining parolini kiriting — hammasi shu hisobingizga qo‘shiladi.',
+
+      'pf.claimTitle': 'Egasimisiz? Eski nusxa turibdi', 'pf.claimText': 'Bu serverda egasining oldingi yozuvlari saqlanib qolgan. Agar egasi siz bo‘lsangiz, uning parolini kiriting — hammasi shu hisobga ko‘chadi. Bo‘lmasangiz, e’tibor bermang.',
       'pf.claimBtn': 'Eski ma’lumotni olish', 'pf.claimPh': 'Egasining paroli', 'pf.claimOk': 'Eski ma’lumot qo‘shildi', 'pf.claimBad': 'Parol to‘g‘ri kelmadi',
     },
     uzk: {
-      'pf.title': 'Профил', 'pf.noName': 'Исм киритилмаган', 'pf.editName': 'Исмни таҳрирлаш', 'pf.namePh': 'Исмингиз', 'pf.saved': 'Сақланди',
-      'pf.prov.google': 'Google ҳисоби', 'pf.prov.password': 'Исм ва парол билан', 'pf.prov.owner': 'Эгаси', 'pf.prov.env': 'Асосий ҳисоб', 'pf.prov.local': 'Фақат шу қурилмада',
+      'pf.noName': 'Исм киритилмаган', 'pf.editName': 'Исмни таҳрирлаш', 'pf.namePh': 'Исмингиз', 'pf.saved': 'Сақланди',
+      'pf.prov.google': 'Google ҳисоби', 'pf.prov.password': 'Email ва парол билан', 'pf.prov.owner': 'Эгаси', 'pf.prov.env': 'Асосий ҳисоб', 'pf.prov.local': 'Фақат шу қурилмада',
       'pf.since': '{d} дан бери', 'pf.days': 'Кунлар', 'pf.habits': 'Одатлар', 'pf.whoopOff': 'уланмаган',
-      'pf.details': 'Профил маълумотлари', 'pf.export': 'Маълумотни юклаб олиш', 'pf.logout': 'Чиқиш',
+      'pf.logout': 'Чиқиш',
       'pf.photo': 'Расм танлаш', 'pf.removePhoto': 'Расмни олиб ташлаш', 'pf.uploading': 'Юкланмоқда…',
       'pf.private': 'Маълумотларингиз фақат сизнинг ҳисобингизда сақланади — бошқа ҳеч ким кўрмайди.',
       'pf.e.name': 'Исм 1–40 та белги: ҳарф, рақам, бўш жой', 'pf.e.image': 'Расмни ўқиб бўлмади', 'pf.e.big': 'Расм жуда катта', 'pf.e.net': 'Сервер билан алоқа йўқ',
       'pf.saveOk': 'Ҳаммаси ҳисобингизда сақланган', 'pf.saveWait': 'Сақланмоқда…', 'pf.saveErr': 'Серверга етмади — қайта уриниб кўринг',
       'pf.saveLocal': 'Фақат шу қурилмада сақланади', 'pf.saveNow': 'Ҳозир сақлаш',
-      'pf.me': 'Мен', 'pf.edit': 'Ўзгартириш', 'pf.noData': 'киритилмаган',
-      'pf.claimTitle': 'Эски маълумотингиз турибди', 'pf.claimText': 'Бу серверда аввалги ҳисобда йиғилган ёзувлар бор. Эгасининг паролини киритинг — ҳаммаси шу ҳисобингизга қўшилади.',
+
+      'pf.claimTitle': 'Эгасимисиз? Эски нусха турибди', 'pf.claimText': 'Бу серверда эгасининг олдинги ёзувлари сақланиб қолган. Агар эгаси сиз бўлсангиз, унинг паролини киритинг — ҳаммаси шу ҳисобга кўчади. Бўлмасангиз, эътибор берманг.',
       'pf.claimBtn': 'Эски маълумотни олиш', 'pf.claimPh': 'Эгасининг пароли', 'pf.claimOk': 'Эски маълумот қўшилди', 'pf.claimBad': 'Парол тўғри келмади',
     },
     ru: {
-      'pf.title': 'Профиль', 'pf.noName': 'Имя не указано', 'pf.editName': 'Изменить имя', 'pf.namePh': 'Ваше имя', 'pf.saved': 'Сохранено',
-      'pf.prov.google': 'Аккаунт Google', 'pf.prov.password': 'По имени и паролю', 'pf.prov.owner': 'Владелец', 'pf.prov.env': 'Основной аккаунт', 'pf.prov.local': 'Только на этом устройстве',
+      'pf.noName': 'Имя не указано', 'pf.editName': 'Изменить имя', 'pf.namePh': 'Ваше имя', 'pf.saved': 'Сохранено',
+      'pf.prov.google': 'Аккаунт Google', 'pf.prov.password': 'По email и паролю', 'pf.prov.owner': 'Владелец', 'pf.prov.env': 'Основной аккаунт', 'pf.prov.local': 'Только на этом устройстве',
       'pf.since': 'с {d}', 'pf.days': 'Дней', 'pf.habits': 'Привычек', 'pf.whoopOff': 'не подключён',
-      'pf.details': 'Данные профиля', 'pf.export': 'Скачать данные', 'pf.logout': 'Выйти',
+      'pf.logout': 'Выйти',
       'pf.photo': 'Выбрать фото', 'pf.removePhoto': 'Убрать фото', 'pf.uploading': 'Загрузка…',
       'pf.private': 'Ваши данные хранятся только в вашем аккаунте — никто другой их не видит.',
       'pf.e.name': 'Имя 1–40 символов: буквы, цифры, пробел', 'pf.e.image': 'Не удалось прочитать фото', 'pf.e.big': 'Фото слишком большое', 'pf.e.net': 'Нет связи с сервером',
       'pf.saveOk': 'Всё сохранено в вашем аккаунте', 'pf.saveWait': 'Сохраняется…', 'pf.saveErr': 'Не дошло до сервера — попробуйте ещё раз',
       'pf.saveLocal': 'Хранится только на этом устройстве', 'pf.saveNow': 'Сохранить сейчас',
-      'pf.me': 'Я', 'pf.edit': 'Изменить', 'pf.noData': 'не указано',
-      'pf.claimTitle': 'Есть ваши старые данные', 'pf.claimText': 'На сервере остались записи прежнего аккаунта. Введите пароль владельца — всё добавится в этот аккаунт.',
+
+      'pf.claimTitle': 'Вы владелец? Осталась старая копия', 'pf.claimText': 'На сервере остались прежние записи владельца. Если это вы — введите его пароль, всё перенесётся в этот аккаунт. Если нет — не обращайте внимания.',
       'pf.claimBtn': 'Забрать старые данные', 'pf.claimPh': 'Пароль владельца', 'pf.claimOk': 'Старые данные добавлены', 'pf.claimBad': 'Пароль не подошёл',
     },
   });
@@ -82,12 +84,12 @@
       const ini = P().initials(nameOf());
       return `<span class="${cls}-ini" style="--s:${size}px;--h:${P().hue(uid)}" aria-hidden="true">${ini ? esc(ini) : D.ic('user', Math.round(size * 0.5))}</span>`;
     },
-    open() { editing = false; D.sheet(`<div class="pf" id="pfRoot">${inner()}</div>`, { title: t('pf.title'), noFocus: true }); },
+    /** Sozlashning birinchi kartasi. Sahifa har chizilganda qaytadan quriladi. */
+    cardHtml() { return `<div class="card pf" id="pfRoot">${inner()}</div>`; },
   };
-  D.act.openProfile = () => P().open();
 
   /* ------------------------------------------------------------------ */
-  /* varaq                                                               */
+  /* karta                                                               */
   /* ------------------------------------------------------------------ */
   function nameHtml(on, name) {
     if (on && editing) return `<div class="pf-edit"><input class="inp sm pf-inp" id="pfNameInp" maxlength="40" value="${esc(name)}" placeholder="${esc(t('pf.namePh'))}"
@@ -110,26 +112,12 @@
     return `<div class="pf-save s-${esc(st)}">${D.ic(ic, 15)}<span>${esc(t(k))}</span>
       ${st === 'ok' ? '' : `<button type="button" class="btn ghost xs" data-act="pfSyncNow" ${busy ? 'disabled' : ''}>${esc(t('pf.saveNow'))}</button>`}</div>`;
   }
-  /** Profil raqamlari — Sozlashga yubormay, shu yerda ko'rinadi. */
-  function facts() {
-    const p = D.S.profile, lb = (D.S.settings || {}).weightUnit === 'lb';
-    const w = p.weightKg == null ? null : lb ? p.weightKg * 2.20462 : p.weightKg;
-    const age = D.profileAge();   // yosh bitta joyda hisoblanadi (core.js)
-    const none = `<span class="muted">${esc(t('pf.noData'))}</span>`;
-    const cell = (label, val) => `<div class="pf-fact"><div class="pf-fact-l">${esc(label)}</div><div class="pf-fact-v">${val}</div></div>`;
-    return `<div class="pf-facts">
-      ${cell(t('set.height'), p.heightCm ? `<span class="num">${D.fmtNum(p.heightCm)}</span> <span class="pf-unit">cm</span>` : none)}
-      ${cell(t('set.weight'), w != null ? `<span class="num">${D.fmtNum(w, 1)}</span> <span class="pf-unit">${lb ? 'lb' : 'kg'}</span>` : none)}
-      ${cell(t('set.age'), age ? `<span class="num">${D.fmtNum(age)}</span>` : none)}
-      ${cell(t('set.goal'), esc(t('set.goal.' + (['lose', 'keep', 'gain'].includes(p.goal) ? p.goal : 'keep'))))}
-    </div>`;
-  }
   function inner() {
     const on = online(), me = D.me || {}, name = nameOf();
     const uid = me.uid || D.device.uid || '';
     // Google → e-mail; boshqalar → hisob turi va qisqa uid
     const prov = ['google', 'password', 'owner', 'env'].includes(me.provider) ? me.provider : 'password';
-    const line2 = !on ? esc(t('pf.prov.local')) : me.provider === 'google' && me.email ? esc(me.email)
+    const line2 = !on ? esc(t('pf.prov.local')) : me.email ? esc(me.email)
       : `${esc(t('pf.prov.' + prov))}${uid ? ` <span class="pf-uid num muted">· ${esc(shortUid(uid))}</span>` : ''}`;
     const whoop = D.S.whoop && D.S.whoop.connected ? whoopName() : t('pf.whoopOff');
     const since = on && me.since ? sinceStr(me.since) : '';
@@ -151,16 +139,14 @@
       <div class="stat"><div class="stat-num num">${D.activeHabits().length}</div><div class="stat-label">${esc(t('pf.habits'))}</div></div>
       <div class="stat"><div class="stat-num pf-stat-text ellipsis" title="${esc(whoop)}">${esc(whoop)}</div><div class="stat-label">WHOOP</div></div>
     </div>
-    ${facts()}
     <div class="pf-actions">
-      <button type="button" class="btn ghost block" data-act="pfDetails">${D.ic('edit', 16)} ${esc(t('pf.edit'))}</button>
-      <button type="button" class="btn ghost block" data-act="pfExport">${D.ic('download', 16)} ${esc(t('pf.export'))}</button>
+      ${on && me.provider === 'password' && D.act.setPassword ? `<button type="button" class="btn ghost block" data-act="setPassword">${D.ic('key', 16)} ${esc(t('set.pw'))}</button>` : ''}
       ${on ? `<button type="button" class="btn danger block" data-act="setLogout">${D.ic('logout', 16)} ${esc(t('pf.logout'))}</button>` : ''}
       ${on && me.avatar ? `<button type="button" class="btn ghost xs pf-rm" data-act="pfRemovePhoto" ${busy ? 'disabled' : ''}>${D.ic('trash', 13)} ${esc(t('pf.removePhoto'))}</button>` : ''}
     </div>
     <p class="pf-private help">${esc(t('pf.private'))}</p>`;
   }
-  /* varaq ochiq bo'lsa qayta chizish (D.confirm bilan almashgan bo'lsa — hech narsa) */
+  /* karta ekranda bo'lsa qayta chizish (boshqa bo'limda — hech narsa) */
   const redraw = () => D.patch('pfRoot', inner());
 
   /* ------------------------------------------------------------------ */
@@ -225,13 +211,12 @@
     busy = false; redraw();
   };
 
-  // rasm yuklanmasa (tarmoq uzildi, kesh o'chdi) — bosh harflar; header keyingi chizishda qayta urinadi
+  // rasm yuklanmasa (tarmoq uzildi, kesh o'chdi) — o'rniga bosh harflar
   document.addEventListener('error', (ev) => {
     const im = ev.target;
-    if (!im || im.tagName !== 'IMG' || !/(?:^|\s)(?:h-avatar|pf-av)-img(?:\s|$)/.test(im.className || '')) return;
+    if (!im || im.tagName !== 'IMG' || !/(?:^|\s)pf-av-img(?:\s|$)/.test(im.className || '')) return;
     broken = D.me && D.me.avatar;
     im.outerHTML = P().avatarHtml(+im.getAttribute('width') || 40, im.className.replace(/-img$/, ''));
-    const av = document.getElementById('hAvatar'); if (av) av._h = null;
   }, true);
 
   /* ------------------------------------------------------------------ */
@@ -271,9 +256,6 @@
   }, 900);
   D.profile.syncName = (v) => { v = String(v || '').trim().replace(/\s+/g, ' '); if (NAME_RE.test(v) && HAS_ALNUM.test(v)) pushName(v); };
 
-  // varaq ochiq turganda saqlanish qatori o'zgarishlarni ko'rsatib tursin
+  // karta ko'rinib turganda saqlanish qatori o'zgarishlarni ko'rsatib tursin
   D.on('sync:changed', () => { if (document.getElementById('pfRoot')) redraw(); });
-
-  D.act.pfDetails = () => { D.closeModal(); D.go('settings', 'general'); };
-  D.act.pfExport = () => D.exportJson();
 })();

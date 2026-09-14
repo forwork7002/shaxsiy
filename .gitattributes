@@ -1,0 +1,12 @@
+# Windows'da klon qilinganda ham hamma matn fayli LF bo'lib qolsin.
+# Sababi: deploy/*.sh serverga yuboriladi va Linux bash ularni ishga tushiradi.
+# CRLF bo'lsa bash "$'\r': command not found" deb yiqiladi.
+* text=auto eol=lf
+
+# Ikkilik fayllar — tegilmasin
+*.woff2 binary
+*.woff  binary
+*.png   binary
+*.jpg   binary
+*.ico   binary
+*.db    binary

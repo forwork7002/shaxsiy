@@ -1,13 +1,9 @@
 /* ==== health ==== (prefix hl-)
    Sog'liq uchta bo'limchadan iborat va sahifalarni whoop.js chizadi,
-   shuning uchun bu yerda faqat qobiq: bo'limchalar, sana chizig'i,
-   soat ulanmagan holatdagi karta. Qolgan hamma qoida whoop.css'da. */
+   shuning uchun bu yerda faqat qobiq: bo'limchalar va sana chizig'i.
+   Qolgan hamma qoida whoop.css'da. */
 .hl-seg button { padding: 8px 8px; font-size: 12px; min-height: 40px; }
 .hl-link { border: 0; background: transparent; padding: 4px 6px; margin: -4px -2px; color: var(--info); font-size: 11px; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; border-radius: 6px; }
 .hl-link:hover { background: var(--hover); }
 /* raqam yonidagi birlik ("7 soat 32 daq" dagi «soat»/«daq») — butun ilova bo'ylab bir xil */
 .stat-num small { font-size: 12px; font-weight: 600; color: var(--text3); margin-left: 2px; letter-spacing: 0; }
-/* WHOOP ulanmaganda: bo'limcha nima ko'rsatishini bir jumlada aytadi */
-.hl-off { text-align: center; }
-.hl-off .title { justify-content: center; margin-bottom: 6px; }
-.hl-off .help { max-width: 42ch; margin: 0 auto; }

@@ -9,69 +9,81 @@
   D.i18n.add({
     uz: {
       'ib.sub.times': 'Vaqtlar', 'ib.sub.log': 'Qayd', 'ib.sub.fasting': "Ro'za", 
-      'ib.next': 'Keyingi namoz', 'ib.left': 'qoldi', 'ib.current': 'Joriy vaqt', 'ib.night': 'Tun', 'ib.duha': 'Quyosh — namoz vaqti emas',
-      'ib.timesFor': 'Namoz vaqtlari', 'ib.backToday': 'Bugunga', 'ib.hijri': 'Hijriy',
+      'ib.next': 'Keyingi namoz', 'ib.left': 'qoldi', 'ib.current': 'Joriy vaqt', 'ib.night': 'Tun', 
+      'ib.timesFor': 'Namoz vaqtlari', 'ib.backToday': 'Bugunga', 
       'ib.ramadan': 'Ramazon muborak!', 'ib.ramadanDay': 'Ramazon, {d}-kun',
-      'ib.method': 'Hisoblash usuli', 'ib.methodNote': 'Bomdod {f}° · Xufton {i}° · Asr: {asr}', 'ib.asr.hanafi': 'Hanafiy', 'ib.asr.shafi': "Shofe'iy", 'ib.openSettings': 'Sozlash',
+      'ib.method': 'Hisoblash usuli', 
       'ib.logTitle': 'Namoz qaydi', 'ib.loggedN': '{n}/5 qayd', 'ib.allJamaat': 'Hammasi jamoat',
-      'ib.per': 'Namozlar kesimida', 'ib.per.sub': "so'nggi 30 kun", 'ib.per.weak': 'Eng zaif: **{n}**',
-      'ib.per.none': "Hali yetarli qayd yo'q", 'ib.per.ontime': "o'z vaqtida",
+      'ib.qib.title': 'Qibla', 'ib.qib.fromN': 'shimoldan', 'ib.qib.on': 'Kompas yoqilgan',
+      'ib.qib.live': 'Telefonni tekis ushlang \u2014 strelka qiblani ko\u2018rsatadi.',
+      'ib.qib.static': 'Kompas yo\u2018q \u2014 shimoldan {d}\u00b0 o\u2018ngga buriling.',
+      'ib.qib.enable': 'Kompasni yoqish', 'ib.qib.denied': 'Kompasga ruxsat berilmadi',
+      'ib.sahar': 'Saharlik tugaydi', 'ib.iftor': 'Iftorlik',
+      'ib.toSahar': 'Saharlikka {t} qoldi', 'ib.toIftor': 'Iftorlikka {t} qoldi',
+      'ib.trackTitle': 'Oylik jadval', 'ib.trackDays': '{n} kun',
+      
       'ib.st.jamaat': 'Jamoat', 'ib.st.alone': 'Yakka', 'ib.st.qaza': 'Qazo', 'ib.st.missed': "O'tkazib",
       'ib.qazaHint': 'qazo?',
-      'ib.last30': "So'nggi 30 kun", 'ib.heatJamaat': 'Jamoat ulushi (kunlik)', 'ib.streak5': '5 vaqt seriyasi', 'ib.jamaat': 'Jamoat', 'ib.ontime': "O'z vaqtida",
       'ib.prevDay': 'Oldingi kun', 'ib.nextDay': 'Keyingi kun', 
-      'ib.fastToday': "Bugun ro'za", 'ib.fasted': "Ro'za tutdim", 'ib.suggest': 'Tavsiya', 'ib.noSuggest': "Bugun sunnat ro'za kuni emas", 'ib.fastType': "Ro'za turi",
+      'ib.fastToday': "Bugun ro'za", 'ib.fasted': "Ro'za tutdim", 'ib.noSuggest': "Bugun sunnat ro'za kuni emas", 'ib.fastType': "Ro'za turi",
       'ib.f.ramadan': 'Ramazon', 'ib.f.ayyam_bid': 'Ayyomi biyz', 'ib.f.arafa': 'Arafa', 'ib.f.ashura': 'Ashuro', 'ib.f.shawwal': 'Shavvol 6', 'ib.f.mon_thu': 'Dushanba-Payshanba',
       'ib.ft.ramadan': 'Ramazon', 'ib.ft.sunnah': 'Sunnat', 'ib.ft.qaza': 'Qazo', 'ib.ft.nafl': 'Nafl',
       'ib.hijriMonth': 'Hijriy oy', 'ib.fastedN': '{n} kun', 'ib.sugDot': 'tavsiya kuni',
       'ib.qazaFast': "Qazo ro'zalar", 'ib.owed': 'qarz (kun)', 'ib.qazaDone': 'Tutilgan', 'ib.remaining': 'Qolgan',
       'ib.ramadanMode': 'Ramazon', 'ib.ramadanProgress': "Tutilgan ro'za", 'ib.khatm': "Xatm sur'ati", 'ib.khatmHint': 'Kuniga ~{p} sahifa · bugungacha {page}-sahifa (juz {juz})',
       'ib.toRamadan': 'Ramazongacha {n} kun', 'ib.lastTen': 'Oxirgi 10 kecha — Laylatul qadrni izlang',
-      
     },
     uzk: {
       'ib.sub.times': 'Вақтлар', 'ib.sub.log': 'Қайд', 'ib.sub.fasting': 'Рўза', 
-      'ib.next': 'Кейинги намоз', 'ib.left': 'қолди', 'ib.current': 'Жорий вақт', 'ib.night': 'Тун', 'ib.duha': 'Қуёш — намоз вақти эмас',
-      'ib.timesFor': 'Намоз вақтлари', 'ib.backToday': 'Бугунга', 'ib.hijri': 'Ҳижрий',
+      'ib.next': 'Кейинги намоз', 'ib.left': 'қолди', 'ib.current': 'Жорий вақт', 'ib.night': 'Тун', 
+      'ib.timesFor': 'Намоз вақтлари', 'ib.backToday': 'Бугунга', 
       'ib.ramadan': 'Рамазон муборак!', 'ib.ramadanDay': 'Рамазон, {d}-кун',
-      'ib.method': 'Ҳисоблаш усули', 'ib.methodNote': 'Бомдод {f}° · Хуфтон {i}° · Аср: {asr}', 'ib.asr.hanafi': 'Ҳанафий', 'ib.asr.shafi': 'Шофеъий', 'ib.openSettings': 'Созлаш',
+      'ib.method': 'Ҳисоблаш усули', 
       'ib.logTitle': 'Намоз қайди', 'ib.loggedN': '{n}/5 қайд', 'ib.allJamaat': 'Ҳаммаси жамоат',
-      'ib.per': 'Намозлар кесимида', 'ib.per.sub': 'сўнгги 30 кун', 'ib.per.weak': 'Энг заиф: **{n}**',
-      'ib.per.none': 'Ҳали етарли қайд йўқ', 'ib.per.ontime': 'ўз вақтида',
+      'ib.qib.title': 'Қибла', 'ib.qib.fromN': 'шимолдан', 'ib.qib.on': 'Компас ёқилган',
+      'ib.qib.live': 'Телефонни текис ушланг \u2014 стрелка қиблани кўрсатади.',
+      'ib.qib.static': 'Компас йўқ \u2014 шимолдан {d}\u00b0 ўнгга бурилинг.',
+      'ib.qib.enable': 'Компасни ёқиш', 'ib.qib.denied': 'Компасга рухсат берилмади',
+      'ib.sahar': 'Саҳарлик тугайди', 'ib.iftor': 'Ифторлик',
+      'ib.toSahar': 'Саҳарликка {t} қолди', 'ib.toIftor': 'Ифторликка {t} қолди',
+      'ib.trackTitle': 'Ойлик жадвал', 'ib.trackDays': '{n} кун',
+      
       'ib.st.jamaat': 'Жамоат', 'ib.st.alone': 'Якка', 'ib.st.qaza': 'Қазо', 'ib.st.missed': 'Ўтказиб',
       'ib.qazaHint': 'қазо?',
-      'ib.last30': 'Сўнгги 30 кун', 'ib.heatJamaat': 'Жамоат улуши (кунлик)', 'ib.streak5': '5 вақт серияси', 'ib.jamaat': 'Жамоат', 'ib.ontime': 'Ўз вақтида',
       'ib.prevDay': 'Олдинги кун', 'ib.nextDay': 'Кейинги кун', 
-      'ib.fastToday': 'Бугун рўза', 'ib.fasted': 'Рўза тутдим', 'ib.suggest': 'Тавсия', 'ib.noSuggest': 'Бугун суннат рўза куни эмас', 'ib.fastType': 'Рўза тури',
+      'ib.fastToday': 'Бугун рўза', 'ib.fasted': 'Рўза тутдим', 'ib.noSuggest': 'Бугун суннат рўза куни эмас', 'ib.fastType': 'Рўза тури',
       'ib.f.ramadan': 'Рамазон', 'ib.f.ayyam_bid': 'Айёми бийз', 'ib.f.arafa': 'Арафа', 'ib.f.ashura': 'Ашуро', 'ib.f.shawwal': 'Шаввол 6', 'ib.f.mon_thu': 'Душанба-Пайшанба',
       'ib.ft.ramadan': 'Рамазон', 'ib.ft.sunnah': 'Суннат', 'ib.ft.qaza': 'Қазо', 'ib.ft.nafl': 'Нафл',
       'ib.hijriMonth': 'Ҳижрий ой', 'ib.fastedN': '{n} кун', 'ib.sugDot': 'тавсия куни',
       'ib.qazaFast': 'Қазо рўзалар', 'ib.owed': 'қарз (кун)', 'ib.qazaDone': 'Тутилган', 'ib.remaining': 'Қолган',
       'ib.ramadanMode': 'Рамазон', 'ib.ramadanProgress': 'Тутилган рўза', 'ib.khatm': 'Хатм суръати', 'ib.khatmHint': 'Кунига ~{p} саҳифа · бугунгача {page}-саҳифа (жуз {juz})',
       'ib.toRamadan': 'Рамазонгача {n} кун', 'ib.lastTen': 'Охирги 10 кеча — Лайлатул қадрни изланг',
-      
     },
     ru: {
       'ib.sub.times': 'Время', 'ib.sub.log': 'Журнал', 'ib.sub.fasting': 'Пост', 
-      'ib.next': 'Следующий намаз', 'ib.left': 'осталось', 'ib.current': 'Сейчас', 'ib.night': 'Ночь', 'ib.duha': 'Восход — не время намаза',
-      'ib.timesFor': 'Время намазов', 'ib.backToday': 'Сегодня', 'ib.hijri': 'По хиджре',
+      'ib.next': 'Следующий намаз', 'ib.left': 'осталось', 'ib.current': 'Сейчас', 'ib.night': 'Ночь', 
+      'ib.timesFor': 'Время намазов', 'ib.backToday': 'Сегодня', 
       'ib.ramadan': 'Рамадан мубарак!', 'ib.ramadanDay': 'Рамадан, день {d}',
-      'ib.method': 'Метод расчёта', 'ib.methodNote': 'Фаджр {f}° · Иша {i}° · Аср: {asr}', 'ib.asr.hanafi': 'Ханафи', 'ib.asr.shafi': 'Шафии', 'ib.openSettings': 'Настройки',
+      'ib.method': 'Метод расчёта', 
       'ib.logTitle': 'Журнал намазов', 'ib.loggedN': '{n}/5 отмечено', 'ib.allJamaat': 'Все в джамаате',
-      'ib.per': 'По намазам', 'ib.per.sub': 'последние 30 дн.', 'ib.per.weak': 'Слабее всего: **{n}**',
-      'ib.per.none': 'Пока недостаточно записей', 'ib.per.ontime': 'вовремя',
+      'ib.qib.title': 'Кибла', 'ib.qib.fromN': 'от севера', 'ib.qib.on': 'Компас включён',
+      'ib.qib.live': 'Держите телефон ровно \u2014 стрелка укажет киблу.',
+      'ib.qib.static': 'Компаса нет \u2014 повернитесь на {d}\u00b0 вправо от севера.',
+      'ib.qib.enable': 'Включить компас', 'ib.qib.denied': 'Доступ к компасу не разрешён',
+      'ib.sahar': 'Сухур заканчивается', 'ib.iftor': 'Ифтар',
+      'ib.toSahar': 'До сухура {t}', 'ib.toIftor': 'До ифтара {t}',
+      'ib.trackTitle': 'Месячная таблица', 'ib.trackDays': '{n} дн.',
+      
       'ib.st.jamaat': 'Джамаат', 'ib.st.alone': 'Один', 'ib.st.qaza': 'Каза', 'ib.st.missed': 'Пропущен',
       'ib.qazaHint': 'каза?',
-      'ib.last30': 'Последние 30 дней', 'ib.heatJamaat': 'Доля джамаата (по дням)', 'ib.streak5': 'Серия 5/5', 'ib.jamaat': 'Джамаат', 'ib.ontime': 'Вовремя',
       'ib.prevDay': 'Предыдущий день', 'ib.nextDay': 'Следующий день', 
-      'ib.fastToday': 'Пост сегодня', 'ib.fasted': 'Пост соблюдён', 'ib.suggest': 'Рекомендация', 'ib.noSuggest': 'Сегодня не день сунна-поста', 'ib.fastType': 'Тип поста',
+      'ib.fastToday': 'Пост сегодня', 'ib.fasted': 'Пост соблюдён', 'ib.noSuggest': 'Сегодня не день сунна-поста', 'ib.fastType': 'Тип поста',
       'ib.f.ramadan': 'Рамадан', 'ib.f.ayyam_bid': 'Айям аль-бид', 'ib.f.arafa': 'Арафа', 'ib.f.ashura': 'Ашура', 'ib.f.shawwal': '6 дней Шавваля', 'ib.f.mon_thu': 'Понедельник и четверг',
       'ib.ft.ramadan': 'Рамадан', 'ib.ft.sunnah': 'Сунна', 'ib.ft.qaza': 'Каза', 'ib.ft.nafl': 'Нафль',
       'ib.hijriMonth': 'Месяц хиджры', 'ib.fastedN': '{n} дн.', 'ib.sugDot': 'рекомендуемый день',
       'ib.qazaFast': 'Каза-посты', 'ib.owed': 'долг (дней)', 'ib.qazaDone': 'Восполнено', 'ib.remaining': 'Осталось',
       'ib.ramadanMode': 'Рамадан', 'ib.ramadanProgress': 'Дней поста', 'ib.khatm': 'Темп хатма', 'ib.khatmHint': '~{p} стр. в день · сегодня стр. {page} (джуз {juz})',
       'ib.toRamadan': 'До Рамадана {n} дн.', 'ib.lastTen': 'Последние 10 ночей — ищите Ляйлятуль-кадр',
-      
     },
   });
 
@@ -79,87 +91,130 @@
   D.i18n.add({
     uz: {
       'ib.sub.qaza': 'Qazo',
-      'qz.title': 'Qazo daftari', 'qz.debt': 'namoz qarzi', 'qz.debtShort': 'Qazo qarzi',
+      'qz.debt': 'namoz qarzi', 'qz.debtShort': 'Qazo qarzi',
       'qz.daysWorth': '≈ {n} kunlik namoz', 'qz.free': "Qazo qarzi yo'q", 'qz.freeSub': 'Alhamdulillah — daftar toza',
       'qz.todayDone': 'Bugun o‘qildi', 'qz.ofTarget': '{n} / {t}', 'qz.targetMet': 'Bugungi reja bajarildi',
       'qz.pay': 'Qazo o‘qish', 'qz.paySub': 'O‘qigan qazoyingizni shu yerda belgilang',
-      'qz.owedN': '{n} ta qarz', 'qz.noneOwed': 'qarz yo‘q', 'qz.oneDay': 'Bir kunlik (5 vaqt)',
+      'qz.oneDay': 'Bir kunlik (5 vaqt)',
       'qz.added': '{p} qazosi qayd etildi', 'qz.removed': 'Qayd olib tashlandi', 'qz.nothingOwed': 'Bu namozda qarz yo‘q',
       'qz.dayAdded': 'Bir kunlik qazo qayd etildi',
-      'qz.trend': 'Qarz kamayishi', 'qz.trendSub': 'so‘nggi {n} kun', 'qz.was': '{n} kun oldin', 'qz.now': 'Hozir', 'qz.change': 'O‘zgarish',
-      'qz.trendDown': 'Qarz kamayyapti — davom eting', 'qz.trendUp': 'Qarz o‘syapti', 'qz.trendFlat': 'Qarz o‘zgarmadi',
-      'qz.pace': 'To‘lov sur‘ati', 'qz.paceSub': 'kunlik qazo, so‘nggi 30 kun',
-      'qz.p7': '7 kun', 'qz.p30': '30 kun', 'qz.avg': 'Kuniga', 'qz.streak': 'Seriya',
-      'qz.eta': 'Tugash muddati', 'qz.etaAt': '{d} ga tugaydi', 'qz.etaIn': '{n} kun qoldi', 'qz.etaYears': '~{n} yil',
-      'qz.etaNone': 'Hali sur‘at yo‘q — bugundan boshlang', 'qz.etaTarget': 'Kuniga {t} tadan — {d}',
-      'qz.per': 'Namozlar kesimida', 'qz.perSub': 'to‘langan / jami', 'qz.owed': 'Qarz', 'qz.paidAll': 'To‘langan', 'qz.totalAll': 'Jami',
+      
+      
+      
+      'qz.paidAll': 'To‘langan', 
       'qz.setup': 'Boshlang‘ich qarz', 'qz.setupSub': 'Kuzatuvdan oldingi qazolaringiz sonini kiriting',
       'qz.byYears': 'Yillar bo‘yicha hisoblash', 'qz.yearsQ': 'Necha yil namoz qazo bo‘lgan?', 'qz.yearsPh': 'masalan: 3',
       'qz.yearsSet': '{y} yil = har bir namozdan {n} ta', 'qz.target': 'Kunlik reja', 'qz.targetHint': 'Kuniga nechta qazo o‘qiysiz',
       'qz.reset': 'Daftarni tozalash', 'qz.resetQ': 'Butun qazo daftari o‘chiriladi. Davom etamizmi?', 'qz.resetDone': 'Qazo daftari tozalandi',
-      'qz.logged': 'Qaydlardan', 'qz.baseLabel': 'Boshlang‘ich',
       'qz.remind': 'Qazo: {n} ta · bugun {d}/{t}', 'qz.remindGo': 'Ochish', 'qz.remindDone': 'Qazo: {n} · bugungi reja bajarildi',
-      'qz.calendar': 'To‘lov kalendari', 'qz.calSub': 'so‘nggi 12 hafta · kuniga o‘qilgan qazo',
-      'qz.matrix': 'Namoz matritsasi', 'qz.matrixSub': 'so‘nggi 8 hafta · har bir vaqt alohida',
-      'qz.mxNone': 'Hali qayd yo‘q — «Qayd» bo‘limidan boshlang',
-      'qz.q1': 'Bugun', 'qz.hist': 'Tarix',
+      
+      'qz.q1': 'Bugun', 
       'qz.start': 'Qazo daftari bo‘sh', 'qz.startSub': 'Quyida boshlang‘ich qarzingizni kiriting — keyin har kuni belgilab borasiz',
     },
     uzk: {
       'ib.sub.qaza': 'Қазо',
-      'qz.title': 'Қазо дафтари', 'qz.debt': 'намоз қарзи', 'qz.debtShort': 'Қазо қарзи',
+      'qz.debt': 'намоз қарзи', 'qz.debtShort': 'Қазо қарзи',
       'qz.daysWorth': '≈ {n} кунлик намоз', 'qz.free': 'Қазо қарзи йўқ', 'qz.freeSub': 'Алҳамдулиллаҳ — дафтар тоза',
       'qz.todayDone': 'Бугун ўқилди', 'qz.ofTarget': '{n} / {t}', 'qz.targetMet': 'Бугунги режа бажарилди',
       'qz.pay': 'Қазо ўқиш', 'qz.paySub': 'Ўқиган қазойингизни шу ерда белгиланг',
-      'qz.owedN': '{n} та қарз', 'qz.noneOwed': 'қарз йўқ', 'qz.oneDay': 'Бир кунлик (5 вақт)',
+      'qz.oneDay': 'Бир кунлик (5 вақт)',
       'qz.added': '{p} қазоси қайд этилди', 'qz.removed': 'Қайд олиб ташланди', 'qz.nothingOwed': 'Бу намозда қарз йўқ',
       'qz.dayAdded': 'Бир кунлик қазо қайд этилди',
-      'qz.trend': 'Қарз камайиши', 'qz.trendSub': 'сўнгги {n} кун', 'qz.was': '{n} кун олдин', 'qz.now': 'Ҳозир', 'qz.change': 'Ўзгариш',
-      'qz.trendDown': 'Қарз камаяпти — давом этинг', 'qz.trendUp': 'Қарз ўсяпти', 'qz.trendFlat': 'Қарз ўзгармади',
-      'qz.pace': 'Тўлов суръати', 'qz.paceSub': 'кунлик қазо, сўнгги 30 кун',
-      'qz.p7': '7 кун', 'qz.p30': '30 кун', 'qz.avg': 'Кунига', 'qz.streak': 'Серия',
-      'qz.eta': 'Тугаш муддати', 'qz.etaAt': '{d} га тугайди', 'qz.etaIn': '{n} кун қолди', 'qz.etaYears': '~{n} йил',
-      'qz.etaNone': 'Ҳали суръат йўқ — бугундан бошланг', 'qz.etaTarget': 'Кунига {t} тадан — {d}',
-      'qz.per': 'Намозлар кесимида', 'qz.perSub': 'тўланган / жами', 'qz.owed': 'Қарз', 'qz.paidAll': 'Тўланган', 'qz.totalAll': 'Жами',
+      
+      
+      
+      'qz.paidAll': 'Тўланган', 
       'qz.setup': 'Бошланғич қарз', 'qz.setupSub': 'Кузатувдан олдинги қазоларингиз сонини киритинг',
       'qz.byYears': 'Йиллар бўйича ҳисоблаш', 'qz.yearsQ': 'Неча йил намоз қазо бўлган?', 'qz.yearsPh': 'масалан: 3',
       'qz.yearsSet': '{y} йил = ҳар бир намоздан {n} та', 'qz.target': 'Кунлик режа', 'qz.targetHint': 'Кунига нечта қазо ўқийсиз',
       'qz.reset': 'Дафтарни тозалаш', 'qz.resetQ': 'Бутун қазо дафтари ўчирилади. Давом этамизми?', 'qz.resetDone': 'Қазо дафтари тозаланди',
-      'qz.logged': 'Қайдлардан', 'qz.baseLabel': 'Бошланғич',
       'qz.remind': 'Қазо: {n} та · бугун {d}/{t}', 'qz.remindGo': 'Очиш', 'qz.remindDone': 'Қазо: {n} · бугунги режа бажарилди',
-      'qz.calendar': 'Тўлов календари', 'qz.calSub': 'сўнгги 12 ҳафта · кунига ўқилган қазо',
-      'qz.matrix': 'Намоз матрицаси', 'qz.matrixSub': 'сўнгги 8 ҳафта · ҳар бир вақт алоҳида',
-      'qz.mxNone': 'Ҳали қайд йўқ — «Қайд» бўлимидан бошланг',
-      'qz.q1': 'Бугун', 'qz.hist': 'Тарих',
+      
+      'qz.q1': 'Бугун', 
       'qz.start': 'Қазо дафтари бўш', 'qz.startSub': 'Қуйида бошланғич қарзингизни киритинг — кейин ҳар куни белгилаб борасиз',
     },
     ru: {
       'ib.sub.qaza': 'Каза',
-      'qz.title': 'Учёт каза', 'qz.debt': 'намазов долга', 'qz.debtShort': 'Долг каза',
+      'qz.debt': 'намазов долга', 'qz.debtShort': 'Долг каза',
       'qz.daysWorth': '≈ {n} дней намазов', 'qz.free': 'Долга каза нет', 'qz.freeSub': 'Альхамдулиллях — учёт чист',
       'qz.todayDone': 'Восполнено сегодня', 'qz.ofTarget': '{n} / {t}', 'qz.targetMet': 'План на сегодня выполнен',
       'qz.pay': 'Восполнение каза', 'qz.paySub': 'Отмечайте здесь восполненные намазы',
-      'qz.owedN': 'долг {n}', 'qz.noneOwed': 'долга нет', 'qz.oneDay': 'Целый день (5 намазов)',
+      'qz.oneDay': 'Целый день (5 намазов)',
       'qz.added': '{p} — каза записана', 'qz.removed': 'Запись убрана', 'qz.nothingOwed': 'По этому намазу долга нет',
       'qz.dayAdded': 'Записан день каза',
-      'qz.trend': 'Снижение долга', 'qz.trendSub': 'последние {n} дн.', 'qz.was': '{n} дн. назад', 'qz.now': 'Сейчас', 'qz.change': 'Изменение',
-      'qz.trendDown': 'Долг снижается — продолжайте', 'qz.trendUp': 'Долг растёт', 'qz.trendFlat': 'Долг без изменений',
-      'qz.pace': 'Темп восполнения', 'qz.paceSub': 'каза в день, последние 30 дн.',
-      'qz.p7': '7 дней', 'qz.p30': '30 дней', 'qz.avg': 'В день', 'qz.streak': 'Серия',
-      'qz.eta': 'Срок завершения', 'qz.etaAt': 'завершение {d}', 'qz.etaIn': 'осталось {n} дн.', 'qz.etaYears': '~{n} лет',
-      'qz.etaNone': 'Темпа пока нет — начните сегодня', 'qz.etaTarget': 'По {t} в день — {d}',
-      'qz.per': 'По намазам', 'qz.perSub': 'восполнено / всего', 'qz.owed': 'Долг', 'qz.paidAll': 'Восполнено', 'qz.totalAll': 'Всего',
+      
+      
+      
+      'qz.paidAll': 'Восполнено', 
       'qz.setup': 'Начальный долг', 'qz.setupSub': 'Укажите число каза до начала учёта',
       'qz.byYears': 'Расчёт по годам', 'qz.yearsQ': 'Сколько лет намазы были пропущены?', 'qz.yearsPh': 'например: 3',
       'qz.yearsSet': '{y} г. = по {n} на каждый намаз', 'qz.target': 'Дневной план', 'qz.targetHint': 'Сколько каза в день вы читаете',
       'qz.reset': 'Очистить учёт', 'qz.resetQ': 'Весь учёт каза будет удалён. Продолжить?', 'qz.resetDone': 'Учёт каза очищен',
-      'qz.logged': 'Из журнала', 'qz.baseLabel': 'Начальный',
       'qz.remind': 'Каза: {n} · сегодня {d}/{t}', 'qz.remindGo': 'Открыть', 'qz.remindDone': 'Каза: {n} · план на сегодня выполнен',
-      'qz.calendar': 'Календарь восполнения', 'qz.calSub': 'последние 12 недель · каза в день',
-      'qz.matrix': 'Матрица намазов', 'qz.matrixSub': 'последние 8 недель · каждый намаз отдельно',
-      'qz.mxNone': 'Записей пока нет — начните в разделе «Журнал»',
-      'qz.q1': 'Сегодня', 'qz.hist': 'История',
+      
+      'qz.q1': 'Сегодня', 
       'qz.start': 'Учёт каза пуст', 'qz.startSub': 'Укажите ниже начальный долг — дальше отмечайте каждый день',
+    },
+  });
+
+  /* Joylashuv, dial navigatsiya va ixcham statistika matnlari */
+  D.i18n.add({
+    uz: {
+      'ib.placeChange': "o'zgartirish",
+      'ib.pickCity': 'Shaharni tanlang',
+      'ib.useGeo': 'Joylashuvni aniqlash',
+      'ib.geoOk': 'Joylashuv: {p}',
+      'ib.geoWait': 'Aniqlanmoqda…',
+      'ib.geoFail': "Joylashuvni aniqlab bo'lmadi — shaharni qo'lda tanlang",
+      'ib.geoNo': 'Bu qurilma joylashuvni bermaydi',
+      'ib.statOntime': "O'z vaqtida",
+      'ib.statJamaat': 'Jamoat',
+      'ib.statStreak': 'Seriya',
+      'ib.qzMore': 'Qazo sozlamalari',
+      'ib.ishroq': 'Ishroq {t} dan', 'ib.ishroqHint': 'quyosh chiqqach {n} daqiqa namoz o‘qilmaydi',
+      'ib.findCity': 'Shahar nomini yozing',
+      'ib.cityNone': "Bunday shahar ro'yxatda yo'q",
+      'ib.source': 'islom.uz taqvimi bilan bir xil',
+      'ib.sourceOn': '{d}da tekshirildi',
+      'ib.sourceGeo': "islom.uz hisob usuli · joylashuvingizga qarab",
+    },
+    uzk: {
+      'ib.placeChange': 'ўзгартириш',
+      'ib.pickCity': 'Шаҳарни танланг',
+      'ib.useGeo': 'Жойлашувни аниқлаш',
+      'ib.geoOk': 'Жойлашув: {p}',
+      'ib.geoWait': 'Аниқланмоқда…',
+      'ib.geoFail': 'Жойлашувни аниқлаб бўлмади — шаҳарни қўлда танланг',
+      'ib.geoNo': 'Бу қурилма жойлашувни бермайди',
+      'ib.statOntime': 'Ўз вақтида',
+      'ib.statJamaat': 'Жамоат',
+      'ib.statStreak': 'Серия',
+      'ib.qzMore': 'Қазо созламалари',
+      'ib.ishroq': 'Ишроқ {t} дан', 'ib.ishroqHint': 'қуёш чиққач {n} дақиқа намоз ўқилмайди',
+      'ib.findCity': 'Шаҳар номини ёзинг',
+      'ib.cityNone': 'Бундай шаҳар рўйхатда йўқ',
+      'ib.source': 'islom.uz тақвими билан бир хил',
+      'ib.sourceOn': '{d}да текширилди',
+      'ib.sourceGeo': 'islom.uz ҳисоб усули · жойлашувингизга қараб',
+    },
+    ru: {
+      'ib.placeChange': 'изменить',
+      'ib.pickCity': 'Выберите город',
+      'ib.useGeo': 'Определить местоположение',
+      'ib.geoOk': 'Местоположение: {p}',
+      'ib.geoWait': 'Определяем…',
+      'ib.geoFail': 'Не удалось определить — выберите город вручную',
+      'ib.geoNo': 'Устройство не даёт местоположение',
+      'ib.statOntime': 'Вовремя',
+      'ib.statJamaat': 'Джамаат',
+      'ib.statStreak': 'Серия',
+      'ib.qzMore': 'Настройки каза',
+      'ib.ishroq': 'Ишрак с {t}', 'ib.ishroqHint': 'после восхода {n} мин намаз не читается',
+      'ib.findCity': 'Введите название города',
+      'ib.cityNone': 'Такого города в списке нет',
+      'ib.source': 'Совпадает с календарём islom.uz',
+      'ib.sourceOn': 'проверено {d}',
+      'ib.sourceGeo': 'Метод islom.uz · по вашим координатам',
     },
   });
 
@@ -168,7 +223,7 @@
   /* ------------------------------------------------------------------ */
   const esc = D.esc, t = D.t;
   const PR = D.PRAYERS;
-  const STATES = ['jamaat', 'alone', 'qaza', 'missed'];
+  const STATES = ['jamaat', 'alone', 'qaza']; // 'missed' olib tashlandi — eski yozuvlar o'z holicha qoladi
   const SUBS = ['times', 'log', 'qaza', 'fasting'];
   const FTYPES = ['ramadan', 'sunnah', 'qaza', 'nafl'];
   const NEXT_OF = { bomdod: 'quyosh', peshin: 'asr', asr: 'shom', shom: 'xufton' };
@@ -177,6 +232,8 @@
     shom: /\b(shom|maghrib|magrib)\b/, xufton: /\b(xufton|isha)\b/,
   };
   const PAGES = 604, JUZ = 30;
+  // Bizning hisob islom.uz e'lon qilgan jadval bilan oxirgi marta solishtirilgan sana
+  const VERIFIED = '2026-09-10';
 
   const isDay = (k) => typeof k === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(k);
   const F = () => { if (!D.ui.filters || typeof D.ui.filters !== 'object') D.ui.filters = {}; return D.ui.filters; };
@@ -257,8 +314,6 @@
   const int = (v) => Math.max(0, Math.floor(+v || 0));
   const HIJRI_YEAR = 354; // a lunar year — the unit qaza is normally counted in
   let qzMigrated = false;
-  // eta dates land years out, so they must carry the year
-  const qzDate = (k) => { const { y, m, d } = D.parseKey(k); const sep = D.t('date.sep') === 'date.sep' ? '-' : D.t('date.sep'); return `${d}${sep}${D.t('months')[m - 1]} ${y}`; };
 
   function QZ() {
     let q = D.S.prayers._qaza;
@@ -316,14 +371,6 @@
   const qzPaidOn = (k) => { const d = QZ().pay[k]; if (!d || typeof d !== 'object') return 0; let n = 0; for (const p of PR) n += int(d[p]); return n; };
   const qzTarget = () => { const v = int(QZ().target); return v > 0 ? Math.min(v, 200) : 5; };
 
-  // Debt as it stood on each of the last n days — walked forward once.
-  function qzSeries(n) {
-    const days = D.lastDays(n), s = qzScan(), o = qzOwed();
-    let run = o.base;
-    for (const k in s.missedDay) if (k < days[0]) run += s.missedDay[k];
-    for (const k in s.payDay) if (k < days[0]) run -= s.payDay[k];
-    return days.map((k) => { run += (s.missedDay[k] || 0) - (s.payDay[k] || 0); return Math.max(0, run); });
-  }
   function qzPace() {
     const sum = (arr) => arr.reduce((a, k) => a + qzPaidOn(k), 0);
     const p7 = sum(D.lastDays(7)), p30 = sum(D.lastDays(30));
@@ -334,14 +381,6 @@
     for (const k of Object.keys(QZ().pay)) if (isDay(k) && qzPaidOn(k) > 0) set.add(k);
     return D.streak(set);
   });
-  // Finish date at a given per-day rate; null when the rate is zero or the horizon is absurd.
-  function qzEta(rate) {
-    const owed = qzOwed().total;
-    if (!owed || !(rate > 0)) return null;
-    const days = Math.ceil(owed / rate);
-    if (days > 365 * 60) return { days, years: Math.round(days / 365), far: true };
-    return { days, years: Math.round((days / 365) * 10) / 10, date: D.addDays(D.today(), days), far: false };
-  }
 
   /* Shared with today.js — the reminder needs the same numbers, not its own copy. */
   D.qaza = {
@@ -419,76 +458,6 @@
     </div>`;
   }
 
-  function qzTrendCard() {
-    const N = 90, vals = qzSeries(N);
-    const now = vals[N - 1], was = vals[0], diff = now - was;
-    const color = diff < 0 ? 'var(--success)' : diff > 0 ? 'var(--danger-text)' : 'var(--text3)';
-    const note = diff < 0 ? t('qz.trendDown') : diff > 0 ? t('qz.trendUp') : t('qz.trendFlat');
-    return `<div class="card">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.trend'))}</div><div class="title">${esc(t('qz.trendSub', { n: N }))}</div></div>
-        <span class="pill ${diff < 0 ? 'good' : diff > 0 ? 'bad' : ''}">${D.ic(diff <= 0 ? 'trendDown' : 'trend', 12)} ${diff > 0 ? '+' : ''}${D.fmtNum(diff)}</span></div>
-      ${D.chart.spark({ values: vals, color, height: 76 })}
-      <div class="stat-grid mt">
-        <div class="stat"><div class="stat-num num">${D.fmtNum(was)}</div><div class="stat-label">${esc(t('qz.was', { n: N }))}</div></div>
-        <div class="stat"><div class="stat-num num">${D.fmtNum(now)}</div><div class="stat-label">${esc(t('qz.now'))}</div></div>
-        <div class="stat"><i class="zone ${diff < 0 ? 'z-good' : diff > 0 ? 'z-bad' : ''}"></i><div class="stat-num num">${diff > 0 ? '+' : ''}${D.fmtNum(diff)}</div><div class="stat-label">${esc(t('qz.change'))}</div></div>
-      </div>
-      <div class="small muted mt-s">${esc(note)}</div>
-    </div>`;
-  }
-
-  function qzPaceCard() {
-    const days = D.lastDays(30), vals = days.map(qzPaidOn), p = qzPace(), td = qzTarget();
-    const axis = `<div class="ib-mx-axis ib-qz-axis"><span>${esc(D.fmtDate(days[0], 'dm'))}</span><span>${esc(D.fmtDate(days[14], 'dm'))}</span><span>${esc(D.fmtDate(days[29], 'dm'))}</span></div>`;
-    const eta = qzEta(p.rate), etaT = qzEta(td);
-    const etaLine = eta
-      ? (eta.far ? esc(t('qz.etaYears', { n: D.fmtNum(eta.years) })) : `${esc(t('qz.etaAt', { d: qzDate(eta.date) }))} · ${esc(t('qz.etaIn', { n: D.fmtNum(eta.days) }))}`)
-      : esc(t('qz.etaNone'));
-    const target = etaT && !etaT.far ? `<div class="small muted mt-s">${D.ic('target', 13)} ${esc(t('qz.etaTarget', { t: td, d: qzDate(etaT.date) }))}</div>` : '';
-    return `<div class="card">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.pace'))}</div><div class="title">${esc(t('qz.paceSub'))}</div></div></div>
-      ${D.chart.bars({ values: vals, color: 'var(--success)', height: 66, target: td })}${axis}
-      <div class="stat-grid mt">
-        <div class="stat"><div class="stat-num num">${D.fmtNum(p.p7)}</div><div class="stat-label">${esc(t('qz.p7'))}</div></div>
-        <div class="stat"><div class="stat-num num">${D.fmtNum(p.p30)}</div><div class="stat-label">${esc(t('qz.p30'))}</div></div>
-        <div class="stat"><div class="stat-num num">${D.round(p.rate, 1)}</div><div class="stat-label">${esc(t('qz.avg'))}</div></div>
-        <div class="stat"><div class="stat-num num">${D.ic('fire', 15)} ${D.fmtNum(qzStreak())}</div><div class="stat-label">${esc(t('qz.streak'))}</div></div>
-      </div>
-      <div class="ib-qz-eta"><div class="eyebrow">${esc(t('qz.eta'))}</div><div class="small">${etaLine}</div>${target}</div>
-    </div>`;
-  }
-
-  function qzCalendarCard() {
-    const days = D.lastDays(84), td = qzTarget();
-    const heat = D.chart.heat({
-      days,
-      valueFn: (k) => { const n = qzPaidOn(k); if (!n) return 0; return D.clamp(Math.ceil((n / td) * 4), 1, 4); },
-    });
-    return `<div class="card">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.calendar'))}</div><div class="title">${esc(t('qz.calSub'))}</div></div></div>
-      ${heat}
-    </div>`;
-  }
-
-  function qzPerCard() {
-    const o = qzOwed(), s = qzScan(), b = QZ().base;
-    const rows = PR.map((p) => {
-      const all = int(b[p]) + s.missed[p], paid = s.paid[p], owed = o.per[p];
-      const pct = all ? D.clamp((paid / all) * 100, 0, 100) : 0;
-      return `<div class="ib-qz-per">
-        <div class="row between"><span class="ib-qz-pn">${esc(t('prayer.' + p))}</span>
-          <span class="num small"><b>${D.fmtNum(owed)}</b> <span class="muted">/ ${D.fmtNum(all)}</span></span></div>
-        <span class="bar"><i class="bar-fill" style="width:${pct.toFixed(1)}%;background:${PCOLOR[p]}"></i></span>
-        <div class="ib-qz-pmeta small muted"><span>${esc(t('qz.baseLabel'))} ${D.fmtNum(int(b[p]))}</span><span>${esc(t('qz.logged'))} ${D.fmtNum(s.missed[p])}</span><span class="good">${esc(t('qz.paidAll'))} ${D.fmtNum(paid)}</span></div>
-      </div>`;
-    }).join('');
-    return `<div class="card">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.per'))}</div><div class="title">${esc(t('qz.perSub'))}</div></div>
-        <span class="pill">${D.fmtNum(o.paid)} / ${D.fmtNum(o.all)}</span></div>
-      ${rows}
-    </div>`;
-  }
-
   function qzSetupCard() {
     const b = QZ().base, o = qzOwed();
     const inputs = PR.map((p) => `<label class="ib-qz-in"><span>${esc(t('prayer.' + p))}</span>
@@ -510,8 +479,14 @@
     // nothing owed and nothing ever repaid → the charts would all be flat zeroes.
     // Lead straight to the one card that matters: declaring the backlog.
     if (!o.total && !o.all && !o.paid) return qzHero() + qzSetupCard();
-    return qzHero() + (o.total ? qzPayCard() : '') + qzTrendCard() + qzPaceCard() + qzCalendarCard() + qzPerCard() + qzSetupCard();
+    // Debt number, today's repayments, and the rest folded away underneath.
+    // The trend/pace/calendar charts were noise beside the one action that matters.
+    const open = !!D.ui.collapsed.ibQzSet;
+    const more = `<button class="ib-more ${open ? 'on' : ''}" data-act="ibQzMore" aria-expanded="${open}">
+      ${D.ic('gear', 15)}<span class="grow">${esc(t('ib.qzMore'))}</span>${D.ic('chevD', 15)}</button>`;
+    return qzHero() + (o.total ? qzPayCard() : '') + more + (open ? qzSetupCard() : '');
   }
+  D.act.ibQzMore = () => { D.ui.collapsed.ibQzSet = !D.ui.collapsed.ibQzSet; D.saveUi(); D.rerender(); };
 
   /* ------------------------------------------------------------------ */
   /* qaza — actions                                                      */
@@ -574,44 +549,32 @@
     </button>`;
   }
 
-  /* ------------------------------------------------------------------ */
-  /* prayer matrix — every waqt of the last 8 weeks, one cell each        */
-  /* ------------------------------------------------------------------ */
-  function matrixCard() {
-    const days = D.lastDays(56), td = D.today();
-    let any = false;
-    const rows = PR.map((p) => {
-      const cells = days.map((k) => {
-        const s = stateOf(k, p);
-        if (s) any = true;
-        return `<i class="${s ? 's-' + s : ''}" title="${k} · ${esc(t('prayer.' + p))}${s ? ' · ' + esc(t('ib.st.' + s)) : ''}"></i>`;
-      }).join('');
-      return `<div class="ib-mx-row"><span class="ib-mx-name">${esc(t('prayer.' + p))}</span><span class="ib-mx-cells">${cells}</span></div>`;
-    }).join('');
-    const legend = STATES.map((s) => `<span><i class="ib-leg ib-mx-lg s-${s}"></i>${esc(t('ib.st.' + s))}</span>`).join('');
-    const axis = `<div class="ib-mx-axis"><span>${esc(D.fmtDate(days[0], 'dm'))}</span><span>${esc(D.fmtDate(td, 'dm'))}</span></div>`;
-    return `<div class="card">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.matrix'))}</div><div class="title">${esc(t('qz.matrixSub'))}</div></div></div>
-      ${any ? `<div class="ib-mx">${rows}</div>${axis}<div class="legend">${legend}</div>` : `<div class="empty">${esc(t('qz.mxNone'))}</div>`}
-    </div>`;
-  }
-
   /* date steppers (device-only) */
   function timesKey() { const k = F().ibTimesDate; return isDay(k) ? k : D.today(); }
   function logKey() { const td = D.today(), k = F().ibLogDate; return isDay(k) && k < td ? k : td; }
-  function dateNav(k, which, opts = {}) {
-    const td = D.today(), today = k === td;
-    let hint = today ? t('common.today') : k === D.addDays(td, -1) ? t('common.yesterday') : '';
-    const hij = D.hijri.fmt(k);
-    const fwdOff = opts.backfill && today;
-    return `<div class="date-nav ib-nav">
-      <button class="btn ghost sq" data-act="ibShift" data-which="${which}" data-n="-1" aria-label="${esc(t('ib.prevDay'))}">${D.ic('chevL')}</button>
-      <div class="label">${esc(D.fmtDate(k, 'weekday'))}
-        <span class="sub">${esc(hij)}${hint ? ` · ${esc(hint)}` : ''}</span>
-        ${today ? '' : `<button class="ib-return" data-act="ibToday" data-which="${which}">${D.ic('undo', 12)} ${esc(t('ib.backToday'))}</button>`}
-      </div>
-      <button class="btn ghost sq" data-act="ibShift" data-which="${which}" data-n="1" ${fwdOff ? 'disabled' : ''} aria-label="${esc(t('ib.nextDay'))}">${D.ic('chevR')}</button>
+  /* Sana — tepa panelning chekkasida ikkita strelka. Kun va hijriy sana
+     sarlavha ostida yozilib turadi, shuning uchun sahifa ustida alohida
+     qator kerak emas: u sanani ikkinchi marta aytardi. */
+  /* Kun o'qi — sahifaning ichida, tepa panelda emas. Ibodatda kunni
+     almashtirishning boshqa yo'li yo'q: yon tomonga surish bo'limchani
+     almashtiradi, kunni emas. */
+  function dayBar(which) {
+    const td = D.today(), k = which === 'log' ? logKey() : timesKey();
+    const fwdOff = which === 'log' && k === td;
+    return `<div class="ib-daybar">
+      <button class="btn ghost sq sm" data-act="ibShift" data-which="${which}" data-n="-1" aria-label="${esc(t('ib.prevDay'))}">${D.ic('chevL', 16)}</button>
+      <div class="ib-daybar-l">${esc(D.fmtDate(k, 'weekday'))}</div>
+      <button class="btn ghost sq sm" data-act="ibShift" data-which="${which}" data-n="1" ${fwdOff ? 'disabled' : ''} aria-label="${esc(t('ib.nextDay'))}">${D.ic('chevR', 16)}</button>
     </div>`;
+  }
+  /* Tepa paneldagi izoh qatori: hijriy sana va «bugunga qaytish».
+     Milodiy kun bu yerdan olib tashlandi — u sahifaning o'z kun o'qida
+     (dayBar) yozilib turadi va ikki joyda takrorlanishi shart emas. */
+  function daySub(which) {
+    const td = D.today(), k = which === 'log' ? logKey() : timesKey();
+    const hint = k === td ? t('common.today') : k === D.addDays(td, -1) ? t('common.yesterday') : '';
+    return esc(D.hijri.fmt(k)) + (hint ? ' · ' + esc(hint) : '')
+      + (k === td ? '' : ` · <button class="top-link" data-act="ibToday" data-which="${which}">${esc(t('ib.backToday'))}</button>`);
   }
   D.act.ibShift = (el) => {
     const which = el.dataset.which, n = +el.dataset.n || 0;
@@ -627,7 +590,67 @@
   };
   D.act.ibToday = (el) => { if (el.dataset.which === 'log') F().ibLogDate = null; else F().ibTimesDate = null; D.saveUi(); D.rerender(); };
 
-  const segHtml = () => `<div class="seg ib-seg">${SUBS.map((x) => `<button class="${sub() === x ? 'on' : ''}" data-act="sub" data-view="prayer" data-sub="${x}">${esc(t('ib.sub.' + x))}</button>`).join('')}</div>`;
+  /* ------------------------------------------------------------------ */
+  /* section switcher — a thumb-reach dial above the main tab bar.       */
+  /* The four labels fan out along a quarter arc; the dial itself always */
+  /* shows where you are, so the top of the page stays free for content. */
+  /* ------------------------------------------------------------------ */
+  const SUB_ICON = { times: 'clock', log: 'check', qaza: 'flag', fasting: 'moon' };
+  let dialOpen = false;   // ephemeral: never persisted, always closed on a fresh load
+  const SUB_LABEL = { times: 'ib.sub.times', log: 'ib.sub.log', qaza: 'ib.sub.qaza', fasting: 'ib.sub.fasting' };
+  function dialHtml() {
+    const cur = sub(), open = dialOpen;
+    const items = SUBS.map((x, i) => `<button class="ib-dial-item ${cur === x ? 'on' : ''}" style="--i:${i}"
+        data-act="ibDial" data-sub="${x}" tabindex="${open ? 0 : -1}">
+        <span class="ib-dial-lbl">${esc(t(SUB_LABEL[x]))}</span>
+        <i class="ib-dial-ic">${D.ic(SUB_ICON[x], 17)}</i>
+      </button>`).join('');
+    return `<div class="ib-dial ${open ? 'open' : ''}">
+      <button class="ib-dial-scrim" data-act="ibDial" tabindex="-1" aria-label="${esc(t('btn.close'))}"></button>
+      <div class="ib-dial-items">${items}</div>
+      <button class="ib-dial-btn" data-act="ibDial" aria-expanded="${open}">
+        <i class="ib-dial-cur">${D.ic(SUB_ICON[cur], 21)}</i>
+        <span class="ib-dial-now">${esc(t(SUB_LABEL[cur]))}</span>
+      </button>
+    </div>`;
+  }
+  D.act.ibDial = (el) => {
+    const to = el.dataset.sub;
+    if (to && SUBS.includes(to)) { dialOpen = false; haptic(); D.go('prayer', to); return; }
+    dialOpen = !dialOpen; haptic(); D.rerender();
+  };
+  // swiping the page left/right is the second way through the same four sections
+  function swipeTo(dir) {
+    const i = SUBS.indexOf(sub()), n = D.clamp(i + dir, 0, SUBS.length - 1);
+    if (n === i) return;
+    dialOpen = false; haptic(); D.go('prayer', SUBS[n]);
+  }
+  let swipeOff = null;
+  function bindSwipe() {
+    unbindSwipe();
+    const el = D.$('#view'); if (!el) return;
+    let x0 = 0, y0 = 0, live = false;
+    // Yon tomonga suriladigan idish ichidan boshlangan teginish — o'sha idishniki.
+    // Jadval 400px ekranga sig'maydi va uni surishning yagona yo'li shu; ilgari
+    // jadvalni surmoqchi bo'lgan odam boshqa bo'limchaga tushib ketardi.
+    const start = (e) => {
+      const p = e.touches && e.touches[0]; if (!p) return;
+      if (e.target && e.target.closest && e.target.closest('.trk-scroll, [data-noswipe]')) { live = false; return; }
+      x0 = p.clientX; y0 = p.clientY; live = true;
+    };
+    const end = (e) => {
+      if (!live) return; live = false;
+      const p = e.changedTouches && e.changedTouches[0]; if (!p) return;
+      const dx = p.clientX - x0, dy = p.clientY - y0;
+      // a real horizontal flick, not a scroll that drifted sideways
+      if (Math.abs(dx) < 70 || Math.abs(dx) < Math.abs(dy) * 1.8) return;
+      swipeTo(dx < 0 ? 1 : -1);
+    };
+    el.addEventListener('touchstart', start, { passive: true });
+    el.addEventListener('touchend', end, { passive: true });
+    swipeOff = () => { el.removeEventListener('touchstart', start); el.removeEventListener('touchend', end); };
+  }
+  function unbindSwipe() { if (swipeOff) { swipeOff(); swipeOff = null; } }
 
   /* ------------------------------------------------------------------ */
   /* 1. TIMES                                                            */
@@ -649,7 +672,7 @@
     const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
     return (h ? h + ':' + D.pad2(m) : D.pad2(m)) + ':' + D.pad2(s);
   };
-  const heroRing = (pct) => D.chart.ring({ pct, size: 84, stroke: 6, color: 'var(--success)', label: D.ic('mosque', 22), sub: D.fmtPct(pct) });
+  const heroRing = (pct) => D.chart.ring({ pct, size: 84, stroke: 6, color: 'var(--accent)', label: D.ic('mosque', 22), sub: D.fmtPct(pct) });
   function heroHtml() {
     const hs = heroState();
     if (!hs) return `<div class="card ib-hero"><div class="eyebrow">${esc(t('ib.next'))}</div><div class="ib-hero-count num">—</div></div>`;
@@ -678,31 +701,239 @@
       const past = isToday ? x.mins <= nowM && x.id !== cur : k < td;
       const cls = ['ib-time-row', x.id === cur ? 'now' : '', past ? 'past' : '', x.id === 'quyosh' ? 'quyosh' : ''].join(' ');
       const stHtml = st ? `<span class="ib-time-state ib-c-${st}"><i class="ib-st-dot"></i>${esc(t('ib.st.' + st))}</span>` : '';
-      return `<div class="${cls}"><i class="ib-time-dot"></i><span class="ib-time-name">${esc(t('prayer.' + x.id))}</span>${stHtml}<span class="ib-time-val num">${x.time}</span></div>`;
+      // Quyosh namoz vaqti emas — makruh oynasi qachon tugashini shu yerda aytamiz
+      const sub = x.id === 'quyosh' ? `<span class="ib-time-sub">${esc(t('ib.ishroq', { t: D.prayer.fmt(D.prayer.ishroq(k)) }))}</span>` : '';
+      return `<div class="${cls}"><i class="ib-time-dot"></i><span class="ib-time-name">${esc(t('prayer.' + x.id))}${sub}</span>${stHtml}<span class="ib-time-val num">${x.time}</span></div>`;
     }).join('');
-    const duha = isToday && cur === 'quyosh' ? `<div class="small muted center mt-s">${esc(t('ib.duha'))}</div>` : '';
+    const duha = isToday && cur === 'quyosh'
+      ? `<div class="ib-note">${D.ic('sun', 13)} ${esc(t('ib.ishroqHint', { n: 20 }))}</div>` : '';
+    // Namoz vaqti — ishonch masalasi. Qayerdan kelgani va qachon solishtirilgani ko'rinib tursin.
+    // Ro'yxatdagi shaharda jadval islom.uz bilan aynan bir xil; GPS bilan esa
+    // hisob o'sha nuqtaga bo'ladi — buni "bir xil" deb aytish to'g'ri bo'lmaydi.
+    const src = D.prayer.listed()
+      ? `<div class="ib-src">${D.ic('check', 13)}<span>${esc(t('ib.source'))} <span class="muted">· ${esc(t('ib.sourceOn', { d: D.fmtDate(VERIFIED) }))}</span></span></div>`
+      : `<div class="ib-src geo">${D.ic('compass', 13)}<span>${esc(t('ib.sourceGeo'))}</span></div>`;
     return `<div class="card">
       <div class="card-head"><div><div class="eyebrow">${esc(t('ib.timesFor'))}</div><div class="title">${esc(D.fmtDate(k, 'weekday'))}</div></div>
         <span class="pill">${D.ic('moon', 12)} ${esc(D.hijri.fmt(k))}</span></div>
-      <div class="ib-times">${rows}</div>${duha}
+      <div class="ib-times">${rows}</div>${duha}${src}
     </div>`;
   }
-  function methodCard() {
-    const st = D.S.settings.prayer || {};
-    const note = t('ib.methodNote', { f: +st.fajr || 18, i: +st.isha || 18, asr: t(st.asr === 'shafi' ? 'ib.asr.shafi' : 'ib.asr.hanafi') });
-    return `<div class="card flat ib-method"><div class="row between wrap">
-      <div class="grow"><div class="eyebrow">${esc(t('ib.method'))}</div><div class="small">${esc(note)}</div></div>
-      <button class="btn ghost sm" data-act="go" data-view="settings" data-sub="prayer">${D.ic('gear', 14)} ${esc(t('ib.openSettings'))}</button>
-    </div></div>`;
+  /* Joylashuv — vaqtning eng muhim sharti, shuning uchun jadval ostida
+     bitta qatorda turadi: shahar, GPS, va yig'ilgan usul sozlamalari. */
+  function placeName() {
+    const c = D.prayer.conf();
+    if (c.place) return c.place;
+    const near = D.prayer.nearest(c.lat, c.lng);
+    return near ? near.n : D.round(c.lat, 2) + '\u00b0, ' + D.round(c.lng, 2) + '\u00b0';
   }
+  function placeBar() {
+    const open = !!D.ui.collapsed.ibPrayerSet;
+    const body = open && D.settings && D.settings.prayerCard ? `<div class="ib-set-body">${D.settings.prayerCard()}</div>` : '';
+    const busy = !!D.ui.ibGeoBusy;
+    return `<div class="ib-place">
+      <button class="ib-place-main" data-act="ibPickPlace">
+        ${D.ic('compass', 15)}
+        <span class="ib-place-name">${esc(busy ? t('ib.geoWait') : placeName())}</span>
+        <span class="ib-place-hint">${esc(t('ib.placeChange'))}</span>
+      </button>
+      <button class="ib-place-btn ${busy ? 'busy' : ''}" data-act="ibGeo" aria-label="${esc(t('ib.useGeo'))}">${D.ic('target', 16)}</button>
+      <button class="ib-place-btn ${open ? 'on' : ''}" data-act="ibSetToggle" aria-expanded="${open}" aria-label="${esc(t('ib.method'))}">${D.ic('gear', 16)}</button>
+    </div>${body}`;
+  }
+  D.act.ibSetToggle = () => { D.ui.collapsed.ibPrayerSet = !D.ui.collapsed.ibPrayerSet; D.saveUi(); D.rerender(); };
+  // Ro'yxatdan tanlangan shaharning koordinatasi yaxlitlanmaydi: 4 xonagacha
+  // yaxlitlash yiliga bir-ikki marta biror vaqtni bir daqiqaga surib yuboradi
+  // va jadval islom.uz bilan mos kelmay qoladi. GPS uchun yaxlitlash qoladi —
+  // u yerda 11 metrning ahamiyati yo'q.
+  function setPlace(lat, lng, name, exact) {
+    const pr = D.S.settings.prayer || (D.S.settings.prayer = {});
+    pr.lat = exact ? lat : D.round(lat, 4);
+    pr.lng = exact ? lng : D.round(lng, 4);
+    pr.place = name || ''; pr.fromList = !!exact; pr.geoAsked = true;
+    D.save();
+  }
+  D.act.ibGeo = () => {
+    const geo = typeof navigator !== 'undefined' && navigator.geolocation;
+    if (!geo || typeof geo.getCurrentPosition !== 'function') { D.toast(t('ib.geoNo')); return; }
+    D.ui.ibGeoBusy = true; D.rerender();
+    geo.getCurrentPosition(
+      (pos) => {
+        const near = D.prayer.nearest(pos.coords.latitude, pos.coords.longitude);
+        setPlace(pos.coords.latitude, pos.coords.longitude, near ? near.n : '');
+        D.ui.ibGeoBusy = false; haptic('success'); D.rerender(); D.toast(t('ib.geoOk', { p: placeName() }));
+      },
+      () => { D.ui.ibGeoBusy = false; D.rerender(); D.toast(t('ib.geoFail')); },
+      { timeout: 10000, maximumAge: 600000, enableHighAccuracy: true });
+  };
+  // 90 ta shahar bir ekranga sig'maydi — yozib qidiriladi, va alifbo to'siq bo'lmasligi
+  // kerak. Har bir nom (lotincha, kirillcha, ruschasi) bitta lotin kalitiga keltiriladi:
+  // apostroflar tashlanadi, kirill harflari lotinchaga o'giriladi. Shunda "Тошкент",
+  // "Ташкент", "tashkent" va "toshk" — hammasi bir joyni topadi.
+  const FOLD = {
+    а: 'a', б: 'b', в: 'v', г: 'g', ғ: 'g', д: 'd', е: 'e', ё: 'e', ж: 'j', з: 'z',
+    и: 'i', й: 'y', к: 'k', қ: 'k', л: 'l', м: 'm', н: 'n', о: 'o', п: 'p', р: 'r',
+    с: 's', т: 't', у: 'u', ў: 'u', ф: 'f', х: 'x', ҳ: 'x', ц: 'ts', ч: 'ch',
+    ш: 'sh', щ: 'sh', ъ: '', ы: 'i', ь: '', э: 'e', ю: 'yu', я: 'ya',
+  };
+  const cityKey = (s) => (s || '').toLowerCase()
+    .replace(/[\u02bb\u02bc'\u2018\u2019`]/g, '')
+    .replace(/[\u0400-\u04ff]/g, (c) => (c in FOLD ? FOLD[c] : c));
+  function cityRows(q) {
+    const cur = placeName(), k = cityKey(q);
+    const hit = D.prayer.places.filter((x) => !k || cityKey(x.n).includes(k) || cityKey(x.c).includes(k));
+    if (!hit.length) return `<div class="ib-note">${esc(t('ib.cityNone'))}</div>`;
+    return `<div class="ib-cities">${hit.map((x) => `<button class="ib-city ${x.n === cur ? 'on' : ''}" data-act="ibCity" data-n="${esc(x.n)}">${esc(x.n)}</button>`).join('')}</div>`;
+  }
+  D.act.ibPickPlace = () => {
+    D.modal({
+      title: t('ib.pickCity'), noFocus: true,
+      body: `<button class="btn block" data-act="ibCity" data-n="__geo">${D.ic('target', 15)} ${esc(t('ib.useGeo'))}</button>
+        <input class="inp ib-city-find" id="ibCityFind" type="search" autocomplete="off" placeholder="${esc(t('ib.findCity'))}">
+        <div id="ibCityList">${cityRows('')}</div>`,
+      onOpen: () => {
+        const inp = D.$('#ibCityFind'), list = D.$('#ibCityList');
+        if (!inp || !list) return;
+        inp.addEventListener('input', () => { list.innerHTML = cityRows(inp.value); });
+      },
+    });
+  };
+  D.act.ibCity = (el) => {
+    const n = el.dataset.n;
+    D.closeModal();
+    if (n === '__geo') { D.act.ibGeo(); return; }
+    const x = D.prayer.places.find((v) => v.n === n);
+    if (!x) return;
+    setPlace(x.lat, x.lng, x.n, true); haptic('success'); D.rerender(); D.toast(t('ib.geoOk', { p: x.n }));
+  };
   function ramadanBanner(k) {
     if (!D.hijri.isRamadan(k)) return '';
     const h = D.hijri.fromKey(k);
     return `<div class="banner good">${D.ic('moon', 16)} <b>${esc(t('ib.ramadan'))}</b> · ${esc(t('ib.ramadanDay', { d: h ? h.d : '' }))}</div>`;
   }
+  /* ------------------------------------------------------------------ */
+  /* QIBLA                                                                */
+  /*                                                                      */
+  /* Yo'nalish yerning sferasida hisoblanadi (katta doira), ya'ni bu       */
+  /* «xaritadagi to'g'ri chiziq» emas: Toshkentdan qibla 240,3° — g'arbdan */
+  /* biroz janubda, «janubi-g'arb» degan taxmindan sezilarli farq qiladi.  */
+  /* Formula beshta shaharning nashr etilgan burchagiga aynan mos keladi.  */
+  /*                                                                      */
+  /* Telefonning kompasi bo'lsa strelka haqiqiy yo'nalishni ko'rsatadi;    */
+  /* bo'lmasa — shimolga nisbatan burchak raqam bilan aytiladi. Yolg'on    */
+  /* aniqlik ko'rsatmaymiz: kompas yo'q bo'lsa, yo'qligini aytamiz.        */
+  /* ------------------------------------------------------------------ */
+  let heading = null, orientOff = null;
+  /* Ruxsat tugmasi faqat rostdan kerak bo'lganda ko'rinadi. Chrome ham
+     requestPermission ni e'lon qiladi, lekin so'ramasdan ham ma'lumot beradi —
+     shuning uchun avval tinglab ko'ramiz va tugmani faqat hech narsa
+     kelmagandagina ko'rsatamiz. */
+  const canAsk = () => typeof DeviceOrientationEvent !== 'undefined'
+    && typeof DeviceOrientationEvent.requestPermission === 'function';
+  const needPerm = () => canAsk() && heading === null && !D.ui.qiblaOk;
+
+  function qiblaDeg() { const c = D.prayer.conf(); return D.prayer.qibla(c.lat, c.lng); }
+
+  function qiblaDial(deg) {
+    const marks = [[0, 'N'], [90, 'E'], [180, 'S'], [270, 'W']].map(([a, l]) =>
+      `<g transform="rotate(${a} 80 80)"><line x1="80" y1="10" x2="80" y2="17" stroke="var(--line3)" stroke-width="2"/>
+        <text x="80" y="30" text-anchor="middle" font-size="11" fill="var(--text3)" transform="rotate(${-a} 80 ${24})">${l}</text></g>`).join('');
+    let ticks = '';
+    for (let a = 0; a < 360; a += 15) if (a % 90) ticks += `<line x1="80" y1="11" x2="80" y2="15" stroke="var(--line2)" stroke-width="1.5" transform="rotate(${a} 80 80)"/>`;
+    return `<div class="ib-qib-dial" id="ibQibDial">
+      <svg viewBox="0 0 160 160" aria-hidden="true">
+        <circle cx="80" cy="80" r="72" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+        <g id="ibQibRose">${ticks}${marks}</g>
+        <g id="ibQibNeedle" transform="rotate(${deg.toFixed(1)} 80 80)">
+          <path d="M80 20 L89 78 L80 72 L71 78 Z" fill="var(--accent)"/>
+          <circle cx="80" cy="80" r="4" fill="var(--accent)"/>
+        </g>
+      </svg>
+      <div class="ib-qib-kaaba">\u{1F54B}</div>
+    </div>`;
+  }
+
+  function qiblaCard() {
+    const deg = qiblaDeg();
+    const live = heading !== null;
+    const shown = live ? (deg - heading + 360) % 360 : deg;
+    const note = live ? t('ib.qib.live')
+      : needPerm() ? ''
+      : t('ib.qib.static', { d: D.fmtNum(deg, 1) });
+    return `<div class="card ib-qib">
+      <div class="card-head"><div><div class="eyebrow">${esc(t('ib.qib.title'))}</div>
+        <div class="title num">${esc(D.fmtNum(deg, 1))}° <span class="muted">${esc(t('ib.qib.fromN'))}</span></div></div>
+        ${live ? `<span class="pill good">${D.ic('compass', 12)} ${esc(t('ib.qib.on'))}</span>` : ''}</div>
+      ${qiblaDial(shown)}
+      ${note ? `<div class="ib-note">${esc(note)}</div>` : ''}
+      ${needPerm() ? `<button class="btn ghost sm block" data-act="ibQiblaOn">${D.ic('compass', 15)} ${esc(t('ib.qib.enable'))}</button>` : ''}
+    </div>`;
+  }
+
+  /* Strelka soniyada o'nlab marta yangilanadi — sahifani qayta chizmaymiz,
+     faqat bitta elementning burilishini o'zgartiramiz. */
+  function onOrient(e) {
+    let h = null;
+    if (typeof e.webkitCompassHeading === 'number') h = e.webkitCompassHeading;      // iOS: allaqachon shimoldan
+    else if (e.absolute && typeof e.alpha === 'number') h = 360 - e.alpha;           // boshqalar: alpha teskari
+    if (h === null || isNaN(h)) return;
+    const first = heading === null;
+    heading = (h + 360) % 360;
+    const n = D.$('#ibQibNeedle');
+    if (n) n.setAttribute('transform', `rotate(${((qiblaDeg() - heading + 360) % 360).toFixed(1)} 80 80)`);
+    if (first && D.current() === 'prayer') D.rerender();   // sarlavhadagi holat bir marta yangilansin
+  }
+  function bindOrient() {
+    unbindOrient();
+    if (typeof window === 'undefined' || !window.addEventListener) return;
+    const ev = 'ondeviceorientationabsolute' in window ? 'deviceorientationabsolute' : 'deviceorientation';
+    window.addEventListener(ev, onOrient, true);
+    orientOff = () => window.removeEventListener(ev, onOrient, true);
+  }
+  function unbindOrient() { if (orientOff) { orientOff(); orientOff = null; } heading = null; }
+  D.act.ibQiblaOn = async () => {
+    try {
+      const r = await DeviceOrientationEvent.requestPermission();
+      if (r !== 'granted') { D.toast(t('ib.qib.denied')); return; }
+      D.ui.qiblaOk = true; D.saveUi(); bindOrient(); D.rerender();
+    } catch (e) { D.toast(t('ib.qib.denied')); }
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* SAHARLIK VA IFTORLIK — faqat Ramazonda                               */
+  /* Ikkala vaqt ham jadvalda bor, lekin ro'zador kun davomida aynan shu   */
+  /* ikkitasiga qaraydi. Ramazonda ular tepaga chiqadi va qolgan vaqtgacha */
+  /* sanoq ko'rsatiladi.                                                   */
+  /* ------------------------------------------------------------------ */
+  function suhoorCard(k) {
+    if (!D.hijri.isRamadan(k) || k !== D.today()) return '';
+    const tm = timesOf(k); if (!tm) return '';
+    const now = nowMins();
+    const sah = tm.bomdod, ift = tm.shom;
+    const nextIsIftar = now >= sah && now < ift;
+    const left = nextIsIftar ? ift - now : (now < sah ? sah - now : 1440 - now + sah);
+    return `<div class="card ib-sahar">
+      <div class="ib-sahar-row">
+        <div class="ib-sahar-one ${!nextIsIftar ? 'on' : ''}">
+          <div class="eyebrow">${esc(t('ib.sahar'))}</div>
+          <div class="ib-sahar-t num">${esc(D.prayer.fmt(sah))}</div>
+        </div>
+        <div class="ib-sahar-sep"></div>
+        <div class="ib-sahar-one ${nextIsIftar ? 'on' : ''}">
+          <div class="eyebrow">${esc(t('ib.iftor'))}</div>
+          <div class="ib-sahar-t num">${esc(D.prayer.fmt(ift))}</div>
+        </div>
+      </div>
+      <div class="ib-sahar-left">${esc(t(nextIsIftar ? 'ib.toIftor' : 'ib.toSahar', { t: D.fmtMins(left) }))}</div>
+    </div>`;
+  }
+
   function renderTimes() {
     const k = timesKey();
-    return dateNav(k, 'times') + ramadanBanner(k) + heroHtml() + timesTable(k) + methodCard();
+    // Sanoq faqat bugun uchun ma'noli: boshqa kunni ko'rayotganda hero "hozir"ni,
+    // jadval esa o'sha kunni ko'rsatib, bir ekranda ikki xil kun chiqib qolardi.
+    const hero = k === D.today() ? heroHtml() : '';
+    return ramadanBanner(k) + hero + safe(() => suhoorCard(k)) + timesTable(k) + safe(qiblaCard) + placeBar();
   }
 
   /* ------------------------------------------------------------------ */
@@ -728,64 +959,84 @@
       ${rows}
     </div>`;
   }
-  function last30Card() {
-    const days = D.lastDays(30);
-    let jam = 0, ontime = 0, logged = 0;
-    for (const k of days) { const o = D.S.prayers[k]; if (!o || typeof o !== 'object') continue; for (const p of PR) { const s = o[p]; if (!s) continue; logged++; if (s === 'jamaat') { jam++; ontime++; } else if (s === 'alone') ontime++; } }
-    const streak = memo('streak5', stateSig(), () => D.streak(prayerTotals().full));
-    const heat = D.chart.heat({ days, valueFn: (k) => { const o = D.S.prayers[k]; if (!o || typeof o !== 'object') return 0; let j = 0; for (const p of PR) if (o[p] === 'jamaat') j++; return j ? Math.max(1, Math.round((j / 5) * 4)) : 0; } });
-    const pct = (x) => (logged ? D.fmtPct((x / logged) * 100) : '—');
+
+  /* ------------------------------------------------------------------ */
+  /* OYLIK JADVAL — besh qator, o'ttiz ustun                              */
+  /*                                                                      */
+  /* Bitta kunni belgilash — bu bitta kun. Odam esa oyni ko'rmoqchi:      */
+  /* qaysi namoz oqsayapti, qaysi kunlar tushib qolgan. Shuni bitta       */
+  /* to'rda ko'rsatamiz: har qator bitta namoz, har ustun bitta kun,      */
+  /* o'ng chekkada o'sha namozning oylik soni. Katakni bosish o'sha kunni */
+  /* ochadi — ro'yxat yuqorida, holat u yerda tanlanadi.                  */
+  /* ------------------------------------------------------------------ */
+  const CELL_STATE = { jamaat: 'j', alone: 'a', qaza: 'q', missed: 'x' };
+  function monthTrack(k) {
+    const td = D.today();
+    // O'ttiz kun tanlangan kun bilan tugaydi, lekin kelajakka o'tmaydi
+    const last = k > td ? td : k;
+    const days = [];
+    for (let i = 29; i >= 0; i--) days.push(D.addDays(last, -i));
+
+    const rows = PR.map((id) => {
+      let n = 0;
+      const cells = days.map((day) => {
+        const st = stateOf(day, id);
+        if (st === 'jamaat' || st === 'alone') n++;
+        return { cls: [st ? CELL_STATE[st] || '' : '', day === k ? 'sel' : '', day === td ? 'today' : ''].join(' '),
+          title: D.fmtDate(day) + ' · ' + t('prayer.' + id) + (st ? ' · ' + t('ib.st.' + st) : ''),
+          attrs: `data-act="ibTrackDay" data-key="${day}"` };
+      });
+      return { lab: t('prayer.' + id), cells, n, total: 30 };
+    });
+
+    // «O'tkazib» holatini endi qo'lda qo'yib bo'lmaydi (STATES da yo'q), lekin
+    // eski yozuvlarda uchraydi. Izohda faqat ko'rinib turgan 30 kunda haqiqatan
+    // bor bo'lsa ko'rsatiladi: aks holda izoh mavjud bo'lmagan narsani o'rgatadi.
+    const hasMissed = days.some((d) => PR.some((p) => stateOf(d, p) === 'missed'));
+    const legend = STATES.concat(hasMissed ? ['missed'] : []).map((x) =>
+      `<span><i class="ib-c-${x}" style="background:var(--c)"></i>${esc(t('ib.st.' + x))}</span>`).join('');
     return `<div class="card">
-      <div class="card-head"><div class="title">${esc(t('ib.last30'))}</div></div>
-      <div class="stat-grid">
-        <div class="stat"><div class="stat-num num">${pct(jam)}</div><div class="stat-label">${esc(t('ib.jamaat'))}</div></div>
-        <div class="stat"><div class="stat-num num">${pct(ontime)}</div><div class="stat-label">${esc(t('ib.ontime'))}</div></div>
-        <div class="stat"><div class="stat-num num">${D.ic('fire', 16)} ${D.fmtNum(streak)}</div><div class="stat-label">${esc(t('ib.streak5'))}</div><div class="stat-sub">${esc(t('unit.days'))}</div></div>
-      </div>
-      <div class="eyebrow mt">${esc(t('ib.heatJamaat'))}</div>${heat}
+      <div class="card-head"><div><div class="eyebrow">${esc(t('ib.trackTitle'))}</div>
+        <div class="title">${esc(D.fmtDate(days[0], 'dm'))} – ${esc(D.fmtDate(days[29], 'dm'))}</div></div>
+        <span class="pill">${esc(t('ib.trackDays', { n: 30 }))}</span></div>
+      ${D.chart.tracker({ days, rows })}
+      <div class="trk-legend">${legend}</div>
     </div>`;
   }
-  // Which prayer slips most? 30 days, per prayer, with the four states.
-  function perPrayerCard() {
+  D.act.ibTrackDay = (el) => {
+    const k = el.dataset.key;
+    if (!isDay(k) || k > D.today()) return;
+    F().ibLogDate = k === D.today() ? null : k;
+    D.saveUi(); haptic(); D.rerender();
+    // Ro'yxat sahifaning tepasida — bosilgan kun o'sha yerda ochiladi
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { window.scrollTo(0, 0); }
+  };
+
+  /* One line of numbers under the log — the whole of "how am I doing"
+     without a chart. The heavier breakdowns live in Tarix. */
+  function statStrip() {
     const days = D.lastDays(30);
-    const per = {};
-    let any = 0;
+    let jam = 0, ontime = 0, logged = 0;
     for (const k of days) {
-      const d = D.S.prayers[k]; if (!d) continue;
-      for (const id of D.PRAYERS) {
-        const v = d[id]; if (!v) continue;
-        any++;
-        const p = (per[id] = per[id] || { j: 0, a: 0, q: 0, m: 0, n: 0 });
-        p.n++;
-        if (v === 'jamaat') p.j++; else if (v === 'alone') p.a++; else if (v === 'qaza') p.q++; else if (v === 'missed') p.m++;
+      const o = D.S.prayers[k]; if (!o || typeof o !== 'object') continue;
+      for (const pr of PR) {
+        const st = o[pr]; if (!st) continue;
+        logged++;
+        if (st === 'jamaat') { jam++; ontime++; } else if (st === 'alone') ontime++;
       }
     }
-    const head = `<div class="card"><div class="card-head"><div class="title">${D.ic('list', 16)} ${esc(t('ib.per'))}</div>`;
-    if (!any) return head + `</div><div class="empty">${esc(t('ib.per.none'))}</div></div>`;
-    const NAME = { j: 'jamaat', a: 'alone', q: 'qaza', m: 'missed' };
-    const rows = D.PRAYERS.map((id) => {
-      const p = per[id] || { j: 0, a: 0, q: 0, m: 0, n: 0 };
-      return { id, name: t('prayer.' + id), j: p.j, a: p.a, q: p.q, m: p.m, n: p.n, onTime: p.n ? Math.round(((p.j + p.a) / p.n) * 100) : null };
-    });
-    const scored = rows.filter((r) => r.n >= 3);
-    const weak = scored.length ? scored.slice().sort((a, b) => a.onTime - b.onTime)[0] : null;
-    const seg = [['j', 'var(--success)'], ['a', 'var(--info)'], ['q', 'var(--warning)'], ['m', 'var(--danger-text)']];
-    const body = rows.map((r) => {
-      const bars = r.n ? seg.map(([f, c]) => (r[f] ? `<i style="width:${((r[f] / r.n) * 100).toFixed(1)}%;background:${c}" title="${esc(t('ib.st.' + NAME[f]))}: ${r[f]}"></i>` : '')).join('') : '';
-      return `<div class="ib-per-row ${weak && weak.id === r.id ? 'weak' : ''}">
-        <span class="ib-per-name">${esc(r.name)}</span>
-        <span class="ib-per-bar">${bars}</span>
-        <span class="ib-per-val num">${r.onTime === null ? '—' : r.onTime + '%'}</span></div>`;
-    }).join('');
-    const strip = (h) => h.replace(/^<p>/, '').replace(/<\/p>$/, '');
-    const note = weak ? `<div class="ib-per-note">${D.ic('info', 14)}<span>${D.ai ? strip(D.ai.md(t('ib.per.weak', { n: weak.name }))) : esc(t('ib.per.weak', { n: weak.name }))}</span></div>` : '';
-    const legend = `<div class="legend">${seg.map(([f, c]) => `<span><i class="ib-leg" style="background:${c}"></i>${esc(t('ib.st.' + NAME[f]))}</span>`).join('')}</div>`;
-    return head + `<span class="small muted">${esc(t('ib.per.sub'))} · ${esc(t('ib.per.ontime'))}</span></div>${body}${legend}${note}</div>`;
+    if (!logged) return '';
+    const streak = memo('streak5', stateSig(), () => D.streak(prayerTotals().full));
+    const pct = (x) => D.fmtPct((x / logged) * 100);
+    return `<div class="ib-strip">
+      <span><b class="num">${pct(ontime)}</b>${esc(t('ib.statOntime'))}</span>
+      <span><b class="num">${pct(jam)}</b>${esc(t('ib.statJamaat'))}</span>
+      <span><b class="num">${D.ic('fire', 13)} ${D.fmtNum(streak)}</b>${esc(t('ib.statStreak'))}</span>
+    </div>`;
   }
-
   function renderLog() {
     const k = logKey();
-    return dateNav(k, 'log', { backfill: true }) + logCard(k) + last30Card() + matrixCard() + perPrayerCard();
+    return logCard(k) + statStrip() + safe(() => monthTrack(k));
   }
   D.act.ibSet = (el) => {
     const k = el.dataset.key, id = el.dataset.id, s = el.dataset.s;
@@ -819,15 +1070,15 @@
       <div class="card-head"><div><div class="eyebrow">${esc(t('ib.fastToday'))}</div><div class="title">${esc(D.fmtDate(td, 'weekday'))}</div><div class="small muted">${esc(D.hijri.fmt(td))}</div></div>
         ${sug ? `<span class="pill on">${D.ic('star', 12)} ${esc(t('ib.f.' + sug))}</span>` : `<span class="pill">${esc(t('ib.noSuggest'))}</span>`}</div>
       <button class="ib-fast-toggle ${done ? 'on' : ''}" data-act="ibFastToggle" data-key="${td}" aria-pressed="${done}"><i class="chk big ${done ? 'on' : ''}" aria-hidden="true"></i>${esc(t('ib.fasted'))}</button>
-      <div class="row wrap mt"><span class="eyebrow">${esc(t('ib.fastType'))}</span>
-        <div class="seg compact">${FTYPES.map((f) => `<button class="${type === f ? 'on' : ''}" data-act="ibFastType" data-type="${f}">${esc(t('ib.ft.' + f))}</button>`).join('')}</div></div>
+      ${done ? `<div class="row wrap mt"><span class="eyebrow">${esc(t('ib.fastType'))}</span>
+        <div class="seg compact">${FTYPES.map((f) => `<button class="${type === f ? 'on' : ''}" data-act="ibFastType" data-type="${f}">${esc(t('ib.ft.' + f))}</button>`).join('')}</div></div>` : ''}
     </div>`;
   }
   function ramadanCard() {
     const td = D.today();
     if (!D.hijri.isRamadan(td)) {
       const n = memo('toRamadan', td, () => { let k = td; for (let i = 0; i < 400; i++) { if (D.hijri.isRamadan(k)) return i; k = D.addDays(k, 1); } return null; });
-      return n === null ? '' : `<div class="card flat"><div class="row"><span class="pill info">${D.ic('moon', 12)} ${esc(t('ib.toRamadan', { n }))}</span></div></div>`;
+      return n === null ? '' : `<div class="ib-note">${D.ic('moon', 13)} ${esc(t('ib.toRamadan', { n }))}</div>`;
     }
     const hm = hijriMonth(td); if (!hm) return '';
     let n = 0;
@@ -917,25 +1168,29 @@
 
   function render() {
     const s = sub();
+    const day = s === 'times' || s === 'log' ? safe(() => dayBar(s)) : '';
     const body = s === 'log' ? safe(renderLog) : s === 'qaza' ? safe(renderQaza) : s === 'fasting' ? safe(renderFasting) : safe(renderTimes);
     // the qaza debt is the one thing that must never be out of sight
     const remind = s === 'qaza' ? '' : safe(qzBanner);
-    const ai = D.ai && (s === 'times' || s === 'log' || s === 'qaza' || s === 'fasting') ? safe(() => D.ai.card('prayer')) : '';
-    return `<div class="ib">${segHtml()}${remind}${body}${ai}</div>`;
+    // No AI here: ibodat is for marking and reading times, not for advice.
+    return `<div class="ib">${remind}${day}${body}${safe(dialHtml)}</div>`;
   }
 
   D.view({
     id: 'prayer', icon: 'mosque', order: 40, nav: true, primary: true,
+    subtitle() { const sb = sub(); return sb === 'times' || sb === 'log' ? daySub(sb) : esc(t('ib.sub.' + sb)); },
     render,
     mount() {
       stopTimer();
       const s = sub();
-      if (s === 'times') { tick(); timer = setInterval(tick, 1000); }
+      if (s === 'times' && timesKey() === D.today()) { tick(); timer = setInterval(tick, 1000); }
+      // Kompas faqat Vaqtlar sahifasida tinglanadi: boshqa joyda u batareyani
+      // bekorga yeydi va hech narsa ko'rsatmaydi.
+      if (s === 'times') bindOrient(); else unbindOrient();
+      bindSwipe();
     },
-    unmount() { stopTimer(); },
+    unmount() { stopTimer(); unbindSwipe(); unbindOrient(); dialOpen = false; },
   });
 
   D.on('day:changed', () => { F().ibLogDate = null; F().ibTimesDate = null; D.saveUi(); if (D.current() === 'prayer') D.rerender(); });
-
-  D.search.register(() => SUBS.map((s) => ({ label: t('ib.sub.' + s), sub: t('nav.prayer'), icon: 'mosque', go: () => D.go('prayer', s) })));
 })();

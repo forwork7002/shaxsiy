@@ -25,7 +25,7 @@
       'ob.goal.lose': 'Vazn tashlash', 'ob.goal.keep': 'Vaznni saqlash', 'ob.goal.gain': 'Massa yig‘ish',
       'ob.goal.lose.s': '−400 kkal / kun', 'ob.goal.keep.s': 'me’yorda', 'ob.goal.gain.s': '+300 kkal / kun',
       'ob.whoop.go': 'WHOOP’ni ulash', 'ob.whoop.later': 'Keyinroq',
-      'ob.back': 'Orqaga', 'ob.next': 'Keyingi', 'ob.finish': 'Tayyor', 'ob.skip': 'Hozir emas — Sozlamalarda to‘ldiraman',
+      'ob.back': 'Orqaga', 'ob.next': 'Keyingi', 'ob.skip': 'Hozir emas — Sozlamalarda to‘ldiraman',
       'ob.e.name': 'Ismni yozing', 'ob.e.year': 'Yilni to‘g‘ri kiriting ({a}–{b})', 'ob.e.height': 'Bo‘y 100–250 sm oralig‘ida bo‘lsin',
       'ob.e.weight': 'Vaznni kiriting', 'ob.e.push': 'Serverga yozilmadi — internetni tekshiring',
       'ob.done': 'Tayyor, {name}! Ilova sizga moslandi', 'ob.doneNoName': 'Tayyor! Ilova sizga moslandi',
@@ -44,7 +44,7 @@
       'ob.goal.lose': 'Вазн ташлаш', 'ob.goal.keep': 'Вазнни сақлаш', 'ob.goal.gain': 'Масса йиғиш',
       'ob.goal.lose.s': '−400 ккал / кун', 'ob.goal.keep.s': 'меъёрда', 'ob.goal.gain.s': '+300 ккал / кун',
       'ob.whoop.go': 'WHOOP’ни улаш', 'ob.whoop.later': 'Кейинроқ',
-      'ob.back': 'Орқага', 'ob.next': 'Кейинги', 'ob.finish': 'Тайёр', 'ob.skip': 'Ҳозир эмас — Созламаларда тўлдираман',
+      'ob.back': 'Орқага', 'ob.next': 'Кейинги', 'ob.skip': 'Ҳозир эмас — Созламаларда тўлдираман',
       'ob.e.name': 'Исмни ёзинг', 'ob.e.year': 'Йилни тўғри киритинг ({a}–{b})', 'ob.e.height': 'Бўй 100–250 см оралиғида бўлсин',
       'ob.e.weight': 'Вазнни киритинг', 'ob.e.push': 'Серверга ёзилмади — интернетни текширинг',
       'ob.done': 'Тайёр, {name}! Илова сизга мосланди', 'ob.doneNoName': 'Тайёр! Илова сизга мосланди',
@@ -63,7 +63,7 @@
       'ob.goal.lose': 'Сбросить вес', 'ob.goal.keep': 'Держать вес', 'ob.goal.gain': 'Набрать массу',
       'ob.goal.lose.s': '−400 ккал / день', 'ob.goal.keep.s': 'по норме', 'ob.goal.gain.s': '+300 ккал / день',
       'ob.whoop.go': 'Подключить WHOOP', 'ob.whoop.later': 'Позже',
-      'ob.back': 'Назад', 'ob.next': 'Дальше', 'ob.finish': 'Готово', 'ob.skip': 'Не сейчас — заполню в Настройках',
+      'ob.back': 'Назад', 'ob.next': 'Дальше', 'ob.skip': 'Не сейчас — заполню в Настройках',
       'ob.e.name': 'Напишите имя', 'ob.e.year': 'Введите год правильно ({a}–{b})', 'ob.e.height': 'Рост должен быть 100–250 см',
       'ob.e.weight': 'Введите вес', 'ob.e.push': 'Не записалось на сервер — проверьте интернет',
       'ob.done': 'Готово, {name}! Приложение подстроилось', 'ob.doneNoName': 'Готово! Приложение подстроилось',
@@ -217,7 +217,7 @@
     // ism: /api/me dan (Google/ro'yxatdan o'tgan ism) — foydalanuvchi yozmagan bo'lsa
     if (!draft.name && D.serverEnabled() && !meAsked) {
       meAsked = true;
-      fetch('/api/me', { credentials: 'same-origin', cache: 'no-store' }).then((r) => r.ok ? r.json() : null).then((m) => {
+      D.fetchTimed('/api/me', { credentials: 'same-origin', cache: 'no-store' }, 10000).then((r) => r.ok ? r.json() : null).then((m) => {
         if (!m || !m.name || m.name === m.uid || !box || draft.name || touched) return;
         draft.name = String(m.name).slice(0, 40);
         const inp = box.querySelector('.ob-inp[data-k=name]'); if (inp) { inp.value = draft.name; inp.select(); }

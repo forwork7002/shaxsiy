@@ -19,16 +19,16 @@
 .wh-ready.good { background: color-mix(in srgb, var(--success) 9%, transparent); border-color: color-mix(in srgb, var(--success) 28%, transparent); }
 .wh-ready.warn { background: color-mix(in srgb, var(--warning) 9%, transparent); border-color: color-mix(in srgb, var(--warning) 28%, transparent); }
 .wh-ready.bad { background: color-mix(in srgb, var(--danger-text) 9%, transparent); border-color: color-mix(in srgb, var(--danger-text) 28%, transparent); }
-.wh-ready-num { font-family: var(--mono); font-size: 26px; font-weight: 800; line-height: 1; letter-spacing: -.03em; flex: none; }
+.wh-ready-num { font-family: var(--num); font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -.03em; flex: none; }
 .wh-ready.good .wh-ready-num { color: var(--success); }
 .wh-ready.warn .wh-ready-num { color: var(--warning); }
 .wh-ready.bad .wh-ready-num { color: var(--danger-text); }
 .wh-ready-num small { font-size: 12px; margin-left: 1px; }
 .wh-ready-body { flex: 1; min-width: 0; }
-.wh-ready-label { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); }
+.wh-ready-label { display: block; font-size: 10.5px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--text3); }
 .wh-ready-text { display: block; font-size: 13px; color: var(--text); line-height: 1.35; margin-top: 2px; }
 .wh-ready-side { display: flex; gap: 10px; flex: none; font-size: 11px; color: var(--text3); text-align: right; }
-.wh-ready-side b { display: block; font-family: var(--mono); font-size: 13px; color: var(--text2); font-weight: 700; }
+.wh-ready-side b { display: block; font-family: var(--num); font-size: 13px; color: var(--text2); font-weight: 700; }
 @media (max-width: 400px) { .wh-ready-side { gap: 0; } .wh-ready-side span:first-child:not(:last-child) { display: none; } }
 
 .wh-auto { font-size: 11px; color: var(--info); display: inline-flex; align-items: center; gap: 4px; }
@@ -52,27 +52,33 @@
 /* ===================================================================== */
 .wh-hero { padding-top: 16px; }
 .wh-hero-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
-.wh-brand { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 800; letter-spacing: .02em; color: color-mix(in srgb, var(--sec, var(--success)) 80%, var(--text3)); }
+.wh-brand { display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 700; letter-spacing: .02em; color: color-mix(in srgb, var(--sec, var(--success)) 80%, var(--text3)); }
 .wh-brand .num { font-weight: 600; color: var(--text3); }
 .wh-hero-main { margin-top: 6px; }
-.wh-hero .hero-title { font-family: var(--font-display); font-size: 17px; }
+.wh-hero .hero-title { font-size: 17px; }
 
 /* freshness: a breathing dot while the reading is under three minutes old */
 .wh-fresh { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text3); white-space: nowrap; }
 .wh-fresh i { width: 7px; height: 7px; border-radius: 50%; background: var(--text4); flex: none; }
-.wh-fresh.live i { background: var(--success); box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 45%, transparent); animation: whBreathe 2.4s ease-out infinite; }
+.wh-fresh.live i { background: var(--success); position: relative; }
 .wh-fresh.stale { color: var(--warning); }
 .wh-fresh.stale i { background: var(--warning); }
-@keyframes whBreathe { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--success) 45%, transparent); } 70% { box-shadow: 0 0 0 7px transparent; } 100% { box-shadow: 0 0 0 0 transparent; } }
-@media (prefers-reduced-motion: reduce) { .wh-fresh.live i { animation: none; } }
+/* The ripple rides on a pseudo-element that only scales and fades. Animating box-shadow —
+   which is what this used to do — repaints the dot on every frame instead of handing the
+   job to the compositor, and this dot breathes for as long as the reading is live. */
+.wh-fresh.live i::after, .wh-dot::after { content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: color-mix(in srgb, var(--success) 45%, transparent); pointer-events: none;
+  animation: whBreathe 2.4s ease-out infinite; }
+@keyframes whBreathe { 0% { transform: scale(1); opacity: 1; } 70%, 100% { transform: scale(3); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .wh-fresh.live i::after, .wh-dot::after { animation: none; opacity: 0; } }
 
 /* live strain row inside the hero */
 .wh-strain { margin-top: 16px; padding: 12px 13px; border-radius: 14px; background: var(--glass); border: 1px solid var(--line); }
 .wh-strain-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
 .wh-strain-lab { font-size: 12.5px; font-weight: 700; color: var(--text2); display: inline-flex; align-items: center; gap: 7px; }
-.wh-strain-lab em { font-style: normal; font-size: 10px; font-weight: 800; letter-spacing: .06em; padding: 2px 7px; border-radius: var(--r-pill);
+.wh-strain-lab em { font-style: normal; font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 2px 7px; border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success); }
-.wh-strain-val { font-size: 26px; font-weight: 800; letter-spacing: -.03em; color: var(--text); line-height: 1; }
+.wh-strain-val { font-size: 26px; font-weight: 700; letter-spacing: -.03em; color: var(--text); line-height: 1; }
 .wh-strain-foot { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; font-size: 11.5px; color: var(--text3); }
 .wh-strain-foot b { color: var(--text2); }
 
@@ -85,14 +91,14 @@
 
 /* ---------- sleep + strain pages ---------- */
 .wh-sl-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
-.wh-sl-big { font-family: var(--font-display); font-size: 40px; font-weight: 700; letter-spacing: -.04em; line-height: 1; color: var(--text); }
+.wh-sl-big { font-size: 40px; font-weight: 700; letter-spacing: -.03em; line-height: 1; color: var(--text); }
 .wh-sl-big small { font-size: 15px; font-weight: 700; letter-spacing: 0; margin-left: 2px; color: var(--text3); }
 .wh-sl-when { font-size: 14px; font-weight: 700; color: var(--text2); white-space: nowrap; }
 .wh-sl-when span { color: var(--text4); margin: 0 3px; }
 .wh-sl-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; font-size: 11.5px; color: var(--text3); }
 .wh-sl-meta b { color: var(--text2); }
 .wh-sl-meta .good { color: var(--success); } .wh-sl-meta .bad { color: var(--danger-text); }
-.wh-live-tag { font-size: 10px; font-weight: 800; letter-spacing: .06em; padding: 1px 7px; border-radius: var(--r-pill);
+.wh-live-tag { font-size: 10px; font-weight: 700; letter-spacing: .06em; padding: 1px 7px; border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success); }
 
 /* stage bar with the minutes hanging under each segment */
@@ -102,6 +108,7 @@
 .wh-stg { display: flex; flex-direction: column; gap: 2px; font-size: 10.5px; color: var(--text3); min-width: 0; }
 .wh-stg i { width: 18px; height: 3px; border-radius: 2px; display: block; }
 .wh-stg b { font-size: 13px; color: var(--text); }
+.wh-stg em { font-style: normal; white-space: nowrap; }
 
 .wh-rings { display: flex; justify-content: space-around; gap: 8px; }
 .wh-ring { display: flex; flex-direction: column; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; color: var(--text3); }
@@ -115,7 +122,7 @@
 .wh-wo-ic { width: 32px; height: 32px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px;
   background: color-mix(in srgb, var(--sec, var(--accent)) 14%, transparent); color: var(--sec, var(--accent)); }
 .wh-wo-name { font-size: 13.5px; font-weight: 700; color: var(--text); text-transform: capitalize; }
-.wh-wo-strain { font-size: 17px; font-weight: 800; color: var(--sec, var(--accent)); flex: none; }
+.wh-wo-strain { font-size: 17px; font-weight: 700; color: var(--sec, var(--accent)); flex: none; }
 .wh-zones { display: flex; gap: 2px; height: 8px; margin-top: 10px; border-radius: 4px; overflow: hidden; background: var(--line); }
 .wh-zones i { display: block; height: 100%; min-width: 2px; }
 .wh-zone-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; font-size: 10.5px; color: var(--text3); }
@@ -134,7 +141,7 @@
 /* Bugun strip additions */
 .wh-ready-fresh { font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--text4); margin-left: 6px; }
 .wh-ready-fresh.stale { color: var(--warning); }
-.wh-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--success); margin-left: 4px; vertical-align: 2px; animation: whBreathe 2.4s ease-out infinite; }
+.wh-dot { position: relative; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--success); margin-left: 4px; vertical-align: 2px; }
 
 /* ---------- Sog'liq → Tana: profil, tana, sinx, yosh paneli ---------- */
 .wh-body-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--text2); }
@@ -147,12 +154,12 @@
 /* WHOOP Age / Pace of Aging — ilovadan ko'chirilgan ikki raqam */
 .wh-body-big { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .wh-body-stat { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 10px; border-radius: 13px; background: var(--row-bg); border: 1px solid var(--row-line); }
-.wh-body-stat b { font-family: var(--font-display); font-size: 30px; font-weight: 700; letter-spacing: -.03em; line-height: 1; color: var(--text); }
-.wh-body-stat span { font-size: 10.5px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); }
+.wh-body-stat b { font-size: 30px; font-weight: 700; letter-spacing: -.03em; line-height: 1; color: var(--text); }
+.wh-body-stat span { font-size: 10.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); }
 
 /* bizning taxmin: bitta katta raqam, hukm, omillar jadvali */
 .wh-body-est { display: flex; align-items: center; gap: 14px; }
-.wh-body-num { font-family: var(--font-display); font-size: 42px; font-weight: 700; letter-spacing: -.04em; line-height: 1; flex: none; }
+.wh-body-num { font-size: 42px; font-weight: 700; letter-spacing: -.03em; line-height: 1; flex: none; }
 .wh-body-num.good { color: var(--success); } .wh-body-num.warn { color: var(--warning); } .wh-body-num.bad { color: var(--danger-text); }
 .wh-body-verdict { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3; }
 .wh-body-ins { margin-top: 12px; border-top: 1px solid var(--line); }
@@ -194,7 +201,7 @@
 .wh-bd-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
 @media (max-width: 520px) { .wh-bd-grid { grid-template-columns: 1fr 1fr; } }
 .wh-bd-cell { display: flex; flex-direction: column; gap: 3px; padding: 12px 10px; border-radius: 13px; background: var(--row-bg); border: 1px solid var(--row-line); min-width: 0; }
-.wh-bd-cell b { font-family: var(--mono); font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; color: var(--text); }
+.wh-bd-cell b { font-family: var(--num); font-size: 19px; font-weight: 700; letter-spacing: -.02em; line-height: 1.1; color: var(--text); }
 .wh-bd-cell b small { font-size: 11px; font-weight: 600; color: var(--text3); margin-left: 2px; }
 .wh-bd-cell b .good { color: var(--success); } .wh-bd-cell b .warn { color: var(--warning); } .wh-bd-cell b .bad { color: var(--danger-text); }
 .wh-bd-cell > span { font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); }
@@ -207,6 +214,17 @@
 /* uyqu bosqichlari endi aniq vaqt yozadi ("1 soat 8 daq") — tor ekranda to'rt ustun sig'maydi */
 @media (max-width: 480px) {
   .wh-stg-row { grid-template-columns: 1fr 1fr; gap: 10px 16px; }
-  .wh-stg { flex-direction: row; align-items: baseline; flex-wrap: wrap; gap: 5px; }
-  .wh-stg i { align-self: center; }
+  /* ikkita aniq qator: rang + vaqt, ostida nom va ulush. Nom o'z holiga qo'yilganda
+     har katak boshqa joyda ko'chardi, bo'yalgan chiziq esa cho'zilgan katakning
+     o'rtasida qolib, o'zi bildiradigan raqamdan uzilib turardi. */
+  .wh-stg { flex-direction: row; align-items: center; flex-wrap: wrap; gap: 5px; align-self: start; }
+  .wh-stg em { flex: 1 0 100%; }
 }
+
+/* Biologik yosh: taxmin ko'rinib turadi, uni nima harakatlantirgani — so'ralganda */
+.wh-bd-why { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 12px;
+  padding: 9px 12px; border: 1px solid var(--line2); border-radius: var(--r-sm); background: transparent;
+  color: var(--text2); font-size: 12px; font-weight: 600; letter-spacing: .03em; min-height: 38px; cursor: pointer; transition: background .15s, color .15s; }
+.wh-bd-why:hover { background: var(--hover); color: var(--text); }
+.wh-bd-why svg { transition: transform .2s; color: var(--text3); }
+.wh-bd-why[aria-expanded="true"] svg { transform: rotate(180deg); }
