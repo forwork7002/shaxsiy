@@ -46,6 +46,15 @@ tar czf - \
   index.html app.css css js fonts icons manifest.json sw.js api.py requirements.txt deploy "${EXTRA[@]}" \
   | ssh "$HOST" "mkdir -p $APP_DIR && tar xzf - -C $APP_DIR"
 
+# /yangi/ — api.py ichidagi oldindan ko'rish yo'li (PREVIEW_DIR). U asosiy sayt
+# bilan BITTA /api ga, ya'ni bitta ma'lumotga yozadi — shu sababli eski kod bilan
+# qolib ketishi xavfli. 2026-09-14 da u yerda 11-sentabrdagi nusxa turgan edi:
+# iOS va ma'lumot yaxlitligi tuzatishlarisiz, lekin haqiqiy bazaga yozadigan.
+# Papka bor bo'lsa mijoz fayllarini asosiydan ko'chiramiz; yo'q bo'lsa tegmaymiz
+# (api.py u holda 404 beradi — eski serverdagidek).
+echo "▸ /yangi/ oldindan ko'rish nusxasi sinxronlanmoqda…"
+ssh "$HOST" "cd $APP_DIR && if [ -d yangi ]; then rm -rf yangi.new && mkdir -p yangi.new && cp -a index.html app.css sw.js manifest.json css js fonts icons yangi.new/ && rm -rf yangi.old && mv yangi yangi.old && mv yangi.new yangi && rm -rf yangi.old && echo '  - sinxronlandi'; else echo '  - papka yoq, otkazib yuborildi'; fi"
+
 if [ "$MODE" = "--setup" ]; then
   echo "▸ Serverni sozlash…"
   ssh "$HOST" "cd $APP_DIR && bash deploy/setup.sh"
