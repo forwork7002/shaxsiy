@@ -122,6 +122,17 @@ n_v = cc.execute("SELECT COUNT(*) FROM state_versions").fetchone()[0]
 cc.close()
 check("nusxada yozuvlar bor", n_v > 0, f"{n_v} ta versiya")
 check("2020 yildagi nusxa joyida qoldi", old_copy.exists())
+check("chala nusxa rad etiladi", db._verify_copy(raw, {"day_facts": 10 ** 6}) != "ok", db._verify_copy(raw, {"day_facts": 10 ** 6}))
+empty = TMP / "bosh"
+empty.mkdir()
+db.init(empty)
+eout = db.backup_db(empty, NOW)
+check("yangi serverda bo'sh baza ham nusxalanadi", eout.exists(), "xato bergan bo'lardi")
+db.init(TMP)
+leftovers = sorted(p.name for p in b.glob("*.part*"))
+check("yordamchi fayllar qolmadi (.part, -wal, -shm)", not leftovers, str(leftovers))
+modes = [oct(p.stat().st_mode & 0o777) for p in b.glob("dash-*.db.gz")]
+check("nusxalar faqat egasiga o'qiladi (600)", all(m == "0o600" for m in modes), str(modes))
 
 head("Buzuq baza")
 bad = TMP / "buzuq"

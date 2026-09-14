@@ -46,6 +46,7 @@ KEEP_ALL_DAYS, KEEP_DAILY_DAYS = 7, 400
 # undan narisi — YILIGA BITTA VA ABADIY. Ya'ni 2040 yilda ham 2026 ning nusxasi turadi.
 KEEP_DAILY_B, KEEP_WEEKLY_B, KEEP_MONTHLY_B = 14, 8, 24
 VACUUM_DAYS = 30              # oyiga bir marta: compact o'chirgan joy diskka qaytariladi
+COUNT_TABLES = ("day_facts", "state_versions", "whoop_records", "chat_messages", "ai_cards")   # nusxa to'liqligi shular bo'yicha
 ZMAGIC = b"DZ1"               # siqilgan blob boshi (zlib) — oddiy matndan ajratib turadi
 DAY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 # 2026-09-14: finance, dhikr, fasting, goals qo'shildi. Ular blobda bor edi, lekin
@@ -699,10 +700,13 @@ def prune_generational(files, now=None) -> int:
     return len(drop)
 
 
-def _verify_copy(p: Path) -> str:
-    """Olingan nusxa haqiqatan ochiladimi va ichida ma'lumot bormi. 'ok' yoki nosozlik matni.
+def _verify_copy(p: Path, want: dict = None) -> str:
+    """Olingan nusxa ochiladimi, butunmi va BARCHA qatorlar yetib kelganmi. 'ok' yoki nosozlik matni.
 
     Tekshirilmagan zaxira — zaxira emas: u faqat tiklash kuni yaroqsizligi ma'lum bo'ladi.
+    `want` — nusxa olishdan oldin manbadagi qator sonlari. Nusxa undan kam bo'lsa, u chala.
+    Ko'p bo'lishi mumkin (nusxa olinayotganda kimdir saqlagan) — bu xato emas.
+    Bo'sh bazaning bo'sh nusxasi ham to'g'ri: yangi serverda hali hech kim hech narsa yozmagan.
     """
     try:
         c = sqlite3.connect(f"file:{p}?mode=ro", uri=True, timeout=10)
@@ -712,10 +716,10 @@ def _verify_copy(p: Path) -> str:
         row = c.execute("PRAGMA quick_check").fetchone()
         if not row or row[0] != "ok":
             return f"quick_check: {row[0] if row else '—'}"
-        n = c.execute("SELECT COUNT(*) FROM day_facts").fetchone()[0]
-        v = c.execute("SELECT COUNT(*) FROM state_versions").fetchone()[0]
-        if n == 0 and v == 0:
-            return "nusxa bo'sh — day_facts ham, state_versions ham yo'q"
+        for t, n_src in (want or {}).items():
+            n = c.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]     # noqa: S608 — jadval nomi COUNT_TABLES dan
+            if n < n_src:
+                return f"{t}: nusxada {n} qator, bazada {n_src} edi"
         return "ok"
     except sqlite3.Error as e:
         return f"o'qilmadi: {e}"
@@ -740,6 +744,8 @@ def backup_db(data_dir: Path, now=None) -> Path:
     raw.unlink(missing_ok=True)
     src = _conn()
     try:
+        # Nusxa olishdan OLDINGI qator sonlari — nusxa chala chiqmaganini shu bilan tekshiramiz
+        want = {t: src.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in COUNT_TABLES}   # noqa: S608
         out = sqlite3.connect(str(raw))
         try:
             src.backup(out)
@@ -748,7 +754,7 @@ def backup_db(data_dir: Path, now=None) -> Path:
     finally:
         src.close()
     try:
-        bad = _verify_copy(raw)
+        bad = _verify_copy(raw, want)
         if bad != "ok":
             raise sqlite3.DatabaseError(f"zaxira nusxasi tekshiruvdan o'tmadi ({bad})")
         with open(raw, "rb") as fin, gzip.open(tmp, "wb", compresslevel=6) as fout:
@@ -756,8 +762,11 @@ def backup_db(data_dir: Path, now=None) -> Path:
         tmp.replace(dst)
         _chmod_private(dst)
     finally:
-        raw.unlink(missing_ok=True)
-        tmp.unlink(missing_ok=True)
+        # -wal/-shm ni ham o'chiramiz: nusxa WAL rejimida bo'lgani uchun _verify_copy uni
+        # faqat-o'qish qilib ochadi va yopilganda SQLite o'sha yordamchi fayllarni
+        # O'CHIRA OLMAYDI (yozish huquqi yo'q). Ular 644 bilan qolib ketardi.
+        for p in (raw, Path(str(raw) + "-wal"), Path(str(raw) + "-shm"), tmp):
+            p.unlink(missing_ok=True)
     # eski formatdagi (siqilmagan) nusxalar: shu kunnikisi ortiqcha, qolganlari siqiladi
     (d / f"dash-{day}.db").unlink(missing_ok=True)
     for old in sorted(d.glob("dash-*.db")):
@@ -771,6 +780,14 @@ def backup_db(data_dir: Path, now=None) -> Path:
             log.error("eski nusxa siqilmadi (%s): %s", old.name, e)
             Path(str(old) + ".gz.part").unlink(missing_ok=True)
     prune_generational(list(d.glob("dash-*.db.gz")) + list(d.glob("dash-*.db")), n)
+    # Nusxalarda hamma odamning butun hayoti bor. Zaxiradan tiklangan yoki qo'lda
+    # ko'chirilgan fayl bo'sh ruxsat bilan kelib qolishi mumkin — har kuni tekshiramiz.
+    for p in d.glob("dash-*.db.gz"):
+        try:
+            if p.stat().st_mode & 0o077:
+                _chmod_private(p)
+        except OSError:
+            pass
     return dst
 
 
