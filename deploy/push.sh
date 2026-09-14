@@ -20,6 +20,17 @@ if [ -z "$HOST" ]; then
 fi
 cd "$(dirname "$0")/.."
 
+# Serverga boradigan yo'llar — BITTA manba. Tekshiruv ham, tar ham shundan
+# o'qiydi. Ilgari ikkita alohida ro'yxat bor edi va ular ajrab qolgan edi:
+# .env.example tar'da bor, tekshiruvda yo'q — ya'ni uning saqlanmagan
+# o'zgarishi ogohlantirishsiz serverga ketardi. Yangi fayl qo'shsangiz,
+# faqat shu yerga qo'shing.
+CORE=(index.html app.css css js fonts icons manifest.json sw.js api.py requirements.txt deploy)
+OPT=(db.py legacy.py .env.example)   # bo'lmasa tar yiqilmasin (legacy.py — bir martalik import)
+SHIP=("${CORE[@]}" "${OPT[@]}")
+TAR=("${CORE[@]}")
+for f in "${OPT[@]}"; do [ -e "$f" ] && TAR+=("$f"); done
+
 # ─── O'ZGA QO'L TEKSHIRUVI ────────────────────────────────────────────
 # push.sh git'ni emas, PAPKANI yuboradi. Ya'ni commit qilinmagan, yarim
 # yozilgan fayl ham serverga ketadi. 2026-09-14 da bu ikki marta jonli
@@ -28,7 +39,6 @@ cd "$(dirname "$0")/.."
 # Bu papkada bir vaqtda bir necha kishi (yoki Claude sessiyasi) ishlashi
 # mumkin, shuning uchun intizomga emas, to'siqqa tayanamiz.
 if git rev-parse --git-dir >/dev/null 2>&1 && [ "${ALLOW_DIRTY:-0}" != "1" ]; then
-  SHIP=(index.html app.css css js fonts icons manifest.json sw.js api.py requirements.txt deploy db.py legacy.py)
   DIRTY="$(git status --porcelain -- "${SHIP[@]}" 2>/dev/null | sed 's/^...//' || true)"
   # index.html ni push.sh ning o'zi har safar ?v= bilan qayta yozadi —
   # o'sha izdan boshqa o'zgarish bo'lmasa, bu «o'zga qo'l» emas.
@@ -46,11 +56,6 @@ if git rev-parse --git-dir >/dev/null 2>&1 && [ "${ALLOW_DIRTY:-0}" != "1" ]; th
   fi
 fi
 
-# Ixtiyoriy fayllar: bo'lsa yuboriladi, bo'lmasa tar yiqilmaydi (legacy.py — bir martalik import)
-EXTRA=()
-for f in db.py legacy.py .env.example; do
-  [ -f "$f" ] && EXTRA+=("$f")
-done
 
 # index.html dagi ?v= ni sw.js dagi CACHE bilan sinxronlaymiz. Ularsiz brauzer
 # deploydan keyin ham eski js/css ni keshdan ishlatadi — 2026-09-09 da namoz
@@ -92,7 +97,7 @@ echo "▸ Yuborilmoqda → $HOST:$APP_DIR"
 tar czf - \
   --exclude='.venv' --exclude='data' --exclude='certs' --exclude='__pycache__' \
   --exclude='.env' --exclude='*.pyc' \
-  index.html app.css css js fonts icons manifest.json sw.js api.py requirements.txt deploy "${EXTRA[@]}" \
+  "${TAR[@]}" \
   | ssh "$HOST" "mkdir -p $APP_DIR && tar xzf - -C $APP_DIR"
 
 # /yangi/ — api.py ichidagi oldindan ko'rish yo'li (PREVIEW_DIR). U asosiy sayt
