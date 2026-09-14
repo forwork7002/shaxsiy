@@ -273,6 +273,18 @@
 .nav-badge { top: -5px; right: 4px; min-width: 15px; height: 15px; padding: 0 4px;
   font-size: 9.5px; line-height: 15px; font-weight: 700;
   background: var(--z-low); color: #fff; box-shadow: 0 0 0 2px var(--nav); }
+/* Belgi — 17-bo'limdagi global tabular-nums qoidasidan CHIQARILADI.
+   Tabular raqamlar ustunlarni tekislash uchun kerak: har raqam eng keng
+   raqam qancha joy egallasa, shuncha egallaydi. Belgi esa hech narsa bilan
+   tekislanmaydi — u yakka turadi, ya'ni bu yerda tnum faqat kenglik qo'shadi.
+   Onest'da o'lchandi (wght 700): tnum bilan "11" 12.79px, tnumsiz 7.41px.
+   Ikki xonali son belgining kengligini deyarli ikki barobar oshirardi va
+   yuqoridagi tuzatishni — belgini ikonka ustidan olib chiqishni — bekor
+   qilardi.
+   Diqqat: core.js da bu element hamon `num` klassi bilan chiziladi, lekin
+   klassni olib tashlash yetarli EMAS: global qoida `body` da turibdi va
+   meros bo'lib baribir tushadi. Shuning uchun bekor qilish shu yerda. */
+.nav-badge { font-variant-numeric: proportional-nums; font-feature-settings: "tnum" 0; }
 /* O'rtadagi ko'tarilgan yorliq — oq disk. Uning ustida chiziq kerak emas:
    shakli o'zi qayerdaligini aytadi. */
 .nav-tab.nav-mid .nav-ic { width: 54px; height: 54px; margin-top: -24px; padding: 0;

@@ -5,6 +5,9 @@
 - `test_prayer_fasting.js` — ro'za tutish man etilgan besh kun (`hijri.forbiddenFast`)
 - `test_prayer_waqt.js` — joriy namoz vaqti quyosh chiqishida almashadi (`prayer.next`)
 - `test_prayer_names.js` — odat nomidan namozni tanish (`prayer.matchName`)
+- `test_sky.js` — kun fazasi (`prayer.sky`): JS nomlari CSS qoidalari bilan
+  mos keladimi, chegaralar namoz vaqtlariga to'g'ri keladimi, fasllar va
+  qutb kengligi, buzuq joylashuvda yiqilmasligi (33 ta tekshiruv)
 - `test_levels.js` — daraja va nishonlar: ochko hisobi, kunlik chegaralar,
   ketma-ketlik, haftalik sinov, `D.normalize` va `D.merge` (103 ta tekshiruv)
 
@@ -20,3 +23,4 @@ Ishga tushirish:
     node tests/test_prayer_waqt.js
     node tests/test_prayer_names.js
     node tests/test_levels.js
+    node tests/test_sky.js
