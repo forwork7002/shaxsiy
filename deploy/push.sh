@@ -22,7 +22,7 @@ cd "$(dirname "$0")/.."
 
 # Ixtiyoriy fayllar: bo'lsa yuboriladi, bo'lmasa tar yiqilmaydi (legacy.py — bir martalik import)
 EXTRA=()
-for f in db.py legacy.py; do
+for f in db.py legacy.py .env.example; do
   [ -f "$f" ] && EXTRA+=("$f")
 done
 
