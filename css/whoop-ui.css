@@ -267,7 +267,12 @@
 .nav-tab.nav-mid .nav-em { color: var(--on-btn); opacity: 1; }
 .nav-tab.on::before { content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
   width: 26px; height: 2px; background: var(--text); }
-.nav-badge { background: var(--z-low); color: #fff; font-weight: 700; box-shadow: 0 0 0 2px var(--nav); }
+/* Belgi emoji davridan qolgan joyda turardi va SVG ikonkaning o'ng yelkasiga
+   tushib, uni yopib qo'yardi (machitda ayniqsa — u eng zich shakl). Kichrayib,
+   yuqoriroqqa chiqdi: endi ikonkaning burchagiga tegadi, ustiga chiqmaydi. */
+.nav-badge { top: -5px; right: 4px; min-width: 15px; height: 15px; padding: 0 4px;
+  font-size: 9.5px; line-height: 15px; font-weight: 700;
+  background: var(--z-low); color: #fff; box-shadow: 0 0 0 2px var(--nav); }
 /* O'rtadagi ko'tarilgan yorliq — oq disk. Uning ustida chiziq kerak emas:
    shakli o'zi qayerdaligini aytadi. */
 .nav-tab.nav-mid .nav-ic { width: 54px; height: 54px; margin-top: -24px; padding: 0;
