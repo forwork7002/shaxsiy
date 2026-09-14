@@ -21,7 +21,7 @@ APP="${SHAXSIY_APP:-/opt/shaxsiy}"; F="$APP/.env"
 python3 - "$F" "$TOKEN" <<'PYR'
 import sys, pathlib, secrets
 f, val = pathlib.Path(sys.argv[1]), sys.argv[2]
-lines = f.read_text().splitlines(); done = False; out = []
+lines = (f.read_text() if f.exists() else "").splitlines(); done = False; out = []
 for line in lines:
     if line.startswith("MA_BOT_TOKEN="): line = "MA_BOT_TOKEN=" + val; done = True
     out.append(line)

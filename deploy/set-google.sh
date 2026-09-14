@@ -36,7 +36,7 @@ import os, sys, pathlib
 f = pathlib.Path(sys.argv[1])
 want = {"GOOGLE_CLIENT_ID": os.environ["CID"], "GOOGLE_CLIENT_SECRET": os.environ["SEC"], "MA_ALLOWED_EMAILS": os.environ["EMAILS"]}
 out = []
-for line in (f.read_text().splitlines() if f.exists() else []):
+for line in ((f.read_text() if f.exists() else "").splitlines() if f.exists() else []):
     k = line.split("=", 1)[0]
     if k in want: line = k + "=" + want.pop(k)
     out.append(line)

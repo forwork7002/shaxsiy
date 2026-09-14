@@ -47,7 +47,7 @@ PY_DOOR=$(cat <<'PY'
 import pathlib, sys
 reg, inv = sys.stdin.readline().strip(), sys.stdin.readline().rstrip('\n')
 f = pathlib.Path(sys.argv[1]) / '.env'
-out = [l for l in f.read_text().splitlines() if not l.startswith(('MA_REGISTER=', 'MA_INVITE='))]
+out = [l for l in (f.read_text() if f.exists() else "").splitlines() if not l.startswith(('MA_REGISTER=', 'MA_INVITE='))]
 out += ['MA_REGISTER=' + reg, 'MA_INVITE=' + inv]
 f.write_text('\n'.join(out) + '\n'); f.chmod(0o600)
 print('MA_REGISTER=' + reg, '| MA_INVITE:', ('%d belgi' % len(inv)) if inv else "bo'sh")

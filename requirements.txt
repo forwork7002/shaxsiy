@@ -1,3 +1,14 @@
-flask>=3.0
-anthropic>=1.0
-gunicorn>=21
+# Versiyalar ataylab qotirilgan: droplet'ni qayta qurganda bugungi bilan
+# bir xil narsa o'rnatilsin. Yangilash — ataylab qilinadigan ish:
+#   .venv/bin/pip install -U flask gunicorn && .venv/bin/pip freeze | grep -iE '^(flask|gunicorn|anthropic)'
+# so'ng shu yerga ko'chiring va sinab ko'ring.
+#
+# Chegara yuqoridan qo'yilgan (<N): keyingi katta versiya buzuvchi
+# o'zgarish olib kelsa, deploy o'z-o'zidan buzilmasin.
+flask>=3.0,<4.0
+gunicorn>=21.2,<24.0
+
+# anthropic — AI_PROVIDER=anthropic bo'lgandagina kerak. api.py uni
+# funksiya ichida import qiladi, shuning uchun bo'lmasa ham server ishlaydi.
+# OpenAI tomoni urllib bilan ishlaydi — qo'shimcha kutubxona talab qilmaydi.
+anthropic>=0.40,<1.0

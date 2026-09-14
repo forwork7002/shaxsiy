@@ -33,7 +33,7 @@ PW="$PW" python3 - "$F" <<'PYR'
 import os, sys, pathlib
 f = pathlib.Path(sys.argv[1])
 pw = os.environ["PW"]
-out = [l for l in (f.read_text().splitlines() if f.exists() else []) if not l.startswith("MA_PASSCODE=")]
+out = [l for l in ((f.read_text() if f.exists() else "").splitlines() if f.exists() else []) if not l.startswith("MA_PASSCODE=")]
 out.append("MA_PASSCODE=" + pw)
 f.write_text("\n".join(out) + "\n")
 print("MA_PASSCODE:", ("%d belgi" % len(pw)) if pw else "bo'sh (o'chirildi)")

@@ -86,7 +86,7 @@
 .nv-chips::-webkit-scrollbar { display: none; }
 .nv-chip { flex: none; min-height: 40px; padding: 8px 12px; cursor: pointer; color: var(--text2); }
 .nv-chip svg { color: var(--success); }
-.nv-chip:hover { background: var(--hover); border-color: var(--line3); color: var(--text); }
+@media (hover: hover) { .nv-chip:hover { background: var(--hover); border-color: var(--line3); color: var(--text); } }
 .nv-chip:disabled { opacity: .5; cursor: default; }
 
 /* composer */
@@ -99,7 +99,7 @@
 .nv-toggle { width: 100%; border: 0; background: transparent; cursor: pointer; min-height: 40px; padding: 0; text-align: left; font-family: inherit; }
 .nv-toggle .ic { transition: transform .2s; color: var(--text3); }
 .nv-toggle.open .ic { transform: rotate(180deg); }
-.nv-toggle:hover { color: var(--text2); }
+@media (hover: hover) { .nv-toggle:hover { color: var(--text2); } }
 
 /* thread list */
 .nv-th { cursor: pointer; min-height: 52px; }
@@ -113,5 +113,5 @@
 .nv-stat .stat-num small { font-size: 11px; color: var(--text3); font-weight: 600; margin-left: 1px; }
 .nv-stat .stat-num.good { color: var(--success); } .nv-stat .stat-num.warn { color: var(--warning); } .nv-stat .stat-num.bad { color: var(--danger-text); }
 .nv-ctx-note { margin-top: 8px; }
-@media (max-width: 400px) { .nv-ctx { grid-template-columns: repeat(2, 1fr); } .nv-name { font-size: 20px; } .nv-orb { width: 52px; height: 52px; } .nv-head-row { gap: 10px; } .nv-msg { max-width: 96%; } }
-@media (min-width: 960px) { .nv-feed { max-height: 62vh; } }
+@media (max-width: 400px){ .nv-ctx { grid-template-columns: repeat(2, 1fr); } .nv-name { font-size: 20px; } .nv-orb { width: 52px; height: 52px; } .nv-head-row { gap: 10px; } .nv-msg { max-width: 96%; } }
+@media (min-width: 960px){ .nv-feed { max-height: 62vh; } }

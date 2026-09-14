@@ -45,7 +45,7 @@ APP="${SHAXSIY_APP:-/opt/shaxsiy}"; F="$APP/.env"
 python3 - "$F" "$LIST" <<'PY'
 import sys, pathlib
 f, val = pathlib.Path(sys.argv[1]), sys.argv[2]
-lines = f.read_text().splitlines(); done = False; out = []
+lines = (f.read_text() if f.exists() else "").splitlines(); done = False; out = []
 for line in lines:
     if line.startswith("MA_USERS="): line = "MA_USERS=" + val; done = True
     out.append(line)

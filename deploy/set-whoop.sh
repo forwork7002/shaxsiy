@@ -31,7 +31,7 @@ python3 - "$F" "$CID" "$CSEC" <<'PY'
 import sys, pathlib
 f, cid, sec = pathlib.Path(sys.argv[1]), sys.argv[2], sys.argv[3]
 out = []
-for line in f.read_text().splitlines():
+for line in (f.read_text() if f.exists() else "").splitlines():
     if line.startswith("WHOOP_CLIENT_ID="):     line = "WHOOP_CLIENT_ID=" + cid
     elif line.startswith("WHOOP_CLIENT_SECRET="): line = "WHOOP_CLIENT_SECRET=" + sec
     out.append(line)

@@ -32,7 +32,7 @@ modelvar = "OPENAI_MODEL" if prov == "openai" else "AI_MODEL"
 want = {"AI_PROVIDER": prov, keyvar: key}
 if model: want[modelvar] = model
 out = []
-for line in f.read_text().splitlines():
+for line in (f.read_text() if f.exists() else "").splitlines():
     k = line.split("=", 1)[0]
     if k in want: line = k + "=" + want.pop(k)
     out.append(line)

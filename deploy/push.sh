@@ -30,7 +30,7 @@ echo "▸ Yuborilmoqda → $HOST:$APP_DIR"
 tar czf - \
   --exclude='.venv' --exclude='data' --exclude='certs' --exclude='__pycache__' \
   --exclude='.env' --exclude='*.pyc' \
-  index.html app.css css js icons manifest.json sw.js api.py requirements.txt deploy "${EXTRA[@]}" \
+  index.html app.css css js icons manifest.json sw.js api.py requirements.txt .env.example deploy "${EXTRA[@]}" \
   | ssh "$HOST" "mkdir -p $APP_DIR && tar xzf - -C $APP_DIR"
 
 if [ "$MODE" = "--setup" ]; then

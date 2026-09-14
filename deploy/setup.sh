@@ -43,6 +43,29 @@ id -u "$APP_USER" >/dev/null 2>&1 || useradd --system --home "$APP_DIR" --shell 
 mkdir -p "$APP_DIR"/{data,data/backups,certs}
 chown -R "$APP_USER:$APP_USER" "$APP_DIR"
 
+echo "▸ .env…"
+if [ ! -f "$APP_DIR/.env" ]; then
+  # Sukut bo'yicha YOPIQ: MA_REGISTER yozilmasa ilova hisob ochishni ochiq qoldiradi,
+  # ya'ni saytni topgan har kim o'ziga hisob ochardi. Shaxsiy dashboard uchun bu
+  # ataylab tanlanadigan narsa — shuning uchun bu yerda 0 bilan boshlanadi.
+  umask 077
+  {
+    echo "# Bu fayl setup.sh tomonidan yaratildi. To'ldirish uchun deploy/ dagi"
+    echo "# set-*.sh skriptlaridan foydalaning (qiymatlar ekranga chiqmaydi)."
+    echo "# Hamma sozlama ro'yxati: .env.example"
+    echo "MA_REGISTER=0"
+    echo "MA_SECRET=$(head -c 32 /dev/urandom | od -An -tx1 | tr -d ' 
+')"
+    echo "PORT=8081"
+  } > "$APP_DIR/.env"
+  echo "  ✓ $APP_DIR/.env yaratildi (hisob ochish YOPIQ, sessiya kaliti yozildi)"
+else
+  echo "  · mavjud .env tegilmadi"
+fi
+# Kalit bor-yo'qligidan qat'i nazar: faqat ilova o'qiy olsin.
+chown "$APP_USER:$APP_USER" "$APP_DIR/.env"
+chmod 600 "$APP_DIR/.env"
+
 echo "▸ Python muhiti…"
 if [ ! -d "$APP_DIR/.venv" ]; then python3 -m venv "$APP_DIR/.venv"; fi
 "$APP_DIR/.venv/bin/pip" install -q --upgrade pip
@@ -61,8 +84,9 @@ Type=simple
 User=$APP_USER
 Group=$APP_USER
 WorkingDirectory=$APP_DIR
-EnvironmentFile=$APP_DIR/.env
-ExecStart=$APP_DIR/.venv/bin/gunicorn -w 2 -b 127.0.0.1:8081 --no-control-socket --timeout 120 --access-logfile - api:app
+# '-' — fayl yo'q bo'lsa xizmat baribir ko'tariladi (sozlanmagan holatda, lekin tirik).
+EnvironmentFile=-$APP_DIR/.env
+ExecStart=$APP_DIR/.venv/bin/gunicorn --worker-class gthread --workers 2 --threads 8 \n    -b 127.0.0.1:8081 --no-control-socket --timeout 120 --graceful-timeout 30 --access-logfile - api:app
 Restart=always
 RestartSec=3
 # ilova faqat o'z papkasiga yozadi

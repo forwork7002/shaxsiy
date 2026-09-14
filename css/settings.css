@@ -12,7 +12,7 @@
 .set-ctl .sel { width: auto; min-width: 120px; max-width: 100%; min-height: 40px; }
 .set-ctl .seg { margin: 0; }
 .set-ctl .seg.compact button { min-height: 40px; }
-@media (max-width: 420px) {
+@media (max-width: 420px){
   .set-row { flex-wrap: wrap; }
   .set-ctl { max-width: 100%; width: 100%; justify-content: flex-start; }
   .set-ctl .sel { width: 100%; }
@@ -29,7 +29,7 @@
 .set-grid2 .seg { margin: 0; }
 .set-grid2 .seg button { min-height: 40px; }
 .set-grid2-cards { gap: 0 12px; }
-@media (max-width: 480px) { .set-grid2-cards { grid-template-columns: 1fr; } .set-grid3 { gap: 8px; } }
+@media (max-width: 480px){ .set-grid2-cards { grid-template-columns: 1fr; } .set-grid3 { gap: 8px; } }
 
 /* language / theme segments */
 .set-seg-lang button { font-size: 12px; padding: 8px 6px; min-height: 40px; }
@@ -72,7 +72,7 @@
 .set-hab-acts .btn.icon, .set-hab-acts .li-del { width: 40px; height: 40px; padding: 0; }
 .set-hab-acts .btn.icon:disabled { opacity: .25; }
 .set-up svg { transform: rotate(180deg); }
-@media (max-width: 480px) {
+@media (max-width: 480px){
   .set-hab-acts { grid-template-columns: repeat(2, 40px); grid-auto-flow: row; }
   .set-hab-acts .set-up { grid-row: 1; grid-column: 1; }
   .set-hab-acts .set-down { grid-row: 2; grid-column: 1; }
@@ -80,7 +80,7 @@
   .set-hab-acts .li-del { grid-row: 2; grid-column: 2; }
   .set-hab .li-text { font-size: 13.5px; }
 }
-@media (max-width: 400px) { .set-sph-sel { width: 112px; } }
+@media (max-width: 400px){ .set-sph-sel { width: 112px; } }
 /* habit emoji + done-label: two fields, then a row of suggested emoji chips that fill the input in place */
 .set-hab-emoji { display: inline-block; width: 22px; margin-right: 4px; font-size: 15px; line-height: 1; text-align: center; vertical-align: -1px; }
 .set-emoji-grid { margin-bottom: 8px; }
@@ -91,10 +91,10 @@
 .set-emoji-row { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin: 0 0 12px; }
 .set-emoji-chip { height: 40px; min-width: 0; padding: 0; border-radius: 10px; border: 1px solid var(--line2); background: var(--f-input); font-size: 18px; line-height: 1; cursor: pointer;
   transition: background .15s, border-color .15s, transform .1s; }
-.set-emoji-chip:hover { background: var(--hover); border-color: var(--line3); }
+@media (hover: hover) { .set-emoji-chip:hover { background: var(--hover); border-color: var(--line3); } }
 .set-emoji-chip:active { transform: scale(.94); }
 .set-emoji-chip.on { background: color-mix(in srgb, var(--success) 16%, transparent); border-color: var(--success); box-shadow: 0 0 8px var(--success-glow); }
-@media (max-width: 400px) { .set-emoji-row { grid-template-columns: repeat(8, 1fr); gap: 3px; } .set-emoji-chip { height: 36px; font-size: 16px; } }
+@media (max-width: 400px){ .set-emoji-row { grid-template-columns: repeat(8, 1fr); gap: 3px; } .set-emoji-chip { height: 36px; font-size: 16px; } }
 .modal .set-emoji-grid { margin-top: 2px; }
 
 /* prayer */
@@ -106,13 +106,13 @@
 .set-time.next { border-color: color-mix(in srgb, var(--success) 40%, transparent); background: color-mix(in srgb, var(--success) 10%, transparent); box-shadow: 0 0 12px var(--success-glow); }
 .set-time.next .set-time-val { color: var(--success); }
 .set-time-next { font-size: 9px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--success); }
-@media (max-width: 480px) { .set-times { grid-template-columns: repeat(3, 1fr); } .set-time-val { font-size: 15px; } }
+@media (max-width: 480px){ .set-times { grid-template-columns: repeat(3, 1fr); } .set-time-val { font-size: 15px; } }
 .set-sub-eyebrow { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); margin-bottom: 4px; }
 .set-off-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
 .set-off { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .set-off .tiny { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
 .set-off .set-num { width: 100%; text-align: center; padding-left: 6px; padding-right: 6px; }
-@media (max-width: 480px) { .set-off-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 480px){ .set-off-grid { grid-template-columns: repeat(3, 1fr); } }
 .set-ctl .toggle { width: 48px; height: 28px; }
 .set-ctl .toggle::before { content: ''; position: absolute; inset: -8px -6px; } /* 44px hit area */
 .set-ctl .toggle::after { width: 22px; height: 22px; }

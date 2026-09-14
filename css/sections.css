@@ -65,7 +65,7 @@ body::before { transition: background 1.2s ease; }
 .hero-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: var(--r-pill); font-size: 11.5px; font-weight: 700;
   background: color-mix(in srgb, var(--sec) 13%, transparent); border: 1px solid color-mix(in srgb, var(--sec) 26%, transparent); color: var(--sec); white-space: nowrap; }
 .hero-chip.mute { background: var(--inset); border-color: var(--line); color: var(--text3); }
-@media (max-width: 400px) { .hero { padding: 15px; } .hero-num { font-size: 36px; } }
+@media (max-width: 400px){ .hero { padding: 15px; } .hero-num { font-size: 36px; } }
 
 /* ---------- bento: big block + small blocks, instead of a stack of equals ---------- */
 .bento { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 14px; }
@@ -78,7 +78,7 @@ body::before { transition: background 1.2s ease; }
 .bento-tile::before { content: ''; position: absolute; top: 0; left: 18%; right: 18%; height: 1px; pointer-events: none;
   background: linear-gradient(90deg, transparent, var(--sheen), transparent); opacity: .7; }
 button.bento-tile { cursor: pointer; }
-button.bento-tile:hover { border-color: color-mix(in srgb, var(--sec) 34%, transparent); background: var(--hover); }
+@media (hover: hover) { button.bento-tile:hover { border-color: color-mix(in srgb, var(--sec) 34%, transparent); background: var(--hover); } }
 button.bento-tile:active { transform: scale(.985); }
 .bento-tile .lab { font-size: 10px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text3); display: flex; align-items: center; gap: 5px; }
 .bento-tile .lab .ic { color: var(--sec); opacity: .9; }
@@ -88,7 +88,7 @@ button.bento-tile:active { transform: scale(.985); }
 .bento-tile .mini { position: absolute; right: 10px; bottom: 8px; width: 46px; opacity: .55; }
 .bento-tile.on { border-color: color-mix(in srgb, var(--sec) 40%, transparent); background: var(--sec-soft); }
 .bento-tile.on .val { color: var(--sec); }
-@media (max-width: 340px) { .bento { grid-template-columns: 1fr; } .bento .b-wide { grid-column: span 1; } }
+@media (max-width: 340px){ .bento { grid-template-columns: 1fr; } .bento .b-wide { grid-column: span 1; } }
 
 /* ---------- section-specific character ---------- */
 /* Moliya reads like a ledger: mono numbers, tighter rows */
@@ -112,4 +112,4 @@ button.bento-tile:active { transform: scale(.985); }
 .card, .bento-tile, .hero { will-change: auto; }
 .li, .pill, .btn, .seg button, .tabs button { transition: background .16s ease, color .16s ease, border-color .16s ease, transform .1s ease; }
 .li:active, .bento-tile:active { transform: scale(.995); }
-@media (prefers-reduced-motion: reduce) { #view.view-enter > * { animation: none !important; } }
+@media (prefers-reduced-motion: reduce){ #view.view-enter > * { animation: none !important; } }

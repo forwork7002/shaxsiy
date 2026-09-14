@@ -29,7 +29,7 @@ if [ -f "$F" ] && grep -q '^MA_SECRET=' "$F"; then
   NEW="$NEW" python3 - "$F" <<'PYR'
 import os, sys, pathlib
 f = pathlib.Path(sys.argv[1])
-out = [("MA_SECRET=" + os.environ["NEW"]) if l.startswith("MA_SECRET=") else l for l in f.read_text().splitlines()]
+out = [("MA_SECRET=" + os.environ["NEW"]) if l.startswith("MA_SECRET=") else l for l in (f.read_text() if f.exists() else "").splitlines()]
 f.write_text("\n".join(out) + "\n")
 PYR
   chmod 600 "$F"

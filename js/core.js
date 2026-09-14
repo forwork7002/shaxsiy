@@ -210,11 +210,37 @@
   /** Kutayotgan yozuvni bekor qilish — chiqishda kalit o'chgach qayta yozilmasin. */
   function saveLocalCancel() { lsDirty = false; if (lsTimer) { clearTimeout(lsTimer); lsTimer = 0; } }
   D.saveLocalNow = saveLocalNow;
+  /** Chiqish nuqtalari uchun: bayroqqa qaramay bir marta yozadi. Modullarning
+      o'z kechiktirishlari (today.js eslatmasi kabi) shu bilan qutqariladi. */
+  D.flushLocal = saveLocalForce;
 
   D.ui = fill(lsGet(UI_KEY), { view: 'today', sub: {}, viewDate: null, filters: {}, collapsed: {} });
   D.saveUi = D.debounce(() => lsSet(UI_KEY, D.ui), 150);
   D.device = fill(lsGet(DEV_KEY), { novaKey: '', whoop: null, lockHash: '', uid: '', name: '', lastUser: '' });
   D.saveDevice = () => lsSet(DEV_KEY, D.device);
+
+  /** Ichida odamning yozuvlari bormi. Serverdagi _has_content bilan bir xil ro'yxat —
+      ikkalasi bir xil javob berishi shart, aks holda biri «bo'sh» deb yozib yuboradi. */
+  D.hasContent = (st) => {
+    if (!st || typeof st !== 'object') return false;
+    for (const k of ['logs', 'habits', 'tasks', 'goals', 'notes', 'counts', 'gratitude',
+                     'prayers', 'dhikr', 'fasting', 'health', 'learn', 'reviews']) {
+      const v = st[k];
+      if (Array.isArray(v) ? v.length : v && Object.keys(v).length) return true;
+    }
+    for (const [k, sub] of [['finance', 'tx'], ['finance', 'accounts'], ['finance', 'subs'], ['finance', 'wishlist'],
+                            ['food', 'logs'], ['nova', 'threads'], ['caffeine', 'logs'], ['stack', 'items'],
+                            ['gym', 'logs'], ['gym', 'days'], ['gym', 'exercises'],
+                            ['whoop', 'days'], ['whoop', 'workouts'], ['ai', 'log']]) {
+      const box = st[k];
+      if (!box || typeof box !== 'object') continue;
+      const v = box[sub];
+      if (Array.isArray(v) ? v.length : v && Object.keys(v).length) return true;
+    }
+    const pr = st.profile;
+    if (pr && (pr.name || pr.weightKg || pr.heightCm)) return true;
+    return false;
+  };
 
   D.S = null;
   D.load = () => {
@@ -431,7 +457,7 @@
         if (D.device.uid !== owner) { D.device.uid = owner; D.device.name = ''; D.saveDevice(); }
       }
       await D.meRefresh();   // header avatari, Sozlash «Hisob», onboarding ismi — 'pull:ok' dan oldin
-      const localEmpty = !Object.keys(D.S.logs).length && !D.S.habits.length && !D.S.tasks.length;
+      const localEmpty = !D.hasContent(D.S);
       if (remote && D.isOldFormat(remote)) {
         // server still holds the old Шахсий data.json → migrate once, keep local additions, push new format
         const migrated = D.migrateOld(remote);
@@ -1364,12 +1390,33 @@
     a.click();
     setTimeout(() => { a.remove(); URL.revokeObjectURL(url); }, 2000);
   };
-  D.importJson = (text) => {
+  /** Holatdagi yozuvlar sonini qisqacha sanaydi — import oynasida ko'rsatish uchun. */
+  D.countRecords = (st) => {
+    if (!st) return 0;
+    let n = 0;
+    for (const k of ['habits', 'tasks', 'goals', 'gratitude', 'learn', 'reviews']) n += (st[k] || []).length;
+    for (const k of ['logs', 'counts', 'notes', 'prayers', 'dhikr', 'fasting', 'health']) n += Object.keys(st[k] || {}).length;
+    n += ((st.finance || {}).tx || []).length;
+    for (const day of Object.values((st.food || {}).logs || {})) n += (day || []).length;
+    return n;
+  };
+
+  D.importJson = async (text) => {
     let j;
     try { j = JSON.parse(text); } catch (e) { throw new Error(D.t('data.badJson')); }
     if (!j || typeof j !== 'object') throw new Error(D.t('data.badJson'));
     const next = D.isOldFormat(j) ? D.migrateOld(j) : D.normalize(j);
     const prev = D.S;
+    // Import — almashtirish, qo'shish emas: qurilmadagi ham, serverdagi ham
+    // nusxa ustidan yoziladi. Shuning uchun so'raymiz.
+    if (D.hasContent(prev)) {
+      const ok = await D.confirm({
+        title: D.t('data.importTitle'),
+        text: D.t('data.importWarn', { now: D.countRecords(prev), next: D.countRecords(next) }),
+        ok: D.t('data.importOk'), danger: true,
+      });
+      if (!ok) return false;
+    }
     D.S = next;
     D.S.meta.deviceId = prev.meta.deviceId;
     D.undo.push({ label: D.t('data.imported'), undo: () => { D.S = prev; D.theme.apply(); D.renderNav(); } });
@@ -1378,6 +1425,7 @@
     D.renderNav();
     D.rerender();
     D.toast(D.t('data.imported'), { undo: () => D.undo.pop() });
+    return true;
   };
 
   /* ------------------------------------------------------------------ */
@@ -1389,7 +1437,7 @@
     D.theme.apply();
     if (D.tg) { try { D.tg.ready(); D.tg.expand(); if (D.tg.disableVerticalSwipes) D.tg.disableVerticalSwipes(); } catch (e) {} }
     const hash = location.hash.replace('#', '');
-    const empty = !Object.keys(D.S.logs).length && !D.S.habits.length && !D.S.tasks.length && !D.S.finance.tx.length;
+    const empty = !D.hasContent(D.S);
     D.loading = empty && D.serverEnabled();
     D.go(D.views[hash] ? hash : D.ui.view);
     D.setSync(D.serverEnabled() ? 'wait' : 'local');
@@ -1412,7 +1460,7 @@
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         tickStop();
-        D.saveLocalNow();          // ilovadan chiqilmoqda — kutayotgan yozuv diskka
+        D.flushLocal();            // ilovadan chiqilmoqda — holat shartsiz diskka
       } else {
         tickStart();
         onTick();
@@ -1420,7 +1468,7 @@
       }
     });
     // iOS'da beforeunload ishonchsiz; pagehide — yagona kafolatlangan nuqta.
-    window.addEventListener('pagehide', () => D.saveLocalNow());
+    window.addEventListener('pagehide', () => D.flushLocal());
     window.addEventListener('hashchange', () => { const h = location.hash.replace('#', ''); if (D.views[h] && h !== current) D.go(h); });
     D.emit('boot');
   };

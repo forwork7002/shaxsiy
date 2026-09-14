@@ -13,7 +13,7 @@
 .hs-tiles .stat-num { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .hs-tiles .stat-num small { font-size: 11px; font-weight: 600; color: var(--text3); margin-left: 1px; }
 .hs-tiles .hs-wt { font-size: 15px; }
-@media (max-width: 720px) { .hs-tiles { grid-template-columns: repeat(3, 1fr); gap: 8px; } .hs-tiles .stat { padding: 10px 8px; } }
+@media (max-width: 720px){ .hs-tiles { grid-template-columns: repeat(3, 1fr); gap: 8px; } .hs-tiles .stat { padding: 10px 8px; } }
 .hs-z-good { color: var(--success); } .hs-z-warn { color: var(--warning); } .hs-z-bad { color: var(--danger-text); }
 /* calendar: 7 columns, Monday first; must fit a 360px phone */
 .hs-cal { padding: 14px 12px 12px; }
@@ -23,7 +23,7 @@
 .hs-pad { display: block; }
 .hs-cell { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; aspect-ratio: 1 / 1; min-height: 40px; padding: 5px 2px 4px;
   border: 1px solid var(--line); border-radius: var(--r-xs); background: var(--inset); color: var(--text2); transition: background .15s, border-color .15s, transform .1s; }
-.hs-cell:hover { border-color: var(--line3); }
+@media (hover: hover) { .hs-cell:hover { border-color: var(--line3); } }
 .hs-cell:active { transform: scale(.96); }
 .hs-cell.future { opacity: .3; pointer-events: none; }
 .hs-cell.today { border-color: var(--text); box-shadow: inset 0 0 0 1px var(--text); }
@@ -51,7 +51,7 @@
 .hs-lg i.l3 { background: color-mix(in srgb, var(--success) 48%, transparent); } .hs-lg i.l4 { background: color-mix(in srgb, var(--success) 68%, transparent); }
 /* desktop: square cells would be 100px tall — cap the row height */
 @media (min-width: 720px) { .hs-cell { aspect-ratio: auto; height: 62px; } .hs-dn { font-size: 13px; } }
-@media (max-width: 400px) { .hs-cal { padding: 12px 8px 10px; } .hs-grid, .hs-dow { gap: 3px; } .hs-cell { min-height: 38px; padding: 4px 1px 3px; } .hs-dn { font-size: 11px; } }
+@media (max-width: 400px){ .hs-cal { padding: 12px 8px 10px; } .hs-grid, .hs-dow { gap: 3px; } .hs-cell { min-height: 38px; padding: 4px 1px 3px; } .hs-dn { font-size: 11px; } }
 /* day sheet (read-only) */
 .hs-day { display: flex; flex-direction: column; gap: 14px; }
 .hs-sec .eyebrow { margin-bottom: 6px; }
@@ -70,9 +70,9 @@
 .hs-wo-row { min-height: 38px; }
 /* year: month cards + heat-maps */
 .hs-mgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 10px; margin-bottom: 14px; }
-@media (max-width: 520px) { .hs-mgrid { grid-template-columns: 1fr 1fr; gap: 8px; } }
+@media (max-width: 520px){ .hs-mgrid { grid-template-columns: 1fr 1fr; gap: 8px; } }
 .hs-mcard { display: block; width: 100%; min-width: 0; text-align: left; padding: 12px; border: 1px solid var(--card-line); border-radius: var(--r-sm); background: var(--card-bg); color: var(--text); transition: border-color .15s, background .15s, transform .1s; }
-.hs-mcard:hover { border-color: var(--line3); background: var(--hover); }
+@media (hover: hover) { .hs-mcard:hover { border-color: var(--line3); background: var(--hover); } }
 .hs-mcard:active { transform: scale(.98); }
 .hs-mc-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .hs-mc-name { font-family: var(--font-display); font-weight: 700; font-size: 15px; text-transform: capitalize; }
@@ -80,7 +80,7 @@
 .hs-mc-rows span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; min-width: 0; overflow: hidden; }
 .hs-mc-rows .ic { color: var(--text3); flex: none; }
 .hs-mc-foot { margin-top: 8px; }
-@media (max-width: 400px) { .hs-mcard { padding: 10px; } .hs-mc-rows { font-size: 11px; gap: 4px 6px; } }
+@media (max-width: 400px){ .hs-mcard { padding: 10px; } .hs-mc-rows { font-size: 11px; gap: 4px 6px; } }
 .hs-year { overflow-x: auto; padding-bottom: 6px; margin-top: 6px; scrollbar-width: thin; }
 .hs-year .hm-year { overflow: visible; padding-bottom: 0; }
 .hs-hmonths { display: grid; grid-template-columns: repeat(53, 10px); gap: 2.5px; width: max-content; height: 14px; margin-bottom: 4px;

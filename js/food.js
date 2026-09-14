@@ -25,7 +25,7 @@
       'food.busy': 'Tahlil qilinmoqda…', 'food.result': 'Tahlil natijasi', 'food.rough': 'taxminiy',
       'food.save': 'Saqlash', 'food.edit': 'Tahrirlash', 'food.dismiss': 'Bekor',
       'food.notConfigured': "AI ulanmagan — serverda OpenAI kaliti yo'q. Sozlamalarda tekshiring yoki taomni qo'lda kiriting.",
-      'food.toSettings': 'Sozlamalar', 'food.failed': 'AI tahlil qila olmadi — taomni qo\'lda kiriting yoki qayta urinib ko\'ring.',
+      'food.rate': "Soatlik AI chegarasi to'ldi — biroz kutib turing yoki taomni qo'lda kiriting.", 'food.toSettings': 'Sozlamalar', 'food.failed': 'AI tahlil qila olmadi — taomni qo\'lda kiriting yoki qayta urinib ko\'ring.',
       'food.badImage': "Rasm o'qilmadi — boshqa rasm tanlang.", 'food.manual': "Qo'lda kiritish", 'food.retry': 'Qayta urinish',
       'food.offline': "Server yo'q — taomni qo'lda kiriting.",
       'food.name': 'Taom', 'food.grams': 'Gramm', 'food.note': 'Izoh', 'food.items': 'Tarkibi',
@@ -48,6 +48,7 @@
       'food.busy': 'Таҳлил қилинмоқда…', 'food.result': 'Таҳлил натижаси', 'food.rough': 'тахминий',
       'food.save': 'Сақлаш', 'food.edit': 'Таҳрирлаш', 'food.dismiss': 'Бекор',
       'food.notConfigured': 'AI уланмаган — серверда OpenAI калити йўқ. Созламаларда текширинг ёки таомни қўлда киритинг.',
+      'food.rate': "Соатлик AI чегараси тўлди — бироз кутиб туринг ёки таомни қўлда киритинг.",
       'food.toSettings': 'Созламалар', 'food.failed': 'AI таҳлил қила олмади — таомни қўлда киритинг ёки қайта уриниб кўринг.',
       'food.badImage': 'Расм ўқилмади — бошқа расм танланг.', 'food.manual': 'Қўлда киритиш', 'food.retry': 'Қайта уриниш',
       'food.offline': 'Сервер йўқ — таомни қўлда киритинг.',
@@ -71,6 +72,7 @@
       'food.busy': 'Анализирую…', 'food.result': 'Результат анализа', 'food.rough': 'примерно',
       'food.save': 'Сохранить', 'food.edit': 'Изменить', 'food.dismiss': 'Отмена',
       'food.notConfigured': 'AI не подключён — на сервере нет ключа OpenAI. Проверьте настройки или введите блюдо вручную.',
+      'food.rate': "Часовой лимит AI исчерпан — подождите немного или введите блюдо вручную.",
       'food.toSettings': 'Настройки', 'food.failed': 'AI не смог разобрать — введите блюдо вручную или попробуйте снова.',
       'food.badImage': 'Не удалось прочитать фото — выберите другое.', 'food.manual': 'Ввести вручную', 'food.retry': 'Повторить',
       'food.offline': 'Нет сервера — введите блюдо вручную.',
@@ -108,7 +110,7 @@
   let busy = false;        // so'rov ketyapti
   let pending = null;      // { text, note, preview, src }
   let result = null;       // server javobi + preview/text
-  let errorKind = null;    // 'ai_not_configured' | 'ai_failed' | 'bad_image' | 'offline'
+  let errorKind = null;    // 'ai_not_configured' | 'ai_failed' | 'bad_image' | 'offline' | 'rate'
   let editing = null;      // ochiq tahrir oynasi: { k, id, isNew, base, meal }
 
   /* ------------------------------------------------------------------ */
@@ -285,13 +287,15 @@
       };
     } catch (e) {
       const m = String((e && e.message) || e);
-      errorKind = /ai_not_configured|501/.test(m) ? 'ai_not_configured' : /bad_image/.test(m) ? 'bad_image' : 'ai_failed';
+      errorKind = /ai_not_configured|501/.test(m) ? 'ai_not_configured'
+        : /ai_rate_limited|429/.test(m) ? 'rate'
+        : /bad_image/.test(m) ? 'bad_image' : 'ai_failed';
       D.logError(e);
     } finally {
       busy = false;
       D.rerender();
       // tahlil bo'lmadi → matn bilan to'ldirilgan qo'lda kiritish oynasi
-      if (errorKind === 'ai_failed') openEdit(key(), null, { name: pending.text, note: pending.note, src: 'manual' });
+      if (errorKind === 'ai_failed' || errorKind === 'rate') openEdit(key(), null, { name: pending.text, note: pending.note, src: 'manual' });
     }
   }
 
@@ -496,7 +500,7 @@
       </div>`;
     }
     if (errorKind) {
-      const msg = errorKind === 'ai_not_configured' ? t('food.notConfigured') : errorKind === 'bad_image' ? t('food.badImage') : errorKind === 'too_big' ? t('food.tooBig') : errorKind === 'offline' ? t('food.offline') : t('food.failed');
+      const msg = errorKind === 'ai_not_configured' ? t('food.notConfigured') : errorKind === 'rate' ? t('food.rate') : errorKind === 'bad_image' ? t('food.badImage') : errorKind === 'too_big' ? t('food.tooBig') : errorKind === 'offline' ? t('food.offline') : t('food.failed');
       return `<div class="card fd-res" data-k="fd-err"><div class="banner bad">${D.ic('alert', 16)}<span class="grow">${esc(msg)}</span></div>
         <div class="fd-res-acts">
           ${errorKind === 'ai_not_configured' ? `<button class="btn sm ghost" data-act="go" data-view="settings">${D.ic('gear', 14)} ${esc(t('food.toSettings'))}</button>` : ''}

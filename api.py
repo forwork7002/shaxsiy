@@ -32,6 +32,7 @@ Env (start.sh):
   PORT               default 8081
 """
 import base64
+import contextlib
 import fcntl
 import hashlib
 import hmac
@@ -118,13 +119,7 @@ def _reg_load() -> dict:
 
 
 def _reg_save(d: dict):
-    tmp = USERS_FILE.with_suffix(".tmp")
-    tmp.write_text(json.dumps(d, ensure_ascii=False, indent=1), encoding="utf-8")
-    try:
-        os.chmod(tmp, 0o600)
-    except OSError:
-        pass
-    tmp.replace(USERS_FILE)
+    _atomic_write(USERS_FILE, json.dumps(d, ensure_ascii=False, indent=1))
 
 
 def _pw_hash(pw: str, salt: str, it: int = PW_ITER) -> str:
@@ -226,6 +221,74 @@ def _private(p: Path) -> Path:
     except OSError:
         pass
     return p
+
+
+_TMP_TAG = f"{os.getpid()}"
+
+
+def _atomic_write(p: Path, data, mode: int = 0o600) -> None:
+    """Faylni butunligicha almashtiradi. data — str yoki bytes.
+
+    Ilgari har bir yozuv joyi vaqtinchalik faylga QAT'IY nom berardi (`me.tmp`).
+    Ikkita gunicorn ishchisi bitta foydalanuvchini bir vaqtda saqlaganda ikkalasi
+    ayni shu faylga yozardi va birinchisining rename'i ikkinchisining yarim
+    yozilgan faylini asosiy fayl qilib qo'yardi — ya'ni odamning butun tarixi
+    buzilardi. Endi nom noyob (jarayon + tasodifiy), yozilgani diskka majburlanadi
+    (fsync), so'ng bitta atomar rename.
+    """
+    tmp = p.with_name(f"{p.name}.{_TMP_TAG}.{secrets.token_hex(5)}.tmp")
+    binary = isinstance(data, (bytes, bytearray))
+    try:
+        with open(tmp, "wb" if binary else "w", **({} if binary else {"encoding": "utf-8"})) as fh:
+            fh.write(data)
+            fh.flush()
+            os.fsync(fh.fileno())
+        try:
+            os.chmod(tmp, mode)
+        except OSError:
+            pass
+        os.replace(tmp, p)
+    except BaseException:
+        try:
+            tmp.unlink(missing_ok=True)
+        except OSError:
+            pass
+        raise
+
+
+@contextlib.contextmanager
+def _file_lock(name: str):
+    """Ikkita gunicorn ishchisini ketma-ketlashtiradi.
+
+    threading.Lock bu yerda yetmaydi: u faqat bitta jarayon ichida ishlaydi, ishchilar
+    esa alohida jarayon. Aynan shu sabab .fails.json allaqachon flock ga o'tgan edi —
+    foydalanuvchi ma'lumoti va users.json esa o'tmay qolgan. Qulf olinmasa ish
+    to'xtamaydi: ogohlantirish yozilib, avvalgidek davom etadi."""
+    safe = "".join(c for c in str(name) if c.isalnum() or c in "-_.")[:60] or "x"
+    fd = None
+    try:
+        fd = os.open(DATA_DIR / f".lock.{safe}", os.O_RDWR | os.O_CREAT, 0o600)
+        fcntl.flock(fd, fcntl.LOCK_EX)
+    except OSError as e:  # noqa: BLE001
+        log.warning("qulf olinmadi (%s): %s — ketma-ketlashtirilmasdan davom etamiz", safe, e)
+        if fd is not None:
+            try:
+                os.close(fd)
+            except OSError:
+                pass
+            fd = None
+    try:
+        yield
+    finally:
+        if fd is not None:
+            try:
+                fcntl.flock(fd, fcntl.LOCK_UN)
+            except OSError:
+                pass
+            try:
+                os.close(fd)
+            except OSError:
+                pass
 
 
 def _lock_data_dir():
@@ -783,10 +846,7 @@ def who_load(uid: str) -> dict:
 
 def who_save(uid: str, who: dict):
     f = who_file(uid)
-    tmp = f.with_name(f.name + ".tmp")
-    tmp.write_text(json.dumps(who, ensure_ascii=False), encoding="utf-8")
-    _private(tmp)   # ichida email bor
-    tmp.replace(f)
+    _atomic_write(f, json.dumps(who, ensure_ascii=False))   # ichida email bor
 
 
 def who_touch(uid: str, **fields):
@@ -854,13 +914,7 @@ def _avatar_write(uid: str, raw: bytes) -> int:
     """Atomar yozadi (tmp + replace); mtime (soniya) = versiya, oldingisidan albatta katta (ETag / ?v= uchun)."""
     f = avatar_file(uid)
     prev = int(f.stat().st_mtime) if f.is_file() else 0
-    tmp = f.with_name(f.name + ".tmp")
-    tmp.write_bytes(raw)
-    try:
-        os.chmod(tmp, 0o600)
-    except OSError:
-        pass
-    tmp.replace(f)
+    _atomic_write(f, raw)
     if int(f.stat().st_mtime) <= prev:
         os.utime(f, (prev + 1, prev + 1))
     return int(f.stat().st_mtime)
@@ -896,16 +950,32 @@ def user_file(uid: str) -> Path:
     return DATA_DIR / f"{safe}.json"
 
 
+# Holatdagi HAMMA yozuv turi. Ilgari ro'yxat qisqa edi (logs/habits/tasks/goals/notes va
+# to'rtta ichki joy) — ya'ni ma'lumoti asosan namoz, sog'liq yoki sanoqlardan iborat odam
+# uchun "bo'sh nusxa ustidan yozma" himoyasi UMUMAN ishlamasdi: uning bor tarixi bo'sh
+# holat bilan o'chib ketishi mumkin edi.
+_TOP_STORES = ("logs", "habits", "tasks", "goals", "notes", "counts", "gratitude",
+               "prayers", "dhikr", "fasting", "health", "learn", "reviews")
+_SUB_STORES = (("finance", "tx"), ("finance", "accounts"), ("finance", "subs"), ("finance", "wishlist"),
+               ("food", "logs"), ("nova", "threads"), ("caffeine", "logs"), ("stack", "items"),
+               ("gym", "logs"), ("gym", "days"), ("gym", "exercises"),
+               ("whoop", "days"), ("whoop", "workouts"), ("ai", "log"))
+
+
 def _has_content(d) -> bool:
     """Ichida odamning yozuvlari bormi. Bo'sh nusxa to'liq nusxa ustidan yozilmasligi shunga qarab hal bo'ladi."""
     if not isinstance(d, dict):
         return False
-    if d.get("logs") or d.get("habits") or d.get("tasks") or d.get("goals") or d.get("notes"):
-        return True
-    for key, sub in (("finance", "tx"), ("food", "logs"), ("nova", "threads"), ("caffeine", "logs")):
+    for key in _TOP_STORES:
+        if d.get(key):
+            return True
+    for key, sub in _SUB_STORES:
         box = d.get(key)
         if isinstance(box, dict) and box.get(sub):
             return True
+    prof = d.get("profile")
+    if isinstance(prof, dict) and (prof.get("name") or prof.get("weightKg") or prof.get("heightCm")):
+        return True
     return False
 
 
@@ -952,16 +1022,16 @@ def load_data(uid: str) -> dict:
 
 def save_data(uid: str, d: dict):
     f = user_file(uid)
-    tmp = f.with_suffix(".tmp")
-    tmp.write_text(json.dumps(d, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    _private(tmp)
-    tmp.replace(f)
-    # kunlik zaxira
+    body = json.dumps(d, ensure_ascii=False, separators=(",", ":"))
+    _atomic_write(f, body)
+    # Kunlik zaxira. Bu ham atomar bo'lishi shart: ilgari `if not b.exists()` ostida
+    # to'g'ridan-to'g'ri yozilardi, ya'ni yozuv yarmida uzilish bo'lsa o'sha kunning
+    # YAGONA tiklash nusxasi qirqilgan holda qolardi — va fayl mavjud bo'lgani uchun
+    # boshqa hech qachon qayta yozilmasdi.
     today = datetime.now(TZ).strftime("%Y-%m-%d")
     b = DATA_DIR / "backups" / f"{f.stem}-{today}.json"
     if not b.exists():
-        b.write_text(json.dumps(d, ensure_ascii=False), encoding="utf-8")
-        _private(b)
+        _atomic_write(b, body)
         olds = sorted((DATA_DIR / "backups").glob(f"{f.stem}-*.json"))
         for old in olds[:-BACKUP_KEEP]:
             old.unlink(missing_ok=True)
@@ -972,10 +1042,11 @@ def whoop_file(uid: str) -> Path:
 
 
 def whoop_save(uid: str, tok: dict):
-    """WHOOP tokenlari — faqat serverda va faqat ilova o'qiy oladigan qilib (0600)."""
-    f = whoop_file(uid)
-    f.write_text(json.dumps(tok), encoding="utf-8")
-    _private(f)
+    """WHOOP tokenlari — faqat serverda va faqat ilova o'qiy oladigan qilib (0600).
+
+    Ilgari fayl joyida qayta yozilardi: yozuv yarmida uzilish bo'lsa token butunlay
+    o'qib bo'lmas holga kelardi va WHOOP uzilib qolardi (qayta ulash kerak bo'lardi)."""
+    _atomic_write(whoop_file(uid), json.dumps(tok))
 
 
 def whoop_tokens(uid: str):
@@ -1017,7 +1088,10 @@ def post_data():
         return jsonify({"error": "bad_payload"}), 400
     if request.content_length and request.content_length > 25 * 1024 * 1024:
         return jsonify({"error": "too_large"}), 413
-    with _lock:
+    # _lock faqat shu jarayon ichidagi oqimlarni ushlaydi; ikkita gunicorn ishchisi
+    # bir-birini ko'rmaydi. O'qi-o'zgartir-yoz butunligicha fayl qulfi ostida bo'lishi kerak,
+    # aks holda ikkita qurilmadan bir vaqtda kelgan saqlash bir-birini yo'q qiladi.
+    with _lock, _file_lock("data." + uid):
         stored = load_data(uid)
         s_up = int((stored.get("meta") or {}).get("updatedAt") or 0)
         i_up = int((incoming.get("meta") or {}).get("updatedAt") or 0)
@@ -1599,10 +1673,7 @@ def _snap_read(uid: str):
 
 def _snap_write(uid: str, snap: dict):
     f = whoop_cache_file(uid)
-    tmp = f.with_suffix(".tmp")
-    tmp.write_text(json.dumps(snap, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-    _private(tmp)   # sog'liq ko'rsatkichlari
-    tmp.replace(f)
+    _atomic_write(f, json.dumps(snap, ensure_ascii=False, separators=(",", ":")))   # sog'liq ko'rsatkichlari
     _wh_mem[uid] = (f.stat().st_mtime, snap)
 
 
@@ -1835,6 +1906,29 @@ _whoop_poll_start()
 
 # ═══════════════════════ AI (Nova) ═══════════════════════
 
+# Tashqi AI so'rovining eng uzun muddati. gunicorn --timeout 120 dan ANCHA past
+# bo'lishi shart: ilgari OpenAI tomoni ham aynan 120 edi va so'rov chegaraga
+# yetganda ishchi o'rtada o'ldirilardi.
+AI_TIMEOUT = int(os.environ.get("MA_AI_TIMEOUT", "60"))
+
+# Bitta hisob uchun soatiga nechta AI so'rovi. Kalit egasiniki — telefon
+# cho'ntakda turib qayta-qayta so'rov yuborsa yoki sahifa halqaga tushsa,
+# hisob egasining puli ketardi. 0 — cheklov yo'q.
+AI_HOURLY_MAX = int(os.environ.get("MA_AI_HOURLY", "80"))
+
+
+def ai_budget_ok(uid: str) -> bool:
+    """Shu hisob oxirgi soatda chegaradan oshdimi. Hisob .fails.json da,
+    flock ostida — ya'ni ikkala gunicorn ishchisi bitta sanoqni ko'radi."""
+    if AI_HOURLY_MAX <= 0:
+        return True
+    n = _fails_count(f"ai|{uid}", 3600, add=True)
+    if n > AI_HOURLY_MAX:
+        log.warning("AI soatlik chegarasi oshdi (%s): %d", uid, n)
+        return False
+    return True
+
+
 _ai_client = None
 
 
@@ -1842,11 +1936,13 @@ def ai_client():
     global _ai_client
     if _ai_client is None:
         import anthropic  # lazily — kutubxona bo'lmasa server baribir ishlaydi
-        _ai_client = anthropic.Anthropic(api_key=AI_KEY, timeout=90.0)
+        # timeout va max_retries ataylab past: SDK sukut bo'yicha ikki marta qayta
+        # uriniladi (90 s × 3 = 270 s) va bu gunicorn chegarasidan ancha oshib ketardi.
+        _ai_client = anthropic.Anthropic(api_key=AI_KEY, timeout=float(AI_TIMEOUT), max_retries=1)
     return _ai_client
 
 
-def ai_openai(system: str, msgs: list, max_tokens: int, timeout: float = 120):
+def ai_openai(system: str, msgs: list, max_tokens: int, timeout: float = None):
     """OpenAI chat completions. (natija, None) yoki (None, (xato, status)).
     gpt-5 oilasi `max_tokens` va `temperature`ni rad etadi — faqat `max_completion_tokens` yuboriladi.
     msgs[].content matn yoki content-parts ro'yxati (text + image_url) bo'lishi mumkin."""
@@ -1854,6 +1950,8 @@ def ai_openai(system: str, msgs: list, max_tokens: int, timeout: float = 120):
             "max_completion_tokens": max_tokens}
     if OPENAI_REASONING in ("minimal", "low", "medium", "high") and (OPENAI_MODEL.startswith("gpt-5") or OPENAI_MODEL.startswith("o")):
         body["reasoning_effort"] = OPENAI_REASONING   # faqat fikrlaydigan modellar qabul qiladi
+    if timeout is None:
+        timeout = AI_TIMEOUT
     req = urllib.request.Request(OPENAI_BASE + "/chat/completions", data=json.dumps(body).encode("utf-8"), method="POST",
                                  headers={"Authorization": "Bearer " + OPENAI_KEY, "Content-Type": "application/json", "User-Agent": USER_AGENT})
     try:
@@ -1886,6 +1984,8 @@ def ai():
         return err
     if not AI_PROVIDER:
         return jsonify({"error": "ai_not_configured"}), 501
+    if not ai_budget_ok(uid):
+        return jsonify({"error": "ai_rate_limited"}), 429
     body = request.get_json(silent=True) or {}
     msgs = body.get("messages")
     system = str(body.get("system") or "")[:16000]
@@ -2081,6 +2181,8 @@ def food_analyze():
         return err
     if not AI_PROVIDER:
         return jsonify({"error": "ai_not_configured"}), 501
+    if not ai_budget_ok(uid):
+        return jsonify({"error": "ai_rate_limited"}), 429
     if request.content_length and request.content_length > FOOD_MAX_REQ:
         return jsonify({"error": "too_large"}), 413
     body = request.get_json(silent=True) or {}
@@ -2130,10 +2232,7 @@ def food_analyze():
         photo = "fp_" + secrets.token_hex(8)
         f = food_dir(uid) / (photo + ".jpg")
         try:
-            tmp = f.with_suffix(".tmp")
-            tmp.write_bytes(img[0])
-            os.chmod(tmp, 0o600)
-            tmp.replace(f)
+            _atomic_write(f, img[0])
         except OSError as e:
             log.warning("Ovqat surati saqlanmadi: %s", e)
             photo = None

@@ -17,5 +17,5 @@ if [ "${MA_DEV:-}" = "1" ]; then
   fi
   exec python api.py
 else
-  exec gunicorn -w 2 -b "127.0.0.1:$PORT" --timeout 120 api:app
+  exec gunicorn --worker-class gthread --workers 2 --threads 8 -b "127.0.0.1:$PORT" --timeout 120 --graceful-timeout 30 api:app
 fi

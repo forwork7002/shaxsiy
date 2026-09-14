@@ -20,7 +20,7 @@
 .td-ring-status { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3; }
 .td-ring-remain { font-size: 12px; color: var(--text2); }
 .td-ring-hours { font-size: 11px; color: var(--text3); }
-@media (max-width: 480px) { .td-ring { width: 120px; height: 120px; } .td-ring-pct { font-size: 26px; } .td-ring-status { font-size: 13px; } }
+@media (max-width: 480px){ .td-ring { width: 120px; height: 120px; } .td-ring-pct { font-size: 26px; } .td-ring-status { font-size: 13px; } }
 .td-pr-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
 .td-prayers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
 .td-pr { --c: var(--text3); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 50px; padding: 7px 3px; min-width: 0;
@@ -42,7 +42,7 @@
 .td-sph-head .num { margin-left: auto; color: var(--text3); font-size: 11px; letter-spacing: 0; }
 .td-step { display: flex; align-items: center; gap: 2px; flex: none; }
 .td-step-btn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line2); background: var(--glass); color: var(--text); display: inline-flex; align-items: center; justify-content: center; transition: background .15s; }
-.td-step-btn:hover { background: var(--hover); }
+@media (hover: hover) { .td-step-btn:hover { background: var(--hover); } }
 .td-step-val { min-width: 42px; text-align: center; font-weight: 700; color: var(--text); font-size: 13px; }
 .td-step-val small { color: var(--text3); font-weight: 600; font-size: 11px; }
 
@@ -64,12 +64,12 @@
 /* quick strip */
 .td-quick { grid-template-columns: repeat(2, 1fr); margin-bottom: 12px; } /* same rhythm as .card */
 .td-tile { cursor: pointer; transition: background .2s, border-color .2s; }
-.td-tile:hover { background: var(--hover); border-color: var(--line2); }
+@media (hover: hover) { .td-tile:hover { background: var(--hover); border-color: var(--line2); } }
 .td-tile .stat-label { display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .td-tile-of { font-size: 13px; color: var(--text3); font-weight: 600; letter-spacing: 0; }
 .td-tile-bar { margin-top: 8px; }
 .td-plus { position: absolute; top: 4px; right: 4px; width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line2); background: var(--glass); color: var(--info); display: inline-flex; align-items: center; justify-content: center; transition: background .15s; }
-.td-plus:hover { background: var(--hover); }
+@media (hover: hover) { .td-plus:hover { background: var(--hover); } }
 .td-tile-water .stat-num { padding-right: 42px; } /* keep the count clear of the absolutely-positioned + button */
 @media (max-width: 480px) { .td-quick { gap: 8px; } .td-tile { padding: 10px 8px; } .td-tile .stat-num { font-size: 20px; } .td-tile .stat-label { font-size: 9px; letter-spacing: .01em; gap: 3px; } .td-tile .stat-label svg { width: 11px; height: 11px; } }
 
@@ -87,11 +87,11 @@
 .td-more { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 42px; margin-top: 6px;
   border: 1px dashed var(--line2); border-radius: var(--r-sm); background: transparent; color: var(--text3);
   font-size: 12px; font-weight: 700; letter-spacing: .04em; transition: color .18s, border-color .18s, background .18s; }
-.td-more:hover { color: var(--text); border-color: var(--line3); background: var(--glass); border-style: solid; }
+@media (hover: hover) { .td-more:hover { color: var(--text); border-color: var(--line3); background: var(--glass); border-style: solid; } }
 .td-more .ic { transition: transform .22s var(--ease-out); }
 .td-more.open .ic { transform: rotate(180deg); }
 .td-more.done { border-style: solid; border-color: var(--line); color: var(--text3); }
-.td-more.done:hover { color: var(--text2); }
+@media (hover: hover) { .td-more.done:hover { color: var(--text2); } }
 .td-alldone { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 20px 10px; color: var(--success); font-size: 13.5px; font-weight: 700; }
 .td-alldone .ic { color: var(--success); }
 
@@ -102,7 +102,7 @@
 .td-tile .td-plus { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 10px;
   border: 1px solid color-mix(in srgb, var(--sec) 30%, transparent); background: color-mix(in srgb, var(--sec) 12%, transparent); color: var(--sec);
   display: inline-flex; align-items: center; justify-content: center; transition: background .15s, transform .1s; }
-.td-tile .td-plus:hover { background: color-mix(in srgb, var(--sec) 22%, transparent); }
+@media (hover: hover) { .td-tile .td-plus:hover { background: color-mix(in srgb, var(--sec) 22%, transparent); } }
 .td-tile .td-plus:active { transform: translateY(-50%) scale(.92); }
 .td-tile-water .val { padding-right: 46px; }
 .td-tile-bar { margin-top: 6px; }
@@ -139,7 +139,7 @@
 .td-ready.z-bad  { --z: var(--danger-text); }
 .td-ready { border: 1px solid color-mix(in srgb, var(--z) 26%, transparent);
   background: linear-gradient(140deg, color-mix(in srgb, var(--z) 11%, transparent), transparent 62%), var(--card-bg); }
-.td-ready:hover { border-color: color-mix(in srgb, var(--z) 42%, transparent); }
+@media (hover: hover) { .td-ready:hover { border-color: color-mix(in srgb, var(--z) 42%, transparent); } }
 .td-ready .ring-pct { font-size: 27px; }
 .td-ready .ring-pct small { font-size: 13px; color: var(--text3); font-weight: 700; }
 
@@ -167,7 +167,7 @@
 .td-kpi-d { font-size: 11px; font-weight: 700; color: var(--c); line-height: 1.3; overflow-wrap: anywhere; }
 .td-hero-foot { display: flex; align-items: center; gap: 6px; margin-top: 11px; font-size: 11.5px; font-weight: 600; color: var(--text3); }
 .td-hero-foot .ic { color: var(--text4); }
-@media (max-width: 380px) {
+@media (max-width: 380px){
   .td-ready-top { gap: 12px; }
   .td-ready-state { font-size: 17px; }
   .td-kpi-val { font-size: 18px; }
@@ -189,7 +189,7 @@
 
 /* --- xulosa plitkalari: to'rtta, kengda bir qatorda --- */
 .td-quick { grid-template-columns: repeat(2, 1fr); }
-@media (min-width: 620px) { .td-quick { grid-template-columns: repeat(4, 1fr); } .td-quick .b-wide { grid-column: span 1; } }
+@media (min-width: 620px){ .td-quick { grid-template-columns: repeat(4, 1fr); } .td-quick .b-wide { grid-column: span 1; } }
 
 /* --- fokus ro'yxati: odat + vazifa bitta joyda --- */
 .td-focus-list { margin-top: 2px; }
