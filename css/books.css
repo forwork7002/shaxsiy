@@ -10,8 +10,8 @@
 .bk-cover { flex: none; width: 38px; height: 52px; border-radius: 7px; display: grid; place-items: center; font-size: 19px;
   background: var(--card2); border: 1px solid var(--line); }
 .bk-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-.bk-title { font-size: 14.5px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.bk-meta { font-size: 11.5px; color: var(--text3); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+.bk-title { font-size: 14px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bk-meta { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
 .bk-meta .sep { opacity: .5; }
 .bk-bar { flex: none; height: 5px; margin-top: 4px; }
 .bk-bar .bar-fill { background: var(--accent); }

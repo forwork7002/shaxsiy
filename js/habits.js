@@ -38,7 +38,7 @@
       'hb.col.habit': 'Odat', 'hb.col.goal': 'Maqsad', 'hb.col.streak': 'Ketma-ket',
       'hb.goal.daily': 'Har kuni', 'hb.goal.days': 'Haftada {n}', 'hb.goal.week': 'Haftada {n} marta', 'hb.goal.month': 'Oyda {n} marta',
       'hb.month': 'Shu oy', 'hb.streak': 'Ketma-ket', 'hb.checks': 'Belgilar', 'hb.active': 'Faol',
-      'hb.daysN': '{n} kun', 'hb.empty': "Hali odat yo'q. Sozlash > Odatlar bo'limidan qo'shing.",
+      'hb.daysN': '{n} kun', 'hb.emptyT': "Hali odat yo'q", 'hb.empty': "Pastdagi tugmadan birinchisini qo'shing.",
       'hb.manage': 'Odatlarni tahrirlash', 'hb.book': 'Kitob', 'hb.year': "So'nggi 52 hafta",
       'hb.add.habit': 'Takroriy ish', 'hb.add.task': 'Bir martalik',
       'hb.task.title': 'Bir martalik vazifa', 'hb.task.what': 'Nima qilinadi?',
@@ -59,7 +59,7 @@
       'hb.col.habit': 'Одат', 'hb.col.goal': 'Мақсад', 'hb.col.streak': 'Кетма-кет',
       'hb.goal.daily': 'Ҳар куни', 'hb.goal.days': 'Ҳафтада {n}', 'hb.goal.week': 'Ҳафтада {n} марта', 'hb.goal.month': 'Ойда {n} марта',
       'hb.month': 'Шу ой', 'hb.streak': 'Кетма-кет', 'hb.checks': 'Белгилар', 'hb.active': 'Фаол',
-      'hb.daysN': '{n} кун', 'hb.empty': 'Ҳали одат йўқ. Созлаш > Одатлар бўлимидан қўшинг.',
+      'hb.daysN': '{n} кун', 'hb.emptyT': 'Ҳали одат йўқ', 'hb.empty': 'Пастдаги тугмадан биринчисини қўшинг.',
       'hb.manage': 'Одатларни таҳрирлаш', 'hb.book': 'Китоб', 'hb.year': 'Сўнгги 52 ҳафта',
       'hb.add.habit': 'Такрорий иш', 'hb.add.task': 'Бир марталик',
       'hb.task.title': 'Бир марталик вазифа', 'hb.task.what': 'Нима қилинади?',
@@ -80,7 +80,7 @@
       'hb.col.habit': 'Привычка', 'hb.col.goal': 'Цель', 'hb.col.streak': 'Подряд',
       'hb.goal.daily': 'Каждый день', 'hb.goal.days': '{n} в неделю', 'hb.goal.week': '{n} раз в неделю', 'hb.goal.month': '{n} раз в месяц',
       'hb.month': 'В этом месяце', 'hb.streak': 'Подряд', 'hb.checks': 'Отметок', 'hb.active': 'Активных',
-      'hb.daysN': '{n} дн.', 'hb.empty': 'Привычек пока нет. Добавьте в Настройки > Привычки.',
+      'hb.daysN': '{n} дн.', 'hb.emptyT': 'Привычек пока нет', 'hb.empty': 'Добавьте первую кнопкой ниже.',
       'hb.manage': 'Редактировать привычки', 'hb.book': 'Книга', 'hb.year': 'Последние 52 недели',
       'hb.add.habit': 'Повторяющееся', 'hb.add.task': 'Разовая задача',
       'hb.task.title': 'Разовая задача', 'hb.task.what': 'Что сделать?',
@@ -194,9 +194,9 @@
     const { y, m } = D.parseKey(first);
     const lab = `${t('months')[m - 1]} ${y}`;
     return `<div class="hb-monthbar">
-      <button class="btn ghost sq sm" data-act="hbMonth" data-n="-1" aria-label="${esc(t('hb.mo.prev'))}">${D.ic('chevL', 16)}</button>
+      <button class="btn icon sq" data-act="hbMonth" data-n="-1" aria-label="${esc(t('hb.mo.prev'))}">${D.ic('chevL', 20)}</button>
       <div class="hb-monthbar-l">${esc(lab)}</div>
-      <button class="btn ghost sq sm" data-act="hbMonth" data-n="1" ${off === 0 ? 'disabled' : ''} aria-label="${esc(t('hb.mo.next'))}">${D.ic('chevR', 16)}</button>
+      <button class="btn icon sq" data-act="hbMonth" data-n="1" ${off === 0 ? 'disabled' : ''} aria-label="${esc(t('hb.mo.next'))}">${D.ic('chevR', 20)}</button>
     </div>`;
   }
 
@@ -222,9 +222,9 @@
     const days = weekDays();
     const lab = off === 0 ? t('hb.w.thisWeek') : `${D.fmtDate(days[0], 'dm')} \u2013 ${D.fmtDate(days[6], 'dm')}`;
     return `<div class="hb-weekbar">
-      <button class="btn ghost sq sm" data-act="hbWeek" data-n="-1" aria-label="${esc(t('hb.w.prev'))}">${D.ic('chevL', 16)}</button>
+      <button class="btn icon sq" data-act="hbWeek" data-n="-1" aria-label="${esc(t('hb.w.prev'))}">${D.ic('chevL', 20)}</button>
       <div class="hb-weekbar-l">${esc(lab)}</div>
-      <button class="btn ghost sq sm" data-act="hbWeek" data-n="1" ${off === 0 ? 'disabled' : ''} aria-label="${esc(t('hb.w.nextW'))}">${D.ic('chevR', 16)}</button>
+      <button class="btn icon sq" data-act="hbWeek" data-n="1" ${off === 0 ? 'disabled' : ''} aria-label="${esc(t('hb.w.nextW'))}">${D.ic('chevR', 20)}</button>
     </div>`;
   }
 
@@ -564,7 +564,7 @@
   function render() {
     const list = items();
     if (!list.length) {
-      return `<div class="hb">${monthBar()}<div class="card"><div class="empty">${esc(t('hb.empty'))}</div></div>${addRow()}</div>`;
+      return `<div class="hb">${monthBar()}<div class="card"><div class="empty"><div class="empty-ic">${D.ic('refresh', 22)}</div><div class="empty-t">${esc(t('hb.emptyT'))}</div><div>${esc(t('hb.empty'))}</div></div></div>${addRow()}</div>`;
     }
     const days = monthDays();
     // Har kunlik odatlar jadvalga, haftalik va oylik odatlar o'z blokiga.

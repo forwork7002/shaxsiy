@@ -31,7 +31,11 @@
 /* uch plitka: kunlar · odatlar · WHOOP */
 .pf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .pf-stats .stat { text-align: center; padding: 10px 8px; }
-.pf-stat-text { font-size: 14px; }
+/* Aniqlik ataylab ko'tarilgan. whoop-ui.css index.html da eng oxirida
+   yuklanadi va undagi oddiy `.stat-num` (0,1,0) shu qoida bilan teng edi —
+   kechroq kelgani uchun g'olib chiqardi. Natijada WHOOP holati profilda 14px
+   o'rniga 22px bo'lib, "ulanmagan" so'zi "ulanmag…" ga kesilardi. */
+.pf-stats .pf-stat-text { font-size: 14px; }
 .pf-stats .stat-label { text-align: center; }
 
 .pf-actions { display: flex; flex-direction: column; gap: 8px; }

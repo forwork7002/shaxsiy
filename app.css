@@ -20,7 +20,7 @@
   /* Kanvas — chin qora. OLED'da piksel butunlay o'chadi, ya'ni kartaning
      chekkasi chiziqsiz ham seziladi; shu sabab chegara juda ingichka. */
   --bg: #000000; --bg2: #08080A; --bg3: #131316;
-  --text: #FFFFFF; --text2: #B6BBC2; --text3: #878D96; --text4: #5B616A;
+  --text: #FFFFFF; --text2: #B6BBC2; --text3: #878D96; --text4: #757B84;
   /* Tokenning nomi to'g'ri aytadi: bu YORUG' fon ustidagi siyoh. Oq tugma ham,
      neon yashil to'ldirish ham shuni ishlatadi — ikkalasida ham qora yagona
      to'g'ri javob (oq matn neon yashil ustida 2:1 ga tushardi). */
@@ -43,7 +43,7 @@
   --row-bg: rgba(255,255,255,.035); --row-line: rgba(255,255,255,.07);
   --line: rgba(255,255,255,.07); --line2: rgba(255,255,255,.13); --line3: rgba(255,255,255,.24);
   --track: rgba(255,255,255,.09); --nav: #000000; --accent-soft: rgba(0,147,231,.16);
-  --hover: rgba(255,255,255,.07); --focus: rgba(255,255,255,.55);
+  --hover: rgba(255,255,255,.07); --focus: rgba(255,255,255,.55); --ring: #FFFFFF;
   --f-input: rgba(255,255,255,.045); --f-input-focus: rgba(255,255,255,.07);
   /* Asosiy tugma — tekis oq. Gradient "bu tugma" degan bezak edi; oq to'rtburchak
      qora ekranda o'zidan boshqa hech narsaga o'xshamaydi, ya'ni izlash shart emas. */
@@ -83,7 +83,7 @@
    umuman yaramaydi). To'ldirish sifatida ular yorqinroq qoladi. */
 [data-theme="light"] {
   --bg: #F1F2F4; --bg2: #E8EAED; --bg3: #FFFFFF;
-  --text: #0A0B0D; --text2: #4A4F57; --text3: #666C75; --text4: #878D96;
+  --text: #0A0B0D; --text2: #4A4F57; --text3: #666C75; --text4: #696F78;
   --ink-on-light: #0A0B0D;
   --accent-text: #00649F; --success-text: #10820A; --warning-text: #8A6B00;
   --info-text: #00649F; --violet-text: #5B48C7;
@@ -98,7 +98,7 @@
   --row-bg: #FFFFFF; --row-line: rgba(10,11,13,.07);
   --line: rgba(10,11,13,.09); --line2: rgba(10,11,13,.15); --line3: rgba(10,11,13,.26);
   --track: rgba(10,11,13,.10); --nav: #FFFFFF; --accent-soft: rgba(0,119,189,.13);
-  --hover: rgba(10,11,13,.06); --focus: rgba(0,119,189,.6);
+  --hover: rgba(10,11,13,.06); --focus: rgba(0,119,189,.6); --ring: #0A0B0D;
   --f-input: rgba(10,11,13,.045); --f-input-focus: #FFFFFF;
   /* Oq fonda oq tugma ko'rinmaydi — bu yerda u teskarisiga aylanadi: qora
      to'ldirish, oq yozuv. `--ink-on-light` bu temada qora bo'lgani uchun
@@ -128,7 +128,18 @@ body { min-height: 100vh; min-height: 100dvh; position: relative; overflow-x: hi
    joyida qoldi, shaffofga aylantirildi: ularga murojaat qiladigan modullar
    bor. */
 ::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); color: var(--text); }
-:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 6px; }
+
+/* «Kontrastni oshir» — iOS: Sozlamalar > Ekran > Kontrastni oshirish.
+   Faqat xira ranglar va chiziqlar ko'tariladi; fon va urg'u tegilmaydi. */
+@media (prefers-contrast: more) {
+  :root {
+    --text2: #D4D8DD; --text3: #AEB4BC; --text4: #949AA3;
+    --line: rgba(255,255,255,.20); --line2: rgba(255,255,255,.32); --line3: rgba(255,255,255,.44);
+    --card-line: rgba(255,255,255,.20);
+  }
+  .btn, .card, .inp, .sel, .ta { border-width: 1.5px; }
+}
 button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
 button { cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 a { color: var(--info-text); text-decoration: none; }
@@ -146,7 +157,7 @@ body.modal-open { position: fixed; left: 0; right: 0; width: 100%; overflow: hid
 .page { max-width: 720px; margin: 0 auto; padding: 4px 18px 28px; }
 .page.wide { max-width: 1000px; }
 .section { margin-top: 10px; }
-.section-title { display: flex; align-items: center; gap: 12px; margin: 18px 0 10px; font-size: 10.5px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--text3); }
+.section-title { display: flex; align-items: center; gap: 12px; margin: 18px 0 10px; font-size: 11px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--text3); }
 .section-title::before { content: ''; width: 18px; height: 1px; background: var(--text3); opacity: .6; }
 .section-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line2), transparent); }
 .section-title .right { margin-left: auto; letter-spacing: 0; text-transform: none; font-weight: 600; }
@@ -175,7 +186,7 @@ h2 { font-size: 16px; } h3 { font-size: 14px; }
 .num { font-family: var(--num); font-variant-numeric: tabular-nums; }
 .muted { color: var(--text3); } .small { font-size: 12px; } .tiny { font-size: 11px; }
 .good { color: var(--success-text); } .bad { color: var(--danger-text); } .warn { color: var(--warning-text); } .info { color: var(--info-text); }
-.eyebrow { font-size: 10.5px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--text3); }
+.eyebrow { font-size: 11px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--text3); }
 .help { font-size: 12px; color: var(--text3); line-height: 1.45; }
 p { margin: 0 0 8px; }
 .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -220,7 +231,7 @@ p { margin: 0 0 8px; }
 .stat-num { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.025em; color: var(--text); line-height: 1.05; overflow-wrap: anywhere; }
 .stat-num.money { font-size: 17px; letter-spacing: -.02em; }
 @media (max-width: 480px){ .stat-num { font-size: 20px; } .stat-num.money { font-size: 15px; } }
-.stat-label { margin-top: 5px; font-size: 10.5px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); }
+.stat-label { margin-top: 5px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); }
 .stat-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
 .zone { position: absolute; top: 9px; right: 9px; width: 7px; height: 7px; border-radius: 50%; background: var(--line3); }
 .zone.z-good { background: var(--success); box-shadow: 0 0 7px var(--success-glow); }
@@ -239,12 +250,22 @@ p { margin: 0 0 8px; }
 .li.tap { cursor: pointer; user-select: none; }
 .li-body { flex: 1; min-width: 0; }
 .li-text { font-size: 14px; color: var(--text); line-height: 1.4; overflow-wrap: anywhere; }
-.li-meta { font-size: 11.5px; color: var(--text3); margin-top: 2px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.li-meta { font-size: 12px; color: var(--text3); margin-top: 2px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .li-right { font-weight: 700; font-size: 14px; white-space: nowrap; }
 .li-del, .btn.icon { border: 0; background: transparent; color: var(--text3); padding: 9px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; transition: color .2s, background .2s; flex: none; }
 @media (hover: hover) { .li-del:hover { color: var(--danger-text); background: var(--hover); } }
 @media (hover: hover) { .btn.icon:hover { color: var(--text); background: var(--hover); } }
-.empty { text-align: center; font-size: 12.5px; color: var(--text3); padding: 18px 8px; }
+/* Bo'sh holat. Ilgari bitta kulrang qator edi — kartaning tepasiga yopishib
+   qolardi. Endi belgi + sarlavha + tushuntirish. Amal tugmasi ham shu yerda
+   turishi kerak: bo'sh ekranda yagona savol «endi nima qilay» bo'ladi, uni
+   boshqa bo'limga yuborish javob emas. */
+.empty { display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; gap: 6px; padding: 32px 18px; color: var(--text3);
+  font-size: 13px; line-height: 1.5; }
+.empty-ic { width: 46px; height: 46px; border-radius: var(--r-pill); display: grid; place-items: center;
+  background: var(--row-bg); border: 1px solid var(--line); color: var(--text4); margin-bottom: 2px; }
+.empty-t { font-size: 15px; font-weight: 650; color: var(--text2); }
+.empty .btn { margin-top: 10px; }
 .chk { appearance: none; -webkit-appearance: none; width: 24px; height: 24px; flex: none; margin: 0; position: relative; cursor: pointer;
   border: 1.5px solid var(--line3); background: var(--f-input); border-radius: 8px; transition: background .2s, border-color .2s, box-shadow .25s; display: inline-block; }
 .chk:checked, .chk.on { background: var(--success); border-color: var(--success); box-shadow: 0 0 12px var(--success-glow); }
@@ -264,7 +285,7 @@ p { margin: 0 0 8px; }
 .pill.info { background: color-mix(in srgb, var(--info) 10%, transparent); color: var(--info-text); border-color: color-mix(in srgb, var(--info) 30%, transparent); }
 .pill.big { padding: 8px 12px; font-size: 12px; }
 button.pill { min-height: 40px; padding: 8px 13px; }
-.tag { --c: var(--boshqa); display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--r-pill); font-size: 10px; font-weight: 700; letter-spacing: .01em; white-space: nowrap;
+.tag { --c: var(--boshqa); display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: var(--r-pill); font-size: 11px; font-weight: 700; letter-spacing: .01em; white-space: nowrap;
   background: color-mix(in srgb, var(--c) 14%, transparent); border: 1px solid color-mix(in srgb, var(--c) 32%, transparent); color: var(--c); }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--text3)); display: inline-block; flex: none; }
 .streak { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; color: var(--warning-text); font-family: var(--num); }
@@ -272,8 +293,9 @@ button.pill { min-height: 40px; padding: 8px 13px; }
 /* ---------- controls ---------- */
 .inp, .sel, .ta { width: 100%; min-width: 0; padding: 10px 13px; border: 1px solid var(--line2); border-radius: var(--r-sm); background: var(--f-input); color: var(--text); font-size: 15px; outline: none; transition: border-color .2s, background .2s; }
 .inp::placeholder, .ta::placeholder { color: var(--text3); }
-.inp:focus, .sel:focus, .ta:focus { border-color: var(--focus); background: var(--f-input-focus); }
-.inp.sm, .sel.sm { padding: 9px 11px; font-size: 13.5px; min-height: 40px; }
+.inp:focus, .sel:focus, .ta:focus { border-color: var(--accent); background: var(--f-input-focus); }
+.inp:focus-visible, .sel:focus-visible, .ta:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.inp.sm, .sel.sm { padding: 9px 11px; font-size: 13px; min-height: 40px; }
 /* iOS fokusda sahifani kattalashtirmasin — barmoqli ekranda hammasi 16px */
 @media (pointer: coarse) { .inp, .sel, .ta, .inp.sm, .sel.sm { font-size: 16px; } }
 .ta { resize: vertical; min-height: 84px; line-height: 1.5; }
@@ -292,8 +314,8 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 @media (hover: hover) { .btn.ghost:hover { background: var(--hover); border-color: var(--line3); } }
 .btn.danger { background: color-mix(in srgb, var(--danger) 12%, transparent); color: var(--danger-text); border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent); box-shadow: none; }
 @media (hover: hover) { .btn.danger:hover { background: color-mix(in srgb, var(--danger) 20%, transparent); } }
-.btn.sm { padding: 9px 14px; font-size: 12.5px; border-radius: 11px; min-height: 40px; }
-.btn.xs { padding: 7px 11px; font-size: 11.5px; border-radius: 9px; min-height: 36px; }
+.btn.sm { padding: 9px 14px; font-size: 12px; border-radius: 11px; min-height: 40px; }
+.btn.xs { padding: 7px 11px; font-size: 12px; border-radius: 9px; min-height: 36px; }
 .btn.block { width: 100%; }
 .btn.icon { padding: 8px; box-shadow: none; }
 .btn.sq { width: 42px; height: 42px; padding: 0; flex: none; }
@@ -301,7 +323,7 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 @media (hover: hover) { .dashed:hover { color: var(--text); border-style: solid; background: var(--glass); } }
 .seg { display: flex; gap: 4px; padding: 3px; background: var(--glass); border: 1px solid var(--line2); border-radius: 11px; margin-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
 .seg::-webkit-scrollbar { display: none; }
-.seg button { flex: 1; padding: 10px 10px; min-height: 42px; border: 0; background: transparent; color: var(--text3); border-radius: 8px; font-size: 12.5px; font-weight: 600; white-space: nowrap; transition: background .15s, color .15s; }
+.seg button { flex: 1; padding: 10px 10px; min-height: 42px; border: 0; background: transparent; color: var(--text3); border-radius: 8px; font-size: 12px; font-weight: 600; white-space: nowrap; transition: background .15s, color .15s; }
 .seg button.on { background: var(--btn-grad); color: var(--on-btn); }
 .seg.compact { display: inline-flex; margin: 0; }
 .seg.compact button { flex: none; padding: 8px 12px; font-size: 12px; min-height: 36px; }
@@ -339,14 +361,14 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .input-row .inp, .input-row .sel { flex: 1; }
 .form-foot { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
 .date-nav { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
-.date-nav .label { text-align: center; flex: 1; font-weight: 700; color: var(--text); font-size: 14px; }
+.date-nav .label { text-align: center; flex: 1; font-weight: 700; color: var(--text); font-size: 16px; text-transform: capitalize; }
 .date-nav .label .sub { display: block; font-size: 11px; font-weight: 600; color: var(--text3); }
 
 /* ---------- progress ---------- */
 .bar { flex: 1; height: 8px; background: var(--line); border-radius: 5px; overflow: hidden; display: block; min-width: 40px; }
 .bar.thin { height: 5px; } .bar.thick { height: 14px; border-radius: 8px; }
 .bar-fill { display: block; height: 100%; border-radius: inherit; background: var(--success); transition: width .4s var(--ease-out), background .3s; }
-.hbar { display: flex; align-items: center; gap: 8px; font-size: 12.5px; margin: 6px 0; }
+.hbar { display: flex; align-items: center; gap: 8px; font-size: 12px; margin: 6px 0; }
 .hbar-label { width: 96px; flex: none; color: var(--text3); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hbar-val { min-width: 52px; text-align: right; font-weight: 700; color: var(--text); font-size: 12px; flex: none; }
 .segbar { display: flex; gap: 4px; height: 6px; margin: 10px 0 14px; }
@@ -360,12 +382,12 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .donut-seg { transition: stroke-dasharray .45s var(--ease-out), stroke-dashoffset .45s var(--ease-out); }
 .ring-val { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; text-align: center; }
 .ring-pct { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1; letter-spacing: -.03em; }
-.ring-sub { font-size: 10px; color: var(--text3); font-weight: 600; margin-top: 3px; font-family: var(--num); }
+.ring-sub { font-size: 11px; color: var(--text3); font-weight: 600; margin-top: 3px; font-family: var(--num); }
 .ring-row { display: flex; align-items: center; gap: 16px; }
 .spheres { flex: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
 .sph { display: flex; align-items: center; gap: 8px; font-size: 12px; }
 .sph .nm { width: 54px; flex: none; color: var(--text3); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.sph .n { width: 36px; text-align: right; font-weight: 700; font-family: var(--num); font-size: 11.5px; color: var(--text); flex: none; }
+.sph .n { width: 36px; text-align: right; font-weight: 700; font-family: var(--num); font-size: 12px; color: var(--text); flex: none; }
 
 /* jonli nuqta puls: sync indikatori va Ibodat vaqt qatori ishlatadi */
 @keyframes led { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.85); } }
@@ -373,8 +395,8 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 /* ---------- charts ---------- */
 .spark { width: 100%; display: block; }
 .spark-target { stroke: var(--line3); stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
-.spark-labels { display: flex; justify-content: space-between; font-size: 9.5px; color: var(--text3); font-family: var(--num); margin-top: 4px; }
-.spark-labels span { flex: 1; text-align: center; overflow: hidden; }
+.spark-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); font-family: var(--num); margin-top: 4px; }
+.spark-labels span { flex: 1; text-align: center; white-space: nowrap; }
 .hm { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 4px; }
 .hm i, .hm-year-grid i { width: 12px; height: 12px; border-radius: 3px; display: block; background: var(--line); }
 .hm i[data-l="1"], .hm-year-grid i[data-l="1"] { background: color-mix(in srgb, var(--success) 22%, transparent); }
@@ -420,7 +442,7 @@ i.top-av { background: linear-gradient(150deg, var(--accent), color-mix(in srgb,
    Uzun nom bo'lsa nuqta bilan kesiladi: qator ikkiga bo'linib ketmasin. */
 .top-title { margin: 0; font-size: 21px; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; color: var(--text);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.top-sub { margin: 1px 0 0; font-size: 12.5px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.top-sub { margin: 1px 0 0; font-size: 12px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ---------- pastki panel ----------
    Beshta yorliq, o'rtadagisi ko'tarilgan. Panel chekkadan uzilib suzadi:
@@ -438,13 +460,13 @@ i.top-av { background: linear-gradient(150deg, var(--accent), color-mix(in srgb,
    yuborardi (o'lchangan: qator 80px, panel 62px). */
 .nav-tab { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 3px;
   min-height: 0; padding: 0 0 8px; border: 0; background: transparent; color: var(--text4);
-  font-size: 10px; font-weight: 600; letter-spacing: .01em; transition: color .16s; }
+  font-size: 11px; font-weight: 600; letter-spacing: .01em; transition: color .16s; }
 .nav-ic { position: relative; display: grid; place-items: center; padding: 4px 15px;
   border-radius: var(--r-pill); transition: background .18s; }
 /* Yorliqdagi belgi — bugun nechta ish qolgani. Bajarilganda yo'qoladi.
    Emojining o'ng yelkasida turadi, kapsulaning chetidan chiqmaydi. */
 .nav-badge { position: absolute; top: -3px; right: 6px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 99px;
-  background: var(--accent); color: var(--ink-on-light); font-size: 10px; font-weight: 600; line-height: 16px; text-align: center;
+  background: var(--accent); color: var(--ink-on-light); font-size: 11px; font-weight: 600; line-height: 16px; text-align: center;
   box-shadow: 0 0 0 2px var(--nav); }
 .nav-em { display: block; font-family: var(--emoji); font-size: 21px; line-height: 1.05;
   opacity: .55; transition: opacity .18s, transform .12s var(--ease-spring); }
@@ -476,7 +498,7 @@ i.top-av { background: linear-gradient(150deg, var(--accent), color-mix(in srgb,
 
 /* o'rtadagi tugmaning menyusi */
 
-.side-tab { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-sm); border: 0; background: transparent; color: var(--text3); font-size: 13.5px; font-weight: 600; text-align: left; transition: background .15s, color .15s; }
+.side-tab { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--r-sm); border: 0; background: transparent; color: var(--text3); font-size: 13px; font-weight: 600; text-align: left; transition: background .15s, color .15s; }
 @media (hover: hover) { .side-tab:hover { background: var(--hover); color: var(--text); } }
 .side-tab.on { background: var(--glass); color: var(--text); border: 1px solid var(--line2); }
 .side-brand { padding: 6px 12px 16px; }
@@ -502,9 +524,9 @@ i.top-av { background: linear-gradient(150deg, var(--accent), color-mix(in srgb,
 .toast span { overflow: hidden; text-overflow: ellipsis; }
 .toast-undo { border: 0; background: transparent; color: var(--success-text); font-weight: 700; padding: 0; font-size: 13px; }
 @media (min-width: 960px){ .toast { bottom: 24px; } }
-.kbd { font-family: var(--mono); font-size: 10.5px; padding: 2px 6px; border-radius: 5px; background: var(--inset); border: 1px solid var(--line2); color: var(--text3); }
+.kbd { font-family: var(--mono); font-size: 11px; padding: 2px 6px; border-radius: 5px; background: var(--inset); border: 1px solid var(--line2); color: var(--text3); }
 .error-card pre { white-space: pre-wrap; font-size: 11px; max-height: 200px; overflow: auto; }
-.banner { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--warning) 10%, transparent); border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent); color: var(--warning-text); font-size: 12.5px; margin-bottom: 12px; }
+.banner { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--warning) 10%, transparent); border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent); color: var(--warning-text); font-size: 12px; margin-bottom: 12px; }
 .banner.bad { background: color-mix(in srgb, var(--danger) 10%, transparent); border-color: color-mix(in srgb, var(--danger) 30%, transparent); color: var(--danger-text); }
 .banner.good { background: color-mix(in srgb, var(--success) 10%, transparent); border-color: color-mix(in srgb, var(--success) 30%, transparent); color: var(--success-text); }
 @media (min-width: 960px){ .fab { bottom: 24px; right: 24px; } }
@@ -560,20 +582,20 @@ body { font-weight: 450; }
 /* Oraliq nuqtalar uchun — yozuvning o'zi («Parol») harflarga ajralib ko'rinmasin. */
 .auth-inp::placeholder { letter-spacing: 0; }
 .auth-btn { width: 100%; min-height: 46px; margin-top: 2px; }
-.auth-err { width: 100%; text-align: center; font-size: 12.5px; color: var(--danger-text); }
+.auth-err { width: 100%; text-align: center; font-size: 12px; color: var(--danger-text); }
 /* login: pick who you are */
 .auth-users { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; width: 100%; margin-bottom: 4px; }
 .auth-user { flex: 1 1 96px; min-height: 44px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line2); background: var(--glass);
   color: var(--text2); font-size: 14px; font-weight: 700; transition: background .15s, border-color .15s, color .15s, transform .1s; }
 .auth-user.on { background: var(--btn-grad); color: var(--on-btn); border-color: transparent; }
 .auth-user:active { transform: scale(.97); }
-.auth-or { width: 100%; text-align: center; font-size: 11.5px; color: var(--text4); margin: 4px 0; }
+.auth-or { width: 100%; text-align: center; font-size: 12px; color: var(--text4); margin: 4px 0; }
 .auth-google { font-weight: 700; }
 .auth-tg { margin-top: -2px; }
 .auth-tg b { color: var(--text); user-select: all; }
 /* open registration: a name field reads as text, not as a passcode */
 .auth-inp.auth-name { letter-spacing: 0; font-size: 16px; }
-.auth-hint { font-size: 11.5px; color: var(--text4); text-align: center; line-height: 1.4; margin: 0; }
+.auth-hint { font-size: 12px; color: var(--text4); text-align: center; line-height: 1.4; margin: 0; }
 .auth-switch { display: flex; gap: 6px; align-items: center; justify-content: center; flex-wrap: wrap; font-size: 13px; color: var(--text3); margin: 4px 0 0; }
 .auth-link { background: none; border: 0; padding: 4px 2px; font: inherit; font-weight: 700; color: var(--text); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; min-height: 32px; }
 .auth-link:active { opacity: .7; }
@@ -603,10 +625,10 @@ body { font-weight: 450; }
 .trk-scroll::-webkit-scrollbar { display: none; }
 .trk { display: grid; grid-template-columns: 74px repeat(var(--n, 30), minmax(10px, 1fr)) 34px; gap: 2px 2px; align-items: center;
   min-width: calc(74px + 34px + var(--n, 30) * 20px + (var(--n, 30) + 1) * 2px); }
-.trk-h { font-size: 9px; color: var(--text3); text-align: center; font-weight: 500; line-height: 1.2; }
+.trk-h { font-size: 11px; color: var(--text3); text-align: center; font-weight: 500; line-height: 1.2; }
 /* Nom va hisob ustunlari joyida qotib turadi: kunlar yon tomonga suriladi,
    «qaysi ish» va «nechta» esa doim ko'rinib turadi — Excel'da ham shunday. */
-.trk-lab { position: sticky; left: 0; z-index: 2; background: var(--card-solid); font-size: 11.5px; color: var(--text2); font-weight: 500;
+.trk-lab { position: sticky; left: 0; z-index: 2; background: var(--card-solid); font-size: 12px; color: var(--text2); font-weight: 500;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 6px; line-height: 1.2; }
 .trk-corner { position: sticky; z-index: 3; min-height: 14px; background: var(--card-solid); }
 .trk-corner.l { left: 0; }

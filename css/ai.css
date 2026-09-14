@@ -6,8 +6,8 @@
 /* Raqamlar ko'zga tashlanib tursin, lekin tor ustunda tabletkalar qatoriga aylanmasin */
 .ai-body strong { font-weight: 700; color: var(--text); background: color-mix(in srgb, var(--violet) 11%, transparent); padding: 0 3px; border-radius: 5px; }
 .ai-body em { font-style: italic; color: var(--text2); }
-.ai-body code { font-family: var(--mono); font-size: 12.5px; padding: 1px 6px; border-radius: 6px; background: var(--f-input); border: 1px solid var(--line2); color: var(--info-text); }
-.ai-body .ai-h { font-weight: 700; color: var(--text); margin: 10px 0 4px; font-size: 13.5px; }
+.ai-body code { font-family: var(--mono); font-size: 12px; padding: 1px 6px; border-radius: 6px; background: var(--f-input); border: 1px solid var(--line2); color: var(--info-text); }
+.ai-body .ai-h { font-weight: 700; color: var(--text); margin: 10px 0 4px; font-size: 13px; }
 .ai-body .ai-ul, .ai-body .ai-ol { margin: 6px 0 10px; padding-left: 20px; display: grid; gap: 5px; }
 .ai-body .ai-ul:last-child, .ai-body .ai-ol:last-child { margin-bottom: 0; }
 .ai-body li { color: var(--text2); }
@@ -15,7 +15,7 @@
 /* the model always closes with "Bugun qil:" — make that last line pop */
 .ai-body p:last-child strong:first-child { background: color-mix(in srgb, var(--success) 15%, transparent); color: var(--success-text); padding: 1px 6px; }
 
-.ai-busy { display: flex; align-items: center; gap: 10px; padding: 14px 2px; color: var(--text3); font-size: 13.5px; }
+.ai-busy { display: flex; align-items: center; gap: 10px; padding: 14px 2px; color: var(--text3); font-size: 13px; }
 .ai-busy .ic { color: var(--violet-text); animation: aiPulse 1.4s ease-in-out infinite; }
 @keyframes aiPulse { 0%, 100% { opacity: .5; transform: scale(1); } 50% { opacity: 1; transform: scale(1.12); } }
 .ai-dots { display: inline-flex; gap: 5px; align-items: center; }

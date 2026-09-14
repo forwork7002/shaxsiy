@@ -8,19 +8,19 @@
 .fd-hero .ring-pct { font-size: 21px; }
 .fd-hero .ring-sub { font-size: 11px; color: var(--text3); font-weight: 600; }
 .fd-hero-side { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
-.fd-hero-lab { font-size: 10.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); }
-.fd-hero-msg { font-size: 14.5px; font-weight: 700; color: var(--text); line-height: 1.3; overflow-wrap: anywhere; }
+.fd-hero-lab { font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); }
+.fd-hero-msg { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3; overflow-wrap: anywhere; }
 .fd-hero-msg.bad { color: var(--danger-text); }
-.fd-hero-burn { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--text3); }
+.fd-hero-burn { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text3); }
 .fd-hero-burn .ic { color: var(--warning-text); flex: none; }
 .fd-tgt { margin-top: 2px; }
 
 /* me'yor oynasi: bir qator matn, ostida to'rtta raqam */
 .fd-tg-prev { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 12px; }
 .fd-tg-chip { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 9px 4px; border-radius: var(--r-xs); border: 1px solid transparent; background: var(--inset); text-align: center; min-width: 0; }
-.fd-tg-chip .lab { font-size: 10px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text3); }
+.fd-tg-chip .lab { font-size: 11px; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; color: var(--text3); }
 .fd-tg-chip .num { font-size: 16px; font-weight: 700; color: var(--text2); }
-.fd-tg-chip .u { font-size: 10px; color: var(--text3); margin-top: -2px; }
+.fd-tg-chip .u { font-size: 11px; color: var(--text3); margin-top: -2px; }
 /* aynan siz aytgan raqam ajralib tursin — qolgani undan hisoblangani */
 .fd-tg-chip.said { border-color: var(--line3); }
 .fd-tg-chip.said .num { color: var(--accent-text); }
@@ -32,7 +32,7 @@
 .fd-macros-flat .fd-macro-val { margin-bottom: 0; }
 .fd-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
 .fd-macro { min-width: 0; }
-.fd-macro-lab { font-size: 10.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fd-macro-lab { font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fd-macro-val { font-size: 15px; font-weight: 700; color: var(--text); margin: 1px 0 5px; white-space: nowrap; }
 .fd-macro-val small { font-size: 11px; font-weight: 600; color: var(--text3); }
 
@@ -72,7 +72,7 @@
    bosib ketadi, shuning uchun bu yerda aynan shu og'irlik takrorlanadi.
    Yozuv rangi ham qaytariladi — shisha ustida qora siyoh o'qilmaydi. */
 .fd-cap { padding: 12px; }
-.fd-shot { height: 56px; gap: 11px; font-size: 14.5px; border-radius: var(--r); cursor: pointer;
+.fd-shot { height: 56px; gap: 11px; font-size: 14px; border-radius: var(--r); cursor: pointer;
   position: relative; overflow: hidden; }
 #view .fd-shot:not(.ghost):not(.danger):not(.icon) { color: var(--text);
   border: 1px solid color-mix(in srgb, var(--sec) 42%, var(--card-line));
@@ -113,10 +113,10 @@
 @media (max-width: 380px){ .fd-cap { padding: 10px; } .fd-cap-row { gap: 5px; } .fd-cap-row .btn.sq { width: 38px; height: 38px; } }
 
 /* ---- tahlil: rasm → nom → katta kkal → makrolar → tarkib → bitta maslahat ---- */
-.fd-busy-row { display: flex; align-items: center; gap: 10px; color: var(--text3); font-size: 13.5px; padding: 6px 0; }
+.fd-busy-row { display: flex; align-items: center; gap: 10px; color: var(--text3); font-size: 13px; padding: 6px 0; }
 .fd-busy-row .ic { color: var(--violet-text); animation: aiPulse 1.4s ease-in-out infinite; }
 .fd-preview { width: 100%; max-height: 170px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--line); margin-bottom: 10px; display: block; }
-.fd-res-eyebrow { display: flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
+.fd-res-eyebrow { display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); margin-bottom: 10px; }
 .fd-res-eyebrow .ic { color: var(--violet-text); }
 .fd-res-name { font-size: 16px; font-weight: 700; color: var(--text); line-height: 1.3; overflow-wrap: anywhere; }
 .fd-rough { font-size: 11px; font-weight: 600; color: var(--text3); white-space: nowrap; }
@@ -125,18 +125,18 @@
 .fd-big span { font-size: 13px; color: var(--text3); font-weight: 600; }
 .fd-big-g { margin-left: auto; font-family: var(--num); }
 .fd-parts { margin-top: 12px; padding-top: 4px; border-top: 1px solid var(--line); }
-.fd-part { display: flex; gap: 10px; align-items: baseline; font-size: 12.5px; color: var(--text2); padding: 6px 0; border-bottom: 1px solid var(--line); }
+.fd-part { display: flex; gap: 10px; align-items: baseline; font-size: 12px; color: var(--text2); padding: 6px 0; border-bottom: 1px solid var(--line); }
 .fd-part:last-child { border-bottom: 0; }
 .fd-part .grow { overflow-wrap: anywhere; }
-.fd-part .num { color: var(--text3); white-space: nowrap; font-size: 11.5px; }
-.fd-advice { display: flex; gap: 8px; align-items: flex-start; font-size: 12.5px; color: var(--text2); line-height: 1.45; padding: 8px 10px; border-radius: var(--r-sm); background: var(--inset); border: 1px dashed var(--line2); margin: 12px 0 10px; }
+.fd-part .num { color: var(--text3); white-space: nowrap; font-size: 12px; }
+.fd-advice { display: flex; gap: 8px; align-items: flex-start; font-size: 12px; color: var(--text2); line-height: 1.45; padding: 8px 10px; border-radius: var(--r-sm); background: var(--inset); border: 1px dashed var(--line2); margin: 12px 0 10px; }
 .fd-advice .ic { color: var(--info-text); flex: none; margin-top: 2px; }
 .fd-res-acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
 .fd-res-acts .btn.icon { margin-left: auto; }
 
 /* ---- bitta taomning to'liq ko'rinishi (modal) ---- */
-.fd-note { margin-top: 12px; padding: 8px 10px; border-radius: var(--r-sm); background: var(--inset); font-size: 12.5px; color: var(--text2); line-height: 1.45; overflow-wrap: anywhere; }
-.fd-when { margin-top: 10px; font-size: 11.5px; color: var(--text3); }
+.fd-note { margin-top: 12px; padding: 8px 10px; border-radius: var(--r-sm); background: var(--inset); font-size: 12px; color: var(--text2); line-height: 1.45; overflow-wrap: anywhere; }
+.fd-when { margin-top: 10px; font-size: 12px; color: var(--text3); }
 
 /* ---- taomlar ro'yxati ---- */
 .fd-meal { align-items: center; }
@@ -144,21 +144,21 @@
 .fd-thumb-ic { display: inline-flex; align-items: center; justify-content: center; color: var(--text3); }
 
 /* ---- so'nggi 7 kun ---- */
-.fd-avg { font-size: 11.5px; color: var(--text2); font-weight: 700; white-space: nowrap; }
+.fd-avg { font-size: 12px; color: var(--text2); font-weight: 700; white-space: nowrap; }
 .fd-avg .muted { font-weight: 600; }
 .fd-days { margin-top: 10px; padding-top: 6px; border-top: 1px solid var(--line); }
-.fd-day { display: flex; align-items: baseline; gap: 8px; padding: 7px 6px; border-radius: 8px; cursor: pointer; font-size: 12.5px; color: var(--text2); }
+.fd-day { display: flex; align-items: baseline; gap: 8px; padding: 7px 6px; border-radius: 8px; cursor: pointer; font-size: 12px; color: var(--text2); }
 @media (hover: hover) { .fd-day:hover { background: var(--hover); } }
 .fd-day.on { background: var(--inset); color: var(--text); font-weight: 700; }
 .fd-day-n { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fd-day-k { font-family: var(--num); white-space: nowrap; min-width: 84px; text-align: right; }
-.fd-day-p { font-family: var(--num); color: var(--text3); min-width: 42px; text-align: right; white-space: nowrap; font-size: 11.5px; }
+.fd-day-p { font-family: var(--num); color: var(--text3); min-width: 42px; text-align: right; white-space: nowrap; font-size: 12px; }
 
 /* ---- tahrir oynasi ---- */
 .fd-ed-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 10px; }
 .fd-ed-f { margin-bottom: 8px; }
 .fd-ed-items { margin-top: 6px; }
-.fd-ed-item { display: flex; gap: 8px; font-size: 12.5px; padding: 6px 0; border-bottom: 1px solid var(--line); color: var(--text2); }
+.fd-ed-item { display: flex; gap: 8px; font-size: 12px; padding: 6px 0; border-bottom: 1px solid var(--line); color: var(--text2); }
 .fd-ed-item:last-child { border-bottom: 0; }
 
 /* ---- Bugun bo'limidagi plitka ---- */

@@ -29,7 +29,7 @@
 .eyebrow, .stat-label, .kpi-label, .field-label, .hero-eyebrow,
 .section-title, .dashed, .wh-trend-name, .wh-ready-label, .td-kpi-lab,
 .ring-sub, .arc-sub, .nav-lab, .top-sub, .wh-ring > span {
-  font-size: 10px; font-weight: 600; letter-spacing: .15em;
+  font-size: 11px; font-weight: 600; letter-spacing: .15em;
   text-transform: uppercase; color: var(--text3);
 }
 /* Bo'lim sarlavhasi: oldidagi rangli chiziqcha olib tashlandi. U bo'lim
@@ -105,7 +105,7 @@
 /* hero — bo'limning bosh o'lchovi */
 .hero-main { gap: 18px; margin-top: 10px; align-items: center; }
 .hero-title { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
-.hero-sub { font-size: 12.5px; color: var(--text3); margin-top: 4px; }
+.hero-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
 .hero-foot { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 14px; }
 
 /* ---------------------------------------------------------------------
@@ -118,11 +118,11 @@
    --------------------------------------------------------------------- */
 .ring-wrap svg > circle:first-child { stroke: var(--track); }
 .ring-val { gap: 1px; }
-.ring-sub { margin-top: 5px; font-size: 9px; letter-spacing: .14em; }
+.ring-sub { margin-top: 5px; font-size: 11px; letter-spacing: .14em; }
 .arc-wrap { max-width: 268px; }
 .arc-val { margin-top: -44px; }
 .arc-sub { margin-top: 7px; }
-.arc-cap { font-size: 12.5px; color: var(--text3); margin-top: 14px; line-height: 1.45; }
+.arc-cap { font-size: 12px; color: var(--text3); margin-top: 14px; line-height: 1.45; }
 .wh-ring > span { display: block; margin-top: 8px; }
 
 /* ---------------------------------------------------------------------
@@ -146,17 +146,17 @@
 .bar.thin { height: 4px; } .bar.thick { height: 12px; }
 .bar-fill { border-radius: 99px; box-shadow: 0 0 10px -2px currentColor; color: inherit; }
 .hbar { font-size: 12px; }
-.hbar-label { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); width: 92px; }
+.hbar-label { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); width: 92px; }
 .hbar-val { font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .segbar { height: 5px; gap: 3px; margin: 12px 0 16px; }
 .segbar i { border-radius: 99px; background: var(--track); }
 .segbar i.on { background: var(--z-high); box-shadow: 0 0 8px var(--success-glow); }
 .segbar i.half { background: var(--z-mid); box-shadow: 0 0 8px var(--warning-glow); }
-.spark-labels { font-size: 9px; font-weight: 600; letter-spacing: .1em;
+.spark-labels { font-size: 11px; font-weight: 600; letter-spacing: .1em;
   text-transform: uppercase; color: var(--text4); margin-top: 7px; }
 .spark-target { stroke: var(--line3); stroke-dasharray: 2 4; }
 .hm i, .hm-year-grid i { border-radius: 2px; background: var(--track); }
-.legend { font-size: 10px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text4); margin-top: 12px; }
+.legend { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text4); margin-top: 12px; }
 
 /* ---------------------------------------------------------------------
    7. TUGMA VA TANLOVLAR
@@ -174,7 +174,7 @@
 @media (hover: hover) { .btn.ghost:hover { background: var(--hover); border-color: var(--line3); opacity: 1; } }
 .btn.danger, #view .btn.danger { background: transparent; border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent); color: var(--danger-text); }
 .btn.sm { padding: 9px 15px; font-size: 11px; }
-.btn.xs { padding: 7px 12px; font-size: 10px; letter-spacing: .08em; }
+.btn.xs { padding: 7px 12px; font-size: 11px; letter-spacing: .08em; }
 .btn.icon, .btn.sq, #view .btn.icon { text-transform: none; letter-spacing: 0; border-radius: 50%; }
 .btn.icon, #view .btn.icon { background: transparent; color: var(--text3); }
 .dashed { border-radius: var(--r-sm); border-color: var(--line2); padding: 12px; }
@@ -186,9 +186,9 @@
 .tabs button { border-radius: var(--r-pill); font-size: 11px; font-weight: 700;
   letter-spacing: .06em; text-transform: uppercase; background: transparent; border-color: var(--line2); }
 .tabs button.on, #view .tabs button.on { background: var(--btn-grad); color: var(--on-btn); border-color: var(--btn-grad); }
-.pill { font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
+.pill { font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase;
   border-radius: var(--r-pill); background: transparent; border-color: var(--line2); }
-.tag { font-size: 9.5px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.tag { font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
 .streak { font-variant-numeric: tabular-nums; letter-spacing: -.01em; }
 
 /* Kalit va belgilash — «yoqilgan» degani doim zona yashili */
@@ -213,10 +213,10 @@
 @media (hover: hover) { .li:hover { background: var(--hover); } }
 .li.done { opacity: .42; background: transparent; }
 .li.hl { background: color-mix(in srgb, var(--warning) 4%, transparent); box-shadow: inset 2px 0 0 0 var(--z-mid); }
-.li-text { font-size: 14.5px; }
-.li-meta { font-size: 10.5px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text4); margin-top: 5px; }
+.li-text { font-size: 14px; }
+.li-meta { font-size: 11px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text4); margin-top: 5px; }
 .li-right { font-size: 15px; }
-.empty { font-size: 12.5px; color: var(--text4); padding: 26px 8px; }
+.empty { font-size: 12px; color: var(--text4); padding: 26px 8px; }
 
 /* ---------------------------------------------------------------------
    9. TEPA PANEL
@@ -245,7 +245,7 @@
   background: var(--nav); border: 0; border-top: 1px solid var(--line2); box-shadow: var(--sh-nav); }
 .nav-tab { position: relative; padding: 0 0 10px; gap: 5px; color: var(--text4); }
 .nav-tab.on { color: var(--text); }
-.nav-lab { font-size: 9px; letter-spacing: .12em; }
+.nav-lab { font-size: 11px; letter-spacing: .12em; }
 .nav-ic { padding: 4px 14px; border-radius: 0; background: transparent; }
 .nav-tab.on .nav-ic { background: transparent; }
 .nav-em { font-size: 20px; opacity: .32; }
@@ -304,9 +304,9 @@
 .wh-ready-text { font-size: 13px; margin-top: 3px; }
 .wh-ready-side b { font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .wh-trend-row { padding: 16px 0; border-top-color: var(--line); }
-.wh-trend-foot { font-size: 10px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--text4); margin-top: 6px; }
-.wh-brand { font-size: 10px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
-.wh-note { border-radius: var(--r-xs); font-size: 12.5px; background: var(--inset); }
+.wh-trend-foot { font-size: 11px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--text4); margin-top: 6px; }
+.wh-brand { font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
+.wh-note { border-radius: var(--r-xs); font-size: 12px; background: var(--inset); }
 
 /* ---------------------------------------------------------------------
    14. YORUG' TEMADAGI TUZATISHLAR

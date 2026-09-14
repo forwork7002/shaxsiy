@@ -9,7 +9,7 @@
 
 /* ---------- yangi qator qo'shish ---------- */
 .tk-new { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-.tk-new-i { flex: 1; min-height: 50px; font-size: 15.5px; border-radius: 14px; }
+.tk-new-i { flex: 1; min-height: 50px; font-size: 15px; border-radius: 14px; }
 .tk-new-y { flex: 0 0 86px; min-height: 50px; border-radius: 14px; font-size: 14px; }
 .tk-new-b { width: 50px; height: 50px; border-radius: 14px; }
 .tk-new.sm .tk-new-i { min-height: 42px; font-size: 14px; border-radius: 11px; }
@@ -23,14 +23,14 @@
 .tk-hl { flex: 1; height: 1px; background: linear-gradient(90deg, var(--line2), transparent); }
 .tk-hb-bar { flex: 1; height: 4px; min-width: 30px; border-radius: 3px; background: var(--line); overflow: hidden; }
 .tk-hb-bar i { display: block; height: 100%; border-radius: 3px; background: var(--success); transition: width .45s var(--ease-out); }
-.tk-hd-n { flex: none; font-size: 11.5px; font-weight: 700; color: var(--text3); }
+.tk-hd-n { flex: none; font-size: 12px; font-weight: 700; color: var(--text3); }
 .tk-hd.now .tk-hd-l { color: var(--text); }
 .tk-hd.now .tk-hd-n { color: var(--text2); }
 .tk-hd.bad .tk-hd-l, .tk-hd.bad .tk-hd-n { color: var(--danger-text); }
 .tk-hd.bad .tk-hl { background: linear-gradient(90deg, color-mix(in srgb, var(--danger) 30%, transparent), transparent); }
 
 /* «Kechikkanlarni bugunga surish» — sarlavhaning o'zida, o'ng chekkada */
-.tk-hd-b { flex: none; min-height: 32px; padding: 6px 11px; border-radius: var(--r-pill); font-family: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer;
+.tk-hd-b { flex: none; min-height: 32px; padding: 6px 11px; border-radius: var(--r-pill); font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
   color: var(--warning-text); border: 1px solid color-mix(in srgb, var(--warning) 38%, transparent); background: color-mix(in srgb, var(--warning) 9%, transparent); transition: background .15s; }
 @media (hover: hover) { .tk-hd-b:hover { background: color-mix(in srgb, var(--warning) 18%, transparent); } }
 
@@ -45,7 +45,7 @@
 .tk-more { width: 100%; min-height: 42px; margin-top: 4px; border: 0; background: transparent; color: var(--text3); font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; border-radius: 10px; }
 @media (hover: hover) { .tk-more:hover { background: var(--hover); color: var(--text); } }
 .tk-sub { margin-top: 4px; font-size: 12px; color: var(--text4); }
-.tk-hint { padding: 0 10px; font-size: 11.5px; line-height: 1.5; color: var(--text4); text-align: center; }
+.tk-hint { padding: 0 10px; font-size: 12px; line-height: 1.5; color: var(--text4); text-align: center; }
 .tk-hint.in { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); text-align: left; }
 @media (hover: hover) and (pointer: fine) { .tk-hint:not(.in) { display: none; } }
 
@@ -56,7 +56,7 @@
   background: transparent; border: 0; border-radius: 12px; transition: transform .22s var(--ease-out), background .2s, opacity .3s; }
 @media (hover: hover) { .tk .li.tk-r:hover { background: var(--hover); } }
 .tk .li.tk-r.done { opacity: .5; background: transparent; }
-.tk-r-t { flex: 1; min-width: 0; font-size: 14.5px; font-weight: 500; line-height: 1.35; cursor: text; }
+.tk-r-t { flex: 1; min-width: 0; font-size: 14px; font-weight: 500; line-height: 1.35; cursor: text; }
 .tk-r.done .tk-r-t { font-weight: 400; }
 
 /* muhimlik: faqat «juda muhim» belgilanadi — chap chekkadagi ingichka chiziq */
@@ -65,7 +65,7 @@
 
 /* sana tugmasi — bosilsa vazifa oynasi ochiladi */
 .tk-r-w { flex: none; display: inline-flex; align-items: center; justify-content: center; min-width: 36px; min-height: 36px; padding: 6px 8px; border: 0; border-radius: 10px;
-  background: transparent; color: var(--text3); font-family: inherit; font-size: 11.5px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
+  background: transparent; color: var(--text3); font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
 @media (hover: hover) { .tk-r-w:hover { background: var(--hover); color: var(--text); } }
 .tk-r-w.empty { color: var(--text4); }
 .tk-r-w.bad { color: var(--danger-text); }
@@ -96,7 +96,7 @@
 .tk-em { flex: none; width: 22px; text-align: center; font-family: var(--emoji); font-size: 17px; line-height: 1; }
 .tk-h-b { flex: 1; min-width: 0; }
 .tk-h-top { display: flex; align-items: center; gap: 8px; }
-.tk-h-n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14.5px; font-weight: 600; color: var(--text); }
+.tk-h-n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 600; color: var(--text); }
 .tk-h.done .tk-h-n { font-weight: 500; color: var(--text2); text-decoration: line-through; text-decoration-color: var(--text4); }
 .tk-h-bot { display: flex; align-items: center; gap: 12px; margin-top: 7px; }
 .tk-strip { display: flex; gap: 3px; flex: 1; min-width: 0; }
@@ -110,25 +110,25 @@
   border: 1px solid var(--line2); background: var(--glass); color: var(--text); cursor: pointer; transition: background .15s, border-color .15s; }
 @media (hover: hover) { .tk-step:hover { background: var(--hover); border-color: var(--line3); } }
 .tk-step:disabled { opacity: .3; cursor: default; }
-.tk-hc-n { min-width: 42px; text-align: center; font-size: 12.5px; font-weight: 700; color: var(--text2); font-family: var(--num); }
-.tk-hc-n small { font-size: 10.5px; font-weight: 600; color: var(--text4); }
+.tk-hc-n { min-width: 42px; text-align: center; font-size: 12px; font-weight: 700; color: var(--text2); font-family: var(--num); }
+.tk-hc-n small { font-size: 11px; font-weight: 600; color: var(--text4); }
 
 /* ---------- Maqsadlar ---------- */
 .tk-tabs { margin-bottom: 12px; }
 .tk-tabs button { min-height: 40px; }
 .tk-tabs button .num { font-size: 11px; opacity: .7; }
-.tk-gn { flex: none; font-size: 11.5px; font-weight: 700; color: var(--text3); }
+.tk-gn { flex: none; font-size: 12px; font-weight: 700; color: var(--text3); }
 .tk-gn.full { color: var(--success-text); }
 .tk-gy { flex: none; font-size: 11px; font-weight: 600; color: var(--text4); }
 .tk-goal > .tk-r-w .ic { transition: transform .25s var(--ease-out); }
 .tk-goal > .tk-r-w.open .ic { transform: rotate(180deg); }
 /* ochilgan maqsad: bog'langan vazifalar qatorning ostida, butun kenglikda */
 .tk-gx { margin: 0 0 10px 36px; padding: 8px 0 0; border-top: 1px dashed var(--line2); }
-.tk-gx-h { margin-bottom: 2px; font-size: 10.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text4); }
+.tk-gx-h { margin-bottom: 2px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--text4); }
 .tk-gx .tk-new { margin: 6px 0 0; }
 .tk-gx .tk-sw + .tk-sw { border-top: 1px solid var(--line); }
 .tk .li.tk-r.tk-mini { min-height: 42px; padding: 6px 2px 6px 9px; gap: 9px; }
-.tk-mini .tk-r-t { font-size: 13.5px; }
+.tk-mini .tk-r-t { font-size: 13px; }
 .tk-mini .chk { width: 21px; height: 21px; border-radius: 7px; }
 .tk-mini .chk:checked::after { left: 6px; top: 2px; width: 5px; height: 10px; }
 .tk-mini .tk-r-w { min-width: 32px; min-height: 32px; }

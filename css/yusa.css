@@ -52,7 +52,7 @@
 .yu-msg { display: flex; flex-direction: column; gap: 4px; max-width: 92%; animation: yuIn .25s var(--ease-out); }
 .yu-msg.user { align-self: flex-end; align-items: flex-end; }
 .yu-msg.ai { align-self: flex-start; max-width: 100%; width: 100%; }
-.yu-role { display: flex; gap: 8px; align-items: baseline; font-family: var(--num); font-size: 10px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--text3); padding: 0 4px; }
+.yu-role { display: flex; gap: 8px; align-items: baseline; font-family: var(--num); font-size: 11px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--text3); padding: 0 4px; }
 .yu-msg.ai .yu-role span:first-child { color: var(--success-text); }
 .yu-bubble { padding: 11px 14px; border-radius: 14px; font-size: 14px; line-height: 1.55; color: var(--text); overflow-wrap: anywhere; }
 .yu-msg.user .yu-bubble { background: var(--hover); border: 1px solid var(--line2); border-bottom-right-radius: 5px; }
@@ -66,7 +66,7 @@
 [data-theme="light"] .yu-bubble strong { background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--text); }
 [data-theme="light"] .yu-bubble code { color: var(--text); background: var(--inset); }
 .yu-bubble em { font-style: italic; color: var(--text2); }
-.yu-bubble code { font-family: var(--mono); font-size: 12.5px; padding: 1px 6px; border-radius: 6px; background: var(--f-input); border: 1px solid var(--line2); color: var(--info-text); }
+.yu-bubble code { font-family: var(--mono); font-size: 12px; padding: 1px 6px; border-radius: 6px; background: var(--f-input); border: 1px solid var(--line2); color: var(--info-text); }
 @keyframes yuIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 /* typing dots */
