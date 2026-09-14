@@ -1,5 +1,5 @@
 /* Service worker: cache-first app shell, network-first API. Bump CACHE on every release. */
-const CACHE = 'dash-v89';
+const CACHE = 'dash-v90';
 const V = '?v=' + CACHE.replace('dash-', '');
 const ASSETS = [
   './app.css',
@@ -58,8 +58,8 @@ const ASSETS = [
 // Plex --font stekida va serverda qoladi: internet bo'lsa, Onest yiqilgan
 // taqdirda brauzer uni oladi. Internetsiz zaxira — system-ui, u har doim bor
 // va hech narsa yuklamaydi.
-const FONTS = ['./fonts/onest-latin.woff2', './fonts/onest-latin-ext.woff2',
-  './fonts/onest-cyrillic.woff2', './fonts/onest-cyrillic-ext.woff2'];
+const FONTS = ['./fonts/mulish-latin.woff2', './fonts/mulish-latin-ext.woff2',
+  './fonts/mulish-cyrillic.woff2', './fonts/mulish-cyrillic-ext.woff2'];
 const SHELL = [
   './', './index.html', './manifest.json', './icons/icon.svg',
   // css/js manzillari ?v= bilan — index.html dagi teglar bilan aynan bir xil bo'lishi shart,
