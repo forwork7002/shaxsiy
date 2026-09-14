@@ -109,7 +109,8 @@
     { id: 'vazifa',   ic: 'checkSq',  u: 'ta',    steps: [100, 500, 2000, 5000] },
     { id: 'maqsad',   ic: 'flag',     u: 'ta',    steps: [1, 5, 15, 40] },
     { id: 'kitob',    ic: 'book',     u: 'ta',    steps: [1, 10, 30, 100] },
-    { id: 'bilim',    ic: 'brain',    u: 'kun',   steps: [30, 100, 365, 1000] },
+    // 'brain' 20px dan kichikda tanilmas chiziqqa aylanadi — «o'qigan/ko'rgan» uchun eye aniqroq
+    { id: 'bilim',    ic: 'eye',      u: 'kun',   steps: [30, 100, 365, 1000] },
     { id: 'mashq',    ic: 'dumbbell', u: 'marta', steps: [25, 100, 300, 1000] },
     { id: 'uyqu',     ic: 'moon',     u: 'kun',   steps: [30, 100, 300, 700] },
     { id: 'suv',      ic: 'droplet',  u: 'kun',   steps: [30, 100, 365, 1000] },
@@ -184,6 +185,7 @@
       'lv.how': 'Ochko o‘zingiz yozgan narsadan yig‘iladi: odat, namoz, zikr, ro‘za, vazifa, mashg‘ulot, ovqat, kundalik. Alohida hisoblagich yo‘q — daraja har doim ma’lumotingizga teng.',
       'lv.empty': 'Hali nishon yo‘q. Birinchisi yaqin — bir hafta to‘xtovsiz yozuv yetadi.',
       'lv.secret': 'Sirli nishon', 'lv.secretHint': 'Sharti oldindan aytilmaydi. O‘z vaqtida o‘zi chiqadi.',
+      'lv.path': 'Martabalar yo‘li', 'lv.near': 'Eng yaqin nishonlar', 'lv.done': 'o‘tildi',
       'lv.u.kun': '{n} kun', 'lv.u.marta': '{n} marta', 'lv.u.ta': '{n} ta',
       'lv.t.bronza': 'Bronza', 'lv.t.kumush': 'Kumush', 'lv.t.oltin': 'Oltin', 'lv.t.olmos': 'Olmos',
       'lv.have': 'Hozir: {n}', 'lv.gotOn': 'Olindi: {d}', 'lv.gotEarly': 'boshidan', 'lv.gotEarlyLong': 'boshidan bor edi',
@@ -246,6 +248,7 @@
       'lv.how': 'Очко ўзингиз ёзган нарсадан йиғилади: одат, намоз, зикр, рўза, вазифа, машғулот, овқат, кундалик. Алоҳида ҳисоблагич йўқ — даража ҳар доим маълумотингизга тенг.',
       'lv.empty': 'Ҳали нишон йўқ. Биринчиси яқин — бир ҳафта тўхтовсиз ёзув етади.',
       'lv.secret': 'Сирли нишон', 'lv.secretHint': 'Шарти олдиндан айтилмайди. Ўз вақтида ўзи чиқади.',
+      'lv.path': 'Мартабалар йўли', 'lv.near': 'Энг яқин нишонлар', 'lv.done': 'ўтилди',
       'lv.u.kun': '{n} кун', 'lv.u.marta': '{n} марта', 'lv.u.ta': '{n} та',
       'lv.t.bronza': 'Бронза', 'lv.t.kumush': 'Кумуш', 'lv.t.oltin': 'Олтин', 'lv.t.olmos': 'Олмос',
       'lv.have': 'Ҳозир: {n}', 'lv.gotOn': 'Олинди: {d}', 'lv.gotEarly': 'бошидан', 'lv.gotEarlyLong': 'бошидан бор эди',
@@ -308,6 +311,7 @@
       'lv.how': 'Очки набираются из того, что вы записываете сами: привычки, намаз, зикр, пост, задачи, тренировки, еда, дневник. Отдельного счётчика нет — уровень всегда равен вашим данным.',
       'lv.empty': 'Наград пока нет. Первая близко — хватит недели без пропусков.',
       'lv.secret': 'Тайная награда', 'lv.secretHint': 'Условие заранее не называется. Придёт само, в своё время.',
+      'lv.path': 'Путь рангов', 'lv.near': 'Самые близкие награды', 'lv.done': 'пройден',
       'lv.u.kun': '{n} дней', 'lv.u.marta': '{n} раз', 'lv.u.ta': '{n} шт',
       'lv.t.bronza': 'Бронза', 'lv.t.kumush': 'Серебро', 'lv.t.oltin': 'Золото', 'lv.t.olmos': 'Алмаз',
       'lv.have': 'Сейчас: {n}', 'lv.gotOn': 'Получена: {d}', 'lv.gotEarly': 'с начала', 'lv.gotEarlyLong': 'была с самого начала',
@@ -792,16 +796,59 @@
     </button>`;
   }
 
+  /** Martabalar yo'li — o'tilgani, hozirgisi va oldindagisi bitta relsda.
+      «Qayerdaman» degan savolga javob beradigan yagona joy: daraja raqami
+      o'zi buni aytmaydi, martaba nomi esa yo'lning qayeri ekanini ko'rsatmaydi. */
+  function pathHtml(i) {
+    const cur = RANKS.indexOf(i.rank);
+    const steps = RANKS.map((r, n) => {
+      const from = n * 5 + 1, to = n * 5 + 5;
+      const cls = n < cur ? 'done' : n === cur ? 'now' : 'next';
+      return `<li class="lv-step ${cls}" style="--c:${r.c}">
+        <i class="lv-step-d">${n === cur ? `<b class="num">${i.level}</b>` : ''}</i>
+        <b class="lv-step-n">${esc(t('lv.r.' + r.id))}</b>
+        <span class="lv-step-l num">${from}–${to}</span>
+      </li>`;
+    }).join('');
+    return `<div class="lv-path">
+      <div class="lv-sec-h">${esc(t('lv.path'))}</div>
+      <ol class="lv-rail" id="lvRail">${steps}</ol>
+    </div>`;
+  }
+
+  /** Bitmagan, sirli bo'lmagan va boshlangan nishonlardan eng yaqin uchtasi.
+      Ro'yxatning boshida turadi, chunki odam «endi nima?» deb ochadi. */
+  function nearHtml(med) {
+    const near = med.filter((m) => !m.on && !m.secret && m.cur > 0).sort((a, b) => b.pct - a.pct).slice(0, 3);
+    if (!near.length) return '';
+    return `<div class="lv-near">
+      <div class="lv-sec-h">${esc(t('lv.near'))}</div>
+      ${near.map((m) => `<button type="button" class="lv-near-i" data-t="${esc(m.tier)}" data-act="lvMedal" data-id="${esc(m.id)}">
+        ${medalHtml(m, 34)}
+        <span class="lv-near-t">
+          <b>${esc(famName(m.fam))}</b>
+          <span class="tiny muted num">${esc(needLabel(m))} · ${esc(t('lv.left', { n: D.fmtNum(m.need - m.cur) }))}</span>
+        </span>
+        <span class="lv-near-p num">${Math.floor(m.pct)}%</span>
+        ${barHtml(m.pct)}
+      </button>`).join('')}
+    </div>`;
+  }
+
   function sheetHtml() {
     const i = D.levels.info(), med = D.levels.medals();
     const on = med.filter((m) => m.on).length;
     const byFam = {};
     for (const m of med) (byFam[m.fam] || (byFam[m.fam] = [])).push(m);
-    const fams = FAMS.map((f) => `<section class="lv-fam">
-      <h4 class="lv-fam-h">${D.ic(f.ic, 15)}<b>${esc(famName(f.id))}</b>
-        <span class="tiny muted">${esc(f.secret ? t('lv.secretHint') : famDesc(f.id))}</span></h4>
-      <div class="lv-grid">${byFam[f.id].map(tileMedal).join('')}</div>
-    </section>`).join('');
+    const fams = FAMS.map((f) => {
+      const list = byFam[f.id], got = list.filter((m) => m.on).length;
+      return `<section class="lv-fam${got === list.length ? ' full' : ''}">
+        <h4 class="lv-fam-h">${D.ic(f.ic, 15)}<b>${esc(famName(f.id))}</b>
+          <span class="lv-fam-n num">${got}/${list.length}</span>
+          <span class="tiny muted">${esc(f.secret ? t('lv.secretHint') : famDesc(f.id))}</span></h4>
+        <div class="lv-grid">${list.map(tileMedal).join('')}</div>
+      </section>`;
+    }).join('');
     return `<div class="lv-sheet">
       <div class="lv-top" style="--c:${i.rank.c}">
         ${markHtml(i.level, i.rank, true)}
@@ -812,15 +859,27 @@
           <div class="lv-sub num"><b>${D.fmtNum(i.xp)}</b> ${esc(t('lv.xp'))} · ${progressLine(i)}</div>
         </div>
       </div>
+      ${pathHtml(i)}
       ${weekHtml(false)}
-      <div class="lv-total num">${esc(t('lv.got', { a: on, b: ALL.length }))}</div>
+      ${nearHtml(med)}
+      <div class="lv-count-row" style="--c:${i.rank.c}">
+        <div class="lv-total num">${esc(t('lv.got', { a: on, b: ALL.length }))}</div>
+        ${barHtml((on / ALL.length) * 100)}
+      </div>
       ${on ? '' : `<p class="empty">${esc(t('lv.empty'))}</p>`}
-      <p class="lv-how help">${esc(t('lv.how'))}</p>
       ${fams}
+      <p class="lv-how help">${esc(t('lv.how'))}</p>
     </div>`;
   }
 
-  function openSheet() { D.sheet(sheetHtml(), { title: t('lv.title') }); }
+  function openSheet() {
+    D.sheet(sheetHtml(), { title: t('lv.title'), onOpen: () => {
+      /* Relsni hozirgi martaba ko'rinadigan qilib suramiz. scrollIntoView
+         ishlatilmadi — u pastki oynaning o'zini ham surib yuborardi. */
+      const rail = D.$('#lvRail'), now = rail && rail.querySelector('.lv-step.now');
+      if (rail && now) rail.scrollLeft = now.offsetLeft - rail.clientWidth / 2 + now.offsetWidth / 2;
+    } });
+  }
   D.act.lvOpen = () => openSheet();
 
   /** Bitta nishonning oynasi — katta medal, sharti va hozirgi holati. */
@@ -848,7 +907,15 @@
   /* ------------------------------------------------------------------ */
   /* 10. Yangi nishon va daraja                                          */
   /* ------------------------------------------------------------------ */
-  const buzz = (pat) => { try { if (navigator.vibrate) navigator.vibrate(pat); } catch (e) {} };
+  /* Tebranish. `userActivation` tekshiruvi shart: tabrik oynasi foydalanuvchi
+     bosmasdan, fon tekshiruvidan chiqadi va o'sha paytda brauzer vibrate() ni
+     rad etib konsolga xato yozadi. Ishlamasa — shunchaki o'tkazib yuboramiz. */
+  const buzz = (pat) => {
+    try {
+      const ua = navigator.userActivation;
+      if (navigator.vibrate && (!ua || ua.hasBeenActive)) navigator.vibrate(pat);
+    } catch (e) { /* tebranish yo'q — muhim emas */ }
+  };
 
   function celebrate(list, lvUp, info) {
     const title = lvUp ? t('lv.newLevel', { n: info.level }) : t('lv.newMedal');
