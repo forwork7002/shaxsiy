@@ -14,11 +14,11 @@
 [data-section="prayer"] { --sec: #6BE3A4; --sec2: #9BE7C4; --sec-soft: rgba(107,227,164,.11); }
 [data-section="food"] { --sec: #F5A38C; --sec2: #A9D96B; --sec-soft: rgba(245,163,140,.11); }
 [data-section="tasks"] { --sec: #9BB7F5; --sec2: #A78BFA; --sec-soft: rgba(155,183,245,.11); }
-[data-theme="light"][data-section="today"] { --sec: #C86B2E; --sec2: #B4472F; --sec-soft: rgba(200,107,46,.10); }
-[data-theme="light"][data-section="health"] { --sec: #24947A; --sec2: #2C7FA8; --sec-soft: rgba(36,148,122,.10); }
-[data-theme="light"][data-section="finance"] { --sec: #9A7A1E; --sec2: #5E8A2A; --sec-soft: rgba(154,122,30,.10); }
-[data-theme="light"][data-section="prayer"] { --sec: #2C8B5A; --sec2: #3F9E72; --sec-soft: rgba(44,139,90,.10); }
-[data-theme="light"][data-section="food"] { --sec: #C25A3C; --sec2: #5E8A2A; --sec-soft: rgba(194,90,60,.10); }
+[data-theme="light"][data-section="today"] { --sec: #A85520; --sec2: #93381F; --sec-soft: rgba(168,85,32,.10); }
+[data-theme="light"][data-section="health"] { --sec: #1C7A64; --sec2: #236789; --sec-soft: rgba(28,122,100,.10); }
+[data-theme="light"][data-section="finance"] { --sec: #7E631A; --sec2: #4C7022; --sec-soft: rgba(126,99,26,.10); }
+[data-theme="light"][data-section="prayer"] { --sec: #237049; --sec2: #2F7D5B; --sec-soft: rgba(35,112,73,.10); }
+[data-theme="light"][data-section="food"] { --sec: #A84A32; --sec2: #4C7022; --sec-soft: rgba(168,74,50,.10); }
 [data-theme="light"][data-section="tasks"] { --sec: #3C63B8; --sec2: #6B4FC0; --sec-soft: rgba(60,99,184,.10); }
 
 /* the ambient page wash picks up the section colour too */

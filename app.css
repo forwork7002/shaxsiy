@@ -39,24 +39,24 @@
 }
 [data-theme="light"] {
   --bg: #faf7f2; --bg2: #f4efe7; --bg3: #ffffff;
-  --text: #2e2a24; --text2: #5a554c; --text3: #857d70; --text4: #b3aa9c;
+  --text: #2e2a24; --text2: #5a554c; --text3: #787165; --text4: #7a6f5d;
   --ink-on-light: #ffffff;
-  --success: #4fa869; --success-glow: rgba(79,168,105,.35);
-  --warning: #d69a2b; --warning-glow: rgba(214,154,43,.4);
-  --danger: #d65c5c; --danger-text: #c74b4b;
-  --info: #3f8fc4; --accent: #d96a49; --violet: #7c5cd6;
+  --success: #3c7f50; --success-glow: rgba(60,127,80,.35);
+  --warning: #946a1d; --warning-glow: rgba(148,106,29,.4);
+  --danger: #ce3c3c; --danger-text: #b03232;
+  --info: #3377a5; --accent: #c14b28; --violet: #7c5cd6;
   --glass: rgba(255,255,255,.72); --inset: rgba(46,42,36,.04); --recess: rgba(46,42,36,.03);
   --card-bg: rgba(255,255,255,.66); --card-solid: #ffffff; --card-line: rgba(46,42,36,.09); --sheen: rgba(255,255,255,.95);
   --row-bg: rgba(255,255,255,.55); --row-line: rgba(46,42,36,.07);
   --line: rgba(46,42,36,.09); --line2: rgba(46,42,36,.14); --line3: rgba(46,42,36,.22);
-  --hover: rgba(46,42,36,.06); --focus: rgba(79,168,105,.6);
+  --hover: rgba(46,42,36,.06); --focus: rgba(60,127,80,.75);
   --f-input: rgba(46,42,36,.04); --f-input-focus: #ffffff;
-  --btn-grad: linear-gradient(180deg,#5cb877 0%,#4fa869 100%);
+  --btn-grad: linear-gradient(180deg,#3f8352 0%,#38774a 100%);
   --title-grad: linear-gradient(180deg,#2e2a24 0%,#5a554c 120%);
   --wash1: rgba(224,118,88,.30); --wash2: rgba(111,176,126,.24); --wash3: rgba(150,130,220,.16); --grain: rgba(0,0,0,.014);
-  --ruh: #4f8fc0; --aql: #4fa869; --qalb: #c9668a; --tana: #d18a3a; --boshqa: #8f877a; --aralash: #7c5cd6;
+  --ruh: #3a74a1; --aql: #3c7f50; --qalb: #be4772; --tana: #9e6525; --boshqa: #787165; --aralash: #7c5cd6;
   --sh: 0 8px 28px rgba(46,42,36,.08); --sh-modal: 0 24px 70px rgba(46,42,36,.25); --sh-card: 0 1px 2px rgba(46,42,36,.05);
-  --sh-btn: inset 0 1px 0 rgba(255,255,255,.35), 0 2px 8px rgba(79,168,105,.25);
+  --sh-btn: inset 0 1px 0 rgba(255,255,255,.30), 0 2px 8px rgba(60,127,80,.25);
   color-scheme: light;
 }
 

@@ -1,12 +1,17 @@
 /* Service worker: cache-first app shell, network-first API. Bump CACHE on every release. */
-const CACHE = 'dash-v21';
+const CACHE = 'dash-v22';
 const SHELL = [
   './', './index.html', './app.css', './css/sections.css', './css/ai.css', './css/whoop.css', './css/profile.css', './css/today.css', './css/tasks.css', './css/health.css', './css/finance.css', './css/ibodat.css', './css/nova.css', './css/food.css', './css/settings.css', './css/history.css', './css/onboard.css', './css/yusa.css', './manifest.json', './icons/icon.svg',
   './js/core.js', './js/i18n.js', './js/prayer.js', './js/ai.js', './js/whoop.js', './js/profile.js', './js/today.js', './js/tasks.js', './js/health.js',
   './js/finance.js', './js/ibodat.js', './js/nova.js', './js/food.js', './js/settings.js', './js/history.js', './js/onboard.js', './js/yusa.js', './js/app.js',
 ];
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL).catch(() => {})).then(() => self.skipWaiting()));
+  // Har faylni ALOHIDA keshlaymiz. c.addAll() atomik: royxatdagi bitta URL 404 qaytarsa
+  // butun kesh bosh qoladi va xato jimgina yutiladi. Bitta yoq fayl butun offline
+  // rejimni oldirmasligi kerak.
+  e.waitUntil(caches.open(CACHE)
+    .then((c) => Promise.all(SHELL.map((u) => c.add(u).catch(() => null))))
+    .then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', (e) => {
   e.waitUntil(caches.keys().then((ks) => Promise.all(ks.filter((k) => k !== CACHE && k !== CACHE + '-fonts').map((k) => caches.delete(k)))).then(() => self.clients.claim()));
