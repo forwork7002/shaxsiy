@@ -81,6 +81,16 @@ ochilishini tekshiradi va nusxa jonli serverdan qancha orqada qolganini aytadi.
 (o'chirilgan yozuvlar ham), profil va suratlar — hammasi oddiy JSON va JPG. Bu faylni o'qish
 uchun shu ilova kerak emas.
 
+**Parolni unutgan bo'lsa.** Ilovada parol almashtirish uchun eskisi so'raladi, ya'ni unutilgan
+parol hisobni butunlay qulflab qo'yardi. Egasi tiklab beradi:
+```bash
+./deploy/reset-password.sh root@SERVER_IP --list          # qaysi hisoblar bor
+./deploy/reset-password.sh root@SERVER_IP ali@example.com # yangi parol — stdin orqali
+```
+Xesh serverda, ilovaning o'z qoidasi bilan hisoblanadi (PBKDF2-SHA256, takrorlar soni
+`api.py` dagi `PW_ITER` dan o'qiladi), `uid` va ism o'zgarmaydi — ma'lumot hisobda qoladi.
+Yozilgandan keyin `/api/login` orqali haqiqatda kirib ko'riladi. Ochiq sessiyalarga tegmaydi.
+
 Sinov: `.venv/bin/python tests/test_durability.py` (43 ta tekshiruv).
 
 ## WHOOP
