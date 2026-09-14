@@ -788,6 +788,60 @@
     const r = arch.r, line = t('set.d.archiveLine', { days: D.fmtNum(+r.days || 0), first: r.first ? D.fmtDate(String(r.first), 'short') + ' ' + String(r.first).slice(0, 4) : '—', threads: D.fmtNum(+r.threads || 0) });
     return `<span class="zone z-good"></span><span>${esc(t('set.d.archive'))}: ${esc(line)}</span>`;
   }
+  /* «Ma'lumot sog'ligi» — /api/health dagi data bo'limi.
+     Nega bu ekran bor: serverdagi hamma nusxa bitta diskda yotadi, ya'ni droplet yo'qolsa
+     ular ham yo'qoladi. Yagona haqiqiy himoya — serverdan TASHQARIDAGI nusxa, va uning
+     eskirib qolgani hech qayerda ko'rinmasa hech kim sezmaydi. Shu qator o'sha uchun. */
+  let hl = null;
+  const HL_MS = 60000;
+  function healthData() {
+    if (!D.serverEnabled()) return null;
+    const uid = (D.device && D.device.uid) || '';
+    if (!hl || hl.uid !== uid || (hl.state !== 'loading' && Date.now() - hl.ts > HL_MS)) {
+      const prev = hl && hl.uid === uid && hl.state === 'ok' ? hl.r : null;
+      hl = { state: 'loading', uid, ts: Date.now(), r: prev };
+      D.api('/api/health').then((r) => { hl = { state: 'ok', uid, ts: Date.now(), r: (r && r.data) || {} }; })
+        .catch(() => { hl = { state: 'err', uid, ts: Date.now() }; })
+        .then(() => D.patch('setHealth', healthRows()));
+    }
+    return hl.state === 'ok' || hl.r ? hl.r : null;
+  }
+  function hrow(zone, label, value) {
+    return `<div class="set-ok"><span class="zone ${zone}"></span><span>${esc(label)}: ${esc(value)}</span></div>`;
+  }
+  function daysWord(n) {
+    return n === 0 ? t('set.h.today') : t('set.h.daysAgo', { n: D.fmtNum(n) });
+  }
+  function healthRows() {
+    if (!D.serverEnabled()) return hrow('', t('set.h.title'), t('set.d.archiveOff'));
+    const h = healthData();
+    if (!h) return hl && hl.state === 'err' ? hrow('z-bad', t('set.h.title'), t('set.d.archiveOff'))
+      : `<div class="set-ok"><span class="zone z-warn"></span><span>…</span></div>`;
+    const warn = h.warn || [], db = h.db || {}, off = h.offsite || {};
+    const rows = [];
+    // 1) eng muhimi — serverdan tashqaridagi nusxa
+    rows.push(hrow(warn.indexOf('offsite') >= 0 ? 'z-bad' : 'z-good', t('set.h.offsite'),
+      off.ageDays === null || off.ageDays === undefined ? t('set.h.never') : daysWord(off.ageDays)));
+    // 2) serverdagi kunlik nusxa
+    rows.push(hrow(warn.indexOf('backup') >= 0 ? 'z-bad' : 'z-good', t('set.h.local'),
+      h.lastDbBackup ? `${h.lastDbBackup} · ${t('set.h.copies', { n: D.fmtNum((+h.backups || 0) + (+h.dbBackups || 0)) })}` : t('set.h.never')));
+    // 3) arxivning qamrovi va hajmi
+    const rowsN = db.rows || {};
+    const recs = (+rowsN.day_facts || 0) + (+rowsN.whoop_records || 0) + (+rowsN.chat_messages || 0);
+    rows.push(hrow('z-good', t('set.h.records'),
+      t('set.h.recordsLine', { n: D.fmtNum(recs), mb: D.fmtNum((+db.bytes || 0) / 1048576, 1) })));
+    // 4) bazaning butunligi — kuniga bir marta tekshiriladi
+    rows.push(hrow(h.integrity === 'ok' ? 'z-good' : h.integrity ? 'z-bad' : 'z-warn', t('set.h.integrity'),
+      h.integrity === 'ok' ? t('set.h.ok') : h.integrity || t('set.h.unchecked')));
+    // 5) disk
+    if (h.diskFreeMb !== undefined) {
+      rows.push(hrow(warn.indexOf('disk') >= 0 ? 'z-bad' : 'z-good', t('set.h.disk'),
+        t('set.h.diskLine', { n: D.fmtNum(h.diskFreeMb / 1024, 1) })));
+    }
+    if (warn.indexOf('offsite') >= 0) rows.push(`<div class="help mt-s">${esc(t('set.h.warnOffsite'))}</div>`);
+    return rows.join('');
+  }
+
   function renderData() {
     const errs = (D.errors || []).slice().reverse();
     return `
@@ -801,6 +855,13 @@
       <div class="help mt">${esc(t('set.d.importHint'))}</div>
       <div class="set-ok mt" id="setArchive">${archiveLine()}</div>
     </div>
+
+    ${D.serverEnabled() ? `<div class="card">
+      <div class="card-head"><div class="title">${D.ic('shield')} ${t('set.h.title')}</div></div>
+      <div id="setHealth">${healthRows()}</div>
+      <a class="btn ghost mt" href="/api/export/full" download>${D.ic('download', 16)} ${t('set.h.full')}</a>
+      <div class="help mt-s">${esc(t('set.h.fullHint'))}</div>
+    </div>` : ''}
 
     ${errs.length ? `<div class="card">
       <div class="card-head"><div class="title">${D.ic('alert')} ${t('set.d.diag')}</div><span class="pill bad num">${esc(t('set.d.errors', { n: errs.length }))}</span></div>
@@ -825,6 +886,29 @@
   D.i18n.add({ uz: { 'set.d.archive': 'Arxiv', 'set.d.archiveLine': '{days} kun · {first} dan · {threads} suhbat', 'set.d.archiveOff': 'mavjud emas' },
     uzk: { 'set.d.archive': 'Архив', 'set.d.archiveLine': '{days} кун · {first} дан · {threads} суҳбат', 'set.d.archiveOff': 'мавжуд эмас' },
     ru: { 'set.d.archive': 'Архив', 'set.d.archiveLine': '{days} дн. · с {first} · бесед: {threads}', 'set.d.archiveOff': 'недоступен' } });
+  /* Ma'lumot sog'ligi — «hisobim yillar o'tsa ham joyidami?» degan savolga ko'rinadigan javob */
+  D.i18n.add({
+    uz: { 'set.h.title': "Ma'lumot sog'ligi", 'set.h.offsite': 'Serverdan tashqaridagi nusxa', 'set.h.local': 'Serverdagi kunlik nusxa',
+      'set.h.records': 'Arxivdagi yozuvlar', 'set.h.recordsLine': '{n} ta · {mb} MB', 'set.h.integrity': 'Bazaning butunligi',
+      'set.h.ok': 'joyida', 'set.h.unchecked': 'hali tekshirilmagan', 'set.h.disk': 'Serverdagi disk', 'set.h.diskLine': "{n} GB bo'sh",
+      'set.h.today': 'bugun', 'set.h.daysAgo': '{n} kun oldin', 'set.h.never': 'hali olinmagan', 'set.h.copies': '{n} ta nusxa',
+      'set.h.full': "To'liq eksport (ZIP)",
+      'set.h.fullHint': "Holat, butun arxiv, profil va suratlar — bitta faylda. Ichidagi hamma narsa oddiy JSON: ilova bo'lmasa ham o'qiladi.",
+      'set.h.warnOffsite': "Diqqat: hamma nusxa serverning bitta diskida. Kompyuteringizda deploy\\pull-backup.ps1 ni ishga tushiring — u nusxani shu yerdan tashqariga chiqaradi." },
+    uzk: { 'set.h.title': 'Маълумот соғлиғи', 'set.h.offsite': 'Сервердан ташқаридаги нусха', 'set.h.local': 'Сервердаги кунлик нусха',
+      'set.h.records': 'Архивдаги ёзувлар', 'set.h.recordsLine': '{n} та · {mb} МБ', 'set.h.integrity': 'Базанинг бутунлиги',
+      'set.h.ok': 'жойида', 'set.h.unchecked': 'ҳали текширилмаган', 'set.h.disk': 'Сервердаги диск', 'set.h.diskLine': '{n} ГБ бўш',
+      'set.h.today': 'бугун', 'set.h.daysAgo': '{n} кун олдин', 'set.h.never': 'ҳали олинмаган', 'set.h.copies': '{n} та нусха',
+      'set.h.full': 'Тўлиқ экспорт (ZIP)',
+      'set.h.fullHint': 'Ҳолат, бутун архив, профил ва суратлар — битта файлда. Ичидаги ҳамма нарса оддий JSON: илова бўлмаса ҳам ўқилади.',
+      'set.h.warnOffsite': 'Диққат: ҳамма нусха сервернинг битта дискида. Компютерингизда deploy\\pull-backup.ps1 ни ишга туширинг — у нусхани шу ердан ташқарига чиқаради.' },
+    ru: { 'set.h.title': 'Сохранность данных', 'set.h.offsite': 'Копия вне сервера', 'set.h.local': 'Ежедневная копия на сервере',
+      'set.h.records': 'Записей в архиве', 'set.h.recordsLine': '{n} · {mb} МБ', 'set.h.integrity': 'Целостность базы',
+      'set.h.ok': 'в порядке', 'set.h.unchecked': 'ещё не проверялась', 'set.h.disk': 'Диск сервера', 'set.h.diskLine': '{n} ГБ свободно',
+      'set.h.today': 'сегодня', 'set.h.daysAgo': '{n} дн. назад', 'set.h.never': 'ещё не делалась', 'set.h.copies': 'копий: {n}',
+      'set.h.full': 'Полный экспорт (ZIP)',
+      'set.h.fullHint': 'Состояние, весь архив, профиль и фото — одним файлом. Внутри обычный JSON: читается и без приложения.',
+      'set.h.warnOffsite': 'Внимание: все копии на одном диске сервера. Запустите на компьютере deploy\\pull-backup.ps1 — он вынесет копию за пределы сервера.' } });
   D.i18n.add({
     uz: { 'set.pw': 'Parol', 'set.pw.title': "Parolni o'zgartirish", 'set.pw.old': 'Hozirgi parol', 'set.pw.new': 'Yangi parol',
       'set.pw.hint': 'Kamida 8 ta belgi', 'set.pw.save': 'Saqlash', 'set.pw.ok': 'Parol yangilandi',

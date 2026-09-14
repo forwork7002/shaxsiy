@@ -43,15 +43,18 @@ import logging
 import os
 import re
 import secrets
+import shutil
+import tempfile
 import threading
 import time
+import zipfile
 import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-from flask import Flask, request, jsonify, send_from_directory, redirect, Response, stream_with_context
+from flask import Flask, request, jsonify, send_from_directory, redirect, Response, stream_with_context, send_file, after_this_request
 
 import db   # SQLite arxiv: kunlik faktlar, WHOOP yozuvlari, chatlar — hech qachon qirqilmaydi
 
@@ -265,8 +268,6 @@ if AI_PROVIDER == "openai" and not OPENAI_KEY:
     log.error("AI_PROVIDER=openai, lekin OPENAI_API_KEY bo'sh — AI o'chirilgan"); AI_PROVIDER = ""
 if AI_PROVIDER == "anthropic" and not AI_KEY:
     log.error("AI_PROVIDER=anthropic, lekin AI_API_KEY bo'sh — AI o'chirilgan"); AI_PROVIDER = ""
-BACKUP_KEEP = 30
-
 app = Flask(__name__, static_folder=None)
 _lock = threading.Lock()
 
@@ -1171,14 +1172,15 @@ def _write_atomic(f: Path, text: str):
 def save_data(uid: str, d: dict):
     f = user_file(uid)
     _write_atomic(f, json.dumps(d, ensure_ascii=False, separators=(",", ":")))
-    # kunlik zaxira
+    # Kunlik zaxira. Siyraklashtirish avlodlar bo'yicha (db.prune_generational):
+    # 14 kun har kuni · 8 hafta haftasiga · 24 oy oyiga · keyin yiliga bitta, abadiy.
+    # Ilgari «oxirgi 30 tasi» edi — ya'ni bir oydan eski holatga qaytib bo'lmasdi.
     today = datetime.now(TZ).strftime("%Y-%m-%d")
     b = DATA_DIR / "backups" / f"{f.stem}-{today}.json"
     if not b.exists():
         _write_atomic(b, json.dumps(d, ensure_ascii=False))
-        olds = sorted((DATA_DIR / "backups").glob(f"{f.stem}-*.json"))
-        for old in olds[:-BACKUP_KEEP]:
-            old.unlink(missing_ok=True)
+        _archive(db.prune_generational, list((DATA_DIR / "backups").glob(f"{f.stem}-*.json")),
+                 what="zaxira siyraklashtirish")
 
 
 def whoop_file(uid: str) -> Path:
@@ -1259,23 +1261,56 @@ def post_data():
 
 @app.get("/api/health")
 def health():
-    return jsonify({"ok": True, "time": datetime.now(TZ).isoformat(), "dev": DEV,
-                    "whoop": bool(WHOOP_ID and WHOOP_SECRET), "ai": bool(AI_PROVIDER), "aiProvider": AI_PROVIDER or None,
-                    # qaysi model va qanday fikrlash darajasi ishlayotgani — .env ni ochmasdan tekshirish uchun
-                    "aiModel": (OPENAI_MODEL if AI_PROVIDER == "openai" else AI_MODEL) if AI_PROVIDER else None,
-                    "aiReasoning": OPENAI_REASONING if AI_PROVIDER == "openai" else None,
-                    "telegram": bool(BOT_TOKEN), "users": len(USERS),
-                    "data": _data_health()})
+    """Ochiq holat. Ma'lumot bo'limi (disk, hajm, hisoblar soni) faqat kirgan odamga
+    yoki serverning o'zidan (deploy skriptlari) ko'rinadi — ochiq internetga emas."""
+    out = {"ok": True, "time": datetime.now(TZ).isoformat(), "dev": DEV,
+           "whoop": bool(WHOOP_ID and WHOOP_SECRET), "ai": bool(AI_PROVIDER), "aiProvider": AI_PROVIDER or None,
+           # qaysi model va qanday fikrlash darajasi ishlayotgani — .env ni ochmasdan tekshirish uchun
+           "aiModel": (OPENAI_MODEL if AI_PROVIDER == "openai" else AI_MODEL) if AI_PROVIDER else None,
+           "aiReasoning": OPENAI_REASONING if AI_PROVIDER == "openai" else None,
+           "telegram": bool(BOT_TOKEN), "users": len(USERS)}
+    _, err = current_user()
+    if not err or client_ip() == "127.0.0.1":
+        out["data"] = _data_health()
+    return jsonify(out)
+
+
+OFFSITE_FILE = DATA_DIR / ".offsite"      # deploy/pull-backup.* muvaffaqiyatli tortgandan keyin yozadi
+MAINT_FILE = DATA_DIR / ".maint.json"     # kunlik xizmat natijasi: butunlik, siqish, nusxa
+OFFSITE_WARN_DAYS = 7                     # tashqi nusxa shundan eskirsa — ilovada qizil chiziq
+DISK_WARN_MB = 500
+
+
+def _read_json(f: Path, default=None):
+    try:
+        return json.loads(f.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return default
+
+
+def _age_days(iso: str):
+    d = _parse_dt(iso)
+    if not d:
+        return None
+    return max(0, int((datetime.now(TZ) - d).total_seconds() // 86400))
+
+
+def _parse_dt(s):
+    try:
+        d = datetime.fromisoformat(str(s).replace("Z", "+00:00"))
+        return d if d.tzinfo else d.replace(tzinfo=TZ)
+    except (TypeError, ValueError):
+        return None
 
 
 def _data_health() -> dict:
-    """Ma'lumot sog'ligi — .env ni ochmasdan, bitta so'rov bilan ko'rinadi.
+    """Ma'lumot sog'ligi — bitta so'rov bilan: nusxalar, tashqi nusxa, disk, bazaning butunligi.
 
-    Zaxira jimgina to'xtaganini kimdir sezishi kerak: shuning uchun oxirgi
-    nusxaning sanasi va bo'sh disk shu yerda turadi. «lastBackup» bugungi
-    sanadan orqada qolsa — zaxira ishlamayapti.
+    Zaxira jimgina to'xtaganini kimdir sezishi kerak. Eng xavflisi — SERVERDAN TASHQARIDAGI
+    nusxa: serverdagi hamma narsa bitta diskda yotadi, ya'ni droplet yo'qolsa ular ham yo'qoladi.
+    Shuning uchun «offsite» alohida ko'rsatiladi va 7 kundan oshsa ogohlantirish qaytariladi.
     """
-    out = {}
+    out, warn = {}, []
     try:
         files = [f for f in DATA_DIR.glob("*.json") if not f.name.endswith((".who.json", ".whoop.json"))
                  and f.name not in ("users.json",)]
@@ -1285,29 +1320,65 @@ def _data_health() -> dict:
         pass
     # Sana nom bo'yicha emas, SANA bo'yicha olinadi: fayl nomi <uid>-KUN.json
     # ko'rinishida va alifbo tartibi eng yangi kunni bermaydi.
-    def _last_day(pat: str, strip: str = "") -> str | None:
+    def _days(pat: str) -> list:
         days = []
         for f in (DATA_DIR / "backups").glob(pat):
-            m = re.search(r"(\d{4}-\d{2}-\d{2})", f.stem)
+            m = re.search(r"(\d{4}-\d{2}-\d{2})", f.name)
             if m:
                 days.append(m.group(1))
-        return max(days) if days else None
+        return sorted(days)
 
     try:
-        out["backups"] = len(list((DATA_DIR / "backups").glob("*.json")))
-        out["lastBackup"] = _last_day("*.json")
+        js = _days("*-*.json")
+        out["backups"] = len(js)
+        out["lastBackup"] = js[-1] if js else None
+        out["firstBackup"] = js[0] if js else None
     except OSError:
-        out["backups"] = 0
-        out["lastBackup"] = None
+        out["backups"], out["lastBackup"], out["firstBackup"] = 0, None, None
     try:
-        out["lastDbBackup"] = _last_day("dash-*.db")
+        dbs = _days("dash-*.db*")
+        out["lastDbBackup"] = dbs[-1] if dbs else None
+        out["dbBackups"] = len(dbs)
     except OSError:
-        out["lastDbBackup"] = None
+        out["lastDbBackup"], out["dbBackups"] = None, 0
     try:
         st = os.statvfs(str(DATA_DIR))
         out["diskFreeMb"] = int(st.f_bavail * st.f_frsize / 1048576)
+        total = st.f_blocks * st.f_frsize
+        out["diskUsedPct"] = int(100 - (st.f_bavail * st.f_frsize * 100 / total)) if total else None
     except OSError:
         pass
+    # ── serverdan tashqaridagi nusxa ──
+    try:
+        at = OFFSITE_FILE.read_text(encoding="utf-8").strip() if OFFSITE_FILE.exists() else ""
+    except OSError:
+        at = ""
+    out["offsite"] = {"at": at or None, "ageDays": _age_days(at) if at else None}
+    # ── kunlik xizmat: butunlik tekshiruvi ──
+    m = _read_json(MAINT_FILE, {}) or {}
+    out["integrity"] = m.get("integrity")
+    out["maintAt"] = m.get("at")
+    out["vacuumAt"] = m.get("vacuumAt")
+    try:
+        out["db"] = db.stats()
+    except Exception as e:  # noqa: BLE001 — sog'liq paneli hech qachon xato bermasin
+        out["db"] = {"error": str(e)}
+    # ── ogohlantirishlar (mijoz shu kalitlar bo'yicha chizadi) ──
+    today = datetime.now(TZ).strftime("%Y-%m-%d")
+    off = out["offsite"]["ageDays"]
+    if off is None or off > OFFSITE_WARN_DAYS:
+        warn.append("offsite")
+    if out.get("lastDbBackup") and out["lastDbBackup"] < (datetime.now(TZ) - timedelta(days=2)).strftime("%Y-%m-%d"):
+        warn.append("backup")
+    if not out.get("lastDbBackup"):
+        warn.append("backup")
+    if (out.get("diskFreeMb") or 10 ** 9) < DISK_WARN_MB:
+        warn.append("disk")
+    if out.get("integrity") and out["integrity"] != "ok":
+        warn.append("integrity")
+    if out.get("lastBackup") and out["lastBackup"] < today and out.get("states"):
+        pass      # bugun hali hech kim saqlamagan bo'lishi mumkin — bu nosozlik emas
+    out["warn"] = warn
     return out
 
 
@@ -1334,6 +1405,94 @@ def get_backup(name):
     if not f.exists():
         return jsonify({"error": "not_found"}), 404
     return Response(f.read_text(encoding="utf-8"), mimetype="application/json")
+
+
+EXPORT_README = """Shaxsiy Dashboard — to'liq eksport
+=====================================
+
+Bu arxivda sizning hisobingizdagi HAMMA narsa bor. U hech qanday dasturga bog'liq emas:
+ichidagi fayllar oddiy JSON va JPG — ularni yuz yildan keyin ham ochib o'qish mumkin.
+
+  holat.json     Ilovadagi joriy holat: odatlar, vazifalar, maqsadlar, moliya, sozlamalar.
+                 Shu faylni ilovaga qaytarib yuklash mumkin (Sozlash → Ma'lumot → JSON import).
+
+  arxiv.json     O'TMISH — ilova hech qachon o'chirmaydigan yozuvlar:
+                   days    har bir kun bo'yicha faktlar (sog'liq, odatlar, namoz, ovqat,
+                           moliya, zikr, ro'za, izohlar). O'chirilgan yozuv ham qoladi —
+                           unda "goneAt" sanasi turadi.
+                   whoop   WHOOP'dan kelgan barcha yozuvlar (tiklanish, uyqu, sikl, mashg'ulot).
+                   chats   Yusa AI bilan suhbatlar, to'liq matni bilan.
+                   cards   AI tahlil kartalari.
+
+  profil.json    Ism, e-mail, qaysi usul bilan kirilgani, hisob ochilgan sana.
+
+  rasmlar/       Profil surati va ovqat suratlari (ular hech qachon holat faylining
+                 ichiga kirmaydi — shuning uchun alohida turibdi).
+
+Sanalar Toshkent vaqtida (+05:00). Kun kaliti — YYYY-MM-DD.
+"""
+
+
+@app.get("/api/export/full")
+def export_full():
+    """Butun hisobning bitta ZIP fayli: holat + arxiv + profil + suratlar.
+
+    Nega kerak: «ma'lumotim umrbod saqlanadimi?» degan savolning eng halol javobi —
+    ma'lumot shu ilovadan tashqarida ham o'qiladigan bo'lishi. Bu yerdan chiqqan
+    arxivda hech qanday maxfiy kalit yo'q (parol xeshi, sessiya kaliti, WHOOP tokenlari
+    kirmaydi), ya'ni uni xotirjam saqlash mumkin.
+    """
+    uid, err = current_user()
+    if err:
+        return err
+    want_photos = request.args.get("photos") != "0"
+    # Yarim qolgan eski eksportlar (uzilgan yuklab olish, Windows'da band fayl) diskda yig'ilmasin
+    for old in DATA_DIR.glob("export-*.zip"):
+        try:
+            if time.time() - old.stat().st_mtime > 3600:
+                old.unlink(missing_ok=True)
+        except OSError:
+            pass
+    tmp = tempfile.NamedTemporaryFile(prefix="export-", suffix=".zip", dir=str(DATA_DIR), delete=False)
+    tmp.close()
+    path = Path(tmp.name)
+    _private(path)
+    try:
+        with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+            z.writestr("O'QING.txt", EXPORT_README)
+            z.writestr("holat.json", json.dumps(load_data(uid), ensure_ascii=False, indent=1))
+            z.writestr("arxiv.json", json.dumps(db.export_all(uid), ensure_ascii=False, indent=1))
+            who = who_load(uid)
+            z.writestr("profil.json", json.dumps({
+                "uid": uid, "name": who.get("name"), "email": who.get("email"),
+                "provider": who.get("provider"), "createdAt": who.get("createdAt"),
+                "lastLogin": who.get("lastLogin"), "exportedAt": datetime.now(TZ).isoformat(timespec="seconds"),
+            }, ensure_ascii=False, indent=1))
+            av = avatar_file(uid)
+            if av.exists():
+                z.write(av, "rasmlar/avatar.jpg")
+            if want_photos:
+                d = user_file(uid).with_name(user_file(uid).stem + ".food")
+                if d.is_dir():
+                    for p in sorted(d.glob("*.jpg")):
+                        z.write(p, f"rasmlar/ovqat/{p.name}")
+    except Exception as e:  # noqa: BLE001
+        path.unlink(missing_ok=True)
+        log.exception("to'liq eksport: %s", e)
+        return jsonify({"error": "export_failed"}), 500
+
+    @after_this_request
+    def _cleanup(resp):
+        # Fayl yuborilgach o'chadi. Xato bo'lsa ham qolib ketmasin: DATA_DIR da
+        # kimsasiz export-*.zip yig'ilib diskni yeb qo'yardi.
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            pass
+        return resp
+
+    name = f"dash-toliq-{datetime.now(TZ).strftime('%Y-%m-%d')}.zip"
+    return send_file(str(path), mimetype="application/zip", as_attachment=True, download_name=name)
 
 
 # ═══════════════════════ API: tarix (arxivdan o'qish) ═══════════════════════
@@ -2031,19 +2190,52 @@ _maint_day = None
 
 
 def _maint_tick():
-    """Kunlik xizmat: arxivni siqish va dash.db nusxasi. Kuniga bir marta.
+    """Kunlik xizmat: butunlik → siqish → nusxa → (oyiga bir marta) VACUUM. Kuniga bir marta.
 
     Ilgari bu WHOOP oqimining ichida edi — ya'ni WHOOP kalitlari bo'lmasa yoki
     poller o'chirilgan bo'lsa, ARXIV NUSXASI HAM olinmay qolardi va buni hech
     kim sezmasdi. Endi u alohida oqimda va WHOOP'ga bog'liq emas.
+
+    Tartib muhim: avval butunlik tekshiriladi. Baza buzilgan bo'lsa undan nusxa
+    OLINMAYDI — aks holda buzuq nusxa sog'ining ustiga chiqib, bir necha kunda
+    hamma nusxa yaroqsiz bo'lib qoladi. Natija .maint.json ga yoziladi va
+    /api/health orqali ilovadagi «Ma'lumot sog'ligi» panelida ko'rinadi.
     """
     global _maint_day
-    today = datetime.now(TZ).strftime("%Y-%m-%d")
+    now = datetime.now(TZ)
+    today = now.strftime("%Y-%m-%d")
     if today == _maint_day:
         return
     _maint_day = today
-    _archive(db.compact, what="arxiv compact")
-    _archive(db.backup_db, DATA_DIR, what="arxiv backup")
+    prev = _read_json(MAINT_FILE, {}) or {}
+    rec = {"at": now.isoformat(timespec="seconds"), "integrity": None, "compact": None,
+           "backup": None, "vacuumAt": prev.get("vacuumAt"), "vacuumFreed": prev.get("vacuumFreed")}
+    rec["integrity"] = _archive(db.integrity, what="arxiv butunlik") or "tekshirilmadi"
+    if rec["integrity"] != "ok":
+        log.error("ARXIV BUTUNLIGI: %s — nusxa OLINMADI, eski nusxalar saqlanib qoldi", rec["integrity"])
+    else:
+        rec["compact"] = _archive(db.compact, what="arxiv compact")
+        b = _archive(db.backup_db, DATA_DIR, what="arxiv backup")
+        rec["backup"] = Path(b).name if b else None
+        last_vac = _parse_dt(prev.get("vacuumAt"))
+        if not last_vac or (now - last_vac).days >= db.VACUUM_DAYS:
+            freed = _archive(db.vacuum, what="arxiv vacuum")
+            if freed is not None:
+                rec["vacuumAt"], rec["vacuumFreed"] = now.isoformat(timespec="seconds"), freed
+                log.info("VACUUM: %.1f MB bo'shadi", freed / 1048576)
+    try:
+        _write_atomic(MAINT_FILE, json.dumps(rec, ensure_ascii=False))
+    except OSError as e:
+        log.error("xizmat natijasi yozilmadi: %s", e)
+    # Disk to'lib borayotgan bo'lsa buni jurnalda ko'rinadigan qilamiz: to'lgan diskda
+    # yozuv umuman bajarilmaydi, ya'ni bu ma'lumot yo'qolishining eng qisqa yo'li.
+    try:
+        st = os.statvfs(str(DATA_DIR))
+        free_mb = int(st.f_bavail * st.f_frsize / 1048576)
+        if free_mb < DISK_WARN_MB:
+            log.error("DISK KAMAYDI: %d MB qoldi — zaxiralar va yozuv xavf ostida", free_mb)
+    except OSError:
+        pass
 
 
 def _maint_loop():

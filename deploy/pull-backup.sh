@@ -72,6 +72,11 @@ if [ "$N_STATE" -lt 1 ]; then
   exit 1
 fi
 
+# Serverga belgi: ilovadagi «Ma'lumot sog'ligi» paneli shundan «oxirgi tashqi nusxa
+# N kun oldin» degan qatorni chizadi va 7 kundan oshsa qizil ko'rsatadi.
+ssh "$HOST" "date -Iseconds > $APP_DIR/data/.offsite; chown shaxsiy:shaxsiy $APP_DIR/data/.offsite; chmod 600 $APP_DIR/data/.offsite" \
+  || echo "  ogohlantirish: serverga belgi qo'yilmadi"
+
 # Eski nusxalar: oxirgi 30 tasi qoladi
 ls -1t "$DEST"/dash-*.tgz 2>/dev/null | tail -n +31 | while read -r old; do
   rm -f "$old"

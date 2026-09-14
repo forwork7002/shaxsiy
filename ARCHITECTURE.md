@@ -262,7 +262,8 @@ Prayer habits (names ПЕШИН/АСР/ШОМ/БОМДОД/ХУФТОН) stay as
 ## Backend contract (api.py)
 
 - `GET /api/data` → full state; `POST /api/data` body = full state (server merges per top-level key using `meta.updatedAt`; returns `{ok, updated}`)
-- `GET /api/health`
+- `GET /api/health` → config flags, always public. The `data` block (states, bytes, backups, `lastBackup`, `lastDbBackup`, `offsite:{at,ageDays}`, `integrity`, `maintAt`, `vacuumAt`, `diskFreeMb`, `db:` row counts, `warn:[]`) is added only for a signed-in session or a request from `127.0.0.1` (deploy scripts) — an open URL must not report disk size and account counts.
+- `GET /api/export/full[?photos=0]` → ZIP: `holat.json` (live state) · `arxiv.json` (`db.export_all` — every day fact, WHOOP record, chat and card, including `goneAt`/`deletedAt` ones, no 400-day cap) · `profil.json` (no password hash) · `rasmlar/` (avatar + food photos) · `O'QING.txt`. Built in a temp file under `data/`, streamed, then removed; stale `export-*.zip` older than an hour are swept on the next call. The one answer to "does my data outlive this app".
 - `GET /api/me` → `{uid, name, email, provider, avatar, since}` (401 `{error:'auth_failed', passcode:true}` when signed out); `POST /api/me {name}` → display name (who.json only, the login name is untouched; 400 `bad_name`)
 - `GET /api/me/avatar` → image bytes (private, ETag = mtime, 304, 404 `not_found`); `POST /api/me/avatar {image: dataURL|base64}` ≤ 1.5 MB JPEG/PNG/WebP (413 `too_large`, 400 `bad_image`) → `{ok, avatar:mtime}`; `DELETE` → `{ok}` and a later Google login does not bring the Google picture back
 - `GET /api/whoop/login` → redirect to WHOOP; `GET /api/whoop/callback` → stores tokens server-side keyed by uid → redirect `/#health`
@@ -284,3 +285,27 @@ The blob is the whole state: a fact that disappears from it (habit un-ticked, no
 - `POST /api/history/restore-thread {id}` → `{ok, thread?:{id,ts,messages}}` — re-inserts the thread into the blob; the client also adds it to `D.S.nova.threads` locally and opens Nova on it.
 - `GET /api/history/versions` → `{versions:[{id,savedAt,size}]}`, `GET /api/history/versions/<id>` → the blob.
 Client conventions: responses cached in module memory keyed by uid+url (ranges touching today expire after 2 min); skeleton while loading, offline card with retry on error; selector state in `D.ui.filters.hist = {y, m}`; sub-tabs `D.ui.sub.history` ∈ month|year|chats|cards; CSS prefix `hs-`, actions `hs*`.
+
+## Durability — the account has to outlive the app
+
+The question this section answers: *if someone opens an account today, is their data still whole in twenty years?*
+
+**Where the truth lives.** Three layers, each with a different job:
+1. `data/<uid>.json` — the live blob, source of truth for *editing*. Written with `_write_atomic`: write → `fsync` → `replace` → `fsync` the directory. A power cut can leave the old file or the new one, never half of either.
+2. `data/dash.db` — source of truth for the *past*. Nothing in the app deletes from it; a disappeared fact gets `gone_at`, a deleted chat gets `deleted_at`. The only exception is `state_versions` sparsening.
+3. `data/backups/` — daily copies of both.
+
+**Size.** Measured 2026-09-14: `state_versions` was 72 % of the database (49 rows, 49 KB each) while the entire real archive — 587 days of facts, WHOOP records and chats — was 0.2 MB. So blob snapshots are stored zlib-compressed (`ZMAGIC = b"DZ1"`, ~8×) and `_loads` reads compressed and plain rows alike, which makes the change reversible and old databases readable without migration. `compact()` squeezes leftover plain rows in batches of 40 — never all at once, because the droplet has 458 MB of RAM.
+
+**Retention is generational** (`db.prune_generational`, used for `dash-*.db.gz` and for each `<uid>-*.json`):
+14 days daily · 8 weeks weekly · 24 months monthly · then **one per year, forever**. A 2026 copy is still there in 2046, and the file count stays under ~70. The old rule ("keep the last 14/30") made any mistake older than two weeks unrecoverable.
+
+**A backup is verified before it replaces anything.** `backup_db` copies via the SQLite backup API, runs `quick_check` and a row count on the *copy*, gzips it, and only then prunes. `_maint_tick` runs `db.integrity()` first: if the database is corrupt **no copy is taken at all**, so a corrupt database cannot overwrite the healthy history. `VACUUM` runs every 30 days. The result is written to `data/.maint.json` and surfaces in `/api/health`.
+
+**The real risk is the single disk.** Everything above still lives on one droplet volume. The only protection is a copy taken off the server:
+`deploy/pull-backup.ps1` (Windows, scheduled daily by `deploy/schedule-backup.ps1`) or `deploy/pull-backup.sh`. Both verify the archive (`tar -tzf` walks the whole gzip stream), apply the same generational rule locally, and write `data/.offsite` on the server. `/api/health` reports its age and Созлаш → Ma'lumot turns the row red past 7 days — because a backup that quietly stopped is the same as no backup.
+Session key (`.secret`) and WHOOP tokens are deliberately excluded: restoring means everyone signs in again, and no long-lived credential sits in a backup archive.
+
+**Portability.** `GET /api/export/full` hands the user a ZIP of plain JSON and JPEG with a README in Uzbek. No part of it needs this app to be readable.
+
+Guarded by `tests/test_durability.py` (39 checks): round-trip through compression, old plain rows still readable, 20-year generational retention, corrupt database refused, deleted records present in the export, health warnings appearing and clearing.
