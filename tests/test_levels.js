@@ -417,6 +417,42 @@ console.log('\n22. Tarix grafigi');
   ok('hamma kunda ochko bor', h.every((x) => x.xp === 10));
 }
 
+console.log('\n23. Uzoq o‘tmishdagi sinov ochkosi bugunga tushmasligi');
+{
+  /* REGRESSIYA. `dayInWeek` bugundan orqaga yurib qidirardi va yurish 400 kun
+     bilan chegaralangan edi — undan eski hafta topilmay `today` qaytarardi,
+     ya'ni bir yildan uzoq tarixi bor odamda o'tgan HAMMA haftaning +80 ochkosi
+     bugunga yig'ilardi. 600 kunlik holatda bugun sinovdan 640 ochko olardi va
+     kunlik maqsad har kuni o'z-o'zidan «bajarilgan» bo'lib chiqardi.
+     Shuning uchun: bugun hech narsa yozilmagan bo'lsa, bugungi ochko NOL. */
+  const logs = {}, prayers = {}, dhikr = {}, notes = {}, fasting = {};
+  const food = { logs: {}, targets: { kcal: null, p: null, c: null, f: null, auto: true } };
+  const whoop = { connected: false, lastSync: null, cache: {}, days: {}, workouts: [], body: {} };
+  const tasks = [];
+  /* 420..540 kun oldingi oraliq — hammasi 400 kunlik yurishdan uzoqda. Har hafta
+     jadvaldan qaysi sinov chiqmasin bajarilgan bo'lsin uchun hamma o'lchov to'ldiriladi. */
+  for (let i = 420; i <= 540; i++) {
+    const k = daysBack(i);
+    logs[k] = ['a', 'b', 'c', 'd', 'e'];
+    prayers[k] = { bomdod: 'jamaat', peshin: 'jamaat', asr: 'jamaat', shom: 'jamaat', xufton: 'jamaat' };
+    dhikr[k] = { total: 330 };
+    notes[k] = 'bor';
+    fasting[k] = { type: 'nafl', done: true };
+    food.logs[k] = [{ id: 'f' + i, ts: 1, name: 'ovqat', grams: 1, kcal: 1, p: 0, c: 0, f: 0 }];
+    whoop.days[k] = { sleepH: 8 };
+    whoop.workouts.push({ id: 'w' + i, k, start: 1, sport: 'run', strain: 1, kcal: 1, mins: 10 });
+    for (let j = 0; j < 2; j++) tasks.push({ id: 't' + i + '_' + j, text: 'x', date: k, done: true,
+      doneAt: Date.parse(k + 'T12:00:00Z'), priority: 2, createdAt: 1 });
+  }
+  const c = setState({ logs, prayers, dhikr, notes, fasting, food, whoop, tasks });
+  ok('o‘sha davrda sinov haqiqatan bajarilgan', c.st.challenges > 0, c.st.challenges);
+  eq('bugunda yozuv yo‘q — bugungi ochko nol', c.days.get(TODAY) || 0, 0);
+  eq('bugungi taqsimot bo‘sh', L.day().src.length, 0);
+  ok('hamma ochko o‘z davrida qolgan',
+     Array.from(c.days.keys()).every((k) => k <= daysBack(419)),
+     Array.from(c.days.keys()).filter((k) => k > daysBack(419)).slice(0, 3));
+}
+
 /* ================================================================= */
 console.log('\n' + (fail ? `${fail} / ${n} tekshiruv YIQILDI` : `hammasi joyida — ${n} ta tekshiruv`) + '\n');
 process.exit(fail ? 1 : 0);

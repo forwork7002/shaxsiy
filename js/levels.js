@@ -838,15 +838,25 @@
   }
 
   /** Hafta kalitiga tegishli bitta kun — sinov ochkosi qaysi kunga yozilishi uchun.
-      Aniq sana muhim emas (kunlik ochko faqat «bugun +N» uchun ko'rsatiladi),
-      shuning uchun bugundan orqaga yurib birinchi mos kelgan kunni olamiz. */
+      Haftaning YAKSHANBASI olinadi: sinov hafta oxirida bajarilib bo'ladi.
+
+      Ilgari bu bugundan orqaga yurib qidirardi va yurish 400 kun bilan
+      chegaralangan edi — undan eski hafta topilmay, `today` qaytarardi. Ya'ni
+      bir yildan uzoq tarixi bor odamda o'tgan hamma haftaning +80 ochkosi
+      BUGUNGA yig'ilib qolardi: 600 kunlik holatda bugun sinovdan 640 ochko
+      olardi. Ilgari bu ko'rinmasdi (kunlik ochko hech qayerda taqsimlanmasdi),
+      endi esa kunlik maqsadni har kuni o'z-o'zidan «bajarilgan» qilib qo'yardi.
+      Shuning uchun sana endi qidirilmaydi, hafta kalitidan HISOBLANADI. */
   function dayInWeek(wk, today) {
-    let probe = today;
-    for (let i = 0; i < 400; i++) {
-      if (D.weekKey(probe) === wk) return probe;
-      probe = D.addDays(probe, -1);
-    }
-    return today;
+    const m = /^(\d{4})-W(\d{2})$/.exec(String(wk));
+    if (!m) return today;
+    const y = +m[1], w = +m[2];
+    // ISO qoidasi: 4-yanvar har doim birinchi haftada bo'ladi.
+    const jan4 = new Date(Date.UTC(y, 0, 4));
+    const dow = jan4.getUTCDay() || 7;                       // dushanba = 1
+    const d = new Date(Date.UTC(y, 0, 4 - dow + 7 + (w - 1) * 7));   // o'sha haftaning yakshanbasi
+    const k = d.getUTCFullYear() + '-' + D.pad2(d.getUTCMonth() + 1) + '-' + D.pad2(d.getUTCDate());
+    return k <= today ? k : today;
   }
 
   /** Ochko → daraja (1..50). */
