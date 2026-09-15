@@ -108,7 +108,6 @@
   const ACC_ICON = { cash: 'wallet', bank: 'layers', card: 'keyboard', crypto: 'globe', other: 'star' };
   const ACC_COLOR = { cash: 'var(--success)', bank: 'var(--info)', card: 'var(--violet)', crypto: 'var(--warning)', other: 'var(--boshqa)' };
   const PERIODS = ['monthly', 'yearly', 'weekly'];
-  const CAT_PALETTE = ['var(--accent)', 'var(--info)', 'var(--violet)', 'var(--warning)', 'var(--qalb)', 'var(--aql)', 'var(--tana)', 'var(--ruh)', 'var(--boshqa)'];
 
   const F = () => D.S.finance;
   const t = (k, p) => D.t(k, p);
@@ -345,18 +344,25 @@
       colors.push(k === today ? 'var(--text)' : k > today ? 'var(--line3)' : 'var(--accent)');
     }
     const maxDay = vals.length ? Math.max(...vals) : 0;
-    const bars = `<div class="fin-spark mt"><div class="row between mb-s"><div class="eyebrow">${esc(t('fin.daily'))}</div>${maxDay ? `<span class="small muted">${esc(t('fin.dailyMax'))} <span class="num">${esc(money(maxDay))}</span></span>` : ''}</div>${D.chart.bars({ values: vals, labels, colors, height: 56 })}</div>`;
+    // Chiziq endi karta ichidagi qo'shimcha emas, sahifaning qahramoni:
+    // balandligi 56 → 104, chetdan chetgacha yoyiladi. «Oy qanday ketyapti»
+    // degan savolga javobni bitta raqam emas, aynan shu shakl beradi.
+    const bars = `<div class="fin-flow">
+      <div class="fin-flow-h"><span class="eyebrow">${esc(t('fin.daily'))}</span>${maxDay ? `<span class="fin-flow-max">${esc(t('fin.dailyMax'))} <b class="num">${esc(money(maxDay))}</b></span>` : ''}</div>
+      <div class="fin-flow-c">${D.chart.bars({ values: vals, labels, colors, height: 104 })}</div>
+    </div>`;
 
     // bosh raqam — oyning sof natijasi (kirim − chiqim)
     const eyebrow = t('fin.net');
     const num = signed(A.net);
     const cls = A.net > 0 ? 'good' : A.net < 0 ? 'bad' : '';
 
-    // oyni to'liq tasvirlaydigan uchta raqam
-    const stats = `<div class="stat-grid mt">
-      <div class="stat"><div class="stat-num num money good">${esc(plain(A.inc))}</div><div class="stat-label">${esc(t('fin.income'))}</div></div>
-      <div class="stat"><div class="stat-num num money bad">${esc(plain(A.out))}</div><div class="stat-label">${esc(t('fin.expense'))}</div></div>
-      <div class="stat"><div class="stat-num num money">${esc(plainSigned(A.net))}</div><div class="stat-label">${esc(t('fin.net'))}</div></div>
+    // Uchta qutidan ikkitasi qoldi va ular qutidan chiqdi. Uchinchisi —
+    // «Sof natija» — tepadagi katta raqamning aynan o'zi edi: bitta ekranda
+    // bir xil sonni ikki marta ko'rsatish o'quvchini ishontirmaydi, chalg'itadi.
+    const stats = `<div class="fin-sum">
+      <span><b class="num money good">${esc(plain(A.inc))}</b> ${esc(t('fin.income'))}</span>
+      <span><b class="num money bad">${esc(plain(A.out))}</b> ${esc(t('fin.expense'))}</span>
     </div>`;
 
     // one honest forecast line instead of a whole card
@@ -367,12 +373,14 @@
     if (bills > 0) notes.push(line('fin.billsLeft', money(bills)));
 
     return `<div class="card fin-hero">
-      <div class="card-head"><div class="eyebrow">${esc(eyebrow)}</div>
-        <div class="row" style="gap:6px">${left ? `<span class="pill">${esc(t('fin.daysLeft', { n: left }))}</span>` : `<span class="pill on">${esc(t('fin.monthOver'))}</span>`}</div></div>
-      <div class="kpi"><div class="kpi-num num ${cls}">${esc(num)}</div></div>
-      ${stats}
-      ${notes.length ? `<div class="fin-notes">${notes.map((x) => `<span>${x}</span>`).join('')}</div>` : ''}
       ${bars}
+      <div class="fin-hero-b">
+        <div class="card-head"><div class="eyebrow">${esc(eyebrow)}</div>
+          <div class="row" style="gap:6px">${left ? `<span class="pill">${esc(t('fin.daysLeft', { n: left }))}</span>` : `<span class="pill on">${esc(t('fin.monthOver'))}</span>`}</div></div>
+        <div class="kpi"><div class="kpi-num num ${cls}">${esc(num)}</div></div>
+        ${stats}
+        ${notes.length ? `<div class="fin-notes">${notes.map((x) => `<span>${x}</span>`).join('')}</div>` : ''}
+      </div>
     </div>`;
   }
 
@@ -383,31 +391,52 @@
     if (box && on) box.scrollLeft = Math.max(0, on.offsetLeft - 12);
   }
 
-  /* the fastest possible entry: amount → category chip → done */
+  /* Eng tez yo'l: summa → kategoriya → tamom.
+     Forma ilgari HAR DOIM ochiq turardi va ekranning uchdan birini egallardi —
+     holbuki u kuniga bir-ikki marta kerak bo'ladi, qolgan vaqtda esa oyning
+     ko'rinishini pastga surib turardi. Endi yig'iq: bitta qator (summa + tugma),
+     summaga tegilganda ochiladi. Ochiq holat D.ui da saqlanadi, ya'ni qayta
+     chizishda yopilib qolmaydi; ochish esa qayta chizishsiz, klass bilan
+     bo'ladi — aks holda klaviatura yopilib, fokus yo'qolardi. */
   function addCard() {
     const hasAcc = F().accounts.length > 0;
-    return `<div class="card fin-add">
-      <div class="card-head"><div class="title">${D.ic('plus', 16)} ${esc(t('fin.add'))}</div>
+    const open = D.ui.filters.finAdd === 1;
+    return `<div class="card fin-add ${open ? 'open' : ''}">
+      <div class="fin-add-top">
+        <input class="inp num fin-amount" id="finAmount" inputmode="decimal" autocomplete="off" placeholder="${esc(t('fin.amountPh'))}" aria-label="${esc(t('fin.amount'))}" data-input="finAmountIn" data-enter="finAdd">
+        <button class="fin-add-go" data-act="finAdd" aria-label="${esc(t('btn.add'))}" title="${esc(t('btn.add'))}">${D.ic('plus', 20)}</button>
+        <button class="btn icon ghost fin-add-less" data-act="finAddClose" aria-label="${esc(t('btn.close'))}" title="${esc(t('btn.close'))}">${D.ic('chevD', 18)}</button>
+      </div>
+      <div class="fin-add-x">
         <div class="seg compact" id="finTypeSeg">
           <button class="${draftType === 'out' ? 'on' : ''}" data-act="finType" data-type="out">${esc(t('fin.out'))}</button>
-          <button class="${draftType === 'in' ? 'on' : ''}" data-act="finType" data-type="in">${esc(t('fin.in'))}</button></div></div>
-      <input class="inp num fin-amount" id="finAmount" inputmode="decimal" autocomplete="off" placeholder="${esc(t('fin.amountPh'))}" aria-label="${esc(t('fin.amount'))}" data-input="finAmountIn" data-enter="finAdd">
-      <div class="fin-chips" id="finChips" role="radiogroup" aria-label="${esc(t('fin.cat'))}">${chipsHtml()}</div>
-      <div class="fin-add-row">
-        <input class="inp" id="finNote" placeholder="${esc(t('fin.notePh'))}" aria-label="${esc(t('common.note'))}" data-enter="finAdd">
-        <input class="inp" type="date" id="finDate" value="${esc(draftDate || D.today())}" aria-label="${esc(t('common.date'))}">
-        ${hasAcc ? `<select class="sel" id="finAcc" aria-label="${esc(t('fin.account'))}">${accOptions(D.ui.filters.finAcc)}</select>` : ''}
+          <button class="${draftType === 'in' ? 'on' : ''}" data-act="finType" data-type="in">${esc(t('fin.in'))}</button></div>
+        <div class="fin-chips" id="finChips" role="radiogroup" aria-label="${esc(t('fin.cat'))}">${chipsHtml()}</div>
+        <div class="fin-add-row">
+          <input class="inp" id="finNote" placeholder="${esc(t('fin.notePh'))}" aria-label="${esc(t('common.note'))}" data-enter="finAdd">
+          <input class="inp" type="date" id="finDate" value="${esc(draftDate || D.today())}" aria-label="${esc(t('common.date'))}">
+          ${hasAcc ? `<select class="sel" id="finAcc" aria-label="${esc(t('fin.account'))}">${accOptions(D.ui.filters.finAcc)}</select>` : ''}
+        </div>
       </div>
-      <button class="btn fin-add-btn" data-act="finAdd">${D.ic('plus', 16)} ${esc(t('btn.add'))}</button>
     </div>`;
   }
+  /** Formani ochadi — qayta chizmasdan, shunda klaviatura va fokus joyida qoladi. */
+  const openAdd = () => {
+    if (D.ui.filters.finAdd !== 1) { D.ui.filters.finAdd = 1; D.saveUi(); }
+    const c = D.$('.fin-add');
+    if (c) c.classList.add('open');
+  };
+  D.act.finAddClose = () => { D.ui.filters.finAdd = 0; D.saveUi(); D.rerender(); };
 
   function catsCard(A) {
     const cats = Object.entries(A.byCat).sort((a, b) => b[1] - a[1]);
     const max = cats.length ? cats[0][1] : 0;
-    let h = `<div class="card"><div class="card-head"><div class="title">${D.ic('chart', 16)} ${esc(t('fin.byCat'))}</div><span class="small muted num">${esc(money(A.out))}</span></div>`;
+    let h = `<div class="card fin-cats"><div class="card-head"><div class="title">${D.ic('chart', 16)} ${esc(t('fin.byCat'))}</div><span class="small muted num">${esc(money(A.out))}</span></div>`;
     if (!cats.length) h += `<div class="empty">${esc(t('fin.noExpense'))}</div>`;
-    else h += cats.map(([id, v], i) => D.chart.hbar({ label: catLabel(id), value: v, max, color: CAT_PALETTE[i % CAT_PALETTE.length], right: `${esc(money(v))} <span class="muted">${D.fmtPct(A.out ? (v / A.out) * 100 : 0)}</span>` })).join('');
+    // Bitta rang: kategoriyaning rangi hech narsa bildirmaydi (moliyada rang
+    // kirim/chiqimni anglatadi), kuchni esa chiziqning UZUNLIGI aytadi.
+    // Ola-bula ro'yxatda uzunliklarni solishtirish qiyinlashardi.
+    else h += cats.map(([id, v]) => D.chart.hbar({ label: catLabel(id), value: v, max, color: 'var(--text2)', right: `${esc(money(v))} <span class="muted">${D.fmtPct(A.out ? (v / A.out) * 100 : 0)}</span>` })).join('');
     h += `<div class="fin-hint"><button class="fin-link" data-act="go" data-view="settings" data-sub="finance">${D.ic('gear', 13)} ${esc(t('fin.catsHint'))}</button></div></div>`;
     return h;
   }
@@ -515,6 +544,8 @@
     },
     mount() {
       scrollChip();
+      const amt = D.$('#finAmount');
+      if (amt) { amt.addEventListener('focus', openAdd); amt.addEventListener('input', openAdd); }
       clearTimeout(mountTimer);
       mountTimer = setTimeout(() => { mountTimer = null; try { runSubs(); } catch (e) { console.error(e); } }, 0);
     },

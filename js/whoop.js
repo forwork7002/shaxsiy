@@ -95,7 +95,7 @@
       'wh.sl.none': 'Bu kecha uchun uyqu yozuvi yo‘q', 'wh.sl.stagesTitle': 'Uyqu bosqichlari', 'wh.sl.light': 'yengil', 'wh.sl.deep': 'chuqur', 'wh.sl.rem': 'REM',
       'wh.sl.consHint': 'Har kuni bir xil vaqtda yotish izchillikni ko‘taradi', 'wh.sl.effHint': 'Yotoqdagi vaqtning qanchasi uyquga ketgani',
       'wh.st.today': 'Bugungi yuk', 'wh.st.none': 'Bugun hali zo‘riqish o‘lchanmadi', 'wh.st.14': 'Zo‘riqish, 14 kun', 'wh.st.legend': 'ustun rangi — o‘sha kungi tiklanish',
-      'wh.st.target': 'bugungi me‘yor {m}', 'wh.st.room': 'yana {n} gacha joy bor', 'wh.st.over': 'me‘yordan {n} yuqori', 'wh.st.kcal': '{k} kkal sarflandi', 'wh.st.tdee': 'taxminiy kunlik me‘yor {t}', 'wh.st.tdeeM': 'kunlik me‘yoringiz {t}',
+      'wh.st.target': 'bugungi me‘yor {m}', 'wh.st.room': 'yana {n} gacha joy bor', 'wh.st.over': 'me‘yordan {n} yuqori', 'wh.st.kcal': '{k} kkal sarflandi', 'wh.st.tdee': 'taxminiy kunlik me‘yor {t}',
       'wh.zones': 'Puls zonalari', 'wh.z.0': 'tinch', 'wh.z.1': 'yengil', 'wh.z.2': 'o‘rtacha', 'wh.z.3': 'kuchli', 'wh.z.4': 'og‘ir', 'wh.z.5': 'maksimal',
       'wh.wo.today': 'Bugungi mashg‘ulotlar', 'wh.wo.none': 'Bugun WHOOP mashg‘ulot yozmagan', 'wh.wo.min': '{n} daqiqa',
       'wh.disconnect': 'Uzish', 'wh.connect': 'WHOOP’ni ulash', 'wh.intro': 'Soatingizdagi tiklanish, uyqu, zo‘riqish va mashg‘ulotlar shu yerga o‘zi keladi — har daqiqa.',
@@ -113,7 +113,7 @@
       'wh.sl.none': 'Бу кеча учун уйқу ёзуви йўқ', 'wh.sl.stagesTitle': 'Уйқу босқичлари', 'wh.sl.light': 'енгил', 'wh.sl.deep': 'чуқур', 'wh.sl.rem': 'REM',
       'wh.sl.consHint': 'Ҳар куни бир хил вақтда ётиш изчилликни кўтаради', 'wh.sl.effHint': 'Ётоқдаги вақтнинг қанчаси уйқуга кетгани',
       'wh.st.today': 'Бугунги юк', 'wh.st.none': 'Бугун ҳали зўриқиш ўлчанмади', 'wh.st.14': 'Зўриқиш, 14 кун', 'wh.st.legend': 'устун ранги — ўша кунги тикланиш',
-      'wh.st.target': 'бугунги меъёр {m}', 'wh.st.room': 'яна {n} гача жой бор', 'wh.st.over': 'меъёрдан {n} юқори', 'wh.st.kcal': '{k} ккал сарфланди', 'wh.st.tdee': 'тахминий кунлик меъёр {t}', 'wh.st.tdeeM': 'кунлик меъёрингиз {t}',
+      'wh.st.target': 'бугунги меъёр {m}', 'wh.st.room': 'яна {n} гача жой бор', 'wh.st.over': 'меъёрдан {n} юқори', 'wh.st.kcal': '{k} ккал сарфланди', 'wh.st.tdee': 'тахминий кунлик меъёр {t}',
       'wh.zones': 'Пульс зоналари', 'wh.z.0': 'тинч', 'wh.z.1': 'енгил', 'wh.z.2': 'ўртача', 'wh.z.3': 'кучли', 'wh.z.4': 'оғир', 'wh.z.5': 'максимал',
       'wh.wo.today': 'Бугунги машғулотлар', 'wh.wo.none': 'Бугун WHOOP машғулот ёзмаган', 'wh.wo.min': '{n} дақиқа',
       'wh.disconnect': 'Узиш', 'wh.connect': 'WHOOP’ни улаш', 'wh.intro': 'Соатингиздаги тикланиш, уйқу, зўриқиш ва машғулотлар шу ерга ўзи келади — ҳар дақиқа.',
@@ -131,7 +131,7 @@
       'wh.sl.none': 'За эту ночь записи сна нет', 'wh.sl.stagesTitle': 'Фазы сна', 'wh.sl.light': 'лёгкий', 'wh.sl.deep': 'глубокий', 'wh.sl.rem': 'REM',
       'wh.sl.consHint': 'Ложиться в одно и то же время — главное для регулярности', 'wh.sl.effHint': 'Какая часть времени в постели ушла на сон',
       'wh.st.today': 'Нагрузка сегодня', 'wh.st.none': 'Сегодня нагрузка ещё не измерена', 'wh.st.14': 'Нагрузка, 14 дней', 'wh.st.legend': 'цвет столбца — восстановление в тот день',
-      'wh.st.target': 'норма на сегодня {m}', 'wh.st.room': 'есть запас до {n}', 'wh.st.over': 'выше нормы на {n}', 'wh.st.kcal': 'потрачено {k} ккал', 'wh.st.tdee': 'примерная дневная норма {t}', 'wh.st.tdeeM': 'ваша дневная норма {t}',
+      'wh.st.target': 'норма на сегодня {m}', 'wh.st.room': 'есть запас до {n}', 'wh.st.over': 'выше нормы на {n}', 'wh.st.kcal': 'потрачено {k} ккал', 'wh.st.tdee': 'примерная дневная норма {t}',
       'wh.zones': 'Пульсовые зоны', 'wh.z.0': 'покой', 'wh.z.1': 'лёгкая', 'wh.z.2': 'средняя', 'wh.z.3': 'высокая', 'wh.z.4': 'тяжёлая', 'wh.z.5': 'максимум',
       'wh.wo.today': 'Тренировки сегодня', 'wh.wo.none': 'WHOOP не записал тренировок сегодня', 'wh.wo.min': '{n} мин',
       'wh.disconnect': 'Отключить', 'wh.connect': 'Подключить WHOOP', 'wh.intro': 'Восстановление, сон, нагрузка и тренировки с часов приходят сюда сами — каждую минуту.',
@@ -456,65 +456,20 @@
     return vs.length >= 3 ? D.avg(vs) : null;
   };
   /** Mifflin–St Jeor BMR × activity, used only when WHOOP has no calorie figure. */
-  /* ------------------------------------------------------------------ */
-  /* Energiya — ilovadagi yagona manba (Ovqat me'yori ham shu yerdan).   */
-  /*                                                                     */
-  /* O'lchangan sarf taxmindan ustun turadi. WHOOP har kuni to'liq       */
-  /* siklning kaloriyasini beradi; so'nggi 28 kunda kamida 10 kun        */
-  /* to'plansa TDEE o'sha kunlarning qirqilgan o'rtachasi bo'ladi — eng  */
-  /* past va eng yuqori 10 % tashlanadi, kasal kun yoki marafon          */
-  /* o'rtachani buzmasin. Bugun kirmaydi: sikl tugamagan, kaloriyasi     */
-  /* to'liq emas va o'rtachani pastga tortadi.                           */
-  /*                                                                     */
-  /* Yetmasa — Mifflin-St Jeor x D.activityFactor, avvalgidek. Farqi     */
-  /* shuki, bo'y yoki yosh bo'lmasa baho endi butunlay o'chib qolmaydi:  */
-  /* 170 sm / 30 yosh o'rniga qo'yiladi va natija `approx: true` bilan   */
-  /* belgilanadi. Ovqat bo'limi me'yorsiz qolgandan ko'ra taxminiy       */
-  /* me'yor bergani yaxshi, faqat taxminligi aytilsin.                   */
-  /* ------------------------------------------------------------------ */
-  const TDEE_WINDOW = 28;     // necha kunlik oynaga qaraymiz
-  const TDEE_MIN_DAYS = 10;   // o'lchangan qiymatga o'tish uchun eng kam kun
-  const TDEE_FLOOR = 800;     // bundan past sikl — taqilmagan kun, hisobga olinmaydi
-
-  function trimmedMean(vs, cut) {
-    const a = vs.slice().sort((x, y) => x - y);
-    const k = Math.floor(a.length * (cut || 0.1));
-    const core = a.length - 2 * k >= 3 ? a.slice(k, a.length - k) : a;
-    return D.avg(core);
-  }
-  /** Vazn: profil -> WHOOP tanasi -> so'nggi 60 kun ichidagi oxirgi o'lchov. */
-  function bodyKg() {
+  function tdeeEstimate() {
     const p = D.S.profile || {};
-    if (num(p.weightKg) !== null) return +p.weightKg;
-    const b = W().body || {};
-    if (num(b.weightKg) !== null) return +b.weightKg;
-    for (const k of D.lastDays(60).reverse()) { const h = (D.S.health || {})[k]; if (h && num(h.weight) !== null) return +h.weight; }
-    return null;
+    const kg = num(p.weightKg) ?? num((W().body || {}).weightKg);
+    const cm = num(p.heightCm) ?? num((W().body || {}).heightCm);
+    // ARCHITECTURE.md: yosh uchun yagona qoida — D.profileAge(). Ilgari bu yer
+    // num(p.age) ni oqirdi; onboarding esa birthYear yozadi va age null bolib
+    // qoladi, ya'ni quyidagi null tekshiruvi butun zaxira bahoni ochirib qoyardi.
+    const age = D.profileAge();
+    if (kg === null || cm === null || age === null) return null;
+    const bmr = 10 * kg + 6.25 * cm - 5 * age + (p.sex === 'f' ? -161 : 5);
+    const f = D.activityFactor(p.activity);
+    return Math.round(bmr * f);
   }
-  function bodyCm() {
-    const p = D.S.profile || {};
-    if (num(p.heightCm) !== null) return +p.heightCm;
-    const b = W().body || {};
-    return num(b.heightCm) !== null ? +b.heightCm : null;
-  }
-  /** {tdee, bmr, source:'measured'|'estimated', days, kg, cm, age, approx} | null */
-  D.whoop.energy = () => {
-    const p = D.S.profile || {};
-    const kg = bodyKg(), cm = bodyCm(), age = D.profileAge();
-    const bmr = kg === null ? null : Math.round(10 * kg + 6.25 * (cm || 170) - 5 * (age || 30) + (p.sex === 'f' ? -161 : 5));
-    const days = W().days || {};
-    const vals = [];
-    for (const k of D.lastDays(TDEE_WINDOW, D.addDays(D.today(), -1))) {
-      const v = num((days[k] || {}).kcal);
-      if (v !== null && v >= TDEE_FLOOR) vals.push(v);
-    }
-    if (vals.length >= TDEE_MIN_DAYS) {
-      return { tdee: Math.round(trimmedMean(vals)), bmr, source: 'measured', days: vals.length, kg, cm, age, approx: false };
-    }
-    if (kg === null) return null;
-    return { tdee: Math.round(bmr * D.activityFactor(p.activity)), bmr, source: 'estimated', days: vals.length, kg, cm, age, approx: !cm || age === null };
-  };
-  D.whoop.tdee = () => { const e = D.whoop.energy(); return e ? e.tdee : null; };
+  D.whoop.tdee = tdeeEstimate;
 
   D.whoop.dayInsight = (key) => {
     key = key || D.today();
@@ -541,10 +496,9 @@
         o.load = o.strainGap > 3 ? 'over' : o.strainGap < -4 ? 'under' : 'ok';
       }
     }
-    // energiya: kunning sarfi o'z me'yoriga nisbatan. `measured` manbada
-    // me'yor aynan shu odamning 28 kunlik o'rtacha sarfi, taxmin emas.
-    const en = D.whoop.energy();
-    if (o.kcal !== null && en && en.tdee) { o.tdee = en.tdee; o.tdeeSource = en.source; o.kcalDelta = o.kcal - en.tdee; }
+    // energy: WHOOP burn vs an estimated maintenance
+    const tdee = tdeeEstimate();
+    if (o.kcal !== null) { o.tdee = tdee; if (tdee) o.kcalDelta = o.kcal - tdee; }
     return o;
   };
 
@@ -823,14 +777,13 @@
     const target = i.strainTarget || null;
     const load = strain != null && target ? (strain - target > 3 ? 'over' : strain - target < -4 ? 'under' : 'ok') : '';
     const gColor = load === 'over' ? 'var(--danger-text)' : load === 'ok' ? 'var(--success)' : 'var(--sec, var(--success))';
-    const en = D.whoop.energy();
-    const tdee = en ? en.tdee : null, tdeeKey = en && en.source === 'measured' ? 'wh.st.tdeeM' : 'wh.st.tdee';
+    const tdee = D.whoop.tdee();
     const top = strain == null ? `<div class="card"><div class="empty">${esc(t('wh.st.none'))}</div></div>` : `<div class="card wh-st">
       <div class="wh-sl-top"><div><div class="wh-sl-big num">${D.fmtNum(strain, 1)}</div><div class="small muted">${esc(t('wh.st.today'))}${live ? ` · <span class="wh-live-tag">${esc(t('wh.live'))}</span>` : ''}</div></div>
         ${live && live.since ? `<div class="wh-sl-when num">${esc(t('wh.sinceStart', { t: hm(live.since) }))}</div>` : ''}</div>
       <div class="mt-s">${gauge(strain, target || 21, 21, gColor)}</div>
       <div class="wh-sl-meta">${target ? `<span>${esc(t('wh.st.target', { m: D.fmtNum(target, 1) }))}</span>` : ''}${target && load === 'under' ? `<span class="good">${esc(t('wh.st.room', { n: D.fmtNum(target, 1) }))}</span>` : ''}${target && load === 'over' ? `<span class="bad">${esc(t('wh.st.over', { n: D.fmtNum(strain - target, 1) }))}</span>` : ''}</div>
-      <div class="wh-sl-meta">${kcal != null ? `<span>${esc(t('wh.st.kcal', { k: D.fmtNum(kcal) }))}</span>` : ''}${tdee ? `<span>${esc(t(tdeeKey, { t: D.fmtNum(tdee) }))}</span>` : ''}${(live || {}).hrAvg || i.hrAvg ? `<span>${esc(t('wh.hr'))} <b class="num">${(live || {}).hrAvg || i.hrAvg}</b>${(live || {}).hrMax || i.hrMax ? `, ${esc(t('wh.hrMaxShort'))} <b class="num">${(live || {}).hrMax || i.hrMax}</b>` : ''}</span>` : ''}</div>
+      <div class="wh-sl-meta">${kcal != null ? `<span>${esc(t('wh.st.kcal', { k: D.fmtNum(kcal) }))}</span>` : ''}${tdee ? `<span>${esc(t('wh.st.tdee', { t: D.fmtNum(tdee) }))}</span>` : ''}${(live || {}).hrAvg || i.hrAvg ? `<span>${esc(t('wh.hr'))} <b class="num">${(live || {}).hrAvg || i.hrAvg}</b>${(live || {}).hrMax || i.hrMax ? `, ${esc(t('wh.hrMaxShort'))} <b class="num">${(live || {}).hrMax || i.hrMax}</b>` : ''}</span>` : ''}</div>
     </div>`;
     const wos = `<div class="card"><div class="card-head"><div class="title">${D.ic('dumbbell', 16)} ${esc(t('wh.wo.today'))}</div></div>${D.whoop.workoutRows(key)}</div>`;
     // 14 days of strain, each bar coloured by that day's recovery

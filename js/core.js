@@ -1267,29 +1267,20 @@
         <div class="arc-val"><div class="arc-num num">${label !== '' ? label : Math.round(p) + '%'}</div>${sub ? `<div class="arc-sub">${sub}</div>` : ''}</div>
         ${cap ? `<div class="arc-cap">${cap}</div>` : ''}</div>`;
     },
-    /* Ustunlar CSS bilan chiziladi, SVG bilan emas.
-       SVG varianti viewBox="0 0 280 H" + preserveAspectRatio="none" edi:
-       karta eni 280 px emas, telefonda ~340, desktopda ~800 px — ya'ni
-       rasm eniga cho'ziladi. Chiziqni `vector-effect` qutqaradi, lekin
-       rx ni hech narsa qutqarmaydi: rx=5 desktopda gorizontal ~14 px,
-       vertikal 5 px bo'lib chiqardi va ustun boshi yassilanib ketardi.
-       CSS da radius haqiqiy piksel va juda tor ustunda brauzerning o'zi
-       uni mutanosib kichraytiradi. Ustun eni 0,68 ustun kengligi —
-       SVG variantidagi nisbat saqlandi. */
     bars({ values = [], labels = [], color = 'var(--success)', height = 70, target = null, max = null, colors = null, miss = null }) {
-      const vs = values.map((v) => +v || 0), n = vs.length || 1;
-      const mx = max || Math.max(1, ...vs, target || 0);
-      const pct = (v) => (v / mx) * 96;   // tepada 4 % nafas qoladi
-      const fmt = (v) => D.fmtNum(v, Number.isInteger(v) ? 0 : 1);
-      const cols = vs.map((v, i) => {
+      const n = values.length || 1, W = 280, H = height, pad = 4, colW = (W - 2 * pad) / n, bw = colW * 0.68;
+      const mx = max || Math.max(1, ...values.map((v) => +v || 0), target || 0);
+      let s = `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:${H}px">`;
+      if (target) { const y = H - pad - (target / mx) * (H - 2 * pad); s += `<line x1="0" x2="${W}" y1="${y}" y2="${y}" class="spark-target"/>`; }
+      values.forEach((v, i) => {
+        const h = Math.max(2, ((+v || 0) / mx) * (H - 2 * pad));
+        const x = pad + i * colW + (colW - bw) / 2;
         const c = colors ? colors[i] : miss && miss[i] ? 'var(--danger)' : color;
-        const lab = labels[i] ? D.esc(labels[i]) + ': ' : '';
-        return `<i style="height:${Math.max(2, pct(v)).toFixed(2)}%;background:${c}${v ? '' : ';opacity:.25'}" title="${lab}${fmt(v)}"></i>`;
-      }).join('');
-      const tgt = target ? `<i class="barc-target" style="bottom:${D.clamp(pct(target), 0, 100).toFixed(2)}%"></i>` : '';
-      return `<div class="barc" style="height:${height}px" role="img" aria-label="${D.esc(labels.map((l, i) => l + ' ' + fmt(vs[i])).join(', '))}">
-        ${tgt}<div class="barc-cols" style="column-gap:${(32 / n).toFixed(2)}%">${cols}</div></div>`
-        + (labels.length ? `<div class="spark-labels">${labels.map((l) => `<span>${D.esc(l)}</span>`).join('')}</div>` : '');
+        s += `<rect x="${x.toFixed(1)}" y="${(H - pad - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" rx="${Math.min(bw / 2, 5).toFixed(1)}" fill="${c}" opacity="${v ? 1 : 0.25}"><title>${D.esc(labels[i] || '')}: ${v}</title></rect>`;
+      });
+      s += '</svg>';
+      if (labels.length) s += `<div class="spark-labels">${labels.map((l) => `<span>${D.esc(l)}</span>`).join('')}</div>`;
+      return s;
     },
     spark({ values = [], color = 'var(--success)', height = 60, fill = true, min = null, max = null, dots = false }) {
       const n = values.length;
@@ -1301,17 +1292,12 @@
       const pts = vs.map((v, i) => [pad + (i / (n - 1)) * (W - 2 * pad), H - pad - ((v - lo) / rng) * (H - 2 * pad)]);
       const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
       const gid = 'g' + Math.random().toString(36).slice(2, 7);
-      const svg = `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:${H}px;color:${color}">
+      return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="height:${H}px;color:${color}">
         <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".45"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs>
         ${fill ? `<path d="${d} L${pts[n - 1][0].toFixed(1)} ${H} L${pts[0][0].toFixed(1)} ${H} Z" fill="url(#${gid})"/>` : ''}
         <path d="${d}" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+        ${dots ? pts.map((p) => `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="2.5" fill="currentColor"/>`).join('') : ''}
       </svg>`;
-      if (!dots) return svg;
-      /* Nuqtalar SVG ichida bo'lsa preserveAspectRatio="none" ularni ham
-         cho'zadi — doira o'rniga ellips chiqadi (chiziqni non-scaling-stroke
-         qutqaradi, doirani esa hech narsa). Shuning uchun ular SVG ustiga
-         qo'yilgan HTML: har qanday enda dumaloq qoladi. */
-      return `<div class="sparkw" style="color:${color}">${svg}<div class="spark-dots">${pts.map((p) => `<i style="left:${((p[0] / W) * 100).toFixed(2)}%;top:${((p[1] / H) * 100).toFixed(2)}%"></i>`).join('')}</div></div>`;
     },
     heat({ days = [], valueFn, title }) {
       // valueFn(key) → 0..4 level (or null for future)

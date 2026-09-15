@@ -100,8 +100,7 @@ D.remove(arr, id, {label})  // splice + undo toast
 D.undo.push({label, undo:fn})
 D.ic(name, size?)           // icon svg string (see icons list)
 D.chart.ring({pct, size, stroke, color, label, sub})       // svg string
-D.chart.bars({values, labels, color, height, target})   // CSS ustunlar (.barc) — SVG emas:
-                           //   preserveAspectRatio="none" rx burchaklarni eniga cho'zib yuborardi
+D.chart.bars({values, labels, color, height, target})
 D.chart.spark({values, color, height, fill})
 D.chart.heat({days, valueFn, cols})                        // heatmap
 D.chart.donut({parts:[{v,color,label}], size})
@@ -154,14 +153,6 @@ D.whoop.readiness()      // {pct, zone, sleepH, strain, label} for the Today str
 D.whoop.fillSleep()      // writes health[date].sleep (archive/Tarix read it; nothing in the UI edits it any more)
 D.whoop.workoutsOn(key)  D.whoop.workoutRows(key, {empty:false})   // Today's WHOOP workouts card + Health › strain
 D.whoop.bioAge()         // {est, chrono, delta, inputs:[{k,v,effect}]} | null — transparent 30-day estimate
-D.whoop.energy()         // {tdee, bmr, source:'measured'|'estimated', days, kg, cm, age, approx} | null
-                         //   Ilovadagi YAGONA energiya manbai — Ovqat me'yori ham, Sog'liq sahifasi ham shundan.
-                         //   `measured`: so'nggi 28 kunda >= 10 ta WHOOP sikli (>= 800 kkal) bo'lsa, ularning
-                         //   qirqilgan o'rtachasi — past/yuqori 10 % tashlanadi. Bugun kirmaydi: sikl tugamagan.
-                         //   `estimated`: Mifflin-St Jeor × D.activityFactor. Bo'y/yosh bo'lmasa 170 sm / 30 yosh
-                         //   o'rniga qo'yiladi va `approx: true` bo'ladi — me'yor butunlay yo'qolgandan yaxshi.
-                         //   Vazn: profil → WHOOP body → so'nggi 60 kun health.weight. Yosh — D.profileAge().
-D.whoop.tdee()           // energy().tdee | null
 
 // Соғлиқ sahifalari — health.js faqat shularni yig'adi:
 D.whoop.hero(key)        // recovery ring + verdict + strain gauge + plain-language notes
@@ -187,13 +178,7 @@ Masofa metrda, puls zonalari aniq davomiylikda.
 D.food.tile(dayKey)        // Today tile HTML ('' when nothing to show) → D.go('food')
 D.food.dayTotals(dayKey)   // {kcal,p,c,f} | null
 D.food.targets()           // {kcal,p,c,f,auto}
-D.food.recalcTargets()     // Energiya D.whoop.energy() dan. Maqsad — TDEE ning ulushi: lose −20 %
-                           //   (−700…−250 oralig'ida), gain +12 % (+200…+500); me'yor BMR dan past
-                           //   tushmaydi. Oqsil lose 2,0 / keep 1,6 / gain 1,8 g/kg (qoida bitta
-                           //   joyda — food.js dagi GOAL jadvali, fillTargets ham shuni o'qiydi),
-                           //   yog' 25 %, uglevod qolgani. `D.food.targets()` manbani ham qaytaradi:
-                           //   `source` ('measured'|'estimated'), `days`, `tdee`, `bmr` — Созлаш →
-                           //   Овқат shuni yozib ko'rsatadi.
+D.food.recalcTargets()     // Mifflin-St Jeor × activity ± goal (−400/0/+300), protein 1.6 g/kg (2.0 gain), fat 25 %, carbs rest
 ```
 Settings → Ovqat edits `S.food.targets`; a manual value sets `auto=false`, the «Avto» switch recalculates. Profile edits
 (height, weight, birth year, sex, activity, goal) call `recalcTargets()` while `auto` is on.

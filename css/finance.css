@@ -8,16 +8,34 @@
 .fin-nav-today { border: 0; background: transparent; color: var(--success-text); font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; padding: 4px 10px; min-height: 32px; border-radius: 8px; }
 @media (hover: hover) { .fin-nav-today:hover { background: var(--hover); } }
 
+/* ---- qahramon: OYNING OQIMI ----
+   Kunlik chiqim chizig'i kartaning ichidagi qo'shimchadan sahifaning bosh
+   elementiga aylandi: balandligi ikki baravar, chetdan chetgacha. Bitta
+   raqam «oy qanday ketyapti» ni ayta olmaydi, shakl esa aytadi. */
+.fin-hero { padding: 0; overflow: hidden; }
+.fin-flow { padding: 14px 15px 6px; }
+.fin-flow-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
+.fin-flow-max { font-size: 11px; color: var(--text3); white-space: nowrap; }
+.fin-flow-max b { color: var(--text2); font-weight: 700; }
+.fin-flow-c { margin: 0 -5px; }
+.fin-hero-b { padding: 4px 15px 15px; }
+
+/* Ikkita raqam qutisiz, bitta qatorda: ular qahramon emas, izoh. */
+.fin-sum { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 8px; font-size: 12px; color: var(--text3); }
+.fin-sum b { font-weight: 700; font-size: 14px; letter-spacing: -.01em; margin-right: 4px; }
+.fin-sum .good { color: var(--success-text); }
+.fin-sum .bad { color: var(--danger-text); }
+
+/* Kategoriya nomi kesilmasin: 92px da «TRANSPO…» bo'lib qolardi. */
+.fin-cats .hbar { margin: 9px 0; }
+.fin-cats .hbar-label { width: 122px; font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--text2); }
+@media (max-width: 380px){ .fin-cats .hbar-label { width: 100px; } }
+
 /* ---- hero: the one number ---- */
 .fin-hero .kpi-num { font-size: clamp(26px, 9vw, 44px); }
 .fin-hero .kpi-num.good { color: var(--success-text); text-shadow: 0 0 24px var(--success-glow); }
 .fin-hero .kpi-num.bad { color: var(--danger-text); }
 .fin-hero .kpi-num.warn { color: var(--warning-text); }
-.fin-hero .stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
-.fin-hero .stat { padding: 11px 9px; }
-/* three amounts side by side on a phone: one line each, never a broken word */
-.fin-hero .stat-num { font-size: clamp(12px, 3.6vw, 17px); white-space: nowrap; overflow-wrap: normal; }
-.fin-hero .stat-label { font-size: 11px; letter-spacing: .05em; }
 .fin-hero .card-head { align-items: center; gap: 8px; flex-wrap: wrap; }
 .fin-subnote { margin: -4px 2px 8px; font-size: 12px; color: var(--text3); }
 .fin-notes { display: flex; flex-direction: column; gap: 3px; margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--line); font-size: 12px; color: var(--text3); }
@@ -38,10 +56,28 @@
 .fin-chip span { font-size: 15px; line-height: 1; }
 @media (hover: hover) { .fin-chip:hover { background: var(--hover); } }
 .fin-chip.on { color: var(--text); border-color: color-mix(in srgb, var(--accent) 55%, transparent); background: color-mix(in srgb, var(--accent) 14%, transparent); }
+/* Yig'iq forma: yopiq holda faqat summa va tugma ko'rinadi. */
+.fin-add-top { display: flex; align-items: center; gap: 8px; }
+.fin-add-top .fin-amount { flex: 1; margin-bottom: 0; text-align: left; padding-left: 14px; }
+/* Bu tugmada ataylab `btn icon` klasslari YO'Q: ular butun ilova bo'ylab
+   qoplangan (shaffof fon, dumaloq shakl, yorug' mavzuda --text rangi) va
+   ularning ustidan yozish uchun har safar aniqlik oshirish kerak bo'lardi.
+   O'z klassi — o'z uslubi: fon matn rangida, belgi esa fon rangida, ya'ni
+   ikkala mavzuda ham o'zi teskari bo'ladi. */
+.fin-add-go { width: 56px; height: 56px; flex: none; display: inline-flex; align-items: center; justify-content: center;
+  border: 0; border-radius: 14px; padding: 0; cursor: pointer;
+  background: var(--text); color: var(--bg); transition: background .15s; }
+.fin-add-go .ic { color: inherit; }
+@media (hover: hover) { .fin-add-go:hover { background: var(--text2); } }
+.fin-add-less { width: 44px; height: 56px; flex: none; }
+.fin-add:not(.open) .fin-add-x, .fin-add:not(.open) .fin-add-less { display: none; }
+.fin-add.open .fin-add-x { margin-top: 12px; }
+.fin-add.open #finTypeSeg { width: 100%; margin-bottom: 10px; }
+@media (max-width: 380px){ .fin-add-go { width: 52px; height: 52px; } .fin-add-less { height: 52px; } }
+
 .fin-add-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .fin-add-row .inp, .fin-add-row .sel { min-height: 44px; }
 .fin-add-row .sel { grid-column: 1 / -1; }
-.fin-add-btn { width: 100%; margin-top: 10px; min-height: 48px; }
 @media (min-width: 560px){ .fin-add-row { grid-template-columns: 1.4fr 1fr 1fr; } .fin-add-row .sel { grid-column: auto; } }
 
 .fin-search { position: relative; margin-bottom: 10px; }

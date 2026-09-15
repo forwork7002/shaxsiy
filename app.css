@@ -428,19 +428,6 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 
 /* ---------- charts ---------- */
 .spark { width: 100%; display: block; }
-/* Ustunli grafik — CSS bilan, SVG emas. SVG varianti preserveAspectRatio="none"
-   bilan eniga cho'zilardi: rx=5 burchak desktopda gorizontal ~14 px, vertikal
-   5 px bo'lib chiqardi. Bu yerda radius haqiqiy piksel va tor ustunda
-   brauzerning o'zi uni mutanosib kichraytiradi. */
-.barc { position: relative; width: 100%; }
-.barc-cols { position: absolute; inset: 0; display: flex; align-items: flex-end; }
-.barc-cols i { flex: 1 1 0; min-width: 0; display: block; border-radius: 5px 5px 2px 2px;
-  transition: height .45s var(--ease-out), background-color .3s var(--ease-out); }
-.barc-target { position: absolute; left: 0; right: 0; height: 0; border-top: 1px dashed var(--line3); pointer-events: none; z-index: 1; }
-/* Chiziqli grafik nuqtalari SVG tashqarisida: cho'zilmaydi, dumaloq qoladi. */
-.sparkw { position: relative; width: 100%; }
-.spark-dots { position: absolute; inset: 0; pointer-events: none; }
-.spark-dots i { position: absolute; width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: currentColor; }
 .spark-target { stroke: var(--line3); stroke-width: 1; stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
 .spark-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); font-family: var(--num); margin-top: 4px; }
 .spark-labels span { flex: 1; text-align: center; white-space: nowrap; }
