@@ -15,6 +15,13 @@
   sahifaning chizilishi va takrorlanuvchi vazifa bajarilganda nima bo'lishi
   (124 ta tekshiruv)
 
+- `test_energy.js` — energiya va kunlik me'yorlar: TDEE o'lchangan WHOOP
+  sarfidan kelishi (yetmasa formulaga qaytishi), bugungi to'lmagan siklning
+  chetlanishi, taqilmagan kun va marafonning o'rtachani buzmasligi, maqsad
+  ulushi, oqsil qoidasi, BMR poli va suv me'yori (44 ta tekshiruv).
+  Haqiqiy `core.js` + `whoop.js` + `food.js` yuklanadi: bu uch modul
+  chegarasida ilgari faollik jadvali ikkiga bo'linib ketgan edi.
+
 - `visual.js` — **ko'rinish**: kesilish, WCAG kontrasti, 11px quyi chegarasi.
   320/360/412px x qorong'i/yorug' x oddiy/`prefers-contrast: more` = 12 holat.
   Boshqalardan farqi: **Chrome talab qiladi**, ya'ni `node tests/*.js` bilan

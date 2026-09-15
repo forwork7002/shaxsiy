@@ -21,7 +21,7 @@
       'set.birthYear': "Tug'ilgan yil", 'set.ageN': '{n} yosh', 'set.goal': 'Maqsad', 'set.goal.lose': 'Vazn tashlash', 'set.goal.keep': 'Saqlash', 'set.goal.gain': 'Vazn olish',
       'set.whoopAgeTitle': 'WHOOP yoshi', 'set.whoopAge': 'WHOOP Age', 'set.paceOfAging': 'Pace of Aging', 'set.whoopAgeHint': 'WHOOP ilovasidan ko‘chiring (Healthspan sahifasi)',
       'set.whoopAgeAt': '{d} holatiga', 'set.onboard': "Savol-javob bilan to'ldirish",
-      'set.fd.title': 'Kunlik maqsadlar', 'set.fd.auto': 'Avto', 'set.fd.autoHint': "Bo'y, vazn, yosh va maqsadingizdan hisoblanadi.",
+      'set.fd.title': 'Kunlik maqsadlar', 'set.fd.auto': 'Avto', 'set.fd.autoHint': "WHOOP o@lchagan sarf bo@lsa o@shandan, bo@lmasa bo@y, vazn, yosh va faollikdan. Maqsad me@yorning ulushi.", 'set.fd.srcMeasured': "WHOOP o'lchagan {n} kunlik haqiqiy sarfdan — {t} kkal/kun", 'set.fd.srcFormula': "Formuladan — {t} kkal/kun; WHOOP 10 kun ma'lumot bersa o'lchangan sarfga o'tadi",
       'set.fd.manualHint': "Qo'lda kiritilgan — «Avto» yoqilsa profil bo'yicha qayta hisoblanadi",
       'set.fd.kcal': 'Kaloriya', 'set.fd.p': 'Oqsil', 'set.fd.c': 'Uglevod', 'set.fd.f': "Yog'", 'set.fd.recalc': 'Qayta hisoblash', 'set.fd.goFood': "Ovqat bo'limiga o'tish",
       'set.fd.needProfile': "Avto hisob uchun profilda bo'y, vazn va tug'ilgan yil kerak",
@@ -73,7 +73,7 @@
       'set.birthYear': 'Туғилган йил', 'set.ageN': '{n} ёш', 'set.goal': 'Мақсад', 'set.goal.lose': 'Вазн ташлаш', 'set.goal.keep': 'Сақлаш', 'set.goal.gain': 'Вазн олиш',
       'set.whoopAgeTitle': 'WHOOP ёши', 'set.whoopAge': 'WHOOP Age', 'set.paceOfAging': 'Pace of Aging', 'set.whoopAgeHint': 'WHOOP иловасидан кўчиринг (Healthspan саҳифаси)',
       'set.whoopAgeAt': '{d} ҳолатига', 'set.onboard': 'Савол-жавоб билан тўлдириш',
-      'set.fd.title': 'Кунлик мақсадлар', 'set.fd.auto': 'Авто', 'set.fd.autoHint': 'Бўй, вазн, ёш ва мақсадингиздан ҳисобланади.',
+      'set.fd.title': 'Кунлик мақсадлар', 'set.fd.auto': 'Авто', 'set.fd.autoHint': "WHOOP ўлчаган сарф бўлса ўшандан, бўлмаса бўй, вазн, ёш ва фаолликдан. Мақсад меъёрнинг улуши.", 'set.fd.srcMeasured': "WHOOP ўлчаган {n} кунлик ҳақиқий сарфдан — {t} ккал/кун", 'set.fd.srcFormula': "Формуладан — {t} ккал/кун; WHOOP 10 кун маълумот берса ўлчанган сарфга ўтади",
       'set.fd.manualHint': 'Қўлда киритилган — «Авто» ёқилса профил бўйича қайта ҳисобланади',
       'set.fd.kcal': 'Калория', 'set.fd.p': 'Оқсил', 'set.fd.c': 'Углевод', 'set.fd.f': 'Ёғ', 'set.fd.recalc': 'Қайта ҳисоблаш', 'set.fd.goFood': 'Овқат бўлимига ўтиш',
       'set.fd.needProfile': 'Авто ҳисоб учун профилда бўй, вазн ва туғилган йил керак',
@@ -126,7 +126,7 @@
       'set.birthYear': 'Год рождения', 'set.ageN': '{n} лет', 'set.goal': 'Цель', 'set.goal.lose': 'Похудеть', 'set.goal.keep': 'Сохранить', 'set.goal.gain': 'Набрать',
       'set.whoopAgeTitle': 'Возраст WHOOP', 'set.whoopAge': 'WHOOP Age', 'set.paceOfAging': 'Pace of Aging', 'set.whoopAgeHint': 'Скопируйте из приложения WHOOP (страница Healthspan)',
       'set.whoopAgeAt': 'на {d}', 'set.onboard': 'Заполнить пошагово',
-      'set.fd.title': 'Дневные цели', 'set.fd.auto': 'Авто', 'set.fd.autoHint': 'Считается по росту, весу, возрасту и цели.',
+      'set.fd.title': 'Дневные цели', 'set.fd.auto': 'Авто', 'set.fd.autoHint': "Если есть измеренный расход WHOOP — от него, иначе по росту, весу, возрасту и активности. Цель — доля от нормы.", 'set.fd.srcMeasured': "По измеренному расходу WHOOP за {n} дн. — {t} ккал/день", 'set.fd.srcFormula': "По формуле — {t} ккал/день; после 10 дней данных WHOOP перейдёт на измеренный расход",
       'set.fd.manualHint': 'Введено вручную — при включении «Авто» пересчитается по профилю',
       'set.fd.kcal': 'Калории', 'set.fd.p': 'Белки', 'set.fd.c': 'Углеводы', 'set.fd.f': 'Жиры', 'set.fd.recalc': 'Пересчитать', 'set.fd.goFood': 'Перейти в Питание',
       'set.fd.needProfile': 'Для авторасчёта нужны рост, вес и год рождения в профиле',
@@ -603,6 +603,7 @@
         <button type="button" class="toggle ${auto ? 'on' : ''}" data-act="setFoodAuto" role="switch" aria-checked="${auto}" aria-label="${esc(t('set.fd.auto'))}"></button></div>
       <div class="help mb-s">${esc(auto ? t('set.fd.autoHint') : t('set.fd.manualHint'))}</div>
       ${auto && !canAuto ? `<div class="set-ok mb-s"><span class="zone z-warn"></span>${esc(t('set.fd.needProfile'))}</div>` : ''}
+      ${auto && tg.source && tg.tdee ? `<div class="set-ok mb-s"><span class="zone ${tg.source === 'measured' ? 'z-good' : 'z-warn'}"></span>${esc(tg.source === 'measured' ? t('set.fd.srcMeasured', { n: tg.days, t: D.fmtNum(tg.tdee) }) : t('set.fd.srcFormula', { t: D.fmtNum(tg.tdee) }))}</div>` : ''}
       <div class="set-grid2">
         ${FD_KEYS.map(([k, unit, min, max, step]) => `<div class="field"><label class="field-label">${t('set.fd.' + k)} <span class="set-unit">${unit}</span></label>${numInp(tg[k] == null ? null : Math.round(tg[k]), 'setFoodTarget', `data-k="${k}" min="${min}" max="${max}" step="${step}" placeholder="—" ${auto ? 'disabled' : ''}`)}</div>`).join('')}
       </div>
