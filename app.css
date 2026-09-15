@@ -487,6 +487,10 @@ i.top-av { background: linear-gradient(150deg, var(--accent), color-mix(in srgb,
 .nav-badge { position: absolute; top: -3px; right: 6px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 99px;
   background: var(--accent); color: var(--ink-on-light); font-size: 11px; font-weight: 600; line-height: 16px; text-align: center;
   box-shadow: 0 0 0 2px var(--nav); }
+/* Foydalanuvchi o'zi tanlagan emoji (odat yoki moliya kategoriyasi).
+   Sukut belgilar chiziqli ikonka — bu faqat odamning o'z tanlovi uchun.
+   core.js dagi D.habitMark/D.catMark chiqaradi, ya'ni modulga bog'liq emas. */
+.mark-em { font-family: var(--emoji); font-size: 14px; line-height: 1; }
 .nav-em { display: block; font-family: var(--emoji); font-size: 21px; line-height: 1.05;
   opacity: .55; transition: opacity .18s, transform .12s var(--ease-spring); }
 .nav-lab { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

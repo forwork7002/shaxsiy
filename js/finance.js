@@ -164,7 +164,7 @@
   const curMonth = () => D.ui.filters.finMonth || D.monthKey();
   const setMonth = (mk) => { D.ui.filters.finMonth = mk; D.saveUi(); };
 
-  const cat = (id) => F().cats.find((c) => c.id === id) || { id, name: id || '—', icon: '📦' };
+  const cat = (id) => F().cats.find((c) => c.id === id) || { id, name: id || '—', icon: 'layers' };
   const catKey = () => (draftType === 'in' ? 'finCatIn' : 'finCat');
   /* categories the user actually reaches for come first — ordering is per type,
      so «Kirim» opens on Maosh instead of Oziq-ovqat */
@@ -180,7 +180,9 @@
     const o = catOrder(draftType);
     return (o[0] || F().cats[0] || {}).id || 'boshqa';
   }
-  const catLabel = (id) => { const c = cat(id); return (c.icon ? c.icon + ' ' : '') + c.name; };
+  /* Faqat MATN. Ilgari bu yerga emoji qo'shilardi; endi c.icon ikonka nomi
+     ('apple'), ya'ni qo'shilsa ekranda «apple Oziq-ovqat» bo'lib chiqardi. */
+  const catLabel = (id) => cat(id).name;
   const acc = (id) => (id ? F().accounts.find((a) => a.id === id) : null);
   const effect = (tx) => (tx.type === 'in' ? 1 : -1) * (+tx.amount || 0);
   function applyTx(tx, dir) { // dir +1 apply, -1 revert
@@ -247,7 +249,7 @@
   }
   function ensureSubCat() {
     let c = F().cats.find((x) => x.id === 'obuna');
-    if (!c) { c = { id: 'obuna', name: t('fin.subCat'), icon: '🔁' }; F().cats.push(c); }
+    if (!c) { c = { id: 'obuna', name: t('fin.subCat'), icon: 'refresh' }; F().cats.push(c); }
     return c.id;
   }
   /** what the recurring payments will still take out of the current month.
@@ -324,7 +326,7 @@
     </div>`;
   }
   const accOptions = (sel, none) => `<option value="">${esc(none || t('fin.noAccount'))}</option>` + F().accounts.map((a) => `<option value="${esc(a.id)}" ${a.id === sel ? 'selected' : ''}>${esc(a.name)} · ${esc(money(a.balance))}</option>`).join('');
-  const catOptions = (sel) => F().cats.map((c) => `<option value="${esc(c.id)}" ${c.id === sel ? 'selected' : ''}>${esc((c.icon ? c.icon + ' ' : '') + c.name)}</option>`).join('');
+  const catOptions = (sel) => F().cats.map((c) => `<option value="${esc(c.id)}" ${c.id === sel ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
   const field = (label, inner) => `<div class="field"><label class="field-label">${esc(label)}</label>${inner}</div>`;
 
   /* ------------------------------------------------------------------ */
@@ -374,7 +376,7 @@
     </div>`;
   }
 
-  const chipsHtml = () => { const sel = selCat(); return catOrder(draftType).map((c) => `<button class="fin-chip ${c.id === sel ? 'on' : ''}" data-act="finChip" data-cat="${esc(c.id)}" role="radio" aria-checked="${c.id === sel}"><span>${esc(c.icon || '📦')}</span>${esc(c.name)}</button>`).join(''); };
+  const chipsHtml = () => { const sel = selCat(); return catOrder(draftType).map((c) => `<button class="fin-chip ${c.id === sel ? 'on' : ''}" data-act="finChip" data-cat="${esc(c.id)}" role="radio" aria-checked="${c.id === sel}"><span class="fin-chip-i">${D.catMark(c.icon, 15)}</span>${esc(c.name)}</button>`).join(''); };
   /* keep the chosen chip visible without ever scrolling the page itself */
   function scrollChip() {
     const box = D.$('#finChips'), on = D.$('#finChips .fin-chip.on');
@@ -422,7 +424,7 @@
       if (x.type !== 'in') dayOut += +x.amount || 0;
       const c = cat(x.cat), a = acc(x.accountId);
       rows.push(`<li class="li tap" data-act="finEditTx" data-id="${esc(x.id)}">
-        <span class="fin-ico">${esc(c.icon || '📦')}</span>
+        <span class="fin-ico">${D.catMark(c.icon, 17)}</span>
         <div class="li-body"><div class="li-text">${esc(x.note || c.name)}</div><div class="li-meta">${x.note ? esc(c.name) : ''}${a ? `<span>· ${esc(a.name)}</span>` : ''}</div></div>
         <span class="fin-amt num ${x.type === 'in' ? 'in' : 'out'}">${x.type === 'in' ? '+' : '−'}${esc(money(x.amount))}</span>
         <button class="li-del" data-act="finDelTx" data-id="${esc(x.id)}" aria-label="${esc(t('btn.delete'))}">${D.ic('x', 16)}</button></li>`);

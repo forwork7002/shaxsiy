@@ -185,6 +185,20 @@
     n.tasks.forEach((t) => { if (!t.id) t.id = D.uid('t'); if (!t.priority) t.priority = 2; });
     n.goals.forEach((g) => { if (!g.id) g.id = D.uid('g'); if (!g.priority) g.priority = 2; if (!D.DIRS.includes(g.dir)) g.dir = 'shaxsiy'; });
     if (!n.finance.cats.length) n.finance.cats = defaultCats();
+    /* ESKI EMOJI -> IKONKA NOMI. Kategoriya belgisi foydalanuvchi HOLATIDA
+       saqlanadi, ya'ni defaultCats() ni o'zgartirish faqat yangi odamga
+       tegardi — eskilarda emoji qolib ketardi. Bu yerda ular ko'chiriladi.
+       Faqat AYNAN eski sukut emojisi almashtiriladi: odam Sozlashda o'zi
+       boshqa belgi tanlagan bo'lsa, unga tegilmaydi. Takror ishlasa ham
+       zararsiz, chunki ikkinchi safar mos keladigan emoji topilmaydi.
+       Yozuvlar kategoriyaga ID orqali bog'langan, belgi orqali emas —
+       shuning uchun bu ko'chirish hech qanday tranzaksiyani yo'qotmaydi. */
+    for (const c of n.finance.cats) {
+      const want = CAT_ICON_OLD[c && c.id];
+      if (!want) continue;
+      const cur = String(c.icon == null ? '' : c.icon).replace(/️/g, '').trim();
+      if (cur === want[0]) c.icon = want[1];
+    }
     if (!['lose', 'keep', 'gain'].includes(n.profile.goal)) n.profile.goal = 'keep';
     // ovqat yozuvlari: kun → massiv; har bir taomda id bo'lsin
     for (const k of Object.keys(n.food.logs)) {
@@ -204,11 +218,17 @@
     n.meta.v = D.VERSION;
     return n;
   };
+  /* id -> [eski sukut emoji (VS16 siz), yangi ikonka nomi]. normalize() ishlatadi. */
+  const CAT_ICON_OLD = {
+    oziq: ['🍽', 'apple'], transport: ['🚌', 'bus'], kommunal: ['💡', 'bolt'], kiyim: ['👕', 'shirt'],
+    soglik: ['💊', 'pill'], talim: ['📚', 'book'], sadaqa: ['🤲', 'hands'], restoran: ['☕', 'coffee'],
+    uy: ['🏠', 'home'], boshqa: ['📦', 'layers'], maosh: ['💼', 'wallet'],
+  };
   function defaultCats() {
     return [
-      ['oziq', 'Oziq-ovqat', '🍽️'], ['transport', 'Transport', '🚌'], ['kommunal', 'Kommunal', '💡'], ['kiyim', 'Kiyim', '👕'],
-      ['soglik', "Sog'liq", '💊'], ['talim', "Ta'lim", '📚'], ['sadaqa', 'Hadya/Sadaqa', '🤲'], ['restoran', 'Restoran', '☕'],
-      ['uy', 'Uy/Remont', '🏠'], ['boshqa', 'Boshqa', '📦'], ['maosh', 'Maosh', '💼'],
+      ['oziq', 'Oziq-ovqat', 'apple'], ['transport', 'Transport', 'bus'], ['kommunal', 'Kommunal', 'bolt'], ['kiyim', 'Kiyim', 'shirt'],
+      ['soglik', "Sog'liq", 'pill'], ['talim', "Ta'lim", 'book'], ['sadaqa', 'Hadya/Sadaqa', 'hands'], ['restoran', 'Restoran', 'coffee'],
+      ['uy', 'Uy/Remont', 'home'], ['boshqa', 'Boshqa', 'layers'], ['maosh', 'Maosh', 'wallet'],
     ].map(([id, name, icon]) => ({ id, name, icon }));
   }
   D.defaultCats = defaultCats;
@@ -239,7 +259,7 @@
     n.finance.tx = (o.finance || []).map((f) => {
       let cat = OLD_CAT[f.kategoriya];
       if (!cat && f.kategoriya) {
-        cat = D.uid('c'); n.finance.cats.push({ id: cat, name: f.kategoriya, icon: '📦' });
+        cat = D.uid('c'); n.finance.cats.push({ id: cat, name: f.kategoriya, icon: 'layers' });
       }
       return { id: f.id || D.uid('f'), date: f.sana || D.today(), type: f.tur === 'kirim' ? 'in' : 'out', amount: +f.summa || 0,
         cat: cat || 'boshqa', note: f.izoh || '', accountId: null };
@@ -895,6 +915,35 @@
   D.SPHERE_EMOJI = SPHERE_EMOJI;
   D.habitEmoji = (h) => (h && h.emoji) || SPHERE_EMOJI[h && h.sphere] || SPHERE_EMOJI.boshqa;
 
+  /* SOHANING SUKUT BELGISI — EMOJI EMAS, CHIZIQLI IKONKA.
+     Ilovaning qolgan hamma joyi D.icons dagi bir xil chiziqli to'plamni
+     ishlatadi. Soha belgilari esa emoji edi va ular Vazifa, Kitob hamda
+     Sozlash ekranlarida o'sha ikonkalar YONIDA turardi — rangli multfilm
+     belgisi monoxrom chiziq yonida. Uyg'unlik shu yerda buzilardi.
+     Rang yo'qolmaydi: plitka foni allaqachon soha rangida (.hb-emoji
+     --c), endi ikonkaning o'zi ham o'sha rangda chiziladi.
+     FOYDALANUVCHI TANLAGAN EMOJI SAQLANADI — h.emoji bo'lsa, o'sha
+     chiqadi. O'zgargani faqat SUKUT qiymati. */
+  const SPHERE_ICON = { ruh: 'mosque', aql: 'book', qalb: 'heart', tana: 'dumbbell', boshqa: 'check', aralash: 'sparkles' };
+  D.SPHERE_ICON = SPHERE_ICON;
+  D.sphereIcon = (sp) => SPHERE_ICON[sp] || SPHERE_ICON.boshqa;
+  /** Odat belgisi HTML bo'lib qaytadi: foydalanuvchi emojisi yoki soha ikonkasi. */
+  D.habitMark = (h, px) => {
+    const em = h && h.emoji;
+    if (em) return '<span class="mark-em">' + D.esc(em) + '</span>';
+    return D.ic(SPHERE_ICON[h && h.sphere] || SPHERE_ICON.boshqa, px || 15);
+  };
+
+  /* Moliya kategoriyasining belgisi. Qiymat D.icons dagi nom bo'lsa —
+     chiziqli ikonka; aks holda matn bo'lib chiziladi. Ikkinchisi kerak,
+     chunki eski foydalanuvchilarning holatida emoji saqlanib qolgan va
+     Sozlashda odam o'zi ham istalgan belgi yozishi mumkin. */
+  D.catMark = (icon, px) => {
+    const v = String(icon == null ? '' : icon).trim();
+    if (v && D.icons && D.icons[v]) return D.ic(v, px || 16);
+    return '<span class="mark-em">' + D.esc(v) + '</span>';
+  };
+
   // tick/count mutators shared by Bugun and Vazifa. None of them save or rerender — callers do.
   const targetOf = (h) => (h && h.target && +h.target.n > 0 ? +h.target.n : 0);
   function setLog(k, id, on) {
@@ -1119,6 +1168,9 @@
     dumbbell: '<path d="M6.5 6.5h11M6.5 17.5h11M3 10v4M21 10v4M6 8v8M18 8v8"/><path d="M6 12h12"/>',
     coffee: '<path d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M6 2v2M10 2v2M14 2v2"/>',
     pill: '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
+    /* moliya kategoriyalari uchun qo'shildi — ilgari bu yerda emoji turardi */
+    bus: '<path d="M8 6v6M15 6v6M2 12h19.6"/><path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2s-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/><circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>',
+    shirt: '<path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23Z"/>',
     sparkles: '<path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2Z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/>',
     search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
     menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',

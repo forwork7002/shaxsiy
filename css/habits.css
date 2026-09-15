@@ -58,6 +58,13 @@
 
 .hb-emoji { flex: none; width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; font-size: 14px;
   font-family: var(--emoji); background: color-mix(in srgb, var(--c, var(--accent)) 16%, transparent); }
+/* Plitka ichidagi belgi. Sukut — chiziqli ikonka, soha rangida; foydalanuvchi
+   o'zi emoji tanlagan bo'lsa, o'sha chiqadi va emoji shriftida chiziladi.
+   PLITKA RANGI — SOHA (o'ziga xoslik), KUNLIK NUQTALAR — HOLAT. Ilgari
+   plitkaga ham it.color berilardi va media qatorlari uchun u --warning
+   edi: yorug' temada sariq ikonka sariq fonda 1,59:1 chiqib, ko'rinmay
+   qolardi. O'lchab topildi, ko'z bilan sezilmasdi. */
+.hb-emoji .ic { color: var(--c, var(--accent)); }
 .hb-nm { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .hb-nm-t { font-size: 13px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hb-nm-g { font-size: 11px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

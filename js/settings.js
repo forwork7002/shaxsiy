@@ -397,7 +397,7 @@
     return `<div class="li set-hab ${h.active ? '' : 'off'}">
       <input type="checkbox" class="chk big" ${h.active ? 'checked' : ''} data-change="setHabitActive" data-id="${id}" aria-label="${esc(h.name)}">
       <button type="button" class="li-body set-hab-open" data-act="setHabitEdit" data-id="${id}">
-        <div class="li-text"><span class="set-hab-emoji" aria-hidden="true">${esc(D.habitEmoji(h))}</span>${esc(h.name)}</div>
+        <div class="li-text"><span class="set-hab-emoji" aria-hidden="true" style="--c:var(--${h.sphere || 'boshqa'})">${D.habitMark(h, 14)}</span>${esc(h.name)}</div>
         <div class="li-meta"><span>${esc(schedSummary(h))}</span>${h.active ? '' : `<span class="muted">${esc(t('set.h.inactive'))}</span>`}</div>
       </button>
       <div class="set-hab-acts">
@@ -723,12 +723,13 @@
     <div class="card">
       <div class="card-head"><div class="title">${D.ic('wallet')} ${t('set.f.cats')}</div><span class="pill num">${cats.length}</span></div>
       <div class="input-row mb">
-        <input class="inp set-icon-inp" id="setCatIcon" maxlength="3" placeholder="📦" autocomplete="off" aria-label="${esc(t('set.f.icon'))}">
+        <input class="inp set-icon-inp" id="setCatIcon" maxlength="3" placeholder="—" autocomplete="off" aria-label="${esc(t('set.f.icon'))}">
         <input class="inp" id="setCatName" maxlength="30" placeholder="${esc(t('set.f.namePh'))}" autocomplete="off" data-enter="setCatAdd">
         <button class="btn sq" data-act="setCatAdd" aria-label="${esc(t('btn.add'))}">${D.ic('plus', 18)}</button>
       </div>
       <div class="list">${cats.map((c) => `<div class="li set-cat">
-        <input class="inp set-icon-inp sm" value="${esc(c.icon || '')}" maxlength="3" data-change="setCatIcon" data-id="${esc(c.id)}" aria-label="${esc(t('set.f.icon'))}">
+        <span class="set-cat-ico" aria-hidden="true">${D.catMark(c.icon, 16)}</span>
+        <input class="inp set-icon-inp sm" value="${esc(D.icons[c.icon] ? '' : (c.icon || ''))}" maxlength="3" placeholder="—" data-change="setCatIcon" data-id="${esc(c.id)}" aria-label="${esc(t('set.f.icon'))}">
         <div class="li-body"><div class="li-text set-edit" data-act="setCatName" data-id="${esc(c.id)}">${esc(c.name)}</div>
           ${txCount[c.id] ? `<div class="li-meta"><span class="num">${esc(t('set.f.txCount', { n: txCount[c.id] }))}</span></div>` : ''}</div>
         ${c.id === FALLBACK_CAT ? '' : `<button class="li-del" data-act="setCatDel" data-id="${esc(c.id)}" aria-label="${esc(t('btn.delete'))}">${D.ic('trash', 16)}</button>`}
@@ -741,11 +742,16 @@
     const nameEl = D.$('#setCatName'), iconEl = D.$('#setCatIcon');
     const name = ((nameEl && nameEl.value) || '').trim().slice(0, 30);
     if (!name) { D.toast(t('set.f.needName')); return; }
-    const icon = ((iconEl && iconEl.value) || '').trim().slice(0, 3) || '📦';
+    const icon = ((iconEl && iconEl.value) || '').trim().slice(0, 3) || 'layers';
     D.S.finance.cats.push({ id: D.uid('c'), name, icon });
     D.save(); D.rerender(); D.toast(t('set.f.added'));
   };
-  D.act.setCatIcon = (el) => { const c = findCat(el.dataset.id); if (!c) return; c.icon = el.value.trim().slice(0, 3) || '📦'; D.save(); D.rerender(); };
+  /* Maydon FAQAT o'z belgisi uchun: bo'sh qolsa, kategoriya o'z sukut
+     ikonkasiga qaytadi (chapdagi ko'rinish shuni chizadi). */
+  D.act.setCatIcon = (el) => { const c = findCat(el.dataset.id); if (!c) return;
+    const v = el.value.trim().slice(0, 3);
+    c.icon = v || (D.defaultCats().find((d) => d.id === c.id) || {}).icon || 'layers';
+    D.save(); D.rerender(); };
   D.act.setCatName = (el) => { const c = findCat(el.dataset.id); if (!c) return; inlineEdit(el, () => c.name, (v) => { c.name = v.slice(0, 30); D.save(); D.rerender(); }); };
   // delete category: reassign its transactions + budgets to 'boshqa' inside one undo-able op (mirrors D.remove)
   D.act.setCatDel = (el) => {

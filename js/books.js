@@ -85,7 +85,7 @@
     ].filter(Boolean).join(' <span class="sep">·</span> ');
     return `<div class="bk-row ${m.status === 'done' ? 'fin' : ''}">
       <button class="bk-open" data-act="bkOpen" data-id="${esc(m.id)}">
-        <span class="bk-cover">${m.kind === 'kitob' ? '\u{1F4D8}' : '\u{1F3AC}'}</span>
+        <span class="bk-cover" aria-hidden="true" style="--c:var(--${m.kind === 'kitob' ? 'aql' : 'aralash'})">${D.ic(m.kind === 'kitob' ? 'book' : 'layers', 18)}</span>
         <span class="bk-body">
           <span class="bk-title">${esc(m.title || t('books.untitled'))}</span>
           ${meta ? `<span class="bk-meta">${meta}</span>` : ''}

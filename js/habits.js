@@ -113,7 +113,7 @@
       const sc = h.schedule || { type: 'daily' };
       out.push({
         id: h.id, kind: 'h', sched: sc.type, every: D.clamp(+sc.n || 1, 1, 31),
-        name: h.name, emoji: D.habitEmoji(h), sphere: sp, color: `var(--${sp})`,
+        name: h.name, emoji: D.habitEmoji(h), mark: D.habitMark(h, 15), sphere: sp, color: `var(--${sp})`,
         goal: q ? `${D.fmtNum(q)} ${h.target.unit || ''}`.trim() : goalOf(h),
         on: (day) => (q ? (+((D.S.counts[day] || {})[h.id]) || 0) >= q : (D.S.logs[day] || []).includes(h.id)),
         due: (day) => D.habitDue(h, day),
@@ -126,6 +126,7 @@
       out.push({
         id: m.id, kind: 'm', sched: 'daily', every: 1,
         name: m.title, emoji: m.kind === 'kitob' ? '\u{1F4D8}' : '\u{1F3AC}',
+        mark: D.ic(m.kind === 'kitob' ? 'book' : 'layers', 15),
         sphere: 'aql', color: 'var(--warning)',
         goal: m.perDay ? `${D.fmtNum(m.perDay)} ${esc(m.unit || t(m.kind === 'kitob' ? 'media.pages' : 'media.parts'))}` : t('hb.goal.daily'),
         on: (day) => +((D.S.mediaLogs[day] || {})[m.id]) > 0,
@@ -251,7 +252,7 @@
     }).join('');
     return `<div class="hb-row">
       <div class="hb-c-name">
-        <span class="hb-emoji" style="--c:${it.color}" aria-hidden="true">${esc(it.emoji)}</span>
+        <span class="hb-emoji" style="--c:var(--${it.sphere})" aria-hidden="true">${it.mark}</span>
         <span class="hb-nm"><span class="hb-nm-t">${esc(it.name)}</span><span class="hb-nm-g">${esc(it.goal)}${it.kind === 'm' ? ' \u00b7 ' + esc(t('hb.book')) : ''}</span></span>
       </div>
       <div class="hb-c-days">${cells}</div>
@@ -340,7 +341,7 @@
       }).join('');
       return `<div class="hb-row">
         <div class="hb-c-name">
-          <span class="hb-emoji" style="--c:${it.color}" aria-hidden="true">${esc(it.emoji)}</span>
+          <span class="hb-emoji" style="--c:var(--${it.sphere})" aria-hidden="true">${it.mark}</span>
           <span class="hb-nm"><span class="hb-nm-t">${esc(it.name)}</span><span class="hb-nm-g">${esc(it.goal)}</span></span>
         </div>
         <div class="hb-c-days">${cells}</div>
@@ -358,7 +359,7 @@
       return `<button class="hb-mrow ${full ? 'on' : ''}" data-act="hbTick" data-id="${esc(it.id)}" data-key="${key}"
         ${future ? 'disabled' : ''} aria-pressed="${full}">
         <i class="chk ${full ? 'on' : ''}" aria-hidden="true"></i>
-        <span class="hb-emoji" style="--c:${it.color}" aria-hidden="true">${esc(it.emoji)}</span>
+        <span class="hb-emoji" style="--c:var(--${it.sphere})" aria-hidden="true">${it.mark}</span>
         <span class="hb-nm"><span class="hb-nm-t">${esc(it.name)}</span><span class="hb-nm-g">${esc(it.goal)}</span></span>
         ${it.every > 1 ? `<span class="hb-mrow-n num">${D.fmtNum(n)}/${D.fmtNum(it.every)}</span>` : ''}
       </button>`;
@@ -412,7 +413,7 @@
     return `<div class="card">
       <div class="card-head"><div class="title">${esc(t('hb.progress'))}</div></div>
       ${rows.map(({ it, due, done }) => D.chart.hbar({
-        label: it.emoji + ' ' + it.name, value: done, max: due, color: it.color,
+        label: it.name, value: done, max: due, color: it.color,
         right: `${D.fmtNum(done)}/${D.fmtNum(due)}`,
       })).join('')}
     </div>`;
@@ -506,7 +507,7 @@
     }
     return `<div class="card hb-card">
       <div class="hb-head">
-        <span class="hb-emoji" style="--c:${it.color}" aria-hidden="true">${esc(it.emoji)}</span>
+        <span class="hb-emoji" style="--c:var(--${it.sphere})" aria-hidden="true">${it.mark}</span>
         <span class="hb-name">${esc(it.name)}</span>
         <span class="hb-sub num">${esc(t('hb.daysN', { n: total }))}</span>
       </div>
