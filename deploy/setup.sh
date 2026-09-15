@@ -85,7 +85,7 @@ Group=$APP_USER
 WorkingDirectory=$APP_DIR
 # '-' — fayl yo'q bo'lsa xizmat baribir ko'tariladi (sozlanmagan holatda, lekin tirik).
 EnvironmentFile=-$APP_DIR/.env
-ExecStart=$APP_DIR/.venv/bin/gunicorn --worker-class gthread --workers 2 --threads 8 \n    -b 127.0.0.1:8081 --no-control-socket --timeout 120 --graceful-timeout 30 --access-logfile - api:app
+ExecStart=$APP_DIR/.venv/bin/gunicorn --worker-class gthread --workers 2 --threads 8 -b 127.0.0.1:8081 --timeout 120 --graceful-timeout 30 --access-logfile - api:app
 Restart=always
 RestartSec=3
 # ilova faqat o'z papkasiga yozadi

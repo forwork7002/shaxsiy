@@ -1,0 +1,4 @@
+# Shell skriptlari HAR DOIM LF bilan chiqsin. Windows'da core.autocrlf=true
+# bo'lsa deploy/*.sh CRLF bo'lib checkout qilinardi va serverda
+# "bash: setup.sh: command not found" / \r xatolari bilan yiqilardi.
+*.sh text eol=lf
