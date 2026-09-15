@@ -55,6 +55,7 @@ const PORT = 9411 + (process.pid % 300);
 const ARG = (k, d) => { const a = process.argv.find((x) => x.startsWith('--' + k + '=')); return a ? a.split('=')[1] : d; };
 const WIDTHS = ARG('w', '320,360,412').split(',').map(Number);
 const THEMES = ARG('theme', 'dark,light').split(',');
+const MEASURE_ON = process.argv.includes('--measure');
 
 /* 380px — css/levels.css dagi tor ekran chegarasi; marker shunga bog'langan. */
 const NARROW = 380;
@@ -148,6 +149,40 @@ function buildPage() {
   D.sheet = (h) => { sheet = h; };
   L.open();
 
+  /* IKKINCHI HOLAT: BUGUN HALI BO'SH.
+     Zanjir yorlig'ining risk ko'rinishi («N kun to'xtovsiz · bugun hali
+     yozilmadi») faqat shunda chiziladi. 600 kunlik holatda bugun HAR DOIM
+     to'la, ya'ni .lv-streak i va .lv-day-none sahifaga umuman tushmasdi va
+     tekshirilmay qolardi — hisobotdagi «2 ta selektor topilmadi» shu edi.
+     Aynan o'sha yorliq 2026-09-15 da 320px da kartadan chiqib ketgan
+     edi (d7058c2), ya'ni qo'riqlanishi kerak bo'lgan joy.
+     ALOHIDA BRAUZER YURISHI SHART EMAS: qator shu sahifaga ikkinchi marta,
+     bo'sh holat bilan chiziladi — o'n ikkala holat ham uni o'lchaydi.
+     Ochko va nishon saqlanmaydi, har safar ma'lumotdan hisoblanadi;
+     shuning uchun holatni vaqtincha o'zgartirib, keyin tiklash xavfsiz. */
+  const bugun = D.today();
+  const asl = JSON.parse(JSON.stringify(D.S));
+  for (const m of ['logs', 'prayers', 'dhikr', 'notes', 'fasting', 'mediaLogs', 'counts', 'health']) {
+    if (D.S[m]) delete D.S[m][bugun];
+  }
+  if (D.S.food && D.S.food.logs) delete D.S.food.logs[bugun];
+  if (D.S.whoop && D.S.whoop.days) delete D.S.whoop.days[bugun];
+  /* Kunni FAOL qiladigan hamma manba tozalanishi kerak, aks holda qator
+     baribir oddiy ko'rinishda chiziladi. Birinchi urinishda vazifa, namoz va
+     odat tozalangan edi-yu, maqsad/shukr/xarajat/mashq qolib ketgandi —
+     quyidagi hisobot qatori («FAOL — risk chizilmaydi») shuni ko'rsatdi. */
+  const kunOf = (ts, d) => (ts ? D.dayKey(new Date(ts)) : d);
+  D.S.tasks = (D.S.tasks || []).filter((t) => kunOf(t.doneAt, t.date) !== bugun);
+  D.S.goals = (D.S.goals || []).filter((g) => kunOf(g.doneAt, null) !== bugun);
+  D.S.gratitude = (D.S.gratitude || []).filter((g) => g.date !== bugun);
+  if (D.S.finance) D.S.finance.tx = (D.S.finance.tx || []).filter((x) => x.date !== bugun);
+  if (D.S.whoop) D.S.whoop.workouts = (D.S.whoop.workouts || []).filter((w) => w.k !== bugun);
+  D.emit('state:changed');
+  const tileRisk = L.tile();
+  const dRisk = L.day();
+  D.S = D.normalize(asl);
+  D.emit('state:changed');
+
   const href = (f) => 'file:///' + path.join(ROOT, f).split(path.sep).join('/');
   const page = (theme) => `<!doctype html><html lang="uz" data-theme="${theme}"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -169,6 +204,8 @@ function buildPage() {
 </style></head>
 <body><span id="mq"></span><div class="wrap">
   <div data-view="today">${L.tile()}</div>
+  <!-- bugun hali bo'sh: zanjirning ogohlantirish ko'rinishi -->
+  <div data-view="today">${tileRisk}</div>
   <div class="card">${L.cardHtml()}</div>
   ${sheet}
 </div></body></html>`;
@@ -181,7 +218,8 @@ function buildPage() {
   }
   const d = L.day();
   return { urls: out, note: `daraja ${L.info().level} · ochko ${L.info().xp} · bugun ${d.xp}/${d.goal}`
-    + ` · zanjir ${d.cur} · nishon ${L.medals().filter((m) => m.on).length}/${L.ALL.length}` };
+    + ` · zanjir ${d.cur} · nishon ${L.medals().filter((m) => m.on).length}/${L.ALL.length}`
+    + ` · bo'sh bugun: zanjir ${dRisk.cur}, ${dRisk.todayActive ? 'FAOL (risk chizilmaydi!)' : 'risk'}` };
 }
 
 /* ------------------------------------------------------------------ */
@@ -258,6 +296,28 @@ const AUDIT = `(function () {
     if (fpx && fpx < 11) out.tiny.push({ el: nm(t), px: fpx });
   }
   return JSON.stringify(out);
+})()`;
+
+/* Zichlik o'lchovi (`--measure`). 123-7f so'ragan «oldin/keyin» raqamlari shu
+   yerdan olinadi: balandlik + haqiqiy bosish nuqtalari. 44px (iOS) va 11px
+   chegaralari buzilmaganini shu bilan isbotlanadi, ko'z bilan emas. */
+const MEASURE = `(function () {
+  function h(sel) { var e = document.querySelector(sel); return e ? +e.getBoundingClientRect().height.toFixed(1) : null; }
+  var taps = [], seen = {};
+  var btns = document.querySelectorAll('.lv-sheet button, .lv-td button, .lv button, .lv-cell, .lv-near-i');
+  for (var i = 0; i < btns.length; i++) {
+    var b = btns[i], r = b.getBoundingClientRect();
+    var k = (b.className || '').split(' ')[0];
+    if (!r.height || seen[k]) continue;
+    seen[k] = 1;
+    taps.push({ el: k, h: +r.height.toFixed(1) });
+  }
+  return JSON.stringify({
+    tile: h('.lv-td'), card: h('.lv'), sheet: h('.lv-sheet'),
+    day: h('.lv-day'), path: h('.lv-path'), near: h('.lv-near'),
+    hist: h('.lv-hist'), fam1: h('.lv-fam'), doc: document.documentElement.scrollHeight,
+    taps: taps
+  });
 })()`;
 
 /* Kuzatiladigan yozuvlar. Selektor MATNNI tutishi shart: `.lv-cell span`
@@ -369,6 +429,17 @@ function connect(url) {
             seenMissing = true;
             console.log('  eslatma: sahifada yo‘q selektorlar — '
               + a.contrast.filter((x) => x.missing).map((x) => x.sel).join(', '));
+          }
+
+          if (MEASURE_ON && !hc) {
+            const m = JSON.parse((await c.send('Runtime.evaluate',
+              { expression: MEASURE, returnByValue: true })).result.value);
+            console.log('  o‘lchov ' + label + ': qator=' + m.tile + ' karta=' + m.card
+              + ' oyna=' + m.sheet + ' (bugun=' + m.day + ' yo‘l=' + m.path
+              + ' yaqin=' + m.near + ' grafik=' + m.hist + ' oila=' + m.fam1 + ') hujjat=' + m.doc);
+            const small = m.taps.filter((t) => t.h < 44);
+            if (small.length) console.log('         44px dan past bosish nuqtasi: '
+              + small.map((t) => t.el + ' ' + t.h).join(', '));
           }
 
           const missing = a.contrast.filter((x) => x.missing);
