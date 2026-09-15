@@ -160,12 +160,36 @@ body { min-height: 100vh; min-height: 100dvh; position: relative; overflow-x: hi
 :focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 6px; }
 
 /* «Kontrastni oshir» — iOS: Sozlamalar > Ekran > Kontrastni oshirish.
-   Faqat xira ranglar va chiziqlar ko'tariladi; fon va urg'u tegilmaydi. */
+   Faqat xira ranglar va chiziqlar ko'tariladi; fon va urg'u tegilmaydi.
+
+   IKKALA TEMA HAM YOZILISHI SHART. Bu blokni men yozgandim va faqat
+   `:root` ni yozgandim — ya'ni qorong'i tema qiymatlarini. Blok esa
+   `[data-theme="light"]` dan KEYIN turadi va aniqligi teng (0,1,0),
+   demak u yorug' temani ham bosib o'tardi: oq fonga qorong'i tema uchun
+   mo'ljallangan och kulranglar tushardi. Brauzerda o'lchandi
+   (Emulation.setEmulatedMedia, prefers-contrast: more):
+
+       yorug' + yuqori kontrast, TUZATISHDAN OLDIN
+       --text2 #D4D8DD  1.19    --text3 #AEB4BC  1.73    --text4 #949AA3  2.35
+
+   1.19:1 — matn fonda ko'rinmaydi. Chegaralar ham oq edi, ya'ni oq
+   fonda ular ham yo'qolardi. Zarari oddiy nuqsondan kattaroq: bu rejimni
+   yoqadigan odam aynan ko'rish qiyinligi sababli yoqadi. (123-f9 topdi.)
+
+   Yorug' qiymatlar qorong'i temadagi kuchayishga qarab tanlandi, toki
+   rejim ikkala temada bir xil kuchda ishlasin:
+       --text2  14.67 / 13.73      --text3  10.05 / 9.37
+       --text4   7.41 /  6.96      (qorong'i / yorug', eng yomon yuza) */
 @media (prefers-contrast: more) {
   :root {
     --text2: #D4D8DD; --text3: #AEB4BC; --text4: #949AA3;
     --line: rgba(255,255,255,.20); --line2: rgba(255,255,255,.32); --line3: rgba(255,255,255,.44);
     --card-line: rgba(255,255,255,.20);
+  }
+  [data-theme="light"] {
+    --text2: #1A1F27; --text3: #353B44; --text4: #484E57;
+    --line: rgba(0,0,0,.28); --line2: rgba(0,0,0,.40); --line3: rgba(0,0,0,.52);
+    --card-line: rgba(0,0,0,.28);
   }
   .btn, .card, .inp, .sel, .ta { border-width: 1.5px; }
 }
