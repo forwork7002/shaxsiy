@@ -519,6 +519,18 @@ the 49 stale files all answered `200` perfectly well.
    Normalise CRLF first. Expect exactly one difference: `index.html`, and
    only on the `?v=` lines, which `push.sh` rewrites. Anything else is
    unexplained until you explain it.
+
+   **Every file in the comparison tree must come from the server — not one
+   of them from the working folder.** Filling gaps locally (`app.css`,
+   `fonts/`, `icons/`) mixes a half-edited file from another session into
+   what you are calling "live", and the method then reports a defect it
+   created itself. That happened on 2026-09-15: a missing "Namozlar" label
+   was reported as a live regression when the real cause was an `app.css`
+   being edited in the folder at that moment. A false positive that looks
+   convincing is worse than no check at all.
+
+       ssh … "cd /opt/shaxsiy && tar cz js css fonts icons app.css \
+              index.html sw.js manifest.json" | tar xz -C <dir>
 3. **Does it run?** Checks 1 and 2 are both static, and neither could have
    caught the `D.icons` break: the file was present *and* byte-identical to
    the commit that contained the bug. Only executing the code finds a broken
