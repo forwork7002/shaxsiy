@@ -24,22 +24,23 @@
       ma'lumot ko'rinadi.
 
    ---------------------------------------------------------------------
-   EGASINING QARORI (2026-09-15) — ARALASH. Buni qayta muhokama qilmang.
+   YORLIQ REGISTRI — BUTUN ILOVA BOSH HARFDA (2026-09-15).
 
-   Ilovada ikkita yorliq uslubi YONMA-YON yashaydi, va bu ataylab:
-     · Bugun (Asosiy) ekrani — KICHIK harf, tor oraliq. «Jimjit va nafis»
-       uslubi, css/today.css egallaydi. Egasi uni namunalar ko'rsatilgan
-       holda tanlagan.
-     · Qolgan hamma bo'lim — BOSH harf, keng oraliq (quyidagi 1-bo'lim).
-       WHOOP tili, egasi buni ham ataylab so'ragan.
+   Hozirgi holat: Bugun ekrani ham, qolgan hamma bo'lim ham quyidagi
+   1-bo'limdagi bitta yorliq uslubidan foydalanadi — 11px, bosh harf,
+   .15em oraliq. Bu v95 da serverga chiqarilgan.
 
-   Ikkita sessiya bir odamdan qarama-qarshi topshiriq olgan edi va
-   savol egasining o'ziga qaytarildi. Javob: ikkalasi ham qolsin.
-   Ya'ni:
-     · Bugun ekranini bosh harfga o'tkazmang;
-     · jimjit uslubni qolgan bo'limlarga TARQATMANG.
-   Ikkalasi ham hozirgi qarorga zid. Fikr o'zgarsa — egasidan so'ralsin,
-   o'zaro hal qilinmasin.
+   Nega bu yerda yozilgan: bitta kunda ikkita sessiya egadan yorliq
+   registri haqida ALOHIDA so'radi va ikki xil javob oldi —
+     · 10:10 da «hozircha aralash qolsin» (Bugun kichik harf),
+     · 10:12 da «butun ilova WHOOP uslubida» (hammasi bosh harf).
+   Ikkinchisi keyingi javob va aynan u bajarilib, v95 bilan jonli
+   saytga chiqdi. Shuning uchun kod bosh harfda turibdi.
+
+   Buni o'zaro hal qilmang. Bugun ekranini yana kichik harfga
+   qaytarish kerak degan xulosaga kelsangiz — bu uslub emas, egasining
+   qarori masalasi: to'g'ridan-to'g'ri egadan so'rang va javobni shu
+   yerga sana bilan yozib qo'ying.
    ===================================================================== */
 
 /* ---------------------------------------------------------------------
