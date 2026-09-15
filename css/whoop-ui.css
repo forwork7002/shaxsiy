@@ -711,3 +711,41 @@ html.sky-turn body::after { animation: skyTurn 2.6s var(--ease-out); }
   font-variant-numeric: proportional-nums;
   font-feature-settings: "tnum" 0;
 }
+
+/* ---------------------------------------------------------------------
+   21. ZICHLIK — egasi «compact» dedi
+
+   16-bo'limda «keng» talabi bajarilgan edi: karta to'ldirishi 17 -> 20,
+   bo'limlar orasi 26 -> 32. Endi teskari talab keldi, shuning uchun o'sha
+   qiymatlar qaytarilmaydi — ustiga zichroq qatlam qo'yiladi, toki 16-bo'lim
+   izohi va sababi joyida qolsin va kerak bo'lsa bu blokni o'chirish bilan
+   hammasi tiklansin.
+
+   O'LCHANDI (390px, Bugun ekrani, iframe ichida — headless Chrome
+   --window-size ni layout uchun ishlatmaydi, shuning uchun to'g'ridan-to'g'ri
+   o'lchov yolg'on chiqadi):
+       karta            padding 17/17 · margin-bottom 14
+       ro'yxat kartasi  balandligi 518
+       guruh qatori     51 · namoz qatori 37 · hafta chipi 65
+       sahifa           1478px
+
+   NIMAGA TEGILMAYDI: namoz qatori (.td-row) 37px — u allaqachon iOS ning
+   44px tavsiyasidan past, ya'ni barmoq bilan bosish qiyin. Uni yanada
+   kichraytirish zichlik emas, nuqson bo'lardi. Guruh qatori 51 -> 47 ga
+   tushdi, bu hali ham 44 dan yuqori.
+   --------------------------------------------------------------------- */
+.card, .hero { padding: 13px 15px; margin-bottom: 9px; }
+.card-head { margin-bottom: 9px; }
+.section-title { margin: 18px 0 8px; }
+.divider { margin: 12px -15px; }
+.page { padding: 4px 15px 28px; }
+.td-grp { padding: 10px 0; }
+.td-strip2-item { padding: 9px 10px; }
+.td-wd { padding: 7px 0 6px; }
+.card.flat { padding: 11px 13px; }
+
+@media (max-width: 400px) {
+  .card, .hero { padding: 12px 13px; margin-bottom: 8px; }
+  .divider { margin: 11px -13px; }
+  .page { padding: 4px 13px 26px; }
+}
