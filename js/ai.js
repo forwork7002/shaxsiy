@@ -506,7 +506,6 @@ Qoidalar:
     const W = S.whoop || {}, WD = W.days || {};
     const wv = (k, f) => (WD[k] ? num(WD[k][f]) : null);
     const fmtMin = (ms) => (ms == null ? '—' : Math.round(ms / 60000) + ' daq');
-    const avgOf = (keys, f) => { const v = keys.map((k) => wv(k, f)).filter((x) => x !== null); return v.length ? D.round(D.avg(v), f === 'strain' || f === 'sleepH' ? 1 : 0) : null; };
 
     if (section === 'sleep') {
       const k = today, d = WD[k] || WD[D.addDays(today, -1)] || null;

@@ -108,8 +108,6 @@
 .set-danger .row .btn { min-height: 44px; }
 
 /* «Hisob» kartasi — avatar profile.js dan (.pf-av-*) */
-.set-account .pf-av-img, .set-account .pf-av-ini { margin-right: 2px; }
-.set-account .row > .row { flex: none; }
 
 /* Vaqt va joy — bir necha qator raqam va, agar telefonning mintaqasi boshqa
    bo'lsa, bitta ogohlantirish. Ogohlantirish qizil emas: bu xato emas, tanlov. */

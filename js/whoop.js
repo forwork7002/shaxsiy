@@ -15,7 +15,6 @@
 (function () {
   'use strict';
   const esc = D.esc, t = D.t;
-  const AUTO_MS = 30 * 60 * 1000;   // avtomatik yangilash oralig'i
   const KEEP_DAYS = 180;            // kunlik yozuvlar tarixi
   const KEEP_WORKOUTS = 60;
 
@@ -589,7 +588,6 @@
   };
   const fmtHm = (h, opts) => D.fmtHm(h, opts);
   const fmtMs = (ms) => D.fmtMsH(ms);
-  const n1 = (v, d = 1) => (v == null || isNaN(+v) ? '—' : D.fmtNum(+v, d));
   const strip = (h) => h.replace(/^<p>/, '').replace(/<\/p>$/, '');
   const md = (txt) => (D.ai ? strip(D.ai.md(txt)) : esc(txt));
 

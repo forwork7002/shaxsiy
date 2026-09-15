@@ -17,19 +17,17 @@ app/
   js/ai.js          shared AI analysis engine — D.ai.card(section) insight cards
   js/whoop.js       WHOOP snapshot client, per-day store, trends, readiness, workouts, bioAge; Соғлиқ sahifalarini shu modul chizadi
   js/profile.js     account sheet (D.profile): avatar (photo → /api/me/avatar, or initials), display name, provider/e-mail, stats, export, logout — opened from the header avatar button
-  js/nova.js        AI mentor chat (uses D.ai.ask)
   js/levels.js      daraja va nishonlar (D.levels): ochko holatdan hisoblanadi, `S.awards` faqat «qachon berildi» ni saqlaydi; profil kartasidagi blok + to'plam oynasi
   js/settings.js    Созлаш: general (profile incl. birth year / goal / WHOOP Age) · habits · food targets · prayer · finance · data
-  js/history.js     Тарих: read-only archive browser over /api/history/* (month grid · year · chats · cards)
   js/onboard.js     first-entry wizard (D.onboard): name → sex → birth year → height → weight → activity → goal → WHOOP
   js/app.js         boot
   sw.js manifest.json
-  api.py            Flask: accounts (register/login/Google), per-uid /api/data, per-uid WHOOP OAuth+poller, /api/ai proxy, /api/food/*, /api/history/*
-  db.py             SQLite archive data/dash.db (WAL): day_facts / whoop_records / chat_threads+messages / ai_cards / ai_calls / state_versions — written on every save + WHOOP poll, never pruned
+  api.py            Flask: accounts (register/login/Google), per-uid /api/data, per-uid WHOOP OAuth+poller, /api/ai proxy, /api/food/*
+  db.py             SQLite archive data/dash.db (WAL): day_facts / whoop_records / chat_threads+messages / ai_cards / ai_calls / state_versions — written on every save + WHOOP poll, never pruned. FAQAT YOZILADI: o'qish uchun HTTP yo'l yo'q (2026-09-15 da olib tashlandi) — `db.version()` / `db.export_all()` yoki to'g'ridan-to'g'ri SQL
   legacy.py         one-off import of the old Шахсий export (Python port of D.migrateOld + existing-wins merge); deploy/import-legacy.sh runs it on the server
 ```
 
-Script order in index.html: core.js → i18n.js → prayer.js → ai.js → whoop.js → profile.js → today · tasks · health · finance · ibodat · nova → food.js → settings.js → history.js → onboard.js → app.js.
+Script order in index.html: core.js → i18n.js → prayer.js → ai.js → whoop.js → profile.js → today.js → health.js → ibodat.js → food.js → onboard.js → yusa-orb.js → app.js (finance · tasks · books · habits · yusa · settings kechiktirilib yuklanadi, levels.js — kutubxona sifatida).
 `ai.js`, `whoop.js` and `profile.js` are libraries, not views: they register no `D.view` and must load before the views that call them
 (`profile.js` reads the WHOOP profile name and is called by settings.js and app.js).
 `food.js` loads before `settings.js` (the food targets tab calls `D.food.recalcTargets`); `onboard.js` loads last so every view and `D.food` exist when it decides to open.
@@ -51,7 +49,7 @@ Suv faqat Бугун sahifasida yuritiladi; vazn WHOOP `body.weight_kilogram` da
 Data safety: `defaultState` / `normalize` / `D.merge` keep the `gym`, `learn`, `caffeine`, `stack`, `reviews` keys so old blobs and the archive stay intact — nothing in the UI reads them
 (Tarix still shows archived stack/caffeine facts on a past day's sheet, read-only).
 
-Bottom bar = the first four `primary` views by order: today 10 · health 20 · food 25 · prayer 40; everything else (finance, tasks, nova, history, settings) sits in «Yana».
+Bottom bar = `TABS` in core.js — beshta yorliq: today · prayer · health · finance · tasks (o'rtadagisi `MID`, ko'rinishi boshqacha, bosilishi bir xil). Yon panel (≥960px) `nav !== false` bo'lgan hamma bo'limni ko'rsatadi.
 
 ## Conventions (every module follows these)
 
@@ -142,7 +140,7 @@ D.ai.enoughData(section)  D.ai.isFresh(section)  D.ai.md(text)
 ```
 Sections: `today`, `health`, `sleep`, `strain`, `food`, `finance`, `prayer` — one coach card per page
 (the old `age` section was folded into `health`; `hs.sec.age` stays so archived cards still render a label)
-(`history.js` SECTIONS mirrors this list for the Tarix «Kartalar» filter). Add one by extending `SECTIONS`, `QUESTION`,
+(Tarix ekrani 2026-09-10 da o'chirilgan, ya'ni bu ro'yxatni endi faqat `ai.js` o'qiydi). Add one by extending `SECTIONS`, `QUESTION`,
 the `sectionLines()` builder and the three `ai.hint.<section>` strings.
 
 ## WHOOP (js/whoop.js)
@@ -387,19 +385,16 @@ Prayer habits (names ПЕШИН/АСР/ШОМ/БОМДОД/ХУФТОН) stay as
 - `POST /api/food/analyze` `{image?: dataURL jpeg/png ≤ 1.5 MB, text?, note?, lang}` → `{ok, items:[{name,grams,kcal,p,c,f}], total:{kcal,p,c,f}, confidence, advice, photo:id|null}`; errors `ai_not_configured` 501, `bad_image` 400, `ai_failed` 502. `GET /api/food/photo/<id>` → image/jpeg (auth, per-uid `data/<uid>.food/`).
 - All routes require a signed-in session (name+password, Google) unless `MA_DEV=1`.
 
-### History archive (`/api/history/*`, read by js/history.js only — never by other modules)
-Server-side SQLite archive (`db.py`) filled from every state save and WHOOP poll; the client never keeps it in `D.S`.
-All per-uid, `from`/`to` are day keys, ranges capped at 400 days, default = last 31 days.
-The blob is the whole state: a fact that disappears from it (habit un-ticked, note cleared) gets `day_facts.gone_at` and drops out of every reader; it comes back untouched when the blob has it again. No cross-request hash cache — each `archive_state` reads the live hashes from the DB, so two gunicorn workers see each other's writes. Day keys use Tashkent time with `dayStart = 0`.
-- `GET /api/history/range` → `{first, last, days, whoopFirst, threads}`
-- `GET /api/history/days?from&to` → `{days:{ 'YYYY-MM-DD': {health, habits:[habitId], counts:{id:n}, prayers, note, gratitude:[{id,text}|text], food:[{id,ts,name,grams,kcal,p,c,f}] (no photos), stack:{itemId:ts}, caffeine:[{name,mg,ts}], tasks:[{id,text}|text]} }}`
-- `GET /api/history/whoop?from&to` → `{recovery:[{ts,recovery,hrv,rhr}], sleep:[{start,end,nap,sleepH,sleepPerf}], cycle:[{start,end,strain,kcal}], workout:[{id,start,end,sport,strain,kcal,mins}]}` — raw server records; the client keys days exactly like `whoop.js`: recovery → `ts`, sleep → `end`, cycle → `start + 12h`, workout → `start` (all through `D.dayKey`); `whoop_records.day_hint` is filed by the same rule (`db.whoop_day`), so a cycle that starts before midnight lands on its waking day.
-- `GET /api/history/months?year=YYYY` → `{months:{ 'YYYY-MM': {days, habitPct, sleepH, recovery, strain, kcal, kcalEaten, workouts, weightStart, weightEnd, notes} }}` — `kcal` = WHOOP burn, `kcalEaten` = logged meals, both daily averages
-- `GET /api/history/chats?q&limit&before` → `{threads:[{id,ts,title,count,deleted}]}`; `GET /api/history/chats/<id>` → `{id,ts,title,messages:[{idx,ts,role,content}]}`
-- `GET /api/history/cards?section&from&to&limit` → `{cards:[{section,day,ts,text}]}` — newest first, at most 2000 (`db.CARDS_MAX`)
-- `POST /api/history/restore-thread {id}` → `{ok, thread?:{id,ts,messages}}` — re-inserts the thread into the blob; the client also adds it to `D.S.nova.threads` locally and opens Nova on it.
-- `GET /api/history/versions` → `{versions:[{id,savedAt,size}]}`, `GET /api/history/versions/<id>` → the blob.
-Client conventions: responses cached in module memory keyed by uid+url (ranges touching today expire after 2 min); skeleton while loading, offline card with retry on error; selector state in `D.ui.filters.hist = {y, m}`; sub-tabs `D.ui.sub.history` ∈ month|year|chats|cards; CSS prefix `hs-`, actions `hs*`.
+### Arxiv (`db.py`, `data/dash.db`) — faqat yoziladi
+Har bir saqlashda va WHOOP so'rovida to'ldiriladi; mijoz uni `D.S` da saqlamaydi. Blob — butun holat:
+undan yo'qolgan fakt (odat belgisi olindi, izoh o'chdi) `day_facts.gone_at` oladi va blob uni qaytarsa,
+o'zi qayta tiriladi. Kun kaliti Toshkent vaqti, `dayStart = 0`.
+
+**2026-09-15:** `/api/history/*` yo'llari va `db.py` dagi o'quvchilar (`range/days/whoop/months/chats/cards/versions/restore_thread`)
+olib tashlandi — Tarix ekrani 2026-09-10 da o'chirilgandan beri ularni hech kim chaqirmasdi. Arxivning o'zi
+va yozuvchilari (`archive_state`, `archive_facts`, `record_whoop`, `record_ai_call`) joyida: ma'lumot to'planishda davom etadi.
+Qaytarib olish yo'llari: `db.version(uid, vid)` (holat nusxalari), `db.export_all(uid)` (`GET /api/export` shuni beradi)
+va `sqlite3 data/dash.db`. Yana ekran kerak bo'lsa — o'quvchilarni git tarixidan qaytarish mumkin (`git log -S`).
 
 ## Durability — the account has to outlive the app
 

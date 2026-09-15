@@ -415,7 +415,6 @@
     document.getElementById('yusaSend').disabled = busy;
     applyPos();
   }
-  D.yusa = { draw: () => draw(true) };
 
   function toggle(on) {
     open = on === undefined ? !open : !!on;

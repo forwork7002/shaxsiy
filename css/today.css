@@ -43,7 +43,6 @@
    Qoidalar shu yerdan olib tashlandi (js/ va index.html da 0 marta uchraydi).
    Halqa qoidalari fayl oxirida, «UCHTA HALQA» blokida. */
 @media (max-width: 380px) {
-  .td-ready-top { gap: 12px; }
   .td-ready-state { font-size: 17px; }
 }
 
@@ -163,7 +162,6 @@
 .td-wd.on .td-wd-l, .td-wd.on .td-wd-n { color: var(--ink-on-light); }
 .td-wd.on .td-wd-dot.on { background: var(--ink-on-light); opacity: .7; }
 .td-wd[disabled] { opacity: .3; }
-
 
 /* Yoy atrofidagi yaltirash olib tashlandi.
    core.js chart.arc() har bir faol segmentga ichki uslub bilan
