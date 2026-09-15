@@ -86,9 +86,11 @@
       'today.adv.warn': "{n} atrofida zo'riqish yetarli",
       'today.adv.bad': "Dam oling — {n} dan oshirmang",
       'today.adv.over': "Chegara oshdi ({s}/{n}) — qolgan kun dam",
+      'today.adv.past': "Chegaraga yetdingiz — {n} edi, hozir {s}",
       'today.d.short': '{h} kam', 'today.d.over': '{h} ortiq', 'today.d.target': 'chegara {n}',
       'today.d.base': "o'rtachadan {p}", 'today.d.noData': "ma'lumot yo'q",
       'today.debt': '7 kunda {h} uyqu qarzi',
+      'today.r.sleep': 'Uyqu', 'today.r.rec': 'Tiklanish', 'today.r.strain': "Zo'riqish",
     },
     uzk: {
       'today.state.good': 'ТАЙЁР', 'today.state.warn': 'ЎРТАЧА', 'today.state.bad': 'ДАМ ОЛ',
@@ -96,9 +98,11 @@
       'today.adv.warn': '{n} атрофида зўриқиш етарли',
       'today.adv.bad': 'Дам олинг — {n} дан оширманг',
       'today.adv.over': 'Чегара ошди ({s}/{n}) — қолган кун дам',
+      'today.adv.past': 'Чегарага етдингиз — {n} эди, ҳозир {s}',
       'today.d.short': '{h} кам', 'today.d.over': '{h} ортиқ', 'today.d.target': 'чегара {n}',
       'today.d.base': 'ўртачадан {p}', 'today.d.noData': 'маълумот йўқ',
       'today.debt': '7 кунда {h} уйқу қарзи',
+      'today.r.sleep': 'Уйқу', 'today.r.rec': 'Тикланиш', 'today.r.strain': 'Зўриқиш',
     },
     ru: {
       'today.state.good': 'ГОТОВ', 'today.state.warn': 'СРЕДНЕ', 'today.state.bad': 'ОТДЫХ',
@@ -106,9 +110,11 @@
       'today.adv.warn': 'Достаточно нагрузки около {n}',
       'today.adv.bad': 'Отдыхайте — не выше {n}',
       'today.adv.over': 'Предел превышен ({s}/{n}) — дальше отдых',
+      'today.adv.past': 'Предел достигнут — было {n}, сейчас {s}',
       'today.d.short': 'меньше на {h}', 'today.d.over': 'больше на {h}', 'today.d.target': 'предел {n}',
       'today.d.base': '{p} от среднего', 'today.d.noData': 'нет данных',
       'today.debt': 'долг сна за 7 дней: {h}',
+      'today.r.sleep': 'Сон', 'today.r.rec': 'Восстановление', 'today.r.strain': 'Нагрузка',
     },
   });
 
@@ -233,12 +239,6 @@
   /* hech narsa aytmaydi, farq aytadi.                                   */
   /* ---------------------------------------------------------------- */
   const ZONE_COLOR = { good: 'var(--success)', warn: 'var(--warning)', bad: 'var(--danger-text)' };
-  function kpiHtml(lab, val, delta, zone, dur) {
-    return `<div class="td-kpi ${zone || ''}">
-      <span class="td-kpi-lab">${esc(lab)}</span>
-      <span class="td-kpi-val num ${dur ? 'dur' : ''}">${val}</span>
-      <span class="td-kpi-d">${delta ? esc(delta) : esc(t('today.d.noData'))}</span></div>`;
-  }
   /** Shu kunning WHOOP kesimi — bugun uchun ham, orqaga qaralgan kun uchun ham. */
   function dayRec(k) {
     if (!(D.S.whoop && D.S.whoop.connected && D.whoop && D.whoop.dayInsight)) return null;
@@ -257,55 +257,89 @@
       label: t(i.zone === 'good' ? 'wh.ready.high' : i.zone === 'warn' ? 'wh.ready.mid' : 'wh.ready.low') };
     const live = today ? safeVal(() => (D.whoop.live ? D.whoop.live() : null)) : null;
     const f = today ? safeVal(() => (D.whoop.freshness ? D.whoop.freshness() : null)) : null;
-    const col = ZONE_COLOR[r.zone] || 'var(--line3)';
     const tgt = i.strainTarget != null ? i.strainTarget : null;
     const strain = live && live.strain != null ? live.strain : i.strain != null ? i.strain : r.strain;
 
-    // maslahat — bitta jumla: avval chegaradan oshgani, keyin zona bo'yicha
+    /* Baho ekranga chiqadigan AYNAN shu raqamdan hisoblanadi.
+       Ilgari boshqacha edi: zo'riqish jonli qiymatdan chizilardi (live.strain),
+       uning hukmi esa dayInsight ichidagi eski o.strain dan olinardi
+       (whoop.js:497). Natijada karta bir vaqtning o'zida ikki xil gapirardi —
+       «11,3 atrofida zo'riqish yetarli» deb turib, yonida 13,4 ni yashil
+       ko'rsatardi. Raqam yangilanardi, hukmi yangilanmasdi. */
+    const gap = (tgt != null && strain != null) ? strain - tgt : null;
+    const load = gap === null ? null : gap > 3 ? 'over' : gap < -4 ? 'under' : 'ok';
+
+    // maslahat — bitta jumla. «Chegaraga yetdingiz» alohida holat: chidamli
+    // oraliq ichida turibsiz, lekin maqsad allaqachon ortda qolgan — eski matn
+    // o'sha paytda ham «{n} atrofida yetarli» deb maqsadni qaytarardi.
     let adv;
-    if (i.load === 'over' && tgt != null) adv = t('today.adv.over', { s: D.fmtNum(strain, 1), n: D.fmtNum(tgt, 1) });
+    if (load === 'over' && tgt != null) adv = t('today.adv.over', { s: D.fmtNum(strain, 1), n: D.fmtNum(tgt, 1) });
+    else if (tgt != null && strain != null && strain >= tgt) adv = t('today.adv.past', { s: D.fmtNum(strain, 1), n: D.fmtNum(tgt, 1) });
     else if (tgt != null) adv = t('today.adv.' + r.zone, { n: D.fmtNum(tgt, 1) });
     else adv = r.label;
 
-    // 1) uyqu — kerakli miqdordan farqi
-    let sVal = '—', sD = '', sZ = '', sDur = false;
-    if (i.sleepH != null || r.sleepH != null) {
-      // Ilova qoidasi: davomiylik hech qachon kasr soatda emas — «7 soat 12 daq».
-      sVal = D.fmtHm(i.sleepH != null ? i.sleepH : r.sleepH); sDur = true;
-      if (i.gapH != null) {
-        sD = t(i.gapH >= 0 ? 'today.d.over' : 'today.d.short', { h: D.fmtHm(Math.abs(i.gapH)) });
-        sZ = i.gapH >= -0.5 ? 'z-good' : i.gapH >= -1.5 ? 'z-warn' : 'z-bad';
-      } else if (i.perf != null) { sD = D.fmtNum(i.perf, 1) + '%'; sZ = i.perf >= 85 ? 'z-good' : i.perf >= 70 ? 'z-warn' : 'z-bad'; }
-    }
-    // 2) zo'riqish — tiklanish ruxsat bergan chegaraga nisbatan
-    let tVal = '—', tD = '', tZ = '';
-    if (strain != null) {
-      tVal = `${D.fmtNum(strain, 1)}${live ? '<i class="wh-dot"></i>' : ''}`;
-      if (tgt != null) {
-        tD = t('today.d.target', { n: D.fmtNum(tgt, 1) });
-        tZ = i.load === 'over' ? 'z-bad' : i.load === 'under' ? 'z-warn' : i.load === 'ok' ? 'z-good' : '';
-      }
-    }
-    // 3) HRV — o'z 30 kunlik bazasidan og'ish; HRV yo'q bo'lsa tinch puls
-    let hLab = t('wh.hrv'), hVal = '—', hD = '', hZ = '';
-    if (i.hrv != null) {
-      hVal = `${D.fmtNum(i.hrv, 1)}<small>ms</small>`;
-      if (i.hrvPct !== undefined) { hD = t('today.d.base', { p: D.fmtSigned(i.hrvPct, 1) + '%' }); hZ = i.hrvPct >= -5 ? 'z-good' : i.hrvPct >= -15 ? 'z-warn' : 'z-bad'; }
-    } else if (i.rhr != null || r.rhr != null) {
-      hLab = t('wh.rhr'); hVal = `${D.fmtNum(i.rhr != null ? i.rhr : r.rhr, 1)}<small>bpm</small>`;
-      if (i.rhrDelta !== undefined) { hD = t('today.d.base', { p: D.fmtSigned(i.rhrDelta, 1) }); hZ = i.rhrDelta <= 1 ? 'z-good' : i.rhrDelta <= 4 ? 'z-warn' : 'z-bad'; }
-    }
-    // uyqu qarzi ko'zga ko'rinmaydigan narsa — bugun va sezilarli bo'lgandagina bitta qator
-    const dbt = today && D.whoop.sleepDebt ? safeVal(() => D.whoop.sleepDebt(7)) : null;
-    const foot = dbt && dbt.h >= 2 ? `<div class="td-hero-foot">${D.ic('moon', 12)} ${esc(t('today.debt', { h: D.fmtHm(dbt.h) }))}</div>` : '';
+    /* 1) UYQU — halqada bajarilish foizi, ostida haqiqiy davomiylik.
+       Foiz WHOOP dan keladi (sleep_performance_percentage). Kelmagan bo'lsa
+       halqani to'ldiradigan narsa yo'q — o'shanda halqa ichiga DAVOMIYLIKNING
+       o'zi yoziladi. Ilgari bunday holatda «—» turardi va yonida soat pastda
+       yozilgan bo'lardi: ma'lumot bor edi-yu, ekran «yo'q» deb turardi.
+       Ilova qoidasi: davomiylik hech qachon kasr soatda emas — «5 soat 43 daq». */
+    let sPct = 0, sVal = '—', sZ = '', sSub = '';
+    const sh = i.sleepH != null ? i.sleepH : r.sleepH;
+    if (i.perf != null) { sPct = i.perf; sVal = `${D.fmtNum(i.perf)}<small>%</small>`; }
+    else if (i.metPct != null) { sPct = i.metPct; sVal = `${D.fmtNum(i.metPct)}<small>%</small>`; }
+    if (sPct || sVal !== '—') { if (sh != null) sSub = D.fmtHm(sh); }
+    else if (sh != null) sVal = `<span class="td-ring-dur">${esc(D.fmtHm(sh))}</span>`;
+    if (i.gapH != null) sZ = i.gapH >= -0.5 ? 'z-good' : i.gapH >= -1.5 ? 'z-warn' : 'z-bad';
+    else if (i.perf != null) sZ = i.perf >= 85 ? 'z-good' : i.perf >= 70 ? 'z-warn' : 'z-bad';
 
-    // Kunning bosh raqami — yoy o'lchagichda, ostida bitta jumla maslahat.
-    // Ilgari halqa chapda, matn o'ngda edi; telefonda ikkalasi ham siqilardi.
+    // 2) ZO'RIQISH — WHOOP shkalasi 0..21, ostida tanaga mos chegara
+    const tPct = strain != null ? D.clamp((strain / 21) * 100, 0, 100) : 0;
+    const tVal = strain != null ? D.fmtNum(strain, 1) : '—';
+    const tSub = tgt != null ? t('today.d.target', { n: D.fmtNum(tgt, 1) }) : '';
+    /* Yashil FAQAT chegaradan pastda turganda. Chegaraga yetgan-u hali
+       «over» bo'lmagan holat betaraf qoladi: aks holda karta yonidagi
+       jumla «chegaraga yetdingiz» deb turib, raqam yashil bilan «hammasi
+       joyida» derdi — bu o'sha zidlikning kichraygan ko'rinishi bo'lardi. */
+    const tZ = load === 'over' ? 'z-warn' : (gap !== null && gap >= 0) ? '' : load === 'ok' ? 'z-good' : '';
+
+    // Pastki qator — halqaga sig'magan, lekin kunni tushuntiradigan ikki narsa:
+    // HRV (o'z 30 kunlik bazasidan og'ish) va uyqu qarzi.
+    const bits = [];
+    if (i.hrv != null) {
+      let s = `${t('wh.hrv')} ${D.fmtNum(i.hrv, 1)} ms`;
+      if (i.hrvPct !== undefined) s += ` (${D.fmtSigned(i.hrvPct, 1)}%)`;
+      bits.push(esc(s));
+    } else if (i.rhr != null || r.rhr != null) {
+      let s = `${t('wh.rhr')} ${D.fmtNum(i.rhr != null ? i.rhr : r.rhr, 1)} bpm`;
+      if (i.rhrDelta !== undefined) s += ` (${D.fmtSigned(i.rhrDelta, 1)})`;
+      bits.push(esc(s));
+    }
+    // uyqu qarzi ko'zga ko'rinmaydigan narsa — bugun va sezilarli bo'lgandagina
+    const dbt = today && D.whoop.sleepDebt ? safeVal(() => D.whoop.sleepDebt(7)) : null;
+    if (dbt && dbt.h >= 2) bits.push(`${D.ic('moon', 12)} ${esc(t('today.debt', { h: D.fmtHm(dbt.h) }))}`);
+    const foot = bits.length ? `<div class="td-hero-foot">${bits.join('<i class="td-hero-sep"></i>')}</div>` : '';
+
+    /* Uchta TENG halqa. Ilgari faqat tiklanish katta yoy bo'lib turardi, uyqu
+       bilan zo'riqish esa pastda mayda kulrang matn edi — ko'rinishda ikkinchi
+       darajali, aslida esa uchalasi bir xil vaznli ustun. Uyqu foizi allaqachon
+       bor edi (dayInsight().perf, WHOOP ning sleep_performance_percentage i),
+       shunchaki ekranga chiqarilmagan: bu yangi ma'lumot emas, joyini topishi. */
+    const ring = (kind, pct, val, color, sub, zone, dot) => `<div class="td-ring">
+      ${D.chart.ring({ pct: D.clamp(pct, 0, 100), size: 104, stroke: 9, color, label: val, sub: '' })}
+      <span class="td-ring-lab">${esc(t('today.r.' + kind))}</span>
+      <span class="td-ring-sub ${zone}">${sub ? esc(sub) : ''}${dot ? '<i class="wh-dot"></i>' : ''}</span>
+    </div>`;
+    const zCol = (z) => (z === 'z-good' ? 'var(--success)' : z === 'z-warn' ? 'var(--warning)' : z === 'z-bad' ? 'var(--danger-text)' : 'var(--line3)');
+
     return `<div class="card td-ready z-${r.zone}" data-act="go" data-view="health" data-sub="ready" role="button" tabindex="0">
       <div class="eyebrow td-ready-eyebrow">WHOOP${f ? ` <span class="td-fresh ${f.stale ? 'stale' : ''}">${esc(f.label)}</span>` : ''}</div>
-      ${D.chart.arc({ pct: r.pct, color: col, label: `${D.fmtNum(r.pct)}<small>%</small>`, sub: esc(t('wh.recovery')),
-        cap: `<b class="td-ready-state">${esc(t('today.state.' + r.zone))}</b><br>${esc(adv)}` })}
-      <div class="td-kpis">${kpiHtml(t('wh.sleepH'), sVal, sD, sZ, sDur)}${kpiHtml(t('wh.strain'), tVal, tD, tZ)}${kpiHtml(hLab, hVal, hD, hZ)}</div>
+      <div class="td-rings">
+        ${ring('sleep', sPct, sVal, zCol(sZ), sSub, sZ)}
+        ${ring('rec', r.pct, `${D.fmtNum(r.pct)}<small>%</small>`, ZONE_COLOR[r.zone] || 'var(--line3)', t('today.state.' + r.zone), 'z-' + r.zone)}
+        ${ring('strain', tPct, tVal, load === 'over' ? 'var(--warning)' : 'var(--accent)', tSub, tZ, !!live)}
+      </div>
+      <div class="td-hero-adv">${esc(adv)}</div>
       ${foot}</div>`;
   }
 

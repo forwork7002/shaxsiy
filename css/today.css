@@ -193,3 +193,57 @@
    Ichki uslubni bosish uchun !important shart (yorug' tema qoidasi ham
    aynan shu sababdan shunday yozilgan). */
 [data-view="today"] .arc rect.on { filter: none !important; }
+
+/* ==================================================================
+   WHOOP HERO — UCHTA TENG HALQA                     (egasi so'ragan)
+   ------------------------------------------------------------------
+   Ilgari karta bitta katta yoy (tiklanish) ko'rsatardi, uyqu bilan
+   zo'riqish esa uning ostida mayda kulrang matn bo'lib turardi.
+   Ko'rinishda ikkitasi ikkinchi darajali, aslida esa uchalasi ham bir
+   xil vaznli ustun — WHOOP ham, Oura ham ularni bir xil kattalikda
+   chizadi. Endi shu yerda ham shunday.
+
+   Halqalar SUYUQ: D.chart.ring o'lchamni ichki `style` bilan beradi
+   (104px), uni faqat !important yengadi. viewBox saqlangani uchun
+   chizma har qanday o'lchamda to'g'ri qoladi, ya'ni 320px li ekranda
+   halqalar siqiladi-yu, kesilmaydi.
+   ================================================================== */
+.td-rings { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; align-items: start; margin-top: 12px; }
+.td-ring { display: flex; flex-direction: column; align-items: center; min-width: 0; text-align: center; }
+.td-rings .ring-wrap { width: 100% !important; height: auto !important; max-width: 104px; aspect-ratio: 1; }
+.td-rings .ring-wrap svg { width: 100%; height: auto; }
+.td-rings .ring-pct { font-size: 23px; letter-spacing: -.035em; }
+.td-rings .ring-pct small { font-size: 11px; font-weight: 600; color: var(--text3); margin-left: 1px; }
+/* Foiz o'rniga davomiylik turganda — «6 soat 24 daq» yigirma uch pikselda
+   sig'maydi, shuning uchun o'z o'lchami bor. Raqam emas, ya'ni tabular
+   shrift ham kerak emas. */
+.td-rings .ring-pct .td-ring-dur { display: block; font-size: 14px; font-weight: 700;
+  letter-spacing: -.015em; line-height: 1.2; padding: 0 6px; }
+/* Yorliq o'ralishi mumkin va bu ataylab: ruscha «Восстановление» o'n to'rt
+   harf, uni bitta qatorga siqish uchun yozuvni 11px dan kichraytirish kerak
+   bo'lardi — ilovada esa 11px eng kichik qadam. Ikki qator yomon emas,
+   o'qilmaydigan yozuv yomon. */
+.td-ring-lab { margin-top: 8px; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text3); line-height: 1.25; }
+.td-ring-sub { --c: var(--text4); margin-top: 3px; font-size: 11px; font-weight: 700; line-height: 1.3; color: var(--c); overflow-wrap: anywhere; }
+.td-ring-sub.z-good { --c: var(--success); }
+.td-ring-sub.z-warn { --c: var(--warning); }
+.td-ring-sub.z-bad  { --c: var(--danger-text); }
+
+/* Maslahat — bitta jumla, halqalardan chiziq bilan ajratilgan. U kartadagi
+   yagona to'liq gap, shuning uchun raqamlardan kattaroq emas, lekin
+   kulrang ham emas: o'qilishi kerak. */
+.td-hero-adv { margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--line);
+  font-size: 14px; line-height: 1.45; color: var(--text2); }
+.td-hero-sep { display: inline-block; width: 3px; height: 3px; margin: 0 8px; border-radius: 50%;
+  background: var(--text4); vertical-align: middle; }
+
+/* Tor ekranda halqa kichrayadi, YOZUV EMAS: 11px eng kichik qadam bo'lib
+   qoladi (butun ilovada shunday). Faqat harflar orasi torayadi —
+   «TIKLANISH» to'qqiz harf va u bitta qatorda turishi kerak. */
+@media (max-width: 380px) {
+  .td-rings { gap: 6px; }
+  .td-rings .ring-pct { font-size: 20px; }
+  .td-ring-lab { letter-spacing: .04em; }
+  .td-hero-adv { font-size: 13px; }
+}
