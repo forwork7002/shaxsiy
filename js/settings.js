@@ -729,7 +729,7 @@
       </div>
       <div class="list">${cats.map((c) => `<div class="li set-cat">
         <span class="set-cat-ico" aria-hidden="true">${D.catMark(c.icon, 16)}</span>
-        <input class="inp set-icon-inp sm" value="${esc(D.icons[c.icon] ? '' : (c.icon || ''))}" maxlength="3" placeholder="—" data-change="setCatIcon" data-id="${esc(c.id)}" aria-label="${esc(t('set.f.icon'))}">
+        <input class="inp set-icon-inp sm" value="${esc(D.hasIcon(c.icon) ? '' : (c.icon || ''))}" maxlength="3" placeholder="—" data-change="setCatIcon" data-id="${esc(c.id)}" aria-label="${esc(t('set.f.icon'))}">
         <div class="li-body"><div class="li-text set-edit" data-act="setCatName" data-id="${esc(c.id)}">${esc(c.name)}</div>
           ${txCount[c.id] ? `<div class="li-meta"><span class="num">${esc(t('set.f.txCount', { n: txCount[c.id] }))}</span></div>` : ''}</div>
         ${c.id === FALLBACK_CAT ? '' : `<button class="li-del" data-act="setCatDel" data-id="${esc(c.id)}" aria-label="${esc(t('btn.delete'))}">${D.ic('trash', 16)}</button>`}

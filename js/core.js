@@ -934,7 +934,7 @@
      Sozlashda odam o'zi ham istalgan belgi yozishi mumkin. */
   D.catMark = (icon, px) => {
     const v = String(icon == null ? '' : icon).trim();
-    if (v && D.icons && D.icons[v]) return D.ic(v, px || 16);
+    if (v && D.hasIcon(v)) return D.ic(v, px || 16);
     return '<span class="mark-em">' + D.esc(v) + '</span>';
   };
 
@@ -1194,6 +1194,16 @@
     save: '<path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><path d="M17 21v-8H7v8M7 3v5h8"/>',
     keyboard: '<rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M8 14h8"/>',
   };
+  /* D.ic() UCHUN EMAS — «bu nom to'plamda bormi?» degan savol uchun.
+     Ishlatuvchilar: D.catMark (quyida) va settings.js dagi kategoriya
+     tahriri — ular qiymat ikonka nomimi yoki odam yozgan emojimi, shuni
+     ajratishi kerak.
+     ILGARI BU YERDA `D.icons = P` turardi va u 2026-09-15 da «o'lik kod»
+     deb olib tashlandi — o'sha kuni men unga tayanadigan kodni parallel
+     yozgandim. Ikki o'zgarish toza birlashdi, chunki boshqa-boshqa
+     qatorlarda edi; xato faqat ekran ochilganda chiqdi. Nomli funksiya
+     shuning uchun: u o'lik bo'lib ko'rinmaydi. */
+  D.hasIcon = (name) => !!(name && P[name]);
   D.ic = (name, size = 18, extra = '') => {
     const p = P[name] || P.info;
     return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${p}</svg>`;
