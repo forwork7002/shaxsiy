@@ -452,17 +452,68 @@
     return vs.length >= 3 ? D.avg(vs) : null;
   };
   /** Mifflin–St Jeor BMR × activity, used only when WHOOP has no calorie figure. */
-  function tdeeEstimate() {
-    const p = D.S.profile || {};
-    const kg = num(p.weightKg) ?? num((W().body || {}).weightKg);
-    const cm = num(p.heightCm) ?? num((W().body || {}).heightCm);
-    const age = num(p.age);
-    if (kg === null || cm === null || age === null) return null;
-    const bmr = 10 * kg + 6.25 * cm - 5 * age + (p.sex === 'f' ? -161 : 5);
-    const f = [1.2, 1.3, 1.375, 1.46, 1.55, 1.725][D.clamp(Math.round(+p.activity || 3), 0, 5)];
-    return Math.round(bmr * f);
+  /* ------------------------------------------------------------------ */
+  /* Energiya — butun ilovada bitta manba (Ovqat me'yori ham shundan).   */
+  /*                                                                     */
+  /* O'lchangan sarf taxminiy formuladan ustun turadi: WHOOP har kuni    */
+  /* to'liq siklning kaloriyasini beradi, shuning uchun yetarli kun      */
+  /* to'plansa TDEE o'sha kunlarning qirqilgan o'rtachasi bo'ladi — eng  */
+  /* past va eng yuqori 10 % tashlanadi, kasal kun yoki marafon          */
+  /* o'rtachani buzmasin. Bugun hisobga kirmaydi: sikl hali tugamagan,   */
+  /* uning kaloriyasi to'liq emas va o'rtachani pastga tortadi.          */
+  /* Ma'lumot yetmasa — Mifflin-St Jeor x faollik.                       */
+  /*                                                                     */
+  /* Faollik jadvali ilovada bitta. Ilgari food.js [1.2 … 2.1] va        */
+  /* whoop.js [1.2 … 1.725] ikki xil jadval ishlatardi: bir xil profil   */
+  /* uchun Ovqat 2 800 kkal, Sog'liq 2 370 kkal ko'rsatardi.             */
+  /* Yosh ham D.profileAge() dan — p.age onboardingda bir marta yozilgan */
+  /* surat, keyingi yili bir yilga eskiradi (ARCHITECTURE: yagona qoida).*/
+  /* ------------------------------------------------------------------ */
+  const ACT_F = [1.2, 1.375, 1.55, 1.725, 1.9, 2.05];
+  const TDEE_WINDOW = 28;     // necha kunlik oynaga qaraymiz
+  const TDEE_MIN_DAYS = 10;   // o'lchangan qiymatga o'tish uchun eng kam kun
+  const TDEE_FLOOR = 800;     // bundan past sikl — taqilmagan kun, hisobga olinmaydi
+
+  function trimmedMean(vs, cut) {
+    const a = vs.slice().sort((x, y) => x - y);
+    const k = Math.floor(a.length * (cut || 0.1));
+    const core = a.length - 2 * k >= 3 ? a.slice(k, a.length - k) : a;
+    return D.avg(core);
   }
-  D.whoop.tdee = tdeeEstimate;
+  /** Vazn: profil → WHOOP tanasi → so'nggi 60 kun ichidagi oxirgi o'lchov. */
+  function bodyKg() {
+    const p = D.S.profile || {};
+    if (num(p.weightKg) !== null) return +p.weightKg;
+    const b = W().body || {};
+    if (num(b.weightKg) !== null) return +b.weightKg;
+    for (const k of D.lastDays(60).reverse()) { const h = (D.S.health || {})[k]; if (h && num(h.weight) !== null) return +h.weight; }
+    return null;
+  }
+  function bodyCm() {
+    const p = D.S.profile || {};
+    if (num(p.heightCm) !== null) return +p.heightCm;
+    const b = W().body || {};
+    return num(b.heightCm) !== null ? +b.heightCm : null;
+  }
+  /** {tdee, bmr, source:'measured'|'estimated', days, kg, cm, age, approx} | null */
+  D.whoop.energy = () => {
+    const p = D.S.profile || {};
+    const kg = bodyKg(), cm = bodyCm(), age = D.profileAge();
+    const bmr = kg === null ? null : Math.round(10 * kg + 6.25 * (cm || 170) - 5 * (age || 30) + (p.sex === 'f' ? -161 : 5));
+    const days = W().days || {};
+    const vals = [];
+    for (const k of D.lastDays(TDEE_WINDOW, D.addDays(D.today(), -1))) {
+      const v = num((days[k] || {}).kcal);
+      if (v !== null && v >= TDEE_FLOOR) vals.push(v);
+    }
+    if (vals.length >= TDEE_MIN_DAYS) {
+      return { tdee: Math.round(trimmedMean(vals)), bmr, source: 'measured', days: vals.length, kg, cm, age, approx: false };
+    }
+    if (kg === null) return null;
+    const f = ACT_F[D.clamp(Math.round(num(p.activity) ?? 3), 0, 5)];
+    return { tdee: Math.round(bmr * f), bmr, source: 'estimated', days: vals.length, kg, cm, age, approx: !cm || age === null };
+  };
+  D.whoop.tdee = () => { const e = D.whoop.energy(); return e ? e.tdee : null; };
 
   D.whoop.dayInsight = (key) => {
     key = key || D.today();
@@ -489,9 +540,10 @@
         o.load = o.strainGap > 3 ? 'over' : o.strainGap < -4 ? 'under' : 'ok';
       }
     }
-    // energy: WHOOP burn vs an estimated maintenance
-    const tdee = tdeeEstimate();
-    if (o.kcal !== null) { o.tdee = tdee; if (tdee) o.kcalDelta = o.kcal - tdee; }
+    // energiya: kunning WHOOP sarfi o'z me'yoriga nisbatan — o'lchangan
+    // manbada me'yor aynan shu odamning 28 kunlik o'rtacha sarfi bo'ladi
+    const en = D.whoop.energy();
+    if (o.kcal !== null && en && en.tdee) { o.tdee = en.tdee; o.tdeeSource = en.source; o.kcalDelta = o.kcal - en.tdee; }
     return o;
   };
 

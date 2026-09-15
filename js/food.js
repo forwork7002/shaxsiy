@@ -116,37 +116,35 @@
   /* ------------------------------------------------------------------ */
   /* profil → me'yorlar                                                  */
   /* ------------------------------------------------------------------ */
-  const ACT = [1.2, 1.375, 1.55, 1.725, 1.9, 2.1];
-  const GOAL_ADJ = { lose: -400, keep: 0, gain: 300 };
-  const ageOf = () => D.profileAge();   // tug'ilgan yil birinchi, eski `age` — zaxira (core.js)
-  function weightOf() {
-    const p = D.S.profile || {};
-    if (num(p.weightKg)) return +p.weightKg;
-    const b = (D.S.whoop || {}).body || {};
-    if (num(b.weightKg)) return +b.weightKg;
-    for (const k of D.lastDays(60).reverse()) { const h = D.S.health[k]; if (h && num(h.weight)) return +h.weight; }
-    return null;
-  }
-  function heightOf() {
-    const p = D.S.profile || {};
-    if (num(p.heightCm)) return +p.heightCm;
-    const b = (D.S.whoop || {}).body || {};
-    return num(b.heightCm) ? +b.heightCm : null;
-  }
-  /** Mifflin-St Jeor: erkak 10w+6.25h−5a+5, ayol −161; × faollik; ± maqsad. null — vazn yo'q. */
+  /* ------------------------------------------------------------------ */
+  /* Kunlik me'yor. Energiya D.whoop.energy() dan keladi — WHOOP ulangan */
+  /* va yetarli kun to'plangan bo'lsa bu o'lchangan haqiqiy sarf,        */
+  /* bo'lmasa Mifflin-St Jeor x faollik. Ilgari bu yerda o'z formulasi   */
+  /* va o'z faollik jadvali bor edi, Sog'liq bo'limidagisidan boshqacha. */
+  /*                                                                     */
+  /* Maqsad qat'iy kkal emas, TDEE ning ulushi: ilgari har kimga −400    */
+  /* qo'yilardi — kichik odam uchun bu 25 % dan oshiq taqchillik edi.    */
+  /* Oqsil taqchillikda ko'proq kerak, mushak saqlanishi uchun: 'lose'   */
+  /* da 2,0 g/kg (ilgari saqlashdagi bilan bir xil 1,6 edi).             */
+  /* Me'yor hech qachon asosiy almashinuvdan (BMR) past tushmaydi.       */
+  /* ------------------------------------------------------------------ */
+  const GOAL = {
+    lose: { share: -0.20, lo: -700, hi: -250, prot: 2.0 },
+    keep: { share: 0, lo: 0, hi: 0, prot: 1.6 },
+    gain: { share: 0.12, lo: 200, hi: 500, prot: 1.8 },
+  };
   function computeTargets() {
     const p = D.S.profile || {};
-    const kg = weightOf(); if (!kg) return null;
-    const cm = heightOf(), age = ageOf();
-    const approx = !cm || !age;
-    const bmr = 10 * kg + 6.25 * (cm || 170) - 5 * (age || 30) + (p.sex === 'f' ? -161 : 5);
-    const act = ACT[D.clamp(Math.round(num(p.activity) ?? 3), 0, 5)];
-    const goal = GOAL_ADJ[p.goal] !== undefined ? p.goal : 'keep';
-    const kcal = Math.max(1200, r0(bmr * act + GOAL_ADJ[goal]));
-    const prot = r0(kg * (goal === 'gain' ? 2.0 : 1.6));
+    const e = D.whoop && D.whoop.energy ? D.whoop.energy() : null;
+    if (!e || !e.tdee || !e.kg) return null;
+    const goal = GOAL[p.goal] ? p.goal : 'keep';
+    const g = GOAL[goal];
+    const adj = g.share ? D.clamp(Math.round(e.tdee * g.share), g.lo, g.hi) : 0;
+    const kcal = Math.max(1200, e.bmr || 1200, r0(e.tdee + adj));
+    const prot = r0(e.kg * g.prot);
     const fat = r0((kcal * 0.25) / 9);
     const carbs = Math.max(0, r0((kcal - prot * 4 - fat * 9) / 4));
-    return { kcal, p: prot, c: carbs, f: fat, approx, bmr: r0(bmr), goal, kg };
+    return { kcal, p: prot, c: carbs, f: fat, approx: e.approx, source: e.source, days: e.days, bmr: e.bmr, tdee: e.tdee, goal, kg: e.kg };
   }
   D.food = D.food || {};
   D.food.recalcTargets = () => {
@@ -158,7 +156,7 @@
     const tg = F().targets;
     if (tg.auto) {
       const c = computeTargets();
-      if (c) return { kcal: c.kcal, p: c.p, c: c.c, f: c.f, auto: true, approx: c.approx };
+      if (c) return { kcal: c.kcal, p: c.p, c: c.c, f: c.f, auto: true, approx: c.approx, source: c.source, days: c.days, tdee: c.tdee };
       return { kcal: num(tg.kcal), p: num(tg.p), c: num(tg.c), f: num(tg.f), auto: true, approx: true };
     }
     return { kcal: num(tg.kcal), p: num(tg.p), c: num(tg.c), f: num(tg.f), auto: false };

@@ -154,6 +154,13 @@ D.whoop.readiness()      // {pct, zone, sleepH, strain, label} for the Today str
 D.whoop.fillSleep()      // writes health[date].sleep (archive/Tarix read it; nothing in the UI edits it any more)
 D.whoop.workoutsOn(key)  D.whoop.workoutRows(key, {empty:false})   // Today's WHOOP workouts card + Health › strain
 D.whoop.bioAge()         // {est, chrono, delta, inputs:[{k,v,effect}]} | null — transparent 30-day estimate
+D.whoop.energy()         // {tdee, bmr, source:'measured'|'estimated', days, kg, cm, age, approx} | null
+                         //   ilovadagi YAGONA energiya manbai — Ovqat me'yori ham, Sog'liq sahifasi ham shundan.
+                         //   `measured`: so'nggi 28 kun ichida >= 10 ta WHOOP sikli bo'lsa, ularning qirqilgan
+                         //   o'rtachasi (past/yuqori 10 % tashlanadi). Bugun kirmaydi — sikl tugamagan.
+                         //   `estimated`: Mifflin-St Jeor x ACT_F[activity], ACT_F = [1.2,1.375,1.55,1.725,1.9,2.05].
+                         //   Yosh D.profileAge() dan. Vazn: profil -> WHOOP body -> so'nggi 60 kun health.weight.
+D.whoop.tdee()           // energy().tdee | null (eski chaqiruvlar uchun ingichka qobiq)
 
 // Соғлиқ sahifalari — health.js faqat shularni yig'adi:
 D.whoop.hero(key)        // recovery ring + verdict + strain gauge + plain-language notes
@@ -179,7 +186,10 @@ Masofa metrda, puls zonalari aniq davomiylikda.
 D.food.tile(dayKey)        // Today tile HTML ('' when nothing to show) → D.go('food')
 D.food.dayTotals(dayKey)   // {kcal,p,c,f} | null
 D.food.targets()           // {kcal,p,c,f,auto}
-D.food.recalcTargets()     // Mifflin-St Jeor × activity ± goal (−400/0/+300), protein 1.6 g/kg (2.0 gain), fat 25 %, carbs rest
+D.food.recalcTargets()     // D.whoop.energy() -> TDEE; maqsad TDEE ning ulushi (lose −20 % [−700..−250],
+                           //   gain +12 % [+200..+500]), me'yor BMR dan past tushmaydi; oqsil lose 2,0 / keep 1,6 /
+                           //   gain 1,8 g/kg, yog' 25 %, uglevod qolgani. `targets()` manbani ham qaytaradi
+                           //   (`source`, `days`, `tdee`) — Созлаш → Овқат shuni ko'rsatadi.
 ```
 Settings → Ovqat edits `S.food.targets`; a manual value sets `auto=false`, the «Avto» switch recalculates. Profile edits
 (height, weight, birth year, sex, activity, goal) call `recalcTargets()` while `auto` is on.

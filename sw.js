@@ -1,5 +1,5 @@
 /* Service worker: cache-first app shell, network-first API. Bump CACHE on every release. */
-const CACHE = 'dash-v22';
+const CACHE = 'dash-v23';
 const FONTS = CACHE + '-fonts';
 const SHELL = [
   './', './index.html', './app.css', './css/sections.css', './css/ai.css', './css/whoop.css', './css/profile.css', './css/today.css', './css/tasks.css', './css/health.css', './css/finance.css', './css/ibodat.css', './css/nova.css', './css/food.css', './css/settings.css', './css/history.css', './css/onboard.css', './manifest.json', './icons/icon.svg',

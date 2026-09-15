@@ -661,8 +661,17 @@
   /* ------------------------------------------------------------------ */
   /* 6. quick strip                                                      */
   /* ------------------------------------------------------------------ */
-  // same target as the Health › Water tab (manual ml, else 35 ml/kg from profile or last logged weight + activity/sex/age bonuses)
-  function waterTargetMl() {
+  /* Suv me'yori: qo'lda kiritilgan bo'lsa o'sha, bo'lmasa 35 ml/kg + faollik,
+     jins va yosh qo'shimchasi. Yosh D.profileAge() dan olinadi — `p.age`
+     onboardingda bir marta yozilgan surat bo'lib, keyingi yili eskiradi.
+     Ustiga o'sha kunning WHOOP mashg'uloti qo'shiladi: har soat mashqqa
+     ~500 ml (ter bilan yo'qotish), ko'pi bilan +1 500 ml. Ya'ni og'ir
+     mashq qilgan kun me'yor o'zi ko'tariladi — qo'lda tuzatish shart emas. */
+  function workoutMinsOn(key) {
+    if (!D.whoop || !D.whoop.workoutsOn || !(D.S.whoop || {}).connected) return 0;
+    try { return D.sum(D.whoop.workoutsOn(key || D.today()), (w) => +w.mins || 0); } catch (e) { return 0; }
+  }
+  function waterTargetMl(key) {
     const st = D.S.settings, p = D.S.profile || {};
     const manual = +st.waterTargetMl || 0;
     if (manual > 0) return manual;
@@ -673,13 +682,17 @@
       if (!kg) kg = 70;
     }
     const act = D.clamp(p.activity === null || p.activity === undefined ? 3 : +p.activity || 0, 0, 5);
-    return Math.round(kg * 35 + act * 100 + (p.sex === 'm' ? 200 : 0) + ((+p.age || 0) >= 50 ? 100 : 0));
+    const age = D.profileAge() || 0;
+    let ml = Math.round(kg * 35 + act * 100 + (p.sex === 'm' ? 200 : 0) + (age >= 50 ? 100 : 0));
+    const mins = workoutMinsOn(key);
+    if (mins > 0) ml += Math.min(1500, Math.round((mins / 60) * 500));
+    return ml;
   }
   function waterInfo(k) {
     const st = D.S.settings;
     const water = +((D.S.health[k] || {}).water) || 0;
     const ml = Math.max(50, +st.waterMl || 250);
-    const serv = Math.max(1, Math.ceil(waterTargetMl() / ml));
+    const serv = Math.max(1, Math.ceil(waterTargetMl(k) / ml));
     return { water, serv, pct: D.clamp((water / serv) * 100, 0, 100), zone: water >= serv ? 'z-good' : water >= serv / 2 ? 'z-warn' : '' };
   }
   const waterBar = (w) => `<i class="bar-fill" style="width:${w.pct.toFixed(0)}%;background:var(--info)"></i>`;
