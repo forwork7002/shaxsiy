@@ -62,55 +62,64 @@
 @media (max-width: 360px){ .fd-water { gap: 7px; padding: 10px; } .fd-water-b { width: 32px; height: 32px; } }
 
 /* ---- rasm tugmasi: bo'limning asosiy ishi ----
-   Bo'lim rangi qattiq plita bo'lib emas, shisha bo'lib keladi: karta fonining
-   ustida bo'lim rangi tiniq qatlam sifatida yotadi, yuqori qirrasi yorug',
-   zatvor doirasi orqasida yumshoq nur, chetida rangli shu'la. Til `.hero`
-   bilan bir xil (sections.css) — o'sha yerdagi rang aralashtirish usuli.
+   Bo'limda kun bo'yi bosiladigan yagona katta tugma shu, shuning uchun u
+   WHOOP tilida TO'LDIRILGAN tugma: kartadagi yagona to'liq bo'yalgan yuza.
+   Rangi bu yerda yozilmaydi — to'ldirish `--btn-grad`, yozuv `--on-btn`,
+   ikkalasini whoop-ui.css beradi va ular temaga qarab o'zi almashadi.
 
-   #view va :not() lar bejiz emas: sections.css dagi
-   `#view .btn:not(.ghost):not(.danger):not(.icon)` shu tugmaning fonini
-   bosib ketadi, shuning uchun bu yerda aynan shu og'irlik takrorlanadi.
-   Yozuv rangi ham qaytariladi — shisha ustida qora siyoh o'qilmaydi. */
+   NEGA BU YERDA RANG YO'Q (2026-09-15, buzilib turgan holatdan keyin).
+   Ilgari bu yerda «shisha» varianti turardi: bo'lim rangi, ichki nur,
+   chetida shu'la — va u fonni ham, yozuv rangini ham o'zi belgilardi.
+   whoop-ui.css hammasidan keyin yuklanadi va fonni `--btn-grad` ga
+   almashtirardi, lekin bu yerdagi
+   `[data-theme="light"] #view .fd-shot:not(.ghost):not(.danger):not(.icon)`
+   og'irligi kattaroq bo'lgani uchun YOZUV rangi `var(--text)` bo'lib
+   qolardi. Natija: yorug' temada qora tugma ustida qora yozuv —
+   «Ovqatni rasmga oling» butunlay ko'rinmasdi, tugmada bo'm-bo'sh joyda
+   bitta doira turardi. Xuddi shu narsa «Tahlil» tugmasida ham bo'lgan:
+   qora doira ichida qora belgi.
+
+   Qoida: bu yerda tugmaning FONI ham, YOZUV RANGI ham yozilmaydi.
+   Ichidagi doira `currentColor` dan olinadi — ya'ni yozuvning o'zidan,
+   demak har ikki temada ham o'zi to'g'ri chiqadi, alohida
+   `[data-theme]` qatori kerak emas.
+
+   O'lchamlar `.fd-cap .fd-shot` — ikkita sinf orqali yoziladi:
+   whoop-ui.css dagi `.btn` bitta sinf, ya'ni keyin yuklansa ham bosib
+   keta olmaydi. Yolg'iz `.fd-shot` deb yozsangiz, o'lchamlaringiz
+   jimgina yo'qoladi. */
 .fd-cap { padding: 12px; }
-.fd-shot { height: 56px; gap: 11px; font-size: 14px; border-radius: var(--r); cursor: pointer;
-  position: relative; overflow: hidden; }
-#view .fd-shot:not(.ghost):not(.danger):not(.icon) { color: var(--text);
-  border: 1px solid color-mix(in srgb, var(--sec) 42%, var(--card-line));
-  background:
-    linear-gradient(205deg, color-mix(in srgb, var(--sec) 32%, transparent) 0%, color-mix(in srgb, var(--sec) 11%, transparent) 46%, transparent 78%),
-    var(--card-solid);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.30), 0 12px 30px rgba(0,0,0,.40),
-    0 0 34px -12px color-mix(in srgb, var(--sec) 70%, transparent); }
-[data-theme="light"] #view .fd-shot:not(.ghost):not(.danger):not(.icon) { color: var(--text);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 10px 24px color-mix(in srgb, var(--text) 10%, transparent),
-    0 0 30px -12px color-mix(in srgb, var(--sec) 50%, transparent); }
-/* zatvor orqasidagi nur — doira shishaning ichida yoritilgandek turadi */
-.fd-shot::after { content: ''; position: absolute; left: 4px; top: 50%; width: 150px; height: 150px; margin-top: -75px;
-  border-radius: 50%; pointer-events: none; filter: blur(24px);
-  background: radial-gradient(circle, color-mix(in srgb, var(--sec) 34%, transparent), transparent 70%); }
-.fd-shot > span { position: relative; z-index: 1; }
-.fd-shot .fd-lens { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%;
-  background: radial-gradient(circle at 36% 26%, rgba(255,255,255,.24), rgba(255,255,255,.03) 62%), rgba(0,0,0,.30);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.32), inset 0 0 0 1px rgba(255,255,255,.11), 0 1px 3px rgba(0,0,0,.4);
-  transition: transform .18s var(--ease-spring), box-shadow .18s; }
-@media (hover: hover) { .fd-shot:hover .fd-lens { box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 0 0 1px rgba(255,255,255,.2), 0 1px 3px rgba(0,0,0,.4); } }
-.fd-shot:active .fd-lens { transform: scale(.86); }
+.fd-cap .fd-shot { min-height: 60px; gap: 12px; padding: 14px 20px;
+  font-size: 13px; letter-spacing: .08em; }
+/* zatvor doirasi — yozuv rangining o'zidan, past shaffoflikda */
+.fd-cap .fd-shot .fd-lens { flex: none; display: grid; place-items: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 26%, transparent);
+  transition: transform .18s var(--ease-spring), background .18s; }
 .fd-shot .ic { flex: none; }
-[data-theme="light"] .fd-shot .fd-lens { background: radial-gradient(circle at 36% 26%, rgba(255,255,255,.95), rgba(255,255,255,.4) 62%), color-mix(in srgb, var(--sec) 12%, transparent);
-  box-shadow: inset 0 1px 0 #fff, inset 0 0 0 1px color-mix(in srgb, var(--sec) 26%, transparent), 0 1px 3px color-mix(in srgb, var(--sec) 20%, transparent); }
-@media (prefers-reduced-motion: reduce){ .fd-shot .fd-lens { transition: none; } .fd-shot:active .fd-lens { transform: none; } }
-.fd-cap-row { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
-.fd-cap-row .fd-text { flex: 1; min-width: 0; }
-.fd-cap-row label.btn { cursor: pointer; }
-/* «tahlil» tugmasi ham shu shishadan — aks holda kichkina qattiq kvadrat
-   o'zidan kattaroq asosiy tugmadan balandroq qichqiradi */
-#view .fd-send:not(.ghost):not(.danger):not(.icon) { color: var(--text);
-  border: 1px solid color-mix(in srgb, var(--sec) 34%, var(--card-line));
-  background: linear-gradient(150deg, color-mix(in srgb, var(--sec) 22%, transparent), color-mix(in srgb, var(--sec) 7%, transparent) 70%), var(--card-solid);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 4px 14px rgba(0,0,0,.30); }
-[data-theme="light"] #view .fd-send:not(.ghost):not(.danger):not(.icon) { color: var(--text);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 4px 12px color-mix(in srgb, var(--text) 8%, transparent); }
-@media (max-width: 380px){ .fd-cap { padding: 10px; } .fd-cap-row { gap: 5px; } .fd-cap-row .btn.sq { width: 38px; height: 38px; } }
+@media (hover: hover) { .fd-cap .fd-shot:hover .fd-lens { background: color-mix(in srgb, currentColor 24%, transparent); } }
+.fd-cap .fd-shot:active .fd-lens { transform: scale(.88); }
+@media (prefers-reduced-motion: reduce){ .fd-cap .fd-shot .fd-lens { transition: none; } .fd-cap .fd-shot:active .fd-lens { transform: none; } }
+
+/* Fayl tanlagich ko'rinmaydi, lekin FOKUSNI oladi. Ilgari u `hidden` edi:
+   `<label>` ning o'zi fokus olmaydi, ichidagi input esa yashirin edi —
+   ya'ni bo'limning asosiy tugmasiga klaviatura bilan umuman yetib
+   bo'lmasdi. Endi Tab kelganda halqa yorliqning atrofida chiziladi. */
+.fd-pick { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
+  border: 0; overflow: hidden; clip-path: inset(50%); }
+.fd-cap label.btn { position: relative; cursor: pointer; }
+.fd-cap label.btn:focus-within { outline: 2px solid var(--ring); outline-offset: 2px; }
+
+/* Ostidagi qator: doira · pill · doira — uchalasi bitta oilada.
+   «Tahlil» matn yozilgunicha ghost bo'lib turadi (sinfni food.js
+   almashtiradi) — aks holda kartada ikkita to'ldirilgan yuza bo'lib,
+   ikkisi ham asosiy ishga o'xshab qoladi. */
+.fd-cap-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.fd-cap-row .fd-text { flex: 1; min-width: 0; height: 42px; padding: 0 16px; border-radius: var(--r-pill); }
+@media (max-width: 380px){ .fd-cap { padding: 10px; } .fd-cap-row { gap: 6px; }
+  .fd-cap-row .btn.sq { width: 38px; height: 38px; }
+  .fd-cap .fd-shot { padding: 14px 14px; gap: 10px; letter-spacing: .05em; } }
 
 /* ---- tahlil: rasm → nom → katta kkal → makrolar → tarkib → bitta maslahat ---- */
 .fd-busy-row { display: flex; align-items: center; gap: 10px; color: var(--text3); font-size: 13px; padding: 6px 0; }

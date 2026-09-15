@@ -407,7 +407,18 @@
     }
   }
 
-  D.act.fdDraft = (el) => { draft = el.value; };
+  /* Har harfda D.rerender() qilib bo'lmaydi — yozayotgan odam fokusdan
+     ajralib qoladi. Shuning uchun «Tahlil» tugmasi shu yerda, qo'lda
+     almashtiriladi: bo'sh maydonda ghost va o'chiq, matn paydo bo'lishi
+     bilan to'ldirilgan va ishlaydigan. */
+  D.act.fdDraft = (el) => {
+    draft = el.value;
+    const b = el.parentNode && el.parentNode.querySelector('.fd-send');
+    if (!b) return;
+    const ready = !!draft.trim();
+    b.disabled = !ready;
+    b.classList.toggle('ghost', !ready);
+  };
   D.act.fdSend = () => {
     const text = draft.trim();
     if (!text || busy) return;
@@ -602,13 +613,17 @@
      ko'rinadi va barmoqqa yaqin. Matn bilan yozish — ostidagi kichik qator. */
   function capture() {
     const off = busy ? 'disabled' : '';
+    // «Tahlil» yozadigan narsa bo'lgandagina jonlanadi: bo'sh maydonda u
+    // to'ldirilgan bo'lib tursa, kartada ikkita bir xil baland tugma bo'lib,
+    // qaysi biri asosiy ekani ko'rinmay qoladi.
+    const ready = !!draft.trim() && !busy;
     return `<div class="card fd-cap" data-k="fd-cap">
       <label class="btn block fd-shot"><span class="fd-lens">${D.ic('camera', 17)}</span><span>${esc(t('food.camera'))}</span>
-        <input type="file" accept="image/*" capture="environment" data-change="fdPhoto" hidden ${off}></label>
+        <input type="file" accept="image/*" capture="environment" class="fd-pick" data-change="fdPhoto" ${off}></label>
       <div class="fd-cap-row">
-        <label class="btn ghost sq" title="${esc(t('food.gallery'))}" aria-label="${esc(t('food.gallery'))}">${D.ic('grid', 18)}<input type="file" accept="image/*" data-change="fdPhoto" hidden ${off}></label>
+        <label class="btn ghost sq" title="${esc(t('food.gallery'))}">${D.ic('grid', 18)}<input type="file" accept="image/*" class="fd-pick" aria-label="${esc(t('food.gallery'))}" data-change="fdPhoto" ${off}></label>
         <input class="inp fd-text" id="fdText" maxlength="300" placeholder="${esc(t('food.ph'))}" value="${esc(draft)}" data-input="fdDraft" data-enter="fdSend" autocomplete="off" ${off}>
-        <button class="btn sq fd-send" data-act="fdSend" aria-label="${esc(t('food.send'))}" ${off}>${D.ic('sparkles', 18)}</button>
+        <button class="btn sq fd-send${ready ? '' : ' ghost'}" data-act="fdSend" aria-label="${esc(t('food.send'))}" ${ready ? '' : 'disabled'}>${D.ic('sparkles', 18)}</button>
       </div>
     </div>`;
   }
