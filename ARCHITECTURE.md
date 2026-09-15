@@ -479,12 +479,19 @@ Guarded by `tests/test_durability.py` (39 checks): round-trip through compressio
 
 Written after v98 (2026-09-15) shipped a live TypeError that every check passed.
 
-**What happened.** A dead-code sweep removed `D.icons = P` from `core.js` as
-unreferenced, but `settings.js:732` still read `D.icons[c.icon]` unguarded.
-Settings → finance categories threw on render. The deploy was verified by
-requesting every path in `sw.js` and confirming each returned `200` — and it
-did. The file existed. The *link between two files* was broken, and an HTTP
-status code cannot see that.
+**What happened.** A dead-code sweep (`d3b6b99`) removed `D.icons = P` from
+`core.js` as unreferenced. Independently, the icon work (`507c446`) had
+`settings.js:732` read `D.icons[c.icon]` unguarded. **Both commits were
+correct on their own; the break only existed once they were merged.** The
+deploy was verified by requesting every path in `sw.js` and confirming each
+returned `200` — and it did. The file existed. The *link between two files*
+was broken, and an HTTP status code cannot see that.
+
+**And it never looked like an error.** `settings.js:1086` wraps each card in
+`safe()`, which catches, logs and returns `''`. So the throw produced no
+banner, no crash, no visibly broken layout — the "Moliya kategoriyalari" card
+simply was not there. A screenshot looks fine unless you already know what
+should have been in it. Expect silent disappearance, not a stack trace.
 
 The same blind spot had already let v96 and v97 ship without `js/install.js`:
 the 49 stale files all answered `200` perfectly well.
@@ -502,10 +509,18 @@ the 49 stale files all answered `200` perfectly well.
    Normalise CRLF first. Expect exactly one difference: `index.html`, and
    only on the `?v=` lines, which `push.sh` rewrites. Anything else is
    unexplained until you explain it.
-3. **Does it run?** Open the app in a real browser and visit the screens the
-   release touched, with the console open. Checks 1 and 2 are both static;
-   neither would have caught the `D.icons` break, because the file was
-   present *and* byte-identical to the commit that contained the bug.
+3. **Does it run?** Checks 1 and 2 are both static, and neither could have
+   caught the `D.icons` break: the file was present *and* byte-identical to
+   the commit that contained the bug. Only executing the code finds a broken
+   link between two files, and this is the check worth the most.
+
+   Open the app in a real browser and visit the screens the release touched,
+   with the console open. When the app needs a login you do not have, there
+   is a cheap substitute: pull the shipped files off the server, render the
+   same module against the same seed data under both the live copy and the
+   deployed commit, and compare the resulting DOM (`--dump-dom`). That is how
+   this bug was caught — live produced 0 category rows, `HEAD` produced 2.
+   Count what should be on the screen; do not judge by eye.
 
 **Deploy from a clean checkout, never from the working folder.** `push.sh`
 sends the folder, so anything half-written — by you or by another session
