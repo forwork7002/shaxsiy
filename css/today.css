@@ -230,3 +230,82 @@
   .td-ring-lab { letter-spacing: .04em; }
   .td-hero-adv { font-size: 13px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════
+   BUGUN EKRANINING OVOZI (2026-09-15)
+
+   Muammo bezakda emas edi: ekranda olti xil rang bir vaqtda gapirardi.
+   WHOOP kartasidagi yashil/sariq/ko'k — MA'NOLI, u o'lchovning tili.
+   Lekin o'sha ranglar sahifaning boshqa joylarida ham qaytarilardi
+   (daraja qatoridagi sariq «40 kun», guruh nuqtalari, cheklistdagi yashil
+   raqam) — va aynan shundan rang ma'no bildirishdan to'xtaydi.
+
+   Shuning uchun qoida: RANG FAQAT WHOOP KARTASIDA. Qolgan hamma joyda
+   neytral va bitta urg'u. WHOOP kartasining o'z uslubiga (zona tasmasi,
+   halqalar) TEGILMAGAN — u boshqa sessiyaning o'lchab qilingan ishi.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ---- cheklist: sahifaning asl mazmuni, havo ham unga ----
+   Qatorlar kattaroq, mayda ko'rsatkich chiziqlari bitta rangda, raqamlar
+   bitta uslubda. Ilgari Namozlar yashil, Odatlar «ruh» rangi, Vazifalar
+   ko'k, Maqsadlar sariq edi — to'rtta rang bir xil ma'noni aytardi. */
+[data-view="today"] .td-grp { padding: 15px 0; gap: 12px; }
+[data-view="today"] .td-grp-name { font-size: 15px; }
+[data-view="today"] .td-grp-bar { width: 48px; }
+[data-view="today"] .td-grp-n { font-size: 14px; color: var(--text); }
+[data-view="today"] .td-grp.all .td-grp-n { color: var(--text); }
+[data-view="today"] .td-grp .td-kind { background: var(--text4); }
+[data-view="today"] .td-grp .bar-fill { background: var(--text2); }
+[data-view="today"] .td-grp.all .bar-fill { background: var(--success); }
+
+/* ---- pastdagi uchta raqam ----
+   Ular pastki panel ostida qolib, yozuvi qirqilardi («kkal» ko'rinmasdi).
+   Endi quti emas, bitta jimjit qator; panelga tegmaydi. */
+[data-view="today"] .td-strip2 { margin-bottom: 8px; }
+[data-view="today"] .td-strip2-item { padding: 12px 10px; }
+[data-view="today"] .td-strip2-val { font-size: 15px; font-weight: 700; color: var(--text); }
+[data-view="today"] .td-strip2-val small { font-size: 11px; color: var(--text3); font-weight: 600; }
+[data-view="today"] .td-strip2-lab { font-size: 11px; color: var(--text3); line-height: 1.3; }
+
+/* ---- DARAJA O'LCHAGICHI ----
+   Har bo'linma — birlik: kunlikda bir hovuch ochko, haftalikda bitta namoz.
+   Ya'ni chiziqni SANASA bo'ladi; u bezak emas, o'lchov. Bo'linmalar dumaloq
+   emas — asbob shkalasi kabi tekis, va oralig'i 2px: uzoqdan yaxlit chiziq,
+   yaqindan sanaladigan shkala. */
+.td-lv { display: block; width: 100%; text-align: left; border: 1px solid var(--line); cursor: pointer;
+  padding: 14px 15px 13px; transition: border-color .2s, transform .1s; }
+.td-lv:active { transform: scale(.995); }
+@media (hover: hover) { .td-lv:hover { border-color: var(--line2); } }
+.td-lv-row { display: flex; align-items: baseline; gap: 10px; }
+.td-lv-name { flex: 1; min-width: 0; font-size: 14px; font-weight: 600; letter-spacing: -.01em; color: var(--text);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Daraja raqami — nishon emas, nomning davomi: yonida, mayda, jimjit. */
+.td-lv-name em { font-style: normal; font-size: 12px; font-weight: 600; color: var(--text4); margin-left: 7px; letter-spacing: 0; }
+.td-lv-n { flex: none; font-size: 13px; font-weight: 700; color: var(--text); font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
+.td-lv-n i { font-style: normal; font-weight: 600; color: var(--text4); }
+
+.td-gauge { display: flex; gap: 3px; margin: 10px 0 9px; height: 12px; }
+.td-tick { flex: 1 1 0; border-radius: 1px; background: color-mix(in srgb, var(--text) 11%, transparent);
+  transition: background .25s var(--ease-out), box-shadow .25s var(--ease-out); }
+.td-tick.on { background: var(--text); }
+.td-tick.half { background: color-mix(in srgb, var(--text) 42%, transparent); }
+/* Har beshinchi bo'linma sal yorqinroq — asbob shkalasidagi katta belgi.
+   Bezak emas: beshtalab sanashni osonlashtiradi. */
+.td-tick:nth-child(5n) { background: color-mix(in srgb, var(--text) 20%, transparent); }
+.td-tick:nth-child(5n).on { background: var(--text); }
+.td-tick:nth-child(5n).half { background: color-mix(in srgb, var(--text) 42%, transparent); }
+/* Yagona nur — shkalaning hozirgi joyida. Boshqa hech qayerda porlash yo'q. */
+.td-tick.lead { box-shadow: 0 0 10px color-mix(in srgb, var(--text) 55%, transparent); }
+.td-lv.done .td-tick.on { background: var(--success); }
+.td-lv.done .td-tick.lead { box-shadow: 0 0 12px var(--success-glow); }
+
+.td-lv-sub { display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  font-size: 11px; color: var(--text3); }
+
+/* Haftalik sinov — xuddi shu shakl, kichikroq: ikkalasi ham maqsad. */
+.td-lv-w { display: block; margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--line); }
+.td-lv-wt { flex: 1; min-width: 0; font-size: 12px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-lv-w .td-lv-n { font-size: 12px; color: var(--text2); }
+.td-lv-w .td-gauge { height: 8px; margin: 8px 0 0; gap: 3px; }
+.td-lv-w.done .td-tick.on { background: var(--success); }
+@media (max-width: 380px){ .td-gauge { gap: 1.5px; } }

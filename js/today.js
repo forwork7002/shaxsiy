@@ -585,6 +585,64 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* DARAJA — o'yin nishoni emas, ASBOB                                   */
+  /*                                                                      */
+  /* Egasi eski ko'rinishni «multfilm» dedi, va u haq edi: doiradagi katta */
+  /* raqam (o'yin nishoni), butun kenglikdagi dumaloq chiziq (yuklanish    */
+  /* chizig'i) va sariq pill (stiker) — uchta boshqa-boshqa o'yin naqshi   */
+  /* ustma-ust turardi.                                                   */
+  /*                                                                      */
+  /* O'rniga bitta til: MAYDA BO'LINMALI O'LCHAGICH. Har bo'linma — bir   */
+  /* hovuch ochko (kunlik) yoki bitta namoz (haftalik), ya'ni chiziq       */
+  /* bezak emas, birlikni ko'rsatadi: sanab ko'rish mumkin. Kunlik va      */
+  /* haftalik o'lchagich BIR XIL shaklda, ikki o'lchamda — ikkalasi ham    */
+  /* maqsad, farqi faqat muddatida.                                       */
+  /*                                                                      */
+  /* Rang qo'shilmadi: to'lgan bo'linma matn rangida, bo'shi chiziq        */
+  /* rangida. Yashil faqat maqsad bajarilganda va faqat bir joyda.        */
+  /* ------------------------------------------------------------------ */
+  const TICKS = 30;
+  /** n ta bo'linma, `done` tasi yonadi; oxirgisi yarim yonishi mumkin. */
+  function gauge(cur, need, n) {
+    const full = need > 0 ? D.clamp((cur / need) * n, 0, n) : 0;
+    const on = Math.floor(full), part = full - on;
+    let h = '';
+    for (let i = 0; i < n; i++) {
+      // Oxirgi yongan bo'linma — «hozir shu yerdasiz»: yagona nur shu yerda.
+      const cls = i < on ? (i === on - 1 && part < 0.15 ? 'on lead' : 'on')
+                : (i === on && part > 0.15 ? 'half lead' : '');
+      h += `<i class="td-tick ${cls}"></i>`;
+    }
+    return `<span class="td-gauge" aria-hidden="true">${h}</span>`;
+  }
+
+  function levelRow() {
+    const d = D.levels.day(), i = D.levels.info(), w = D.levels.week();
+    const rank = esc(t('lv.r.' + i.rank.id));
+    const left = d.done ? esc(t('lv.day.done')) : esc(t('lv.day.left', { n: D.fmtNum(d.left) }));
+    const streak = d.cur ? esc(t('lv.day.streak', { n: D.fmtNum(d.cur) })) : '';
+    const wTxt = esc(t('lv.w.' + w.id, { n: D.fmtNum(w.need) }));
+    return `<button type="button" class="card td-lv${d.done ? ' done' : ''}" data-act="lvOpen" aria-label="${esc(t('lv.title'))}">
+      <span class="td-lv-row">
+        <span class="td-lv-name">${rank}<em class="num">${D.fmtNum(i.level)}</em></span>
+        <span class="td-lv-n num">${D.fmtNum(d.xp)}<i>/${D.fmtNum(d.goal)}</i></span>
+      </span>
+      ${gauge(d.xp, d.goal, TICKS)}
+      <span class="td-lv-sub">
+        <span>${left}</span>
+        ${streak ? `<span>${streak}</span>` : ''}
+      </span>
+      <span class="td-lv-w${w.done ? ' done' : ''}">
+        <span class="td-lv-row">
+          <span class="td-lv-wt">${wTxt}</span>
+          <span class="td-lv-n num">${D.fmtNum(Math.min(w.cur, w.need))}<i>/${D.fmtNum(w.need)}</i></span>
+        </span>
+        ${gauge(w.cur, w.need, D.clamp(w.need, 5, 24))}
+      </span>
+    </button>`;
+  }
+
+  /* ------------------------------------------------------------------ */
   /* live updates                                                        */
   /* ------------------------------------------------------------------ */
   D.on('tick', () => {
@@ -620,7 +678,7 @@
       // Daraja qatori ataylab ingichka va ataylab TAYYORLIK HERO'SIDAN OLDIN
       // emas — u kunning asosiy raqami bo'lib qolishi kerak. Faqat bugungi
       // kunda ko'rinadi: o'tgan kunni ochganda "bugun +N ochko" yolg'on bo'lardi.
-      const lv = k === td && D.levels ? safe(() => D.levels.tile()) : '';
+      const lv = k === td && D.levels ? safe(() => levelRow()) : '';
       return safe(() => weekStrip(k)) + lv + safe(() => heroCard(k)) + safe(() => listCard(k)) + safe(() => numbersStrip(k));
     },
   });
