@@ -50,7 +50,7 @@
    ularni boshqa-boshqa narsa deb o'qirdi. Endi bitta: 11px, .15em.
    --------------------------------------------------------------------- */
 .eyebrow, .stat-label, .kpi-label, .field-label, .hero-eyebrow,
-.section-title, .dashed, .wh-trend-name, .wh-ready-label, .td-kpi-lab,
+.section-title, .dashed, .wh-trend-name, .wh-ready-label,
 .ring-sub, .arc-sub, .nav-lab, .top-sub, .wh-ring > span {
   font-size: 11px; font-weight: 600; letter-spacing: .15em;
   text-transform: uppercase; color: var(--text3);
@@ -70,7 +70,7 @@
    zich (-.04em) va JADVAL kengligida: 1 bilan 8 bir xil joy egallaydi,
    ya'ni har soniyada yangilanadigan son sakramaydi.
    --------------------------------------------------------------------- */
-.kpi-num, .hero-num, .stat-num, .ring-pct, .arc-num, .td-kpi-val,
+.kpi-num, .hero-num, .stat-num, .ring-pct, .arc-num,
 .wh-ready-num, .wh-trend-val, .stepper .val, .li-right {
   font-weight: 700; font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1; letter-spacing: -.04em; color: var(--text);
@@ -85,12 +85,10 @@
 .arc-num { font-size: 46px; font-weight: 700; line-height: .95; }
 .arc-num small { font-size: 16px; font-weight: 600; color: var(--text3); letter-spacing: 0; }
 .ring-pct { font-size: 27px; letter-spacing: -.045em; }
-.td-kpi-val { font-size: 23px; }
 .wh-trend-val { font-size: 22px; }
 @media (max-width: 400px) {
   .hero-num { font-size: 40px; } .kpi-num { font-size: 38px; }
   .arc-num { font-size: 40px; } .stat-num { font-size: 22px; }
-  .td-kpi-val { font-size: 20px; }
 }
 
 /* ---------------------------------------------------------------------
@@ -131,8 +129,6 @@
 .td-ready.z-bad  { --z: var(--z-low); }
 .td-ready-state { font-size: 15px; font-weight: 700; letter-spacing: .1em;
   text-transform: uppercase; color: var(--z); }
-.td-kpis { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 15px; }
-.td-kpi-d { font-size: 11px; font-weight: 700; letter-spacing: .02em; }
 
 /* hero — bo'limning bosh o'lchovi */
 .hero-main { gap: 18px; margin-top: 10px; align-items: center; }
@@ -462,7 +458,6 @@
 .arc-num { font-size: 56px; letter-spacing: -.05em; }
 .arc-val { margin-top: -52px; }
 .ring-pct { font-size: 29px; }
-.td-kpi-val { font-size: 25px; }
 .stat { padding: 15px 13px 14px; }
 .stat-num { font-size: 27px; }
 .top-title { font-size: 30px; letter-spacing: -.04em; }
@@ -471,7 +466,7 @@
   .divider { margin: 16px -15px; }
   .hero-num { font-size: 46px; } .kpi-num { font-size: 42px; }
   .arc-num { font-size: 46px; } .arc-val { margin-top: -44px; }
-  .stat-num { font-size: 23px; } .td-kpi-val { font-size: 21px; }
+  .stat-num { font-size: 23px; }
   .top-title { font-size: 25px; }
 }
 /* Kengroq ekranda sahifa ham kengayadi — «keng» talabi shu yerda ham. */
@@ -504,7 +499,7 @@ body, .inp, .sel, .ta, button, input, select, textarea {
    chiqsa, sahifada ikkita "eng qattiq" narsa paydo bo'ladi va ierarxiya
    yo'qoladi. Yozuv 700 da qoladi. */
 .hero-num, .kpi-num, .arc-num, .top-title { font-weight: 800; }
-.ring-pct, .wh-ready-num, .stat-num, .td-kpi-val { font-weight: 700; }
+.ring-pct, .wh-ready-num, .stat-num { font-weight: 700; }
 
 /* ---------------------------------------------------------------------
    18. OSMON — ilovaning o'ziga xos qismi
@@ -711,4 +706,46 @@ html.sky-turn body::after { animation: skyTurn 2.6s var(--ease-out); }
 .ai-body, .yu-bubble, .bk-title, .help, .hero-sub, .empty, .auth-sub, .auth-hint {
   font-variant-numeric: proportional-nums;
   font-feature-settings: "tnum" 0;
+}
+
+/* ---------------------------------------------------------------------
+   21. ZICHLIK — egasi «compact» dedi
+
+   OGOHLANTIRISH: bu blok bir marta yo’qolgan. U v96 bilan serverga
+   chiqqan, lekin git’ga tushmagan; keyin boshqa sessiya whoop-ui.css ni
+   tahrirlaganda ish papkasidagi nusxa blok’siz qolib ketdi va faqat
+   jonli saytda saqlanib qoldi (2026-09-15 da serverdan qaytarildi).
+   Shuning uchun: bu faylni o’zgartirgan sessiya darhol commit qilsin.
+
+   16-bo'limda «keng» talabi bajarilgan edi: karta to'ldirishi 17 -> 20,
+   bo'limlar orasi 26 -> 32. Endi teskari talab keldi, shuning uchun o'sha
+   qiymatlar qaytarilmaydi — ustiga zichroq qatlam qo'yiladi, toki 16-bo'lim
+   izohi va sababi joyida qolsin va kerak bo'lsa bu blokni o'chirish bilan
+   hammasi tiklansin.
+
+   O'LCHANDI (390px, Bugun ekrani, iframe ichida — headless Chrome
+   --window-size ni layout uchun ishlatmaydi, shuning uchun to'g'ridan-to'g'ri
+   o'lchov yolg'on chiqadi):
+       karta            padding 17/17 · margin-bottom 14
+       ro'yxat kartasi  balandligi 518
+       guruh qatori     51 · namoz qatori 37 · hafta chipi 65
+       sahifa           1478px
+
+   NIMAGA TEGILMAYDI: namoz qatori (.td-row) 37px — u allaqachon iOS ning
+   44px tavsiyasidan past, ya'ni barmoq bilan bosish qiyin. Uni yanada
+   kichraytirish zichlik emas, nuqson bo'lardi. Guruh qatori 51 -> 47 ga
+   tushdi, bu hali ham 44 dan yuqori.
+   --------------------------------------------------------------------- */
+.card, .hero { padding: 13px 15px; margin-bottom: 9px; }
+.card-head { margin-bottom: 9px; }
+.section-title { margin: 18px 0 8px; }
+.page { padding: 4px 15px 28px; }
+.td-grp { padding: 10px 0; }
+.td-strip2-item { padding: 9px 10px; }
+.td-wd { padding: 7px 0 6px; }
+.card.flat { padding: 11px 13px; }
+
+@media (max-width: 400px) {
+  .card, .hero { padding: 12px 13px; margin-bottom: 8px; }
+  .page { padding: 4px 13px 26px; }
 }
