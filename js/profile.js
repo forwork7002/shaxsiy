@@ -16,7 +16,7 @@
     uz: {
       'pf.noName': 'Ism kiritilmagan', 'pf.editName': 'Ismni tahrirlash', 'pf.namePh': 'Ismingiz', 'pf.saved': 'Saqlandi',
       'pf.prov.google': 'Google hisobi', 'pf.prov.password': 'Email va parol bilan', 'pf.prov.owner': 'Egasi', 'pf.prov.env': 'Asosiy hisob', 'pf.prov.local': 'Faqat shu qurilmada',
-      'pf.since': '{d} dan beri', 'pf.days': 'Kunlar', 'pf.habits': 'Odatlar', 'pf.whoopOff': 'ulanmagan',
+      'pf.since': '{d} dan beri', 'pf.days': 'Kunlar', 'pf.habits': 'Odatlar', 'pf.whoopOff': 'ulanmagan', 'pf.whoopOn': 'ulangan',
       'pf.logout': 'Chiqish',
       'pf.photo': 'Rasm tanlash', 'pf.removePhoto': 'Rasmni olib tashlash', 'pf.uploading': 'Yuklanmoqda…',
       'pf.private': "Ma'lumotlaringiz faqat sizning hisobingizda saqlanadi — boshqa hech kim ko'rmaydi.",
@@ -30,7 +30,7 @@
     uzk: {
       'pf.noName': 'Исм киритилмаган', 'pf.editName': 'Исмни таҳрирлаш', 'pf.namePh': 'Исмингиз', 'pf.saved': 'Сақланди',
       'pf.prov.google': 'Google ҳисоби', 'pf.prov.password': 'Email ва парол билан', 'pf.prov.owner': 'Эгаси', 'pf.prov.env': 'Асосий ҳисоб', 'pf.prov.local': 'Фақат шу қурилмада',
-      'pf.since': '{d} дан бери', 'pf.days': 'Кунлар', 'pf.habits': 'Одатлар', 'pf.whoopOff': 'уланмаган',
+      'pf.since': '{d} дан бери', 'pf.days': 'Кунлар', 'pf.habits': 'Одатлар', 'pf.whoopOff': 'уланмаган', 'pf.whoopOn': 'уланган',
       'pf.logout': 'Чиқиш',
       'pf.photo': 'Расм танлаш', 'pf.removePhoto': 'Расмни олиб ташлаш', 'pf.uploading': 'Юкланмоқда…',
       'pf.private': 'Маълумотларингиз фақат сизнинг ҳисобингизда сақланади — бошқа ҳеч ким кўрмайди.',
@@ -44,7 +44,7 @@
     ru: {
       'pf.noName': 'Имя не указано', 'pf.editName': 'Изменить имя', 'pf.namePh': 'Ваше имя', 'pf.saved': 'Сохранено',
       'pf.prov.google': 'Аккаунт Google', 'pf.prov.password': 'По email и паролю', 'pf.prov.owner': 'Владелец', 'pf.prov.env': 'Основной аккаунт', 'pf.prov.local': 'Только на этом устройстве',
-      'pf.since': 'с {d}', 'pf.days': 'Дней', 'pf.habits': 'Привычек', 'pf.whoopOff': 'не подключён',
+      'pf.since': 'с {d}', 'pf.days': 'Дней', 'pf.habits': 'Привычек', 'pf.whoopOff': 'не подключён', 'pf.whoopOn': 'подключён',
       'pf.logout': 'Выйти',
       'pf.photo': 'Выбрать фото', 'pf.removePhoto': 'Убрать фото', 'pf.uploading': 'Загрузка…',
       'pf.private': 'Ваши данные хранятся только в вашем аккаунте — никто другой их не видит.',
@@ -69,7 +69,10 @@
   const online = () => D.serverEnabled() && !!D.me;
   const shortUid = (u) => { u = String(u || ''); return u.length > 12 ? u.slice(0, 10) + '…' : u; };
   const sinceStr = (iso) => { const k = String(iso || '').slice(0, 10); return /^\d{4}-\d{2}-\d{2}$/.test(k) ? D.fmtDate(k, 'short') + ' ' + k.slice(0, 4) : ''; };
-  const whoopName = () => { const p = (D.whoop && D.whoop.profile && D.whoop.profile()) || {}; return [p.first, p.last].filter(Boolean).join(' ') || 'WHOOP'; };
+  /* Yorliq allaqachon «WHOOP» deb turadi, ya'ni nom topilmasa qiymat ham
+     'WHOOP' bo'lsa katakda «WHOOP / WHOOP» chiqardi — bir so'z ikki marta,
+     hech narsa bildirmay. Nom yo'q bo'lsa holatni yozamiz. */
+  const whoopName = () => { const p = (D.whoop && D.whoop.profile && D.whoop.profile()) || {}; return [p.first, p.last].filter(Boolean).join(' ') || t('pf.whoopOn'); };
   const errMsg = (e) => t(({ too_large: 'pf.e.big', bad_image: 'pf.e.image', bad_name: 'pf.e.name' })[e && e.message] || 'pf.e.net');
 
   D.profile = {
