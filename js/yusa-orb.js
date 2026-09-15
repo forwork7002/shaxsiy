@@ -80,7 +80,15 @@
   let drag = null;
   let sig = '';
   let hi = !(D.device && D.device.yusaSeen);   // birinchi marta: orb yonida bir martalik tanishtiruv
-  const pos = Object.assign({ side: 'r', y: 0.6 }, (D.device && D.device.yusa) || {});
+  /* Sukut holati 0.6 emas, 0.75. 0.6 da shar Asosiy ekrandagi kun yoyining
+     o'ng segmentlari ustiga tushardi — o'lchandi (CDP, 320x690 va 390x690):
+     shar 414..472, yoy qutisi 360..509, ya'ni yoyning pastki o'ng uchdan biri
+     yopilardi. Raqam yopilmasdi (harf qutisi 105..215), lekin yoy ma'lumot
+     ko'rsatadi. 0.75 -> shar 517 dan boshlanadi, yoy 509 da tugaydi.
+     Yuqori chegara baribir clamp bilan qo'yilgan: vh - 58 - 96 = 0.777*vh,
+     ya'ni 0.75 pastki menyuga ham tegmaydi. Foydalanuvchi sudrasa, uning
+     tanlovi D.device.yusa da saqlanadi va bu qiymat ishlatilmaydi. */
+  const pos = Object.assign({ side: 'r', y: 0.75 }, (D.device && D.device.yusa) || {});
 
   function A() {
     const a = D.S.ai || (D.S.ai = { cards: {}, log: [] });
