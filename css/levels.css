@@ -350,7 +350,16 @@
    Nishonlardagi «eng uzun» dan boshqa narsa: bu HOZIRGISI, ya'ni yo'qotish
    mumkin bo'lgan yagona raqam. Bugun hali yozilmagan bo'lsa sariqqa o'tadi —
    qizil emas: hali hech narsa buzilmagan, kun tugamagan. */
-.lv-streak { display: inline-flex; align-items: center; gap: 6px; flex: none;
+/* TOR EKRANDA QISILSIN. Ilgari `flex: none` edi va ichidagi ikkala yozuv
+   ham nowrap — 320px da yorliq kartadan kengroq bo'lib chetdan chiqib
+   ketardi va «bugun hali yozi…» bo'lib kesilardi. O'ram (.lv-td-sub
+   flex-wrap) yordam bermasdi: u yorliqni YANGI QATORGA tushiradi, lekin
+   yorliqning o'zini torroq qilmaydi. Shuning uchun: qisilishga ruxsat
+   (0 1 auto + min-width 0), va ogohlantirish yozuvi BUTUNLIGICHA keyingi
+   qatorga tushsin (flex-wrap) — so'z-so'z sinsa «bugun / hali / yozilmadi»
+   bo'lib uch qatorga cho'zilardi, ya'ni kesilishdan ham xunukroq. */
+.lv-streak { display: inline-flex; align-items: center; gap: 2px 6px;
+  flex: 0 1 auto; min-width: 0; max-width: 100%; flex-wrap: wrap;
   padding: 3px 9px; border-radius: var(--r-pill); background: var(--inset);
   border: 1px solid var(--line); color: var(--text2); }
 .lv-streak svg { color: var(--warning-text); flex: none; }
