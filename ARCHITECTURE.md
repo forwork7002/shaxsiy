@@ -487,6 +487,16 @@ deploy was verified by requesting every path in `sw.js` and confirming each
 returned `200` — and it did. The file existed. The *link between two files*
 was broken, and an HTTP status code cannot see that.
 
+**Why the sweep was not careless.** `d3b6b99` grepped the tree it could see
+and `D.icons` genuinely had no readers in it. The reader arrived in `507c446`
+— written **two minutes and forty-four seconds later on a parallel branch**,
+both diverging from `0aa4811`. Neither commit could see the other; the defect
+was created by the merge, not by either author. So: *before deleting an
+export as dead, grep every branch on `origin`, not just your working folder.*
+`git grep <symbol> $(git for-each-ref --format='%(refname)' refs/remotes)`.
+In a repository where several sessions commit within the same minute, "no
+references" is a statement about one moment in one branch.
+
 **And it never looked like an error.** `settings.js:1086` wraps each card in
 `safe()`, which catches, logs and returns `''`. So the throw produced no
 banner, no crash, no visibly broken layout — the "Moliya kategoriyalari" card
