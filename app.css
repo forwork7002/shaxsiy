@@ -20,7 +20,12 @@
   /* Kanvas — chin qora. OLED'da piksel butunlay o'chadi, ya'ni kartaning
      chekkasi chiziqsiz ham seziladi; shu sabab chegara juda ingichka. */
   --bg: #000000; --bg2: #08080A; --bg3: #131316;
-  --text: #FFFFFF; --text2: #B6BBC2; --text3: #878D96; --text4: #757B84;
+  /* --text4 HAMMA yuza ustida o'lchanadi, faqat --bg ustida emas. Mayda yorliq
+     deyarli har doim karta ustida turadi, sahifa foni ustida emas, va karta
+     qora emas: --card2 #17171A ustida eski #757B84 4.19:1 berardi — AA dan
+     past. Yangi qiymat eng yomon yuzada ham 4.56:1. O'lchangan yuzalar:
+     --bg, --bg2, --bg3, --card-bg, --card2. (123-f9 topdi.) */
+  --text: #FFFFFF; --text2: #B6BBC2; --text3: #878D96; --text4: #7B818A;
   /* Tokenning nomi to'g'ri aytadi: bu YORUG' fon ustidagi siyoh. Oq tugma ham,
      neon yashil to'ldirish ham shuni ishlatadi — ikkalasida ham qora yagona
      to'g'ri javob (oq matn neon yashil ustida 2:1 ga tushardi). */
@@ -102,7 +107,12 @@
    umuman yaramaydi). To'ldirish sifatida ular yorqinroq qoladi. */
 [data-theme="light"] {
   --bg: #F1F2F4; --bg2: #E8EAED; --bg3: #FFFFFF;
-  --text: #0A0B0D; --text2: #4A4F57; --text3: #666C75; --text4: #696F78;
+  /* Yorug'da ikkalasi ham past edi: --bg2 #E8EAED ustida --text3 4.39,
+     --text4 4.20. Eng yomon yuza bu yerda --bg2, chunki --card-bg oq.
+     Yangi: --text3 5.03, --text4 4.52. Ikkalasi bir xil qiymatga tushirilmadi
+     — eskisida farq deyarli ko'rinmasdi (#666C75 va #696F78), endi pog'ona
+     qorong'i temadagidek seziladi. */
+  --text: #0A0B0D; --text2: #4A4F57; --text3: #5D636C; --text4: #646A73;
   --ink-on-light: #0A0B0D;
   --accent-text: #00649F; --success-text: #10820A; --warning-text: #8A6B00;
   --info-text: #00649F; --violet-text: #5B48C7;
