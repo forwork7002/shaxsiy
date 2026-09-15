@@ -54,10 +54,50 @@
     perfect: 50,                        // mukammal kun ustamasi
     challenge: 80,                      // bajarilgan haftalik sinov
   };
+  /* Ochko manbalari — «bugun +47» ni ochganda shu tartibda ro'yxat bo'lib
+     chiqadi. Tartib tasodifiy emas: kunning o'zagi (odat, namoz) tepada,
+     USTAMALAR esa (mukammal kun, haftalik sinov) oxirida — ular alohida ish
+     emas, qilingan ishning natijasi. */
+  const SRC = [
+    { id: 'odat',     ic: 'check' },
+    { id: 'namoz',    ic: 'mosque' },
+    { id: 'zikr',     ic: 'beads' },
+    { id: 'ruza',     ic: 'sun' },
+    { id: 'vazifa',   ic: 'checkSq' },
+    { id: 'maqsad',   ic: 'flag' },
+    { id: 'bilim',    ic: 'book' },
+    { id: 'mashq',    ic: 'dumbbell' },
+    { id: 'whoop',    ic: 'refresh' },
+    { id: 'ovqat',    ic: 'apple' },
+    { id: 'suv',      ic: 'droplet' },
+    { id: 'daftar',   ic: 'edit' },
+    { id: 'shukr',    ic: 'heart' },
+    { id: 'moliya',   ic: 'wallet' },
+    { id: 'hafta',    ic: 'layers' },
+    { id: 'mukammal', ic: 'sparkles' },
+    { id: 'sinov',    ic: 'bolt' },
+  ];
+
   const MAX_LEVEL = 50;
   const PERFECT_MIN_HABITS = 3;         // bitta odat bilan «mukammal kun» bo'lmaydi
   const SLEEP_GOOD_H = 7;
   const BREAK_DAYS = 30;                // «Qaytish» nishoni uchun tanaffus uzunligi
+  const STRONG_DAY = 100;               // «Kuchli kun» — bir kunda shuncha ochko
+  const GREEN_RECOVERY = 67;            // WHOOP yashil zonasi (tayyorlik %)
+  /* To'liq Ramazon deb hisoblanadigan eng kam kun. Hijriy oy 29 yoki 30 kun,
+     ya'ni «hammasi» 29 bo'lardi — ataylab 27 qo'yildi: hijriy sana taqvim
+     manbasiga va `settings.prayer.hijriOffset` ga bog'liq, bir kunga siljisa
+     ro'za tutilgan kun oyning chetida qolib ketadi va nishon bir yil kechikardi.
+     Sirli nishonda aniqlik muhim emas — odamning haqiqatan tutgani muhim. */
+  const RAMADAN_DAYS = 27;
+
+  /* Kunlik maqsad — O'ZINIKIDAN o'sadi, biz o'ylab topgan sondan emas.
+     Oxirgi 28 kunning yozuv bo'lgan kunlari olinadi va MEDIANASI maqsad bo'ladi:
+     ya'ni maqsad «odatdagi kuningiz». O'rtacha emas — bitta 400 ochkolik kun
+     o'rtachani ko'tarib, keyingi hamma kunni «yetmadi» qilib qo'yardi.
+     Bugun ataylab hisobga kirmaydi: maqsad kun davomida siljisa, unga yetib
+     bo'lmasdi. Yozuv kam bo'lsa (5 kundan oz) — 100, ya'ni yengil boshlanish. */
+  const GOAL_DAYS = 28, GOAL_MIN = 60, GOAL_MAX = 300, GOAL_FALLBACK = 100;
 
   /* Daraja narxi: 3.6·n^2.95. Egri chiziq ataylab tik — birinchi darajalar bir
      kunda, yuqorigilari yillarda olinadi. 50-daraja ≈ 370 000 ochko, ya'ni
@@ -119,6 +159,14 @@
     { id: 'daftar',   ic: 'edit',     u: 'kun',   steps: [30, 100, 365, 1000] },
     { id: 'moliya',   ic: 'wallet',   u: 'kun',   steps: [30, 100, 365, 1000] },
     { id: 'hafta',    ic: 'layers',   u: 'ta',    steps: [10, 30, 100, 250] },
+    /* «Kuchli kun» — kunlik maqsadning nishondagi aksi. Maqsadning o'zi
+       o'zgaruvchan (medianadan), nishon esa QAT'IY 100 ochko: o'zgaruvchan
+       chegara bilan nishon bersak, yomon oydan keyin maqsad pasayib nishon
+       osonlashardi, ya'ni tizim o'zini aldardi. */
+    { id: 'kuchli',   ic: 'trend',    u: 'kun',   steps: [10, 50, 200, 500] },
+    /* Tayyorlik — ilovaning asosiy raqami, lekin shu paytgacha nishonlarda
+       umuman yo'q edi. Bu yagona oila: u ishlab emas, TIKLANIB olinadi. */
+    { id: 'tetik',    ic: 'refresh',  u: 'kun',   steps: [30, 100, 365, 1000] },
     { id: 'qirq',     ic: 'star',     u: 'kun',   steps: [40], from: 2 },
     /* Sirli nishonlar. Sharti olinmagunicha ko'rsatilmaydi — to'plamda «?»
        bo'lib turadi. Uchtasi ham ataylab shunday tanlangan: ularni «ko'zlab»
@@ -126,6 +174,9 @@
     { id: 'sahar',    ic: 'sun',      u: 'kun',   steps: [30], from: 3, secret: true },
     { id: 'toliqoy',  ic: 'calendar', u: 'ta',    steps: [12], from: 3, secret: true },
     { id: 'qaytish',  ic: 'undo',     u: 'kun',   steps: [30], from: 3, secret: true },
+    /* Ramazon — hijriy taqvimdan o'qiladi (prayer.js › D.hijri). Sirli, chunki
+       uni «ko'zlab» olish shart emas: ro'za tutgan odam nishonni o'zi oladi. */
+    { id: 'ramazon',  ic: 'moon',     u: 'ta',    steps: [1], from: 3, secret: true },
   ];
   /** Qaysi oila qaysi o'lchovdan o'qiydi (collect() qaytargan `st` maydonlari). */
   const FIELD = {
@@ -134,7 +185,8 @@
     bilim: 'mediaDays', mashq: 'workouts', uyqu: 'sleepDays', suv: 'waterDays',
     ovqat: 'foodDays', shukr: 'thanks', mukammal: 'perfect', daftar: 'noteDays',
     moliya: 'moneyDays', hafta: 'weeks', sinov: 'challenges',
-    sahar: 'sahar', toliqoy: 'fullMonths', qaytish: 'comeback',
+    kuchli: 'strong', tetik: 'green',
+    sahar: 'sahar', toliqoy: 'fullMonths', qaytish: 'comeback', ramazon: 'ramadan',
   };
   /** Yassi ro'yxat: har nishon bitta obyekt. */
   const ALL = [];
@@ -152,7 +204,8 @@
   /* o'zgarsa eski haftalarning sinovi ham o'zgaradi — shuning uchun     */
   /* YANGI SINOVNI FAQAT OXIRIGA qo'shing.                               */
   /* ------------------------------------------------------------------ */
-  const WEEKLY = [
+  /* Birinchi jadval — 2026-W38 gacha bo'lgan hamma hafta shundan o'qiydi. */
+  const WEEKLY_1 = [
     { id: 'jamaat',  n: 15, f: 'jamaat' },
     { id: 'habit',   n: 35, f: 'habits' },
     { id: 'zikr',    n: 2000, f: 'zikr' },
@@ -164,11 +217,42 @@
     { id: 'task',    n: 12, f: 'tasks' },
     { id: 'fast',    n: 2,  f: 'fast' },
   ];
+  /* Ikkinchi jadval — 2026-W39 dan boshlab. Beshta yangi sinov, shundan biri
+     (`xp`) universal: qaysi bo'limda yashaganingizdan qat'i nazar bajariladi. */
+  const WEEKLY_2 = WEEKLY_1.concat([
+    { id: 'xp',      n: 900, f: 'xp' },
+    { id: 'full5',   n: 4,  f: 'full5' },
+    { id: 'media',   n: 5,  f: 'media' },
+    { id: 'thanks',  n: 7,  f: 'thanks' },
+    { id: 'money',   n: 5,  f: 'money' },
+  ]);
+  /* «Yangi sinovni faqat oxiriga qo'shing» degan eski qoida YETARLI EMAS EDI.
+     weekPick hafta kalitini xeshlab `h % WEEKLY.length` qilardi, ya'ni ro'yxat
+     uzunligi o'zgarishi bilan QOLDIQ ham o'zgaradi va o'tgan hamma haftaning
+     sinovi boshqa bo'lib qoladi — odam bajarib qo'ygan sinovi «bajarilmagan»
+     bo'lib, `sinov` nishoni va ochkosi orqaga ketardi. Oxiriga qo'shish ham
+     buni to'xtatmaydi: 37 % 10 = 7, 37 % 15 = 7 emas.
+     Shuning uchun jadval endi SANALI: har hafta o'z davridagi ro'yxatdan
+     o'qiydi va tarix o'zgarmaydi. Yangi sinov qo'shish = yangi ro'yxat +
+     `from` si kelasi hafta bo'lgan yangi qator. Eski qatorlarga TEGILMAYDI. */
+  const WEEKLY_SETS = [
+    { from: '0000-W00', list: WEEKLY_1 },
+    { from: '2026-W39', list: WEEKLY_2 },
+  ];
+  /** Hamma sinovning birlashmasi — tashqi o'quvchilar va sinovlar uchun. */
+  const WEEKLY = WEEKLY_2;
+  /** Shu haftada qaysi jadval amalda edi. */
+  function weekSet(wk) {
+    let list = WEEKLY_SETS[0].list;
+    for (const s of WEEKLY_SETS) if (String(wk) >= s.from) list = s.list;
+    return list;
+  }
   /** Hafta kaliti → jadvaldagi o'rin. Bir xil hafta har doim bir xil sinov. */
   function weekPick(wk) {
+    const list = weekSet(wk);
     let h = 5;
     for (const ch of String(wk)) h = (h * 33 + ch.charCodeAt(0)) >>> 0;
-    return WEEKLY[h % WEEKLY.length];
+    return list[h % list.length];
   }
 
   /* ------------------------------------------------------------------ */
@@ -201,6 +285,11 @@
       'lv.w.food': '{n} kun ovqatingizni yozing',
       'lv.w.task': '{n} ta vazifani bajaring',
       'lv.w.fast': '{n} kun ro‘za tuting',
+      'lv.w.xp': '{n} ochko yig‘ing',
+      'lv.w.full5': '{n} kun besh vaqtni to‘liq o‘qing',
+      'lv.w.media': '{n} kun kitob o‘qing yoki kurs ko‘ring',
+      'lv.w.thanks': '{n} ta shukr yozing',
+      'lv.w.money': '{n} kun xarajatingizni yozing',
 
       'lv.r.niyat': 'Niyat', 'lv.m.niyat': 'Har ish niyat bilan boshlanadi',
       'lv.r.qadam': 'Qadam', 'lv.m.qadam': 'Birinchi qadam — eng og‘iri',
@@ -237,6 +326,23 @@
       'lv.f.sahar': 'Sahar', 'lv.d.sahar': '30 kun ketma-ket bomdodni jamoat bilan',
       'lv.f.toliqoy': 'To‘liq oy', 'lv.d.toliqoy': 'bir kun ham qoldirilmagan oylar',
       'lv.f.qaytish': 'Qaytish', 'lv.d.qaytish': 'uzoq tanaffusdan keyin yana 30 kun',
+      'lv.f.kuchli': 'Kuchli kun', 'lv.d.kuchli': '100 dan ko‘p ochko yig‘ilgan kunlar',
+      'lv.f.tetik': 'Tetiklik', 'lv.d.tetik': 'WHOOP tayyorligi 67 % dan yuqori kunlar',
+      'lv.f.ramazon': 'Ramazon', 'lv.d.ramazon': 'to‘liq tutilgan Ramazon oylari',
+
+      'lv.day.title': 'Bugungi maqsad', 'lv.day.of': '{n} ochkodan',
+      'lv.day.left': 'yana {n} ochko', 'lv.day.done': 'Bugungi maqsad bajarildi',
+      'lv.day.how': 'Maqsad — oxirgi 28 kuningizning o‘rtasi, ya’ni o‘z odatdagi kuningiz. Siz ko‘tarilsangiz u ham ko‘tariladi.',
+      'lv.day.from': 'Bugun qayerdan', 'lv.day.none': 'Bugun hali yozuv yo‘q. Bitta odat belgisi ham hisobga o‘tadi.',
+      'lv.day.streak': '{n} kun to‘xtovsiz', 'lv.day.streak0': 'Zanjir bugundan boshlanadi',
+      'lv.day.risk': 'bugun hali yozilmadi',
+      'lv.hist': 'Oxirgi 30 kun', 'lv.hist.avg': 'kunlik o‘rtacha {n}',
+
+      'lv.s.odat': 'Odat', 'lv.s.namoz': 'Namoz', 'lv.s.zikr': 'Zikr', 'lv.s.ruza': 'Ro‘za',
+      'lv.s.vazifa': 'Vazifa', 'lv.s.maqsad': 'Maqsad', 'lv.s.bilim': 'O‘qish', 'lv.s.mashq': 'Mashg‘ulot',
+      'lv.s.whoop': 'WHOOP kuni', 'lv.s.ovqat': 'Ovqat', 'lv.s.suv': 'Suv', 'lv.s.daftar': 'Kundalik',
+      'lv.s.shukr': 'Shukr', 'lv.s.moliya': 'Moliya', 'lv.s.hafta': 'Hafta yakuni',
+      'lv.s.mukammal': 'Mukammal kun', 'lv.s.sinov': 'Haftalik sinov',
     },
     uzk: {
       'lv.title': 'Даража ва нишонлар', 'lv.xp': 'очко',
@@ -264,6 +370,11 @@
       'lv.w.food': '{n} кун овқатингизни ёзинг',
       'lv.w.task': '{n} та вазифани бажаринг',
       'lv.w.fast': '{n} кун рўза тутинг',
+      'lv.w.xp': '{n} очко йиғинг',
+      'lv.w.full5': '{n} кун беш вақтни тўлиқ ўқинг',
+      'lv.w.media': '{n} кун китоб ўқинг ёки курс кўринг',
+      'lv.w.thanks': '{n} та шукр ёзинг',
+      'lv.w.money': '{n} кун харажатингизни ёзинг',
 
       'lv.r.niyat': 'Ният', 'lv.m.niyat': 'Ҳар иш ният билан бошланади',
       'lv.r.qadam': 'Қадам', 'lv.m.qadam': 'Биринчи қадам — энг оғири',
@@ -300,6 +411,23 @@
       'lv.f.sahar': 'Саҳар', 'lv.d.sahar': '30 кун кетма-кет бомдодни жамоат билан',
       'lv.f.toliqoy': 'Тўлиқ ой', 'lv.d.toliqoy': 'бир кун ҳам қолдирилмаган ойлар',
       'lv.f.qaytish': 'Қайтиш', 'lv.d.qaytish': 'узоқ танаффусдан кейин яна 30 кун',
+      'lv.f.kuchli': 'Кучли кун', 'lv.d.kuchli': '100 дан кўп очко йиғилган кунлар',
+      'lv.f.tetik': 'Тетиклик', 'lv.d.tetik': 'WHOOP тайёрлиги 67 % дан юқори кунлар',
+      'lv.f.ramazon': 'Рамазон', 'lv.d.ramazon': 'тўлиқ тутилган Рамазон ойлари',
+
+      'lv.day.title': 'Бугунги мақсад', 'lv.day.of': '{n} очкодан',
+      'lv.day.left': 'яна {n} очко', 'lv.day.done': 'Бугунги мақсад бажарилди',
+      'lv.day.how': 'Мақсад — охирги 28 кунингизнинг ўртаси, яъни ўз одатдаги кунингиз. Сиз кўтарилсангиз у ҳам кўтарилади.',
+      'lv.day.from': 'Бугун қаердан', 'lv.day.none': 'Бугун ҳали ёзув йўқ. Битта одат белгиси ҳам ҳисобга ўтади.',
+      'lv.day.streak': '{n} кун тўхтовсиз', 'lv.day.streak0': 'Занжир бугундан бошланади',
+      'lv.day.risk': 'бугун ҳали ёзилмади',
+      'lv.hist': 'Охирги 30 кун', 'lv.hist.avg': 'кунлик ўртача {n}',
+
+      'lv.s.odat': 'Одат', 'lv.s.namoz': 'Намоз', 'lv.s.zikr': 'Зикр', 'lv.s.ruza': 'Рўза',
+      'lv.s.vazifa': 'Вазифа', 'lv.s.maqsad': 'Мақсад', 'lv.s.bilim': 'Ўқиш', 'lv.s.mashq': 'Машғулот',
+      'lv.s.whoop': 'WHOOP куни', 'lv.s.ovqat': 'Овқат', 'lv.s.suv': 'Сув', 'lv.s.daftar': 'Кундалик',
+      'lv.s.shukr': 'Шукр', 'lv.s.moliya': 'Молия', 'lv.s.hafta': 'Ҳафта якуни',
+      'lv.s.mukammal': 'Мукаммал кун', 'lv.s.sinov': 'Ҳафталик синов',
     },
     ru: {
       'lv.title': 'Уровень и награды', 'lv.xp': 'очков',
@@ -327,6 +455,11 @@
       'lv.w.food': 'Записывайте еду {n} дней',
       'lv.w.task': 'Выполните {n} задач',
       'lv.w.fast': 'Держите пост {n} дня',
+      'lv.w.xp': 'Наберите {n} очков',
+      'lv.w.full5': 'Совершите все пять намазов {n} дней',
+      'lv.w.media': 'Читайте или смотрите курс {n} дней',
+      'lv.w.thanks': 'Запишите {n} благодарностей',
+      'lv.w.money': 'Записывайте траты {n} дней',
 
       'lv.r.niyat': 'Намерение', 'lv.m.niyat': 'Всякое дело начинается с намерения',
       'lv.r.qadam': 'Шаг', 'lv.m.qadam': 'Первый шаг — самый тяжёлый',
@@ -363,6 +496,23 @@
       'lv.f.sahar': 'Рассвет', 'lv.d.sahar': '30 дней подряд фаджр с джамаатом',
       'lv.f.toliqoy': 'Полный месяц', 'lv.d.toliqoy': 'месяцев без единого пропуска',
       'lv.f.qaytish': 'Возвращение', 'lv.d.qaytish': 'снова 30 дней после долгого перерыва',
+      'lv.f.kuchli': 'Сильный день', 'lv.d.kuchli': 'дней, где набрано больше 100 очков',
+      'lv.f.tetik': 'Восстановление', 'lv.d.tetik': 'дней с готовностью WHOOP выше 67 %',
+      'lv.f.ramazon': 'Рамадан', 'lv.d.ramazon': 'полностью выдержанных месяцев Рамадан',
+
+      'lv.day.title': 'Цель на сегодня', 'lv.day.of': 'из {n} очков',
+      'lv.day.left': 'ещё {n} очков', 'lv.day.done': 'Цель на сегодня выполнена',
+      'lv.day.how': 'Цель — середина ваших последних 28 дней, то есть ваш обычный день. Растёте вы — растёт и она.',
+      'lv.day.from': 'Откуда сегодня', 'lv.day.none': 'Сегодня ещё нет записей. Даже одна отметка привычки уже засчитается.',
+      'lv.day.streak': '{n} дней подряд', 'lv.day.streak0': 'Цепочка начнётся сегодня',
+      'lv.day.risk': 'сегодня ещё пусто',
+      'lv.hist': 'Последние 30 дней', 'lv.hist.avg': 'в среднем {n} в день',
+
+      'lv.s.odat': 'Привычки', 'lv.s.namoz': 'Намаз', 'lv.s.zikr': 'Зикр', 'lv.s.ruza': 'Пост',
+      'lv.s.vazifa': 'Задачи', 'lv.s.maqsad': 'Цели', 'lv.s.bilim': 'Чтение', 'lv.s.mashq': 'Тренировки',
+      'lv.s.whoop': 'День WHOOP', 'lv.s.ovqat': 'Еда', 'lv.s.suv': 'Вода', 'lv.s.daftar': 'Дневник',
+      'lv.s.shukr': 'Благодарность', 'lv.s.moliya': 'Финансы', 'lv.s.hafta': 'Итоги недели',
+      'lv.s.mukammal': 'Идеальный день', 'lv.s.sinov': 'Испытание недели',
     },
   });
 
@@ -406,23 +556,37 @@
     const today = D.today();
     const ok = (k) => typeof k === 'string' && KEY_RE.test(k) && k <= today;   // kelajak kuni sanalmaydi
     const dayXp = new Map();
-    const add = (k, n) => { if (n > 0) dayXp.set(k, (dayXp.get(k) || 0) + n); };
+    /* Ochko MANBASI ham yozib boriladi — «bugun +47» degan raqam o'zi hech
+       narsa o'rgatmaydi, «nimadan?» degan savolga javob kerak. Kun bo'yicha
+       emas, faqat JAMI va BUGUNGI: har kunga manbalar jadvali 600 kunda o'n
+       mingta yozuv bo'lardi, va o'tgan kunning taqsimotini hech kim so'ramaydi. */
+    const srcAll = new Map(), srcToday = new Map();
+    const bump = (map, s, n) => map.set(s, (map.get(s) || 0) + n);
+    const add = (k, n, s) => {
+      if (!(n > 0)) return;
+      dayXp.set(k, (dayXp.get(k) || 0) + n);
+      if (s) { bump(srcAll, s, n); if (k === today) bump(srcToday, s, n); }
+    };
     const active = new Set();      // biror narsa yozilgan kunlar — «uzluksizlik» shundan
     const full5 = new Set();       // besh vaqt to'liq o'qilgan kunlar
     const sahar = new Set();       // bomdod jamoat bilan o'qilgan kunlar
+    const ramadanDays = new Set(); // hijriy 9-oyga tushgan ro'za kunlari
     /* Kunlik o'lchovlar — haftalik sinov shulardan yig'iladi. Alohida yurish
        qilmaymiz: bir marta aylanib, ham ochkoni, ham sinov raqamini olamiz. */
     const met = new Map();
+    const newMet = () => ({ habits: 0, jamaat: 0, zikr: 0, sleep7: 0, note: 0, workouts: 0, food: 0,
+                            tasks: 0, fast: 0, perfect: 0, xp: 0, full5: 0, media: 0, thanks: 0, money: 0 });
     const M = (k) => {
       let m = met.get(k);
-      if (!m) met.set(k, m = { habits: 0, jamaat: 0, zikr: 0, sleep7: 0, note: 0, workouts: 0, food: 0, tasks: 0, fast: 0, perfect: 0 });
+      if (!m) met.set(k, m = newMet());
       return m;
     };
     const st = {
       streak: 0, habitTicks: 0, prayers: 0, jamaat: 0, qirq: 0, dhikr: 0, fast: 0, tasks: 0,
       goals: 0, books: 0, mediaDays: 0, workouts: 0, sleepDays: 0, waterDays: 0, foodDays: 0,
       thanks: 0, perfect: 0, noteDays: 0, moneyDays: 0, weeks: 0, challenges: 0,
-      sahar: 0, fullMonths: 0, comeback: 0,
+      strong: 0, green: 0,
+      sahar: 0, fullMonths: 0, comeback: 0, ramadan: 0,
     };
 
     /* odat — `counts` (miqdorli odatlar) `logs` ga o'zi ko'chadi, bitta manba yetadi */
@@ -432,7 +596,7 @@
       const n = (logs[k] || []).length;
       if (!n) continue;
       st.habitTicks += n; active.add(k); M(k).habits = n;
-      add(k, Math.min(n * XP.habit, XP.habitCap));
+      add(k, Math.min(n * XP.habit, XP.habitCap), 'odat');
     }
 
     /* namoz */
@@ -448,8 +612,8 @@
         else if (v === 'qaza') { xp += XP.qaza; st.prayers++; }
       }
       if (p.bomdod === 'jamaat') sahar.add(k);
-      if (full === 5) { xp += XP.fivePrayers; full5.add(k); }
-      if (xp) { active.add(k); add(k, xp); M(k).jamaat = jam; }
+      if (full === 5) { xp += XP.fivePrayers; full5.add(k); M(k).full5 = 1; }
+      if (xp) { active.add(k); add(k, xp, 'namoz'); M(k).jamaat = jam; }
     }
     st.qirq = longestRun(full5);
     st.sahar = longestRun(sahar);
@@ -461,14 +625,15 @@
       const n = num((dhikr[k] || {}).total);
       if (n <= 0) continue;
       st.dhikr += n; active.add(k); M(k).zikr = n;
-      add(k, Math.min(Math.floor(n / XP.dhikrPer) * XP.dhikrXp, XP.dhikrCap));
+      add(k, Math.min(Math.floor(n / XP.dhikrPer) * XP.dhikrXp, XP.dhikrCap), 'zikr');
     }
 
     /* ro'za */
     const fasting = S.fasting || {};
     for (const k of Object.keys(fasting)) {
       if (!ok(k) || !(fasting[k] || {}).done) continue;
-      st.fast++; active.add(k); M(k).fast = 1; add(k, XP.fast);
+      st.fast++; active.add(k); M(k).fast = 1; add(k, XP.fast, 'ruza');
+      if (D.hijri && D.hijri.isRamadan(k)) ramadanDays.add(k);
     }
 
     /* vazifa va maqsad — `doneAt` (ms) bo'lsa o'sha kun, bo'lmasa vazifaning sanasi */
@@ -489,20 +654,20 @@
       if (!ok(k)) continue;
       perDay.set(k, (perDay.get(k) || 0) + 1);
     }
-    for (const [k, n] of perDay) { active.add(k); M(k).tasks = n; add(k, Math.min(n * XP.task, XP.taskCap)); }
+    for (const [k, n] of perDay) { active.add(k); M(k).tasks = n; add(k, Math.min(n * XP.task, XP.taskCap), 'vazifa'); }
     for (const g of S.goals || []) {
       if (!g || !g.done) continue;
       st.goals++;
       const k = dayOf(g.doneAt);
       if (!ok(k)) continue;
-      active.add(k); add(k, XP.goal);
+      active.add(k); add(k, XP.goal, 'maqsad');
     }
 
     /* kitob va ko'rgan */
     const mediaLogs = S.mediaLogs || {};
     for (const k of Object.keys(mediaLogs)) {
       if (!ok(k) || !Object.keys(mediaLogs[k] || {}).length) continue;
-      st.mediaDays++; active.add(k); add(k, XP.media);
+      st.mediaDays++; active.add(k); M(k).media = 1; add(k, XP.media, 'bilim');
     }
     st.books = (S.media || []).filter((m) => m && m.status === 'done').length;
 
@@ -510,15 +675,19 @@
     const foodLogs = (S.food || {}).logs || {};
     for (const k of Object.keys(foodLogs)) {
       if (!ok(k) || !(foodLogs[k] || []).length) continue;
-      st.foodDays++; active.add(k); M(k).food = 1; add(k, XP.food);
+      st.foodDays++; active.add(k); M(k).food = 1; add(k, XP.food, 'ovqat');
     }
 
     /* WHOOP: kun yozuvi, uzun uyqu va mashg'ulotlar */
     const wh = S.whoop || {}, whDays = wh.days || {};
     for (const k of Object.keys(whDays)) {
       if (!ok(k)) continue;
-      active.add(k); add(k, XP.whoopDay);
-      if (num((whDays[k] || {}).sleepH) >= SLEEP_GOOD_H) { st.sleepDays++; M(k).sleep7 = 1; }
+      active.add(k); add(k, XP.whoopDay, 'whoop');
+      const wd = whDays[k] || {};
+      if (num(wd.sleepH) >= SLEEP_GOOD_H) { st.sleepDays++; M(k).sleep7 = 1; }
+      // Tayyorlik — ishlab emas, tiklanib olinadigan yagona o'lchov. Ochko
+      // berilmaydi (uni «bajarib» bo'lmaydi), faqat nishonga sanaladi.
+      if (num(wd.recovery) >= GREEN_RECOVERY) st.green++;
     }
     perDay.clear();
     for (const w of wh.workouts || []) {
@@ -528,7 +697,7 @@
       st.workouts++;
       perDay.set(k, (perDay.get(k) || 0) + 1);
     }
-    for (const [k, n] of perDay) { active.add(k); M(k).workouts = n; add(k, Math.min(n * XP.workout, XP.workoutCap)); }
+    for (const [k, n] of perDay) { active.add(k); M(k).workouts = n; add(k, Math.min(n * XP.workout, XP.workoutCap), 'mashq'); }
 
     /* suv — me'yor food.js da hisoblanadi (vazn, faollik, jins). Modul hali
        yuklanmagan bo'lsa suv umuman sanalmaydi: taxminiy me'yor bilan yolg'on
@@ -539,7 +708,7 @@
         if (!ok(k) || !num((health[k] || {}).water)) continue;
         let w = null;
         try { w = D.food.water(k); } catch (e) { w = null; }
-        if (w && w.n >= w.goal) { st.waterDays++; active.add(k); add(k, XP.water); }
+        if (w && w.n >= w.goal) { st.waterDays++; active.add(k); add(k, XP.water, 'suv'); }
       }
     }
 
@@ -547,7 +716,7 @@
     const notes = S.notes || {};
     for (const k of Object.keys(notes)) {
       if (!ok(k) || !String(notes[k] || '').trim()) continue;
-      st.noteDays++; active.add(k); M(k).note = 1; add(k, XP.note);
+      st.noteDays++; active.add(k); M(k).note = 1; add(k, XP.note, 'daftar');
     }
 
     /* shukr */
@@ -558,13 +727,13 @@
       if (!ok(g.date)) continue;
       perDay.set(g.date, (perDay.get(g.date) || 0) + 1);
     }
-    for (const [k, n] of perDay) { active.add(k); add(k, Math.min(n * XP.thanks, XP.thanksCap)); }
+    for (const [k, n] of perDay) { active.add(k); M(k).thanks = n; add(k, Math.min(n * XP.thanks, XP.thanksCap), 'shukr'); }
 
     /* moliya — kunda nechta yozuv bo'lishidan qat'i nazar bir marta */
     const seenTx = new Set();
     for (const x of ((S.finance || {}).tx) || []) if (x && ok(x.date)) seenTx.add(x.date);
     st.moneyDays = seenTx.size;
-    for (const k of seenTx) { active.add(k); add(k, XP.money); }
+    for (const k of seenTx) { active.add(k); M(k).money = 1; add(k, XP.money, 'moliya'); }
 
     /* mukammal kun: besh vaqt to'liq + o'sha kuni tegishli hamma odat bajarilgan.
        Jadval hozirgi odatlardan olinadi, ya'ni baho ehtiyotkor: keyin qo'shilgan
@@ -574,7 +743,7 @@
       const due = habits.filter((h) => D.habitDue(h, k));
       if (due.length < PERFECT_MIN_HABITS) continue;
       if (!due.every((h) => D.habitDone(h, k))) continue;
-      st.perfect++; M(k).perfect = 1; add(k, XP.perfect);
+      st.perfect++; M(k).perfect = 1; add(k, XP.perfect, 'mukammal');
     }
 
     /* hafta yakuni — kunga emas, umumiy yig'indiga qo'shiladi */
@@ -593,12 +762,28 @@
       if (cnt >= new Date(Date.UTC(y, mo, 0)).getUTCDate()) st.fullMonths++;
     }
 
+    /* To'liq Ramazon: hijriy 9-oyga tushgan ro'za kunlari HIJRIY YIL bo'yicha
+       guruhlanadi. Milodiy yil bo'yicha guruhlab bo'lmaydi — Ramazon milodiy
+       yilning ikki chetiga bo'linib tushishi mumkin. */
+    if (ramadanDays.size && D.hijri) {
+      const perYear = new Map();
+      for (const k of ramadanDays) {
+        const h = D.hijri.fromKey(k);
+        if (h) perYear.set(h.y, (perYear.get(h.y) || 0) + 1);
+      }
+      for (const n of perYear.values()) if (n >= RAMADAN_DAYS) st.ramadan++;
+    }
+
+    /* Kunlik ochko — haftalik `xp` sinovi uchun. Sinov ustamasidan OLDIN
+       yoziladi: aks holda sinov o'zini o'zi bajarib qo'yardi. */
+    for (const [k, v] of dayXp) M(k).xp = v;
+
     /* haftalik sinovlar — har hafta o'z jadvalidagi maqsadga yetganmi */
     const weekAgg = new Map();
     for (const [k, m] of met) {
       const wk = D.weekKey(k);
       let a = weekAgg.get(wk);
-      if (!a) weekAgg.set(wk, a = { habits: 0, jamaat: 0, zikr: 0, sleep7: 0, note: 0, workouts: 0, food: 0, tasks: 0, fast: 0, perfect: 0 });
+      if (!a) weekAgg.set(wk, a = newMet());
       for (const f of Object.keys(a)) a[f] += m[f];
     }
     const thisWeek = D.weekKey(today);
@@ -607,21 +792,49 @@
       const ch = weekPick(wk);
       const v = a[ch.f] || 0;
       if (wk === thisWeek) weekCur = v;
-      if (v >= ch.n) { st.challenges++; if (wk !== thisWeek) add(dayInWeek(wk, today), XP.challenge); }
+      if (v >= ch.n) { st.challenges++; if (wk !== thisWeek) add(dayInWeek(wk, today), XP.challenge, 'sinov'); }
     }
     // joriy hafta bajarilgan bo'lsa ochkoni bugunga yozamiz (kun bo'yicha ko'rinsin)
     const nowCh = weekPick(thisWeek);
-    if (weekCur >= nowCh.n) add(today, XP.challenge);
+    if (weekCur >= nowCh.n) add(today, XP.challenge, 'sinov');
+
+    /* «Kuchli kun» — hamma ustama qo'shilgandan KEYIN sanaladi: odam kunni
+       shunday ko'radi, ya'ni nishon ham shu raqamdan berilishi kerak. */
+    for (const v of dayXp.values()) if (v >= STRONG_DAY) st.strong++;
 
     st.streak = longestRun(active);
     st.comeback = bestAfterBreak(active);
 
     let xp = st.weeks * XP.weekly;
+    if (st.weeks) bump(srcAll, 'hafta', st.weeks * XP.weekly);
     for (const v of dayXp.values()) xp += v;
 
     cache = { xp: Math.round(xp), st, days: dayXp, active: active.size,
+              srcAll, srcToday,
+              /* Hozirgi zanjir — nishonlardagi «eng uzun» dan boshqa narsa.
+                 Odamni ertaga qaytaradigan raqam aynan shu, va u shu paytgacha
+                 hech qayerda ko'rinmasdi. `D.streak` bugun hali bo'sh bo'lsa
+                 kechagidan boshlab sanaydi, ya'ni kun boshida nol chiqmaydi. */
+              cur: D.streak(active), todayActive: active.has(today),
+              goal: dayGoal(dayXp, today),
               week: { id: nowCh.id, need: nowCh.n, cur: weekCur, done: weekCur >= nowCh.n } };
     return cache;
+  }
+
+  /** Kunlik maqsad — oxirgi GOAL_DAYS kunning yozuvli kunlari medianasi. */
+  function dayGoal(days, today) {
+    const vals = [];
+    let k = D.addDays(today, -1);                 // bugun kirmaydi: maqsad siljimasin
+    for (let i = 0; i < GOAL_DAYS; i++) {
+      const v = days.get(k) || 0;
+      if (v > 0) vals.push(v);
+      k = D.addDays(k, -1);
+    }
+    if (vals.length < 5) return GOAL_FALLBACK;    // tarix yo'q — yengil boshlanish
+    vals.sort((a, b) => a - b);
+    const mid = vals.length >> 1;
+    const med = vals.length % 2 ? vals[mid] : (vals[mid - 1] + vals[mid]) / 2;
+    return D.clamp(Math.round(med / 10) * 10, GOAL_MIN, GOAL_MAX);
   }
 
   /** Hafta kalitiga tegishli bitta kun — sinov ochkosi qaysi kunga yozilishi uchun.
@@ -654,7 +867,27 @@
   };
 
   D.levels = {
-    MAX: MAX_LEVEL, RANKS, TIERS, FAMS, ALL, STEPS, XP, WEEKLY,
+    MAX: MAX_LEVEL, RANKS, TIERS, FAMS, ALL, STEPS, XP, WEEKLY, SRC,
+    /** Bugun: {xp, goal, pct, left, done, cur, todayActive, src:[{id,ic,n}]}.
+        Butun bo'limdagi yagona BUGUNGI va BAJARILADIGAN maqsad — daraja
+        yillar bilan, nishon oylar bilan o'lchanadi, bu esa kun bilan. */
+    day() {
+      const c = collect(), xp = c.days.get(D.today()) || 0;
+      return {
+        xp, goal: c.goal, left: Math.max(0, c.goal - xp), done: xp >= c.goal,
+        pct: D.clamp((xp / (c.goal || 1)) * 100, 0, 100),
+        cur: c.cur, todayActive: c.todayActive,
+        src: SRC.map((s) => ({ id: s.id, ic: s.ic, n: c.srcToday.get(s.id) || 0 })).filter((s) => s.n > 0)
+             .sort((a, b) => b.n - a.n),
+      };
+    },
+    /** Oxirgi n kunning ochkosi — grafik uchun, eskidan yangiga. */
+    history(n) {
+      const c = collect(), out = [];
+      let k = D.addDays(D.today(), -(n - 1));
+      for (let i = 0; i < n; i++) { out.push({ k, xp: c.days.get(k) || 0 }); k = D.addDays(k, 1); }
+      return out;
+    },
     /** {xp, level, have, need, pct, next, max, rank, todayXp, st} */
     info() {
       const c = collect();

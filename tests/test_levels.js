@@ -78,12 +78,12 @@ eq('cheksiz ochko ham 50 da to‘xtaydi', L._levelFor(9e9), 50);
 
 console.log('\n2. Nishonlar jadvali');
 const ids = L.ALL.map((m) => m.id);
-eq('nishonlar soni', ids.length, 84);
+eq('nishonlar soni', ids.length, 93);
 eq('id lar takrorlanmaydi', new Set(ids).size, ids.length);
 ok('har nishonda bosqich bor', L.ALL.every((m) => L.TIERS.includes(m.tier)));
 ok('«Qirq kun» — oltin', L.ALL.find((m) => m.id === 'qirq40').tier === 'oltin');
 ok('sirli nishonlar olmos', L.ALL.filter((m) => m.secret).every((m) => m.tier === 'olmos'));
-eq('sirli nishonlar soni', L.ALL.filter((m) => m.secret).length, 3);
+eq('sirli nishonlar soni', L.ALL.filter((m) => m.secret).length, 4);
 ok('har oilada o‘lchov manbasi bor', L.FAMS.every((f) => L.ALL.some((m) => m.fam === f.id)));
 ok('har oilaning bosqichlari o‘sib boradi', L.FAMS.every((f) => f.steps.every((v, i) => i === 0 || v > f.steps[i - 1])));
 
