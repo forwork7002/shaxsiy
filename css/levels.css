@@ -143,7 +143,19 @@
   border: 0; background: transparent; color: var(--text); font: inherit; }
 .lv-td-b > svg:last-child { color: var(--text3); flex: none; }
 .lv-td-top { display: flex; align-items: baseline; gap: 8px; }
-.lv-td-xp { margin-left: auto; font-size: 13px; font-weight: 700; color: var(--success-text); white-space: nowrap; }
+/* Kunning raqami — qatordagi eng katta son. Ilgari bu yerda «bugun +12» degan
+   yashil yozuv turardi va u faqat ochko QO'SHILGANDA chiqardi: kun boshida
+   qator bo'm-bo'sh edi, ya'ni bugun uchun maqsad borligi umuman bilinmasdi. */
+.lv-td-xp { margin-left: auto; white-space: nowrap; }
+.lv-td-xp b { font-size: 17px; font-weight: 800; letter-spacing: -.02em; color: var(--text); }
+.lv-td-xp i { font-style: normal; font-size: 13px; font-weight: 600; color: var(--text3); }
+.lv-td.done .lv-td-xp b { color: var(--success-text); }
+.lv-td-sub { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+/* Chiziq martaba rangida EMAS, maqsad rangida: u endi darajani emas, kunlik
+   maqsadni ko'rsatadi, va bir xil narsa ilova bo'ylab bir xil rangda bo'lishi
+   kerak (haftalik sinov ham shu ikki rangda). Martaba rangi belgida qoladi. */
+.lv-td-b .lv-bar { --c: var(--accent); }
+.lv-td.done .lv-td-b .lv-bar { --c: var(--success); }
 
 /* Bugun ekrani «jimjit va nafis» ko'rinishga o'tdi (css/today.css, 2026-09-14):
    to'ldirilgan fon va qalin chegara o'rniga nozik ajratgich, bosh harfli mayda
@@ -157,6 +169,11 @@
   border-color: color-mix(in srgb, var(--success) 45%, transparent); }
 [data-view="today"] .lv-ch-h { text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 600; }
 [data-view="today"] .lv-ch-x { font-size: 15px; }
+/* Zanjir belgisi ham shu ekranda tekislanadi — to'ldirilgan qutichalar u yerda
+   yagona bo'lib ajralib turardi. Ogohlantirish holati (risk) tegilmaydi:
+   u uslub emas, xabar. */
+[data-view="today"] .lv-streak { background: transparent; border-color: var(--line2); }
+[data-view="today"] .lv-streak.risk { background: color-mix(in srgb, var(--warning) 9%, transparent); }
 
 /* ------------------------------------------------------------------ */
 /* TO'PLAM OYNASI                                                      */
@@ -293,6 +310,66 @@
 [data-theme="light"] .lv-step.now .lv-step-d b { color: color-mix(in srgb, var(--c) 68%, #000); }
 
 /* ------------------------------------------------------------------ */
+/* BUGUNGI MAQSAD                                                      */
+/* Bo'limdagi yagona BUGUN bajariladigan narsa, shuning uchun oynada u  */
+/* martabadan keyin darhol turadi va yagona to'ldirilgan blok bo'ladi.  */
+/* Rang tili o'sha-o'sha: ko'k — davom etyapti, yashil — bajarildi.     */
+/* ------------------------------------------------------------------ */
+.lv-day { --c: var(--accent); display: flex; flex-direction: column; gap: 10px;
+  padding: 14px; border-radius: var(--r-sm); border: 1px solid var(--line);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 8%, transparent), transparent 80%), var(--inset); }
+.lv-day.done { --c: var(--success); border-color: color-mix(in srgb, var(--success) 34%, var(--line)); }
+.lv-day .lv-sec-h { margin-bottom: 0; }
+
+.lv-day-top { display: flex; align-items: center; gap: 14px; }
+/* Yoy o'zining kengligini o'zi biladi (app.css › .arc-wrap) — qisqartirmaymiz,
+   chunki katta raqam bu blokning butun mazmuni. */
+.lv-day-top .arc-wrap { flex: none; width: 150px; }
+.lv-day-side { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; align-items: flex-start; }
+.lv-day-st { font-size: 15px; font-weight: 700; line-height: 1.2; color: var(--c); overflow-wrap: anywhere; }
+.lv-day.done .lv-day-st { color: var(--success-text); }
+.lv-day-how { margin: 0; font-size: 12px; line-height: 1.35; color: var(--text3); overflow-wrap: anywhere; }
+.lv-day-none { margin: 0; font-size: 13px; line-height: 1.35; color: var(--text3); }
+
+/* ---- OCHKO QAYERDAN ----
+   «Bugun +47» degan raqam o'zi hech narsa o'rgatmaydi. Ro'yxat qisqa va
+   saralangan (kattadan kichikka): odam bir qarashda kunining nimadan
+   yig'ilganini ko'radi va ertaga nimani ko'paytirishni o'zi hal qiladi. */
+.lv-sec-h.sm { font-size: 11px; margin-bottom: 0; }
+.lv-srcs { list-style: none; margin: 0; padding: 0; display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 2px 14px; }
+.lv-src { display: flex; align-items: center; gap: 8px; padding: 4px 0;
+  border-bottom: 1px solid var(--line); }
+.lv-src:last-child { border-bottom: 0; }
+.lv-src-i { display: grid; place-items: center; width: 22px; height: 22px; flex: none;
+  border-radius: 50%; background: var(--track); color: var(--text3); }
+.lv-src-n { flex: 1; min-width: 0; font-size: 13px; color: var(--text2); overflow-wrap: anywhere; }
+.lv-src b { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; }
+
+/* ---- ZANJIR ----
+   Nishonlardagi «eng uzun» dan boshqa narsa: bu HOZIRGISI, ya'ni yo'qotish
+   mumkin bo'lgan yagona raqam. Bugun hali yozilmagan bo'lsa sariqqa o'tadi —
+   qizil emas: hali hech narsa buzilmagan, kun tugamagan. */
+.lv-streak { display: inline-flex; align-items: center; gap: 6px; flex: none;
+  padding: 3px 9px; border-radius: var(--r-pill); background: var(--inset);
+  border: 1px solid var(--line); color: var(--text2); }
+.lv-streak svg { color: var(--warning-text); flex: none; }
+.lv-streak b { font-size: 12.5px; font-weight: 700; color: var(--text); white-space: nowrap; }
+.lv-streak i { font-style: normal; font-size: 11px; color: var(--text3); white-space: nowrap; }
+.lv-streak.none { color: var(--text3); }
+.lv-streak.none svg { color: var(--text4); }
+.lv-streak.none b { color: var(--text3); font-weight: 600; }
+.lv-streak.risk { border-color: color-mix(in srgb, var(--warning) 42%, var(--line));
+  background: color-mix(in srgb, var(--warning) 9%, transparent); }
+
+/* ---- OXIRGI 30 KUN ----
+   Bitta kunning ochkosi hech narsa demaydi, o'ttizta kun odatni ko'rsatadi.
+   Maqsad chizig'i (spark-target, app.css) — «qaysi kunlar yetdi» degan
+   savolga javob; yetgan kunlar yashil, qolgani ko'k, bo'sh kunlar so'ngan. */
+.lv-hist { display: flex; flex-direction: column; gap: 4px; }
+.lv-hist .lv-sec-h { margin-bottom: 2px; }
+
+/* ------------------------------------------------------------------ */
 /* TOR EKRAN                                                           */
 /* ------------------------------------------------------------------ */
 @media (max-width: 380px) {
@@ -303,4 +380,10 @@
   .lv-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .lv-hero { gap: 10px; padding: 10px; }
   .lv-step { width: 68px; }
+  /* Yoy va yonidagi matn 380px da yonma-yon sig'maydi — matn ikki harfga
+     qisqarib, «yana 36 ochko» uch qatorga bo'linib ketardi. Ustma-ust. */
+  .lv-day-top { flex-direction: column; align-items: stretch; gap: 10px; }
+  .lv-day-top .arc-wrap { width: 100%; }
+  .lv-day-side { align-items: center; text-align: center; }
+  .lv-srcs { grid-template-columns: 1fr; }
 }

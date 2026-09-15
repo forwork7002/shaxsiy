@@ -193,6 +193,8 @@ Everything it asks is editable later in Settings → Profil.
 
 ```js
 D.levels.info()      // {xp, level, have, need, pct, next, max, rank, st}
+D.levels.day()       // BUGUN: {xp, goal, left, done, pct, cur, todayActive, src:[{id,ic,n}]}
+D.levels.history(n)  // [{k, xp}] — oxirgi n kun, eskidan yangiga (grafik uchun)
 D.levels.medals()    // [{id, fam, need, cur, done, got, on, pct, tier, ic}]
 D.levels.week()      // shu haftaning sinovi: {id, need, cur, pct, done, daysLeft}
 D.levels.cardHtml()  // Sozlash › profil kartasi ichidagi blok (profile.js chaqiradi)
@@ -200,6 +202,21 @@ D.levels.tile()      // Bugun sahifasining tepasidagi qator (today.js chaqiradi)
 D.levels.open()      // to'liq to'plam — pastki oyna
 D.levels.check()     // yangi nishon/daraja bo'lsa: S.awards ga yozadi va tabriklaydi
 ```
+
+**Uchta ufq, uchta maqsad.** Daraja yillar bilan o'lchanadi, nishon oylar bilan —
+ikkalasi ham bugun ertalab hech narsa demaydi. Shuning uchun **kunlik maqsad**
+bor: `day().goal` = oxirgi 28 kunning yozuvli kunlari **medianasi**, 60…300
+oralig'ida, o'nlikka yaxlitlangan. O'rtacha emas (bitta 400 ochkolik kun
+o'rtachani ko'tarib qolgan hamma kunni «yetmadi» qilardi) va **bugun hisobga
+kirmaydi** (maqsad kun davomida siljisa unga yetib bo'lmasdi). Tarix 5 kundan
+oz bo'lsa — 100. Yonida **hozirgi zanjir** (`day().cur`, `D.streak`) turadi —
+nishonlardagi «eng uzun» dan boshqa narsa: yo'qotish mumkin bo'lgan yagona
+raqam, va bugun hali yozilmagan bo'lsa sariq ogohlantirish chiqadi.
+
+**Ochko manbasi ham yoziladi** (`day().src`, `SRC` jadvali): «bugun +47» degan
+raqam o'zi hech narsa o'rgatmaydi. Faqat JAMI va BUGUNGI taqsimot saqlanadi —
+har kunga manbalar jadvali 600 kunda o'n mingta yozuv bo'lardi va o'tgan
+kunning taqsimotini hech kim so'ramaydi.
 
 **Hech narsa sanalmaydi — hammasi qayta hisoblanadi.** Ochko ham, nishon sharti ham
 har safar `D.S` dan hisoblab chiqiladi (`collect()`, ~600 kunga 5 ms, `state:changed`
@@ -222,17 +239,26 @@ hafta yakuni 25, **mukammal kun +50**, **bajarilgan haftalik sinov +80**. Chegar
 shuning uchun: ularsiz bitta bo'limni «sog'ib» daraja olish mumkin bo'lardi va daraja
 hayotni emas, bitta ekranni ko'rsatardi.
 
-**Nishonlar** — 21 oila + 3 sirli, jami 84 ta bosqich (bronza · kumush · oltin · olmos).
+**Nishonlar** — 23 oila + 4 sirli, jami 93 ta bosqich (bronza · kumush · oltin · olmos).
 `id` = oila nomi + son (`kun365`, `namoz1000`) va u **hech qachon o'zgartirilmaydi**:
 `S.awards.got` ichida yozilgan. Yangi nishon qo'shish = `FAMS` ga bosqich qo'shish +
 `lv.f.*` / `lv.d.*` uchta tilda; o'lchov yangi bo'lsa `collect()` dagi `st` ga maydon
 va `FIELD` ga qator.
 
+Ikkita oila 2026-09-15 da qo'shildi: **Kuchli kun** (bir kunda ≥ 100 ochko — kunlik
+maqsadning nishondagi aksi, lekin **qat'iy** chegara bilan: o'zgaruvchan maqsaddan
+nishon berilsa, yomon oydan keyin maqsad pasayib nishon osonlashardi, ya'ni tizim
+o'zini aldardi) va **Tetiklik** (WHOOP tayyorligi ≥ 67 — ilovaning asosiy raqami shu
+paytgacha nishonlarda umuman yo'q edi; yagona oila, u ishlab emas **tiklanib** olinadi,
+shuning uchun ochko bermaydi).
+
 **Sirli nishonlar** (`secret: true`) — Sahar (30 kun ketma-ket bomdod jamoat bilan),
 To'liq oy (12 ta bir kun ham qoldirilmagan oy), Qaytish (30 kundan uzoq tanaffusdan
-keyin yana 30 kun). Sharti olinmagunicha ko'rsatilmaydi, to'plamda «?» bo'lib turadi.
-«Qaytish» ataylab bor: uzoq tanaffusdan qaytgan odam jazolanmasin, aksincha — aynan
-shu uchun nishon olsin.
+keyin yana 30 kun), Ramazon (hijriy 9-oyda ≥ 27 kun ro'za, `D.hijri` dan — 29 emas
+27, chunki hijriy sana taqvim manbasiga va `hijriOffset` ga bog'liq va bir kunga
+siljisa nishon bir yil kechikardi). Sharti olinmagunicha ko'rsatilmaydi, to'plamda «?»
+bo'lib turadi. «Qaytish» ataylab bor: uzoq tanaffusdan qaytgan odam jazolanmasin,
+aksincha — aynan shu uchun nishon olsin.
 
 **Medal grafikasi butunlay CSS da** (`css/levels.css` › `.lv-med`): o'ymakor chekka
 `repeating-conic-gradient`, metall yuza `linear-gradient`, yorug'lik dog'i, qora siyoh
@@ -241,12 +267,24 @@ ikkitadan `<defs>` kerak bo'lardi. Olinmagan medalning chekkasi — ilgarilash y
 (`conic-gradient`, `--p` foizi HTML dan). Tabrikda `.pop` sinfi medalni aylantirib
 chiqaradi va bir marta yaltiratadi; `prefers-reduced-motion` app.css da to'xtatadi.
 
-**Haftalik sinov** (`WEEKLY` jadvali, 10 ta) — hafta kalitidan tanlanadi (`weekPick`),
-hech qayerda saqlanmaydi. Shu sabab o'tgan haftalarniki ham orqaga qarab aniq bilinadi
-va ikki qurilma birlashganda ziddiyat chiqmaydi. **YANGI SINOV FAQAT JADVAL OXIRIGA
-QO'SHILADI** — o'rtaga qo'shilsa eski haftalarning sinovi ham o'zgaradi va odam
-«bajarilgan» deb bilgan narsasini yo'qotadi. Bajarilgani `sinov` nishon oilasiga
-va +80 ochkoga aylanadi.
+**Haftalik sinov** — hafta kalitidan tanlanadi (`weekPick`), hech qayerda saqlanmaydi.
+Shu sabab o'tgan haftalarniki ham orqaga qarab aniq bilinadi va ikki qurilma
+birlashganda ziddiyat chiqmaydi. Bajarilgani `sinov` nishon oilasiga va +80 ochkoga
+aylanadi.
+
+**Jadval SANALI** (`WEEKLY_SETS`, har biri `{from, list}`; `weekPick` hafta kaliti
+`from` dan katta bo'lgan oxirgi ro'yxatni oladi). Ilgari bu yerda «yangi sinovni faqat
+jadval oxiriga qo'shing» degan qoida turardi va u **noto'g'ri edi**: `weekPick` hafta
+kalitini xeshlab `h % WEEKLY.length` qiladi, ya'ni ro'yxat uzunligi o'zgarishi bilan
+**qoldiq ham o'zgaradi** va o'tgan hamma haftaning sinovi almashadi — odam bajarib
+qo'ygan sinovi «bajarilmagan» bo'lib, `sinov` nishoni va +80 ochko orqaga ketardi.
+Oxiriga qo'shish buni to'xtatmaydi: `37 % 10 = 7`, lekin `37 % 15 = 7` emas.
+Endi har hafta o'z davridagi ro'yxatdan o'qiydi va tarix umuman o'zgarmaydi.
+**Yangi sinov qo'shish** = yangi ro'yxat + `from` si **kelasi hafta** bo'lgan yangi
+qator; eski qatorlarga hech qachon tegilmaydi. `WEEKLY` eksporti — eng oxirgi ro'yxat
+(hamma sinovning birlashmasi), tashqi o'quvchilar va testlar uchun.
+Hozir: `WEEKLY_1` 10 ta (2026-W38 gacha), `WEEKLY_2` 15 ta (2026-W39 dan; yangilari —
+`xp` (haftada 900 ochko, yagona universal sinov), `full5`, `media`, `thanks`, `money`).
 
 **Birinchi ishga tushirish.** `awards.init` false bo'lsa hamma bajarilgan shart jimgina
 `got[id] = 0` bilan yoziladi va bitta umumiy oyna ko'rsatiladi — aks holda 600 kunlik
@@ -255,9 +293,17 @@ tarixi bor odam bir vaqtda 28 ta tabrik olardi. Keyingi nishonlar bittalab tabri
 qilib qo'yilsa, odam butun tarixini nishonsiz ko'rardi va uni qaytarib bo'lmasdi.
 
 **To'plam oynasining tartibi** javob beradigan savollar bo'yicha: martaba (qayerdaman) →
-**martabalar yo'li** (nima oldinda) → haftalik sinov (shu hafta nima) → **eng yaqin uchta nishon**
-(endi nima) → 39/84 (qancha yig'ildi) → oilalar → tushuntirish. Tushuntirish oxirida: u
-ma'lumotnoma, birinchi o'qiladigan narsa emas.
+**bugungi maqsad + ochko qayerdan** (bugun nima qilaman) → haftalik sinov (shu hafta nima) →
+**martabalar yo'li** (nima oldinda) → **eng yaqin uchta nishon** (endi nima) →
+**oxirgi 30 kun** (qanday ketyapman) → 39/93 (qancha yig'ildi) → oilalar → tushuntirish.
+Bugungi maqsad ataylab ikkinchi: u yagona **bugun** bajariladigan narsa, qolgani esa
+oylar va yillar bilan o'lchanadi. Tushuntirish oxirida: u ma'lumotnoma, birinchi
+o'qiladigan narsa emas.
+
+**Eng yaqin nishonlar — har oiladan bittadan.** Saralash faqat foiz bo'yicha bo'lsa bitta
+oilaning ikki bosqichi («100 kun» va «365 kun») yonma-yon tushardi, chunki ikkalasi bitta
+o'lchovdan oziqlanadi — uchta qatordan ikkitasi bir xil narsani aytardi. Lentada bu
+allaqachon shunday edi, ro'yxatda esa yo'q edi.
 
 **Rang = ma'lumot, bu yerda ham:** martaba chizig'i martaba rangida, nishon chizig'i o'z
 metallida, haftalik sinov ko'k (davom etyapti) yoki yashil (bajarildi). `--c` berilmagan
@@ -271,6 +317,13 @@ ingichka va ataylab tayyorlik hero'sidan oldin — hero kunning asosiy raqami bo
 qolishi kerak. Faqat bugungi kunda chiziladi: o'tgan kunni ochganda «bugun +N ochko»
 yolg'on bo'lardi.
 
+Bugun qatoridagi **chiziq — daraja emas, kunlik maqsad**. Daraja chizig'i u yerda
+deyarli qimirlamasdi (20-darajada bir kun 1 % ham surmaydi), ya'ni har kuni bir xil
+ko'rinardi va odam uni ko'rishdan to'xtagandi; kunlik maqsad esa har kuni noldan
+to'ladi. Daraja yo'qolgani yo'q — raqam belgida, martaba nomi yonida, to'liq hisobi
+oynada. Chiziq rangi ham shu sababdan maqsad rangida (ko'k/yashil), martaba rangida
+emas: bir xil narsa ilova bo'ylab bir xil rangda bo'lishi kerak.
+
 Yuklanishi: birinchi ekranga kerak emas, shuning uchun `core.js` dagi `LAZY_LIBS` orqali
 bo'sh vaqtda keladi (kechiktirilgan bo'limlar navbatidan keyin) va kelgach o'zi bir marta
 `check()` qiladi hamda Бугун ochiq bo'lsa uni qayta chizadi. CSS prefiksi `lv-`, amallar
@@ -279,7 +332,9 @@ Bugun ekranidagi qator `[data-view="today"]` ichida tekislanadi (fon va chegara 
 ajratgich): o'sha ekran «jimjit va nafis» ko'rinishga o'tgan, va to'ldirilgan quticha u yerda
 yagona bo'lib ajralib turardi.
 
-Sinov: `node tests/test_levels.js` (103 ta tekshiruv, haqiqiy `core.js` bilan).
+Sinov: `node tests/test_levels.js` (130 ta tekshiruv, haqiqiy `core.js` bilan).
+Ular orasida eng muhimi — **jadval sanali bo'lgani uchun o'tgan 60 haftaning sinovi
+o'zgarmasligi**: bu aynan odam yig'ganini yo'qotadigan xato edi.
 Ko'rinish brauzerda tekshiriladi — Chrome CDP orqali headless, 412px, 600 kunlik sun'iy holat
 bilan: qorong'i va yorug' tema, tabrik, bo'sh holat, WCAG kontrasti, kesilish va gorizontal
 sirg'alish. Uchta ko'rinish nuqsoni (tishlar, panjara, lenta) va yorug' temadagi kontrast

@@ -312,5 +312,111 @@ function evalSheet() {
 }
 
 /* ================================================================= */
+console.log('\n18. Kunlik maqsad');
+{
+  /* Tarix yo'q — yengil boshlanish. */
+  setState({ logs: { [TODAY]: ['a'] } });
+  eq('tarixsiz maqsad — 100', L.day().goal, 100);
+
+  /* O'n kun × 5 ta odat belgisi = kuniga 50 ochko. Mediana ham 50, lekin
+     eng kam maqsad 60, ya'ni pastki chegara ishlashi kerak. */
+  const logs = {};
+  for (let i = 1; i <= 10; i++) logs[daysBack(i)] = ['a', 'b', 'c', 'd', 'e'];
+  setState({ logs });
+  eq('past mediana chegarada to‘xtaydi', L.day().goal, 60);
+
+  /* Kuniga 8 ta belgi = 80 ochko (chegara 80), mediana 80. */
+  const logs2 = {};
+  for (let i = 1; i <= 10; i++) logs2[daysBack(i)] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  setState({ logs: logs2 });
+  eq('mediana maqsad bo‘ladi', L.day().goal, 80);
+
+  /* Bugun maqsadga kirmasligi shart: aks holda ochko yig‘gan sari maqsad
+     ham ko‘tarilib, unga hech qachon yetib bo‘lmasdi. */
+  const logs3 = Object.assign({}, logs2);
+  logs3[TODAY] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+  setState({ logs: logs3 });
+  eq('bugun maqsadni siljitmaydi', L.day().goal, 80);
+  eq('bugungi ochko alohida', L.day().xp, 80);
+  eq('maqsad bajarildi', L.day().done, true);
+  eq('qolgani nol', L.day().left, 0);
+}
+
+console.log('\n19. Ochko qayerdan — manbalar');
+{
+  const c = setState({
+    logs: { [TODAY]: ['a', 'b'] },                                  // 20
+    notes: { [TODAY]: 'bugun' },                                    // 6
+    dhikr: { [TODAY]: { total: 99 } },                              // 6
+  });
+  const d = L.day();
+  eq('bugungi ochko', d.xp, 32);
+  eq('uchta manba', d.src.length, 3);
+  eq('manbalar yig‘indisi bugungi ochkoga teng', d.src.reduce((a, s) => a + s.n, 0), c.days.get(TODAY));
+  eq('eng kattasi birinchi', d.src[0].id, 'odat');
+  ok('har manbaning belgisi bor', d.src.every((s) => typeof s.ic === 'string' && s.ic.length > 0));
+  /* Kechagi ochko bugungi taqsimotga tushmasligi kerak. */
+  setState({ logs: { [daysBack(1)]: ['a', 'b'] } });
+  eq('kechagisi bugungi ro‘yxatda yo‘q', L.day().src.length, 0);
+}
+
+console.log('\n20. Kuchli kun va hozirgi zanjir');
+{
+  /* Odat belgisi kuniga 80 ochkoda to'xtaydi (habitCap), ya'ni bitta bo'lim
+     bilan «kuchli kun» chiqmaydi — bu ataylab shunday. Ro'za qo'shsak 120. */
+  const logs = {}, fasting = {};
+  for (let i = 0; i < 3; i++) {
+    logs[daysBack(i)] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];   // 80
+    fasting[daysBack(i)] = { type: 'nafl', done: true };             // +40 = 120
+  }
+  logs[daysBack(3)] = ['a'];                                        // 10 ochko — kuchli emas
+  const c = setState({ logs, fasting });
+  eq('ikki manbadan yig‘ilgan kun kuchli', c.st.strong, 3);
+  eq('kuchli kun nishoni o‘lchovni oldi', L.medals().find((m) => m.id === 'kuchli10').cur, 3);
+  eq('hozirgi zanjir', L.day().cur, 4);
+  eq('bugun yozilgan', L.day().todayActive, true);
+
+  /* Bugun bo'sh: zanjir kechagidan sanaladi va ogohlantirish holati chiqadi. */
+  const logs2 = {};
+  for (let i = 1; i <= 4; i++) logs2[daysBack(i)] = ['a'];
+  setState({ logs: logs2 });
+  eq('bugun bo‘sh — zanjir kechagidan', L.day().cur, 4);
+  eq('bugun yozilmagan', L.day().todayActive, false);
+}
+
+console.log('\n21. Haftalik sinov jadvali — tarix o‘zgarmasligi');
+{
+  /* ENG MUHIM TEKSHIRUV. Ilgari jadvalga sinov qo'shilsa `h % WEEKLY.length`
+     qoldig'i o'zgarib, O'TGAN hamma haftaning sinovi almashardi va odam
+     bajarib qo'ygan sinovini yo'qotardi. Endi jadval sanali: eski haftalar
+     eski ro'yxatdan o'qiydi. */
+  const OLD = ['jamaat', 'habit', 'zikr', 'perfect', 'sleep', 'note', 'workout', 'food', 'task', 'fast'];
+  const oldPicks = [];
+  for (let i = 1; i <= 60; i++) oldPicks.push(L._weekPick(D.weekKey(daysBack(7 * i))).id);
+  ok('eski haftalar faqat eski jadvaldan chiqadi', oldPicks.every((id) => OLD.includes(id)),
+     oldPicks.filter((id) => !OLD.includes(id)));
+
+  /* Yangi sinovlar kelajakda paydo bo'ladi. */
+  const future = [];
+  for (let i = 1; i <= 60; i++) future.push(L._weekPick(D.weekKey(D.addDays(TODAY, 7 * i))).id);
+  ok('yangi sinovlar kelasi haftalarda chiqadi', future.some((id) => !OLD.includes(id)),
+     Array.from(new Set(future)));
+  ok('har bir tanlov jadvalda bor', future.every((id) => L.WEEKLY.some((w) => w.id === id)));
+  ok('har sinovning o‘lchov maydoni bor', L.WEEKLY.every((w) => typeof w.f === 'string' && w.n > 0));
+}
+
+console.log('\n22. Tarix grafigi');
+{
+  const logs = {};
+  for (let i = 0; i < 40; i++) logs[daysBack(i)] = ['a'];
+  setState({ logs });
+  const h = L.history(30);
+  eq('o‘ttizta kun', h.length, 30);
+  eq('oxirgisi — bugun', h[h.length - 1].k, TODAY);
+  ok('eskidan yangiga tartiblangan', h[0].k < h[1].k);
+  ok('hamma kunda ochko bor', h.every((x) => x.xp === 10));
+}
+
+/* ================================================================= */
 console.log('\n' + (fail ? `${fail} / ${n} tekshiruv YIQILDI` : `hammasi joyida — ${n} ta tekshiruv`) + '\n');
 process.exit(fail ? 1 : 0);

@@ -1027,7 +1027,23 @@
         <span class="lv-ch-x">${esc(text)}</span>
       </span>
       <span class="lv-ch-n num">${D.fmtNum(Math.min(w.cur, w.need))}<i>/${D.fmtNum(w.need)}</i></span>
-      ${barHtml(w.pct)}
+      ${barHtml(w.pct, t('lv.w.title'))}
+    </div>`;
+  }
+
+  /** Profil kartasidagi ixcham «bugun» qatori — oynadagi yoy bu yerga sig'maydi.
+      Haftalik sinov bilan ATAYLAB bir xil shaklda: ikkalasi ham maqsad, farqi
+      faqat muddatida, va bir xil narsa bir xil ko'rinishi kerak. */
+  function dayRow() {
+    const d = D.levels.day();
+    return `<div class="lv-ch${d.done ? ' done' : ''}">
+      <span class="lv-ch-ic">${D.ic(d.done ? 'check' : 'trend', 15)}</span>
+      <span class="lv-ch-t">
+        <span class="lv-ch-h">${esc(t('lv.day.title'))}</span>
+        <span class="lv-ch-x">${esc(d.done ? t('lv.day.done') : t('lv.day.left', { n: D.fmtNum(d.left) }))}</span>
+      </span>
+      <span class="lv-ch-n num">${D.fmtNum(d.xp)}<i>/${D.fmtNum(d.goal)}</i></span>
+      ${barHtml(d.pct, t('lv.day.title'))}
     </div>`;
   }
 
@@ -1054,25 +1070,38 @@
       </span>
       ${D.ic('chevR', 16)}
     </button>
+    ${dayRow()}
     ${weekHtml(true)}
     <div class="lv-strip">
-      ${recent.map((m) => `<span class="lv-strip-i" title="${esc(famName(m.fam) + ' · ' + needLabel(m))}">${medalHtml(m, 30)}</span>`).join('')}
+      ${streakHtml(D.levels.day())}
+      ${recent.map((m) => `<span class="lv-strip-i" role="img" aria-label="${esc(famName(m.fam) + ' · ' + needLabel(m))}"
+          title="${esc(famName(m.fam) + ' · ' + needLabel(m))}">${medalHtml(m, 30)}</span>`).join('')}
       ${rest > 0 ? `<span class="lv-more num">+${rest}</span>` : ''}
       <span class="lv-count small muted num">${esc(t('lv.got', { a: on.length, b: ALL.length }))}</span>
     </div>`;
   }
 
   /** Bugun sahifasining tepasidagi ingichka qator (today.js chaqiradi). */
+  /* Chiziq ATAYLAB daraja ilgarilashi emas, KUNLIK MAQSAD. Daraja chizig'i bu
+     yerda deyarli qimirlamasdi — 20-darajada bir kun 1 % ham surmaydi — ya'ni
+     har kuni bir xil ko'rinardi va odam uni ko'rishdan to'xtagandi. Kunlik
+     maqsad esa har kuni noldan to'ladi. Daraja yo'qolgani yo'q: raqam belgida,
+     martaba nomi yonida, to'liq hisobi esa oynada. */
   function tileHtml() {
-    const i = D.levels.info();
-    return `<div class="card lv-td" style="--c:${i.rank.c}">
+    const i = D.levels.info(), d = D.levels.day();
+    return `<div class="card lv-td${d.done ? ' done' : ''}" style="--c:${i.rank.c}">
       <button type="button" class="lv-td-b" data-act="lvOpen" aria-label="${esc(t('lv.title'))}">
         ${markHtml(i.level, i.rank)}
         <span class="lv-txt">
-          <span class="lv-td-top"><span class="lv-rank">${esc(t('lv.r.' + i.rank.id))}</span>
-            ${i.todayXp ? `<span class="lv-td-xp num">${esc(t('lv.todayXp', { n: D.fmtNum(i.todayXp) }))}</span>` : ''}</span>
-          ${barHtml(i.pct)}
-          <span class="lv-sub num">${progressLine(i)}</span>
+          <span class="lv-td-top">
+            <span class="lv-rank">${esc(t('lv.r.' + i.rank.id))}</span>
+            <span class="lv-td-xp num"><b>${D.fmtNum(d.xp)}</b><i>/${D.fmtNum(d.goal)}</i></span>
+          </span>
+          ${barHtml(d.pct, t('lv.day.title'))}
+          <span class="lv-td-sub">
+            <span class="lv-sub">${esc(d.done ? t('lv.day.done') : t('lv.day.left', { n: D.fmtNum(d.left) }))}</span>
+            ${streakHtml(d)}
+          </span>
         </span>
         ${D.ic('chevR', 16)}
       </button>
@@ -1116,7 +1145,16 @@
   /** Bitmagan, sirli bo'lmagan va boshlangan nishonlardan eng yaqin uchtasi.
       Ro'yxatning boshida turadi, chunki odam «endi nima?» deb ochadi. */
   function nearHtml(med) {
-    const near = med.filter((m) => !m.on && !m.secret && m.cur > 0).sort((a, b) => b.pct - a.pct).slice(0, 3);
+    /* Har OILADAN bittadan — lentadagi bilan bir xil sabab. Saralash faqat
+       foiz bo'yicha bo'lsa, bitta oilaning ikki bosqichi («100 kun» va
+       «365 kun») yonma-yon tushardi, chunki ikkalasi ham bitta o'lchovdan
+       oziqlanadi. Uchta qatordan ikkitasi bir xil narsani aytsa, «endi nima?»
+       degan savolga javob uchdan ikkiga kamayardi. */
+    const seen = new Set();
+    const near = med.filter((m) => !m.on && !m.secret && m.cur > 0)
+      .sort((a, b) => b.pct - a.pct)
+      .filter((m) => !seen.has(m.fam) && seen.add(m.fam))
+      .slice(0, 3);
     if (!near.length) return '';
     return `<div class="lv-near">
       <div class="lv-sec-h">${esc(t('lv.near'))}</div>
@@ -1127,7 +1165,7 @@
           <span class="tiny muted num">${esc(needLabel(m))} · ${esc(t('lv.left', { n: D.fmtNum(m.need - m.cur) }))}</span>
         </span>
         <span class="lv-near-p num">${Math.floor(m.pct)}%</span>
-        ${barHtml(m.pct)}
+        ${barHtml(m.pct, famName(m.fam))}
       </button>`).join('')}
     </div>`;
   }
@@ -1156,12 +1194,14 @@
           <div class="lv-sub num"><b>${D.fmtNum(i.xp)}</b> ${esc(t('lv.xp'))} · ${progressLine(i)}</div>
         </div>
       </div>
-      ${pathHtml(i)}
+      ${dayHtml()}
       ${weekHtml(false)}
+      ${pathHtml(i)}
       ${nearHtml(med)}
+      ${histHtml()}
       <div class="lv-count-row" style="--c:${i.rank.c}">
         <div class="lv-total num">${esc(t('lv.got', { a: on, b: ALL.length }))}</div>
-        ${barHtml((on / ALL.length) * 100)}
+        ${barHtml((on / ALL.length) * 100, t('lv.all'))}
       </div>
       ${on ? '' : `<p class="empty">${esc(t('lv.empty'))}</p>`}
       ${fams}
@@ -1194,7 +1234,7 @@
         <div class="lv-one-t">
           <b class="num">${esc(hidden ? t('lv.secretHint') : needLabel(m) + ' · ' + tierName(m))}</b>
           <span class="small muted">${esc(hidden ? '' : famDesc(m.fam))}</span>
-          ${hidden ? '' : `${barHtml(m.pct)}<span class="small">${esc(t('lv.have', { n: D.fmtNum(m.cur) }))} · ${esc(line)}</span>`}
+          ${hidden ? '' : `${barHtml(m.pct, famName(m.fam))}<span class="small">${esc(t('lv.have', { n: D.fmtNum(m.cur) }))} · ${esc(line)}</span>`}
         </div>
       </div>`,
       actions: [{ label: t('lv.close'), act: 'closeModal' }],
