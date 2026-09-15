@@ -958,7 +958,63 @@
   function progressLine(i) {
     return i.max ? esc(t('lv.max')) : esc(t('lv.next', { n: i.next, x: D.fmtNum(i.need - i.have) }));
   }
-  function barHtml(pct) { return `<span class="lv-bar"><i style="width:${D.clamp(pct, 0, 100).toFixed(1)}%"></i></span>`; }
+  /* Chiziq — ekran o'quvchi uchun ham. Ilgari u bo'sh `<span>` edi, ya'ni
+     ilgarilash faqat ko'zga ko'rinardi: ovozli o'quvchi «10 kun qoldi» ni
+     eshitardi-yu, qanchasi bosib o'tilganini umuman bilmasdi. */
+  function barHtml(pct, label) {
+    const p = D.clamp(pct, 0, 100);
+    return `<span class="lv-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"
+      aria-valuenow="${Math.round(p)}"${label ? ` aria-label="${esc(label)}"` : ''}><i style="width:${p.toFixed(1)}%"></i></span>`;
+  }
+
+  /** Hozirgi zanjir. Nishonlardagi «eng uzun» dan boshqa narsa: ertaga
+      qaytaradigan raqam aynan shu. Bugun hali bo'sh bo'lsa — ogohlantiradi. */
+  function streakHtml(d) {
+    const risk = !d.todayActive && d.cur > 0;
+    return `<span class="lv-streak${d.cur ? '' : ' none'}${risk ? ' risk' : ''}">
+      ${D.ic('fire', 14)}<b>${esc(d.cur ? t('lv.day.streak', { n: D.fmtNum(d.cur) }) : t('lv.day.streak0'))}</b>
+      ${risk ? `<i>${esc(t('lv.day.risk'))}</i>` : ''}</span>`;
+  }
+
+  /** BUGUN — bo'limdagi yagona bugun bajariladigan maqsad, va ochkoning manbasi.
+      Rang tili boshqa joylardagidek: ko'k — davom etyapti, yashil — bajarildi. */
+  function dayHtml() {
+    const d = D.levels.day();
+    const col = d.done ? 'var(--success)' : 'var(--accent)';
+    const rows = d.src.map((s) => `<li class="lv-src">
+        <span class="lv-src-i">${D.ic(s.ic, 14)}</span>
+        <span class="lv-src-n">${esc(t('lv.s.' + s.id))}</span>
+        <b class="num">+${D.fmtNum(s.n)}</b>
+      </li>`).join('');
+    return `<section class="lv-day${d.done ? ' done' : ''}">
+      <div class="lv-sec-h">${esc(t('lv.day.title'))}</div>
+      <div class="lv-day-top">
+        ${D.chart.arc({ pct: d.pct, color: col, track: 'var(--track)',
+                        label: D.fmtNum(d.xp), sub: esc(t('lv.day.of', { n: D.fmtNum(d.goal) })) })}
+        <div class="lv-day-side">
+          <div class="lv-day-st">${esc(d.done ? t('lv.day.done') : t('lv.day.left', { n: D.fmtNum(d.left) }))}</div>
+          ${streakHtml(d)}
+          <p class="lv-day-how">${esc(t('lv.day.how'))}</p>
+        </div>
+      </div>
+      ${rows ? `<div class="lv-sec-h sm">${esc(t('lv.day.from'))}</div><ul class="lv-srcs">${rows}</ul>`
+             : `<p class="lv-day-none">${esc(t('lv.day.none'))}</p>`}
+    </section>`;
+  }
+
+  /** Oxirgi 30 kun — kunlik maqsad chiziq bo'lib turadi, yetgan kunlar yashil.
+      Bitta kunning ochkosi hech narsa demaydi; o'ttizta kun esa odatni ko'rsatadi. */
+  function histHtml() {
+    const h = D.levels.history(30), goal = D.levels.day().goal;
+    const vals = h.map((x) => x.xp);
+    if (vals.filter((v) => v > 0).length < 3) return '';   // grafik bo'lish uchun juda kam
+    const avg = Math.round(vals.reduce((a, b) => a + b, 0) / vals.length);
+    return `<div class="lv-hist">
+      <div class="lv-sec-h">${esc(t('lv.hist'))} <span class="muted">· ${esc(t('lv.hist.avg', { n: D.fmtNum(avg) }))}</span></div>
+      ${D.chart.bars({ values: vals, height: 64, target: goal,
+                       colors: vals.map((v) => (v >= goal ? 'var(--success)' : 'var(--accent)')) })}
+    </div>`;
+  }
 
   /** Haftalik sinov qatori. */
   function weekHtml(compact) {
