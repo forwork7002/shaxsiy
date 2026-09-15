@@ -474,3 +474,44 @@ Session key (`.secret`) and WHOOP tokens are deliberately excluded: restoring me
 **Portability.** `GET /api/export/full` hands the user a ZIP of plain JSON and JPEG with a README in Uzbek. No part of it needs this app to be readable.
 
 Guarded by `tests/test_durability.py` (39 checks): round-trip through compression, old plain rows still readable, 20-year generational retention, corrupt database refused, deleted records present in the export, health warnings appearing and clearing.
+
+## Verifying a deploy — "200" is not "works"
+
+Written after v98 (2026-09-15) shipped a live TypeError that every check passed.
+
+**What happened.** A dead-code sweep removed `D.icons = P` from `core.js` as
+unreferenced, but `settings.js:732` still read `D.icons[c.icon]` unguarded.
+Settings → finance categories threw on render. The deploy was verified by
+requesting every path in `sw.js` and confirming each returned `200` — and it
+did. The file existed. The *link between two files* was broken, and an HTTP
+status code cannot see that.
+
+The same blind spot had already let v96 and v97 ship without `js/install.js`:
+the 49 stale files all answered `200` perfectly well.
+
+**Three checks, three different questions. Run all three.**
+
+1. **Can the service worker install?** Request every path cached by `sw.js`.
+   One `404` aborts the whole install and the browser silently stays on the
+   previous version — no error anywhere. Note the list is in *three* places:
+   `ASSETS` (42), `FONTS` (4), and the shell line (`'./'`, `'./index.html'`,
+   `'./manifest.json'`, `'./icons/icon.svg'`). 50 paths, not 46 — and the
+   shell four are what make the app open offline at all.
+2. **Is the content the intended content?** Pull the shipped files back off
+   the server and diff them against the deployed commit byte for byte.
+   Normalise CRLF first. Expect exactly one difference: `index.html`, and
+   only on the `?v=` lines, which `push.sh` rewrites. Anything else is
+   unexplained until you explain it.
+3. **Does it run?** Open the app in a real browser and visit the screens the
+   release touched, with the console open. Checks 1 and 2 are both static;
+   neither would have caught the `D.icons` break, because the file was
+   present *and* byte-identical to the commit that contained the bug.
+
+**Deploy from a clean checkout, never from the working folder.** `push.sh`
+sends the folder, so anything half-written — by you or by another session
+sharing the directory — ships too. `git clone --no-hardlinks` the repo to a
+temp path, `checkout` the commit, run `push.sh` from there: only committed
+work goes out, and nobody is pressured into a premature commit. One cost to
+know: with no `.git` alongside it, `push.sh`'s own uncommitted-file guard
+passes silently, so check `git rev-list --count HEAD..origin/<branch>` → `0`
+by hand before pushing.
