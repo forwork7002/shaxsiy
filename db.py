@@ -39,7 +39,6 @@ log = logging.getLogger("db")
 
 TZ = timezone(timedelta(hours=5))  # Toshkent — api.py bilan bir xil
 SCHEMA_VERSION = 3            # 2: day_facts.gone_at, chat_threads.hash · 3: state_versions.json zlib bilan siqiladi
-MAX_RANGE_DAYS = 400
 VERSION_GAP_S = 600           # 10 daqiqa ichidagi saqlashlar bitta versiyaga yoziladi
 KEEP_ALL_DAYS, KEEP_DAILY_DAYS = 7, 400
 # Zaxira avlodlari: 14 kun — har kuni, 8 hafta — haftasiga bitta, 24 oy — oyiga bitta,
@@ -49,11 +48,6 @@ VACUUM_DAYS = 30              # oyiga bir marta: compact o'chirgan joy diskka qa
 COUNT_TABLES = ("day_facts", "state_versions", "whoop_records", "chat_messages", "ai_cards")   # nusxa to'liqligi shular bo'yicha
 ZMAGIC = b"DZ1"               # siqilgan blob boshi (zlib) — oddiy matndan ajratib turadi
 DAY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-# 2026-09-14: finance, dhikr, fasting, goals qo'shildi. Ular blobda bor edi, lekin
-# arxivga tushmasdi — ya'ni moliya yozuvi yoki ro'za kuni o'chirilsa, hech qayerda
-# izi qolmasdi. Arxiv o'qiladigan ekran qurilguncha ular jimgina to'planib turadi.
-FACT_KINDS = ("health", "habits", "counts", "prayers", "note", "gratitude", "stack", "caffeine", "tasks", "food",
-              "finance", "dhikr", "fasting", "goals")
 FOOD_MEAL_KEYS = ("id", "ts", "name", "grams", "kcal", "p", "c", "f", "photo", "items", "note", "src")   # surat baytlari hech qachon emas
 WHOOP_TS_KEY = {"cycle": "start", "recovery": "ts", "sleep": "end", "workout": "start"}   # _wh_merge bilan bir xil
 WHOOP_DAY_SHIFT_H = {"cycle": 12}   # mijoz (whoop.js/history.js) sikl kunini start+12h dan oladi — day_hint ham shunday
@@ -213,14 +207,6 @@ def init(data_dir: Path) -> Path:
 
 def _valid_day(k) -> bool:
     return isinstance(k, str) and bool(DAY_RE.match(k))
-
-
-def _clamp_range(frm: str, to: str):
-    """(frm, to) — 400 kundan uzun oraliq boshidan qirqiladi."""
-    a, b = _parse_iso(frm), _parse_iso(to)
-    if a and b and (b - a).days >= MAX_RANGE_DAYS:
-        frm = (b - timedelta(days=MAX_RANGE_DAYS - 1)).strftime("%Y-%m-%d")
-    return frm, to
 
 
 # ═══════════════════════ yozuvchilar ═══════════════════════
@@ -803,180 +789,6 @@ def _loads(s):
         return None
 
 
-def range(uid: str) -> dict:   # noqa: A001 — spec nomi
-    c = _conn()
-    try:
-        r = c.execute("SELECT MIN(day) AS first, MAX(day) AS last, COUNT(DISTINCT day) AS days FROM day_facts WHERE uid=? AND gone_at IS NULL", (uid,)).fetchone()
-        w = c.execute("SELECT MIN(day_hint) AS first FROM whoop_records WHERE uid=? AND day_hint<>''", (uid,)).fetchone()
-        t = c.execute("SELECT COUNT(*) AS n FROM chat_threads WHERE uid=?", (uid,)).fetchone()
-        return {"first": r["first"], "last": r["last"], "days": r["days"] or 0, "whoopFirst": w["first"], "threads": t["n"] or 0}
-    finally:
-        c.close()
-
-
-def days(uid: str, frm: str, to: str) -> dict:
-    frm, to = _clamp_range(frm, to)
-    out = {}
-    c = _conn()
-    try:
-        for r in c.execute("SELECT day, kind, json FROM day_facts WHERE uid=? AND day BETWEEN ? AND ? AND gone_at IS NULL ORDER BY day", (uid, frm, to)):
-            out.setdefault(r["day"], {})[r["kind"]] = _loads(r["json"])
-        return out
-    finally:
-        c.close()
-
-
-def whoop(uid: str, frm: str, to: str) -> dict:
-    frm, to = _clamp_range(frm, to)
-    out = {k: [] for k in WHOOP_TS_KEY}
-    c = _conn()
-    try:
-        for r in c.execute("SELECT kind, json FROM whoop_records WHERE uid=? AND day_hint BETWEEN ? AND ? ORDER BY ts DESC", (uid, frm, to)):
-            if r["kind"] in out:
-                out[r["kind"]].append(_loads(r["json"]))
-        return out
-    finally:
-        c.close()
-
-
-def _avg(xs):
-    xs = [float(x) for x in xs if isinstance(x, (int, float)) and not isinstance(x, bool)]
-    return round(sum(xs) / len(xs), 1) if xs else None
-
-
-def months(uid: str, year: int) -> dict:
-    """Yil bo'yicha oylik yig'indilar: {YYYY-MM: {days, habitPct, sleepH, recovery, strain, kcal, kcalEaten,
-    workouts, weightStart, weightEnd, notes}}. Barcha 12 oy qaytadi (bo'sh oy — days:0)."""
-    y = int(year)
-    frm, to = f"{y:04d}-01-01", f"{y:04d}-12-31"
-    m = {f"{y:04d}-{i:02d}": {"days": 0, "habitPct": None, "sleepH": None, "recovery": None, "strain": None, "kcal": None, "kcalEaten": None,
-                              "workouts": 0, "weightStart": None, "weightEnd": None, "notes": 0} for i in _brange(1, 13)}
-    acc = {k: {"days": set(), "habits": [], "ids": set(), "sleep": [], "rec": [], "strain": [], "kcal": [], "eaten": [], "w": [], "weights": []} for k in m}
-    c = _conn()
-    try:
-        for r in c.execute("SELECT day, kind, json FROM day_facts WHERE uid=? AND day BETWEEN ? AND ? AND gone_at IS NULL ORDER BY day", (uid, frm, to)):
-            mk = r["day"][:7]
-            if mk not in acc:
-                continue
-            a = acc[mk]
-            a["days"].add(r["day"])
-            v = _loads(r["json"])
-            if r["kind"] == "habits" and isinstance(v, list):
-                a["habits"].append(len(v))
-                a["ids"].update(str(x) for x in v)
-            elif r["kind"] == "health" and isinstance(v, dict):
-                if isinstance(v.get("weight"), (int, float)):
-                    a["weights"].append((r["day"], float(v["weight"])))
-            elif r["kind"] == "note":
-                m[mk]["notes"] += 1
-            elif r["kind"] == "food" and isinstance(v, list):
-                a["eaten"].append(sum(float(x.get("kcal") or 0) for x in v if isinstance(x, dict) and isinstance(x.get("kcal"), (int, float))))
-        for r in c.execute("SELECT kind, day_hint, json FROM whoop_records WHERE uid=? AND day_hint BETWEEN ? AND ?", (uid, frm, to)):
-            mk = r["day_hint"][:7]
-            if mk not in acc:
-                continue
-            a, v = acc[mk], _loads(r["json"]) or {}
-            if r["kind"] == "sleep" and not v.get("nap"):
-                a["sleep"].append(v.get("sleepH"))
-            elif r["kind"] == "recovery":
-                a["rec"].append(v.get("recovery"))
-            elif r["kind"] == "cycle":
-                a["strain"].append(v.get("strain")); a["kcal"].append(v.get("kcal"))
-            elif r["kind"] == "workout":
-                a["w"].append(v.get("id"))
-    finally:
-        c.close()
-    for mk, a in acc.items():
-        o = m[mk]
-        o["days"] = len(a["days"])
-        if a["habits"]:
-            # maxraj — shu oyda kamida bir marta belgilangan odatlar soni (odatlar ro'yxati arxivda yo'q)
-            den = max(1, len(a["ids"]))
-            o["habitPct"] = round(100 * sum(a["habits"]) / (den * len(a["habits"])))
-        o["sleepH"] = _avg(a["sleep"]); o["recovery"] = _avg(a["rec"]); o["strain"] = _avg(a["strain"]); o["kcal"] = _avg(a["kcal"])
-        o["kcalEaten"] = _avg(a["eaten"])
-        o["workouts"] = len(a["w"])
-        if a["weights"]:
-            ws = sorted(a["weights"])
-            o["weightStart"], o["weightEnd"] = ws[0][1], ws[-1][1]
-    return m
-
-
-def chats(uid: str, q: str = "", limit: int = 50, before=None) -> list:
-    """Arxivdagi chatlar (o'chirilganlari ham), yangisi birinchi. q — sarlavha va xabar matni bo'yicha."""
-    try:
-        limit = max(1, min(200, int(limit or 50)))
-    except (TypeError, ValueError):
-        limit = 50
-    sql = ("SELECT t.id, t.ts, t.title, t.deleted_at, (SELECT COUNT(*) FROM chat_messages m WHERE m.uid=t.uid AND m.thread_id=t.id) AS cnt "
-           "FROM chat_threads t WHERE t.uid=?")
-    args = [uid]
-    if q:
-        like = "%" + q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
-        sql += (" AND (t.title LIKE ? ESCAPE '\\' OR EXISTS(SELECT 1 FROM chat_messages m WHERE m.uid=t.uid AND m.thread_id=t.id "
-                "AND m.content LIKE ? ESCAPE '\\'))")
-        args += [like, like]
-    try:
-        b = int(before) if before not in (None, "") else None
-    except (TypeError, ValueError):
-        b = None          # noto'g'ri kursor — e'tiborsiz (SQL ga ? qo'shilmaydi)
-    if b is not None:
-        sql += " AND t.ts < ?"
-        args.append(b)
-    sql += " ORDER BY t.ts DESC LIMIT ?"
-    args.append(limit)
-    c = _conn()
-    try:
-        return [{"id": r["id"], "ts": r["ts"], "title": r["title"], "count": r["cnt"], "deleted": r["deleted_at"] is not None}
-                for r in c.execute(sql, args)]
-    finally:
-        c.close()
-
-
-def chat(uid: str, thread_id: str):
-    c = _conn()
-    try:
-        t = c.execute("SELECT id, ts, title, deleted_at FROM chat_threads WHERE uid=? AND id=?", (uid, str(thread_id))).fetchone()
-        if not t:
-            return None
-        msgs = [{"idx": r["idx"], "ts": r["ts"], "role": r["role"], "content": r["content"]}
-                for r in c.execute("SELECT idx, ts, role, content FROM chat_messages WHERE uid=? AND thread_id=? ORDER BY idx", (uid, str(thread_id)))]
-        return {"id": t["id"], "ts": t["ts"], "title": t["title"], "deleted": t["deleted_at"] is not None, "messages": msgs}
-    finally:
-        c.close()
-
-
-CARDS_MAX = 2000              # bitta so'rovdagi kartalar chegarasi (yangilari birinchi)
-
-
-def cards(uid: str, section: str, frm: str, to: str, limit: int = CARDS_MAX) -> list:
-    frm, to = _clamp_range(frm, to)
-    try:
-        limit = max(1, min(CARDS_MAX, int(limit or CARDS_MAX)))
-    except (TypeError, ValueError):
-        limit = CARDS_MAX
-    sql, args = "SELECT section, day, ts, text FROM ai_cards WHERE uid=? AND day BETWEEN ? AND ?", [uid, frm, to]
-    if section:
-        sql += " AND section=?"
-        args.append(section)
-    sql += " ORDER BY day DESC, ts DESC LIMIT ?"
-    args.append(limit)
-    c = _conn()
-    try:
-        return [dict(r) for r in c.execute(sql, args)]
-    finally:
-        c.close()
-
-
-def versions(uid: str) -> list:
-    c = _conn()
-    try:
-        return [{"id": r["id"], "savedAt": r["saved_at"], "size": r["size"]}
-                for r in c.execute("SELECT id, saved_at, size FROM state_versions WHERE uid=? ORDER BY saved_at DESC, id DESC", (uid,))]
-    finally:
-        c.close()
-
-
 def version(uid: str, vid) -> dict:
     try:
         vid = int(vid)
@@ -1027,10 +839,3 @@ def export_all(uid: str) -> dict:
         c.close()
 
 
-def restore_thread(uid: str, thread_id: str):
-    """Arxivdagi chat → blob yusa.threads ko'rinishida ({id, ts, messages:[{role,content,ts}]})."""
-    t = chat(uid, thread_id)
-    if not t:
-        return None
-    return {"id": t["id"], "ts": t["ts"] or 0,
-            "messages": [{"role": m["role"], "content": m["content"], "ts": m["ts"] or 0} for m in t["messages"]]}

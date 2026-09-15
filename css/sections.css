@@ -29,23 +29,15 @@
 .hero { position: relative; overflow: hidden; border-radius: var(--r); padding: 18px; margin-bottom: 14px;
   background: var(--card-solid); border: 1px solid var(--card-line); }
 .hero > * { position: relative; }
-.hero-eyebrow { font-size: 11px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); }
 .hero-main { display: flex; align-items: center; gap: 16px; margin-top: 8px; }
-.hero-num { font-family: var(--num); font-size: 38px; font-weight: 600; letter-spacing: -.03em; line-height: 1; color: var(--text); }
-.hero-num small { font-size: 15px; font-weight: 400; letter-spacing: 0; margin-left: 2px; color: var(--text3); }
 .hero-body { flex: 1; min-width: 0; }
 .hero-title { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -.01em; line-height: 1.25; }
 .hero-sub { font-size: 12px; color: var(--text3); margin-top: 3px; line-height: 1.4; }
-.hero-foot { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
-.hero-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: var(--r-pill); font-size: 12px; font-weight: 500;
-  background: var(--accent-soft); border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent); color: var(--accent-text); white-space: nowrap; }
-.hero-chip.mute { background: var(--inset); border-color: var(--line); color: var(--text3); }
-@media (max-width: 400px) { .hero { padding: 15px; } .hero-num { font-size: 34px; } }
+@media (max-width: 400px) { .hero { padding: 15px; } }
 
 /* ---------- section-specific character ---------- */
 /* Moliya reads like a ledger: mono numbers, tighter rows */
 #view[data-view="finance"] .card { border-radius: 14px; }
-#view[data-view="finance"] .hero-num { letter-spacing: -.05em; }
 /* Ibodat breathes: more space, softer edges */
 #view[data-view="prayer"] .card { border-radius: 20px; }
 #view[data-view="prayer"] .hero { padding: 22px 20px; }
