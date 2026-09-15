@@ -29,6 +29,9 @@
   D.i18n.add({
     uz: {
       'tk.tab.habits': 'Trekker', 'tk.tab.tasks': "Ro'yxat", 'tk.tab.books': 'Kitob', 'tk.tab.goals': 'Maqsad',
+      'goals.add.ph': 'Yangi maqsad…', 'goals.addTask.ph': 'Shu maqsad uchun vazifa…', 'goals.year': 'Yil',
+      'goals.linked': 'Bog‘langan vazifalar', 'goals.noTasks': 'Hali vazifa bog‘lanmagan', 'goals.expand': 'Vazifalarini ochish',
+      'goals.deleted': 'Maqsad o‘chirildi', 'goals.deletedUnlink': 'Maqsad o‘chirildi · {n} ta vazifa ajratildi',
       'tasks.add.ph': 'Yangi vazifa…',
       'tasks.g.overdue': 'Kechikkan', 'tasks.g.today': 'Bugun', 'tasks.g.tomorrow': 'Ertaga', 'tasks.g.later': 'Keyinroq', 'tasks.g.nodate': 'Sanasiz', 'tasks.g.done': 'Bajarilgan',
       'tasks.empty': "Hozircha vazifa yo'q", 'tasks.emptyHint': 'Yuqoridagi qatorga yozing.',
@@ -61,6 +64,9 @@
     },
     uzk: {
       'tk.tab.habits': 'Треккер', 'tk.tab.tasks': 'Рўйхат', 'tk.tab.books': 'Китоб', 'tk.tab.goals': 'Мақсад',
+      'goals.add.ph': 'Янги мақсад…', 'goals.addTask.ph': 'Шу мақсад учун вазифа…', 'goals.year': 'Йил',
+      'goals.linked': 'Боғланган вазифалар', 'goals.noTasks': 'Ҳали вазифа боғланмаган', 'goals.expand': 'Вазифаларини очиш',
+      'goals.deleted': 'Мақсад ўчирилди', 'goals.deletedUnlink': 'Мақсад ўчирилди · {n} та вазифа ажратилди',
       'tasks.add.ph': 'Янги вазифа…',
       'tasks.g.overdue': 'Кечиккан', 'tasks.g.today': 'Бугун', 'tasks.g.tomorrow': 'Эртага', 'tasks.g.later': 'Кейинроқ', 'tasks.g.nodate': 'Санасиз', 'tasks.g.done': 'Бажарилган',
       'tasks.empty': 'Ҳозирча вазифа йўқ', 'tasks.emptyHint': 'Юқоридаги қаторга ёзинг.',
@@ -91,6 +97,9 @@
     },
     ru: {
       'tk.tab.habits': 'Трекер', 'tk.tab.tasks': 'Список', 'tk.tab.books': 'Книги', 'tk.tab.goals': 'Цели',
+      'goals.add.ph': 'Новая цель…', 'goals.addTask.ph': 'Задача для этой цели…', 'goals.year': 'Год',
+      'goals.linked': 'Связанные задачи', 'goals.noTasks': 'Задач пока нет', 'goals.expand': 'Показать задачи',
+      'goals.deleted': 'Цель удалена', 'goals.deletedUnlink': 'Цель удалена · {n} задач отвязано',
       'tasks.add.ph': 'Новая задача…',
       'tasks.g.overdue': 'Просроченные', 'tasks.g.today': 'Сегодня', 'tasks.g.tomorrow': 'Завтра', 'tasks.g.later': 'Позже', 'tasks.g.nodate': 'Без даты', 'tasks.g.done': 'Выполнено',
       'tasks.empty': 'Пока задач нет', 'tasks.emptyHint': 'Напишите в строке выше.',

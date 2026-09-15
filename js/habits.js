@@ -50,7 +50,8 @@
       'hb.w.hard': 'Eng qiyin dam', 'hb.w.hardPh': 'Qayerda qiynaldingiz?',
       'hb.w.next': 'Keyingi haftaga', 'hb.w.nextPh': 'Nimani boshqacha qilasiz?',
       'hb.w.prev': 'Oldingi hafta', 'hb.w.nextW': 'Keyingi hafta', 'hb.w.thisWeek': 'Shu hafta',
-      'hb.an.month': 'Oylik bajarilish', 'hb.an.perHabit': 'Odatlar bo‘yicha',
+      'hb.an.month': 'Oylik bajarilish',
+      'hb.fold.week': 'Hafta yakuni', 'hb.fold.hist': 'Tarix', 'hb.sub': '{n} ta odat \u00b7 {c} belgi', 'hb.an.perHabit': 'Odatlar bo‘yicha',
     },
     uzk: {
       'hb.mo.prev': 'Олдинги ой', 'hb.mo.next': 'Кейинги ой',
@@ -71,7 +72,8 @@
       'hb.w.hard': 'Энг қийин дам', 'hb.w.hardPh': 'Қаерда қийналдингиз?',
       'hb.w.next': 'Кейинги ҳафтага', 'hb.w.nextPh': 'Нимани бошқача қиласиз?',
       'hb.w.prev': 'Олдинги ҳафта', 'hb.w.nextW': 'Кейинги ҳафта', 'hb.w.thisWeek': 'Шу ҳафта',
-      'hb.an.month': 'Ойлик бажарилиш', 'hb.an.perHabit': 'Одатлар бўйича',
+      'hb.an.month': 'Ойлик бажарилиш',
+      'hb.fold.week': 'Ҳафта якуни', 'hb.fold.hist': 'Тарих', 'hb.sub': '{n} та одат \u00b7 {c} белги', 'hb.an.perHabit': 'Одатлар бўйича',
     },
     ru: {
       'hb.mo.prev': 'Прошлый месяц', 'hb.mo.next': 'Следующий месяц',
@@ -92,7 +94,8 @@
       'hb.w.hard': 'Самое трудное', 'hb.w.hardPh': 'Где было тяжело?',
       'hb.w.next': 'На следующую неделю', 'hb.w.nextPh': 'Что сделаете иначе?',
       'hb.w.prev': 'Прошлая неделя', 'hb.w.nextW': 'Следующая неделя', 'hb.w.thisWeek': 'Эта неделя',
-      'hb.an.month': 'Выполнение по месяцам', 'hb.an.perHabit': 'По привычкам',
+      'hb.an.month': 'Выполнение по месяцам',
+      'hb.fold.week': 'Итоги недели', 'hb.fold.hist': 'История', 'hb.sub': '{n} привычек \u00b7 {c} отметок', 'hb.an.perHabit': 'По привычкам',
     },
   });
 
@@ -113,7 +116,7 @@
       const sc = h.schedule || { type: 'daily' };
       out.push({
         id: h.id, kind: 'h', sched: sc.type, every: D.clamp(+sc.n || 1, 1, 31),
-        name: h.name, emoji: D.habitEmoji(h), mark: D.habitMark(h, 15), sphere: sp, color: `var(--${sp})`,
+        name: h.name, emoji: D.habitEmoji(h), mark: D.habitMark(h, 15), sphere: sp,
         goal: q ? `${D.fmtNum(q)} ${h.target.unit || ''}`.trim() : goalOf(h),
         on: (day) => (q ? (+((D.S.counts[day] || {})[h.id]) || 0) >= q : (D.S.logs[day] || []).includes(h.id)),
         due: (day) => D.habitDue(h, day),
@@ -127,7 +130,7 @@
         id: m.id, kind: 'm', sched: 'daily', every: 1,
         name: m.title, emoji: m.kind === 'kitob' ? '\u{1F4D8}' : '\u{1F3AC}',
         mark: D.ic(m.kind === 'kitob' ? 'book' : 'layers', 15),
-        sphere: 'aql', color: 'var(--warning)',
+        sphere: 'aql',
         goal: m.perDay ? `${D.fmtNum(m.perDay)} ${esc(m.unit || t(m.kind === 'kitob' ? 'media.pages' : 'media.parts'))}` : t('hb.goal.daily'),
         on: (day) => +((D.S.mediaLogs[day] || {})[m.id]) > 0,
         due: () => true,
@@ -242,12 +245,20 @@
     </div>`;
   }
 
+  /* Katak rangsiz: to'lgani bajarilgan, halqasi ochiq, xirasi kelajak.
+     Ilgari har odatning o'z rangi bor edi — lekin sohani guruh sarlavhasi
+     allaqachon aytadi, ya'ni rang hech narsa qo'shmasdi va to'r ola-bula
+     ko'rinardi. Yagona rang bugungi ustunga qoldi.
+     Ketma-ket kunlar `lnk` bilan ulanadi: uzluksizlik nuqtalar to'plami
+     emas, CHIZIQ bo'lib ko'rinadi — trekkerning butun ma'nosi shu. */
   function tableRow(it, days) {
     const td = D.today();
-    const cells = days.map((day) => {
+    const cells = days.map((day, i) => {
       const future = day > td, on = it.on(day), due = it.due(day);
-      const cls = [on ? 'on' : '', future ? 'fut' : '', !due && !on ? 'off' : '', day === td ? 'today' : ''].join(' ');
-      return `<button class="hb-dot ${cls}" style="--c:${it.color}" data-act="hbTick" data-id="${esc(it.id)}" data-key="${day}"
+      const prevOn = i > 0 && it.on(days[i - 1]);
+      const cls = [on ? 'on' : '', on && prevOn ? 'lnk' : '', future ? 'fut' : '',
+                   !due && !on ? 'off' : '', day === td ? 'today' : ''].join(' ');
+      return `<button class="hb-dot ${cls}" data-act="hbTick" data-id="${esc(it.id)}" data-key="${day}"
         ${future ? 'disabled' : ''} aria-pressed="${on}" title="${esc(D.fmtDate(day))} · ${esc(it.name)}"></button>`;
     }).join('');
     return `<div class="hb-row">
@@ -279,7 +290,9 @@
       return (many ? groupRow(sp, rows.length) : '') + rows.map((it) => safe(() => tableRow(it, days))).join('');
     }).join('');
     // min-width: ustunlar sig'masa o'ram kengayadi va .hb-scroll uni suradi.
-    return `<div class="card hb-table">
+    // Ramkasiz: to'r sahifaning o'zi bo'lsin. Karta ichida turganda u qolgan
+    // bloklar bilan teng ovozda edi, holbuki sahifaning ma'nosi shu to'rda.
+    return `<div class="hb-table">
       <div class="hb-scroll" id="hbScroll"><div class="hb-tbl" style="--days:${days.length}">
         ${tableHead(days)}${body}
       </div></div>
@@ -334,7 +347,7 @@
     const rows = list.map((it) => {
       const cells = weeks.map(([a, b]) => {
         const n = doneIn(it, a, b), full = n >= it.every, future = a > td;
-        return `<button class="hb-dot hb-dot-w ${full ? 'on' : ''} ${future ? 'fut' : ''}" style="--c:${it.color}"
+        return `<button class="hb-dot hb-dot-w ${full ? 'on' : ''} ${future ? 'fut' : ''}"
           data-act="hbTick" data-id="${esc(it.id)}" data-key="${markDay(a, b)}" ${future ? 'disabled' : ''}
           aria-pressed="${full}" title="${esc(it.name)} · ${esc(D.fmtDate(a, 'dm'))}–${esc(D.fmtDate(b, 'dm'))}"
           ><span class="hb-dot-n num">${it.every > 1 ? D.fmtNum(n) + '/' + D.fmtNum(it.every) : ''}</span></button>`;
@@ -347,7 +360,9 @@
         <div class="hb-c-days">${cells}</div>
       </div>`;
     }).join('');
-    return `<div class="card hb-table"><div class="hb-scroll"><div class="hb-tbl">${head}${rows}</div></div></div>`;
+    // Alohida klass: kunlik jadval sahifaning chetigacha chiqadi, haftalik
+    // blok esa oddiy karta bo'lib qoladi — ular bir xil emas.
+    return `<div class="card hb-wtable"><div class="hb-scroll"><div class="hb-tbl">${head}${rows}</div></div></div>`;
   }
 
   function monthlyCard(list, days) {
@@ -410,10 +425,14 @@
       const due = periodTotal(it, days);
       return { it, due, done: Math.min(periodDone(it, days), due) };
     }).sort((a, b) => (b.due ? b.done / b.due : 0) - (a.due ? a.done / a.due : 0));
-    return `<div class="card">
+    // Bitta rang: kuchni chiziqning UZUNLIGI aytadi. Ilgari har chiziq o'z
+    // rangida edi va ro'yxat kamalakka o'xshardi — uzunliklarni solishtirish
+    // qiyinlashardi. Emoji ham olib tashlandi: u to'rda allaqachon bor,
+    // bu yerda esa nomning joyini yeb, uzun nomni kesib tashlardi.
+    return `<div class="card hb-prog">
       <div class="card-head"><div class="title">${esc(t('hb.progress'))}</div></div>
       ${rows.map(({ it, due, done }) => D.chart.hbar({
-        label: it.name, value: done, max: due, color: it.color,
+        label: it.name, value: done, max: due, color: 'var(--text2)',
         right: `${D.fmtNum(done)}/${D.fmtNum(due)}`,
       })).join('')}
     </div>`;
@@ -431,14 +450,24 @@
     }
     return { pct: due ? (done / due) * 100 : 0, checks, best, active: list.length };
   }
-  function statStrip(list, days) {
+  /* Ilgari to'rtta raqam to'rtta qutichada turardi va to'rttasi ham bir xil
+     ovozda edi. Endi ikkitasi — oylik ulush va ketma-ketlik — qutisiz, katta;
+     qolgan ikkitasi (nechta odat, nechta belgi) ularning ostida bitta jimjit
+     qatorda. Ular kerak, lekin ular qaramaydigan raqam. */
+  function heroStats(list, days) {
     const s = stats(list, days);
-    const one = (v, lab, cls) => `<div class="hb-stat"><div class="hb-stat-v num ${cls || ''}">${v}</div><div class="hb-stat-l">${esc(lab)}</div></div>`;
-    return `<div class="card hb-stats">
-      ${one(D.fmtPct(s.pct), t('hb.month'), 'accent')}
-      ${one(`${D.ic('fire', 15)} ${D.fmtNum(s.best)}`, t('hb.streak'))}
-      ${one(D.fmtNum(s.checks), t('hb.checks'))}
-      ${one(D.fmtNum(s.active), t('hb.active'))}
+    return `<div class="hb-hero">
+      <div class="hb-hero-row">
+        <div class="hb-hero-cell">
+          <div class="hb-hero-n num">${esc(D.fmtPct(s.pct))}</div>
+          <div class="hb-hero-l">${esc(t('hb.month'))}</div>
+        </div>
+        <div class="hb-hero-cell">
+          <div class="hb-hero-n num">${D.ic('fire', 17)}${D.fmtNum(s.best)}</div>
+          <div class="hb-hero-l">${esc(t('hb.streak'))}</div>
+        </div>
+      </div>
+      <div class="hb-hero-sub">${esc(t('hb.sub', { n: D.fmtNum(s.active), c: D.fmtNum(s.checks) }))}</div>
     </div>`;
   }
 
@@ -464,7 +493,7 @@
     return weekBar() + `<div class="card hb-rev-sum">
         <div class="hb-rev-pct num">${esc(D.fmtPct(pct))}</div>
         <div class="hb-rev-lab">${esc(t('hb.week.done', { n: D.fmtNum(done), t: D.fmtNum(due) }))}</div>
-        <span class="bar thick"><i class="bar-fill" style="width:${pct.toFixed(1)}%"></i></span>
+        <span class="bar thick"><i class="bar-fill" style="width:${pct.toFixed(1)}%;background:var(--accent)"></i></span>
       </div>` +
       FIELDS.map(([f, ic]) => `<div class="card hb-rev">
         <div class="hb-rev-h">${D.ic(ic, 15)} ${esc(t('hb.w.' + f))}</div>
@@ -502,7 +531,7 @@
         const day = D.addDays(start, w * 7 + d);
         const future = day > td, on = !future && it.on(day);
         if (on) total++;
-        cells += `<i class="hb-cell ${on ? 'on' : ''} ${future ? 'fut' : ''}" style="--c:${it.color};grid-column:${w + 1};grid-row:${d + 1}"></i>`;
+        cells += `<i class="hb-cell ${on ? 'on' : ''} ${future ? 'fut' : ''}" style="grid-column:${w + 1};grid-row:${d + 1}"></i>`;
       }
     }
     return `<div class="card hb-card">
@@ -541,15 +570,46 @@
 
   /* Yillik to'r yopiq turadi: har odat uchun 364 ta katak — sahifaning eng
      og'ir bloki, va kunda bir marta qaraladigan narsa emas. */
-  function yearFold(list) {
-    // Standart holat — YOPIQ. D.ui.collapsed da yo'qligi «yopiq» degani,
-    // ochilgani esa aniq `false` bilan yoziladi.
-    const open = D.ui.collapsed.hbYear === false;
-    return `<button class="hb-fold ${open ? 'open' : ''}" data-act="hbYearFold">
-        ${D.ic('chevD', 15)}<span>${esc(t('hb.year'))}</span></button>`
-      + (open ? list.map((it) => safe(() => yearRow(it))).join('') : '');
+  /* ------------------------------------------------------------------ */
+  /* IKKITA YIG'MA BLOK                                                   */
+  /*                                                                      */
+  /* Sahifa bitta narsani olti marta aytardi: 41% (oy), kun chizig'i,     */
+  /* 44% (hafta), odat chiziqlari, oylik ustunlar, 52 hafta. Endi ustma-  */
+  /* ust turgani ikkitasi — oylik raqam va to'rning o'zi. Qolgani ikkita  */
+  /* yig'ma blokka kirdi: «Hafta yakuni» va «Tarix».                      */
+  /*                                                                      */
+  /* Holat D.ui.collapsed da: yo'qligi «yopiq», ochilgani aniq `false`.   */
+  /* auto — foydalanuvchi hech narsa bosmagan bo'lsa o'zi ochiladi.       */
+  /* ------------------------------------------------------------------ */
+  const foldOpen = (k, auto) => D.ui.collapsed[k] === false || (auto && D.ui.collapsed[k] === undefined);
+  const foldBtn = (k, lab, auto) => `<button class="hb-fold ${foldOpen(k, auto) ? 'open' : ''}" data-act="hbFold" data-k="${k}" data-auto="${auto ? 1 : ''}">
+        ${D.ic('chevD', 15)}<span>${esc(lab)}</span></button>`;
+  D.act.hbFold = (el) => {
+    const k = el.dataset.k;
+    if (!k) return;
+    // auto ochilganini bosish YOPISHI kerak — shuning uchun holat emas,
+    // KO'RINIB turgan holat teskari qilinadi.
+    D.ui.collapsed[k] = foldOpen(k, !!el.dataset.auto) ? true : false;
+    D.saveUi(); D.rerender();
+  };
+
+  /** Hafta yakuni: uchta savol haftada bir marta to'ldiriladi, shuning uchun
+      yig'iq turadi va yakshanba kuni o'zi ochiladi. */
+  function weekFold(list) {
+    const auto = D.dowOf(D.today()) === 0;
+    return foldBtn('hbWeek', t('hb.fold.week'), auto)
+      + (foldOpen('hbWeek', auto) ? safe(() => renderReview(list)) : '');
   }
-  D.act.hbYearFold = () => { D.ui.collapsed.hbYear = (D.ui.collapsed.hbYear === false); D.saveUi(); D.rerender(); };
+
+  /** Tarix: kun chizig'i, oylik ustunlar va 52 haftalik to'r — uchalasi
+      «qanday ketyapti» degan bitta savolga javob, ya'ni bitta joyda. */
+  function historyFold(list, days) {
+    if (!foldOpen('hbHist', false)) return foldBtn('hbHist', t('hb.fold.hist'), false);
+    return foldBtn('hbHist', t('hb.fold.hist'), false)
+      + safe(() => dayChart(list, days))
+      + safe(() => monthBars(list))
+      + list.map((it) => safe(() => yearRow(it))).join('');
+  }
 
   /* Ikkita tugma yonma-yon: chapda takroriy ish, o'ngda bir martalik vazifa.
      Yonma-yon turgani bejiz emas — farqi shu yerda ko'rinib turadi. */
@@ -574,15 +634,13 @@
     const monthly = list.filter((it) => it.sched === 'month');
     return `<div class="hb">
       ${safe(() => monthBar())}
-      ${safe(() => statStrip(list, days))}
-      ${safe(() => dayChart(list, days))}
+      ${safe(() => heroStats(list, days))}
       ${safe(() => tableCard(daily, days))}
       ${safe(() => weeklyCard(weekly, days))}
       ${safe(() => monthlyCard(monthly, days))}
       ${safe(() => progressCard(list, days))}
-      ${safe(() => renderReview(list))}
-      ${safe(() => monthBars(list))}
-      ${safe(() => yearFold(list))}
+      ${safe(() => weekFold(list))}
+      ${safe(() => historyFold(list, days))}
       ${addRow()}
       <button class="btn ghost block hb-manage" data-act="go" data-view="settings">${D.ic('gear', 15)} ${esc(t('hb.manage'))}</button>
     </div>`;

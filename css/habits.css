@@ -16,12 +16,18 @@
 .hb-weekbar { margin-top: 4px; }
 .hb-chart-n { flex: none; font-size: 12px; color: var(--text3); }
 
-/* tepadagi to'rtta raqam */
-.hb-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; padding: 0; overflow: hidden; background: var(--line); }
-.hb-stat { background: var(--card-solid); padding: 13px 6px; text-align: center; }
-.hb-stat-v { font-size: 17px; font-weight: 600; letter-spacing: -.01em; color: var(--text); display: flex; align-items: center; justify-content: center; gap: 4px; }
-.hb-stat-v.accent { color: var(--accent-text); }
-.hb-stat-l { font-size: 11px; color: var(--text3); margin-top: 3px; }
+/* tepadagi raqamlar — qutisiz.
+   Ilgari to'rtta raqam to'rtta qutichada teng ovozda turardi. Endi ikkitasi
+   katta va ochiq turadi, qolgan ikkitasi ostidagi jimjit qatorda: ular kerak,
+   lekin ular qaraladigan raqam emas. */
+.hb-hero { margin: 2px 2px 16px; }
+.hb-hero-row { display: flex; align-items: flex-end; gap: 30px; }
+.hb-hero-cell { display: flex; flex-direction: column; gap: 3px; }
+.hb-hero-n { display: inline-flex; align-items: center; gap: 6px; font-size: 38px; font-weight: 600; letter-spacing: -.035em; line-height: 1; color: var(--text); }
+.hb-hero-n .ic { color: var(--warning-text); }
+.hb-hero-l { font-size: 12px; color: var(--text3); }
+.hb-hero-sub { margin-top: 12px; font-size: 12px; color: var(--text4); }
+@media (max-width: 380px){ .hb-hero-n { font-size: 33px; } .hb-hero-row { gap: 22px; } }
 
 /* ---------- jadval ----------
    Oyning hamma kuni ustun bo'ladi — 31 ta ustun telefon ekraniga sig'maydi,
@@ -30,18 +36,23 @@
    belgilayotganingiz ko'rinib turishi kerak.
    Karta to'ldirishi nolga tushirildi — surilish karta chetigacha borsin;
    nafas o'rniga ustunlarning o'z to'ldirishi ishlaydi. */
-.hb-table { padding: 0; overflow: hidden; }
+/* To'r sahifaning chetidan chetigacha. `calc(50% - 50vw)` sahifaning yon
+   to'ldirishini BILMASDAN uni bekor qiladi — shuning uchun boshqa fayl
+   to'ldirishni o'zgartirsa ham (15px ↔ 18px) bu joy buzilmaydi. Keng
+   ekranda esa oddiy holatiga qaytadi: u yerda joy siqilmaydi. */
+.hb-table { margin-inline: calc(50% - 50vw); width: 100vw; margin-bottom: 18px; }
+@media (min-width: 760px){ .hb-table { margin-inline: 0; width: auto; } }
 .hb-scroll { overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .hb-scroll::-webkit-scrollbar { display: none; }
-.hb-tbl { min-width: max-content; }
+.hb-tbl { min-width: max-content; --cw: 30px; --gap: 3px; }
 
 .hb-row { display: flex; align-items: stretch; min-width: 100%; border-top: 1px solid var(--line); }
 .hb-row:first-child, .hb-row-head { border-top: 0; }
 
-.hb-c-name { position: sticky; left: 0; z-index: 2; flex: none; width: 134px;
-  display: flex; align-items: center; gap: 9px; padding: 8px 8px 8px 14px;
-  background: var(--card-solid); border-right: 1px solid var(--line); }
-.hb-c-days { flex: 1; display: flex; align-items: center; gap: 3px; padding: 6px 14px 6px 5px; }
+.hb-c-name { position: sticky; left: 0; z-index: 2; flex: none; width: 152px;
+  display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 15px;
+  background: var(--bg); border-right: 1px solid var(--line); }
+.hb-c-days { flex: 1; display: flex; align-items: center; gap: var(--gap); padding: 7px 15px 7px 6px; }
 .hb-row-head .hb-c-name { font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); }
 .hb-row-head .hb-c-days { padding-top: 8px; padding-bottom: 4px; }
 
@@ -51,9 +62,16 @@
 .hb-group-t { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text3);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-.hb-th { flex: none; width: 26px; display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 11px; color: var(--text4); }
+/* Bugungi ustun halqa bilan emas, ustundan o'tgan yumshoq yo'lak bilan
+   belgilanadi: har katakning foni qo'shilib, qatorlar orasidan uzluksiz
+   chiziq bo'lib ko'rinadi. Shuning uchun burchaklari yumaloq emas. */
+.hb-th { flex: none; width: var(--cw); display: flex; flex-direction: column; align-items: center; gap: 1px; font-size: 11px; color: var(--text4); }
 .hb-th b { font-size: 11px; font-weight: 600; color: var(--text3); }
-.hb-th.today span, .hb-th.today b { color: var(--accent-text); }
+/* box-shadow yo'lakni qator to'ldirishi ustiga cho'zadi — aks holda u har
+   qatorda uzilib, dumaloq dog'lar bo'lib ko'rinardi. */
+.hb-th.today, .hb-dot.today { box-shadow: 0 -9px 0 var(--hb-today), 0 9px 0 var(--hb-today); }
+.hb-th.today { background: var(--hb-today); }
+.hb-th.today span, .hb-th.today b { color: var(--text); }
 
 .hb-emoji { flex: none; width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; font-size: 14px;
   font-family: var(--emoji); background: color-mix(in srgb, var(--c, var(--accent)) 16%, transparent); }
@@ -68,20 +86,32 @@
 .hb-nm-t { font-size: 13px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hb-nm-g { font-size: 11px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
-/* katak — bosish maydoni butun ustun, ko'rinishi esa nuqta */
-.hb-dot { position: relative; flex: none; width: 26px; height: 26px; border: 0; background: transparent; padding: 0; border-radius: 7px; }
-.hb-dot::after { content: ''; position: absolute; inset: 0; margin: auto; width: 14px; height: 14px; border-radius: 50%;
-  border: 1.5px solid var(--line3); background: transparent; transition: background .14s, border-color .14s; }
-.hb-dot.on::after { background: var(--c, var(--accent)); border-color: var(--c, var(--accent)); }
-.hb-dot.today::after { box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 45%, transparent); }
-.hb-dot.off::after { border-style: dashed; opacity: .5; }
-.hb-dot.fut::after { opacity: .3; }
-.hb-dot:active::after { transform: scale(.85); }
+/* katak — bosish maydoni butun ustun, ko'rinishi esa nuqta.
+   Rang yo'q: to'lgani bajarilgan, halqasi ochiq, uzuq chizig'i o'sha kuni
+   kerak emas, xirasi kelajak. Ketma-ket ikki kun `lnk` bilan ulanadi —
+   nuqtalar zanjirga aylanadi va uzluksizlik bir qarashda ko'rinadi. */
+.hb-dot { position: relative; flex: none; width: var(--cw); height: 30px; border: 0; background: transparent; padding: 0; }
+.hb-dot::after { content: ''; position: absolute; inset: 0; margin: auto; width: 16px; height: 16px; border-radius: 50%;
+  border: 1.5px solid var(--line3); background: transparent; transition: background .14s, border-color .14s, transform .12s; }
+.hb-dot.on::after { background: var(--text); border-color: var(--text); }
+.hb-dot.lnk::before { content: ''; position: absolute; top: 50%; right: 50%; width: calc(var(--cw) + var(--gap)); height: 2px;
+  margin-top: -1px; background: var(--text); }
+.hb-dot.today { background: var(--hb-today); }
+.hb-dot.off::after { border-style: dashed; opacity: .45; }
+.hb-dot.fut::after { opacity: .22; }
+.hb-dot:active::after { transform: scale(.82); }
+.hb-tbl { --hb-today: color-mix(in srgb, var(--accent) 13%, transparent); }
 
 .hb-group-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
 .hb-group-n { margin-left: auto; font-size: 11px; color: var(--text4); }
 
-/* yillik to'rning ochilish tugmasi */
+/* Odat chizig'i — nom uchun joy: 92px da uzun nom kesilardi
+   («QURON O'…»), holbuki o'ng tomonda bo'sh joy bor edi. */
+.hb-prog .hbar { margin: 9px 0; }
+.hb-prog .hbar-label { width: 124px; font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--text2); }
+@media (max-width: 380px){ .hb-prog .hbar-label { width: 104px; } }
+
+/* yig'ma bloklarning ochilish tugmasi */
 .hb-fold { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 2px 8px; border: 0; background: transparent;
   color: var(--text3); font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; text-align: left; }
 .hb-fold svg { transition: transform .18s var(--ease-out); }
@@ -89,7 +119,9 @@
 
 /* ---------- hafta yakuni ---------- */
 .hb-rev-sum { text-align: center; }
-.hb-rev-pct { font-size: 34px; font-weight: 600; letter-spacing: -.03em; color: var(--accent-text); line-height: 1; }
+/* Raqam oq, chiziq ko'k: ikkisi bitta narsani aytadi, ya'ni ikkita rang
+   bilan aytishning hojati yo'q edi (ilgari biri ko'k, biri yashil edi). */
+.hb-rev-pct { font-size: 34px; font-weight: 600; letter-spacing: -.03em; color: var(--text); line-height: 1; }
 .hb-rev-lab { font-size: 12px; color: var(--text3); margin: 5px 0 12px; }
 .hb-rev-h { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
 .hb-rev-h .ic { color: var(--accent-text); }
@@ -107,7 +139,7 @@
 .hb-m { font-size: 11px; color: var(--text3); white-space: nowrap; grid-row: 1; }
 .hb-grid { display: grid; grid-template-columns: repeat(52, 1fr); grid-template-rows: repeat(7, 1fr); gap: 2px; }
 .hb-cell { aspect-ratio: 1; min-height: 4px; border-radius: 2px; background: var(--track); display: block; }
-.hb-cell.on { background: var(--c, var(--accent)); }
+.hb-cell.on { background: var(--text2); }
 .hb-cell.fut { background: transparent; }
 
 .hb-manage { margin-top: 4px; }
@@ -123,6 +155,7 @@
 /* ---------- haftalik va oylik odatlar ----------
    Haftalik blok jadval bilan bir xil shaklda: ustunlar — oyning haftalari.
    Katakcha kengroq, chunki ichida «2/3» kabi son turishi mumkin. */
+.hb-wtable { padding: 0; overflow: hidden; }
 .hb-th-w { width: 52px; }
 .hb-dot-w { width: 52px; }
 .hb-dot-n { position: relative; z-index: 1; font-size: 11px; font-weight: 600; color: var(--text3); }
