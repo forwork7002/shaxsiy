@@ -60,6 +60,7 @@
 .fin-chip-i { display: inline-flex; align-items: center; }
 .fin-amt { font-weight: 700; font-size: 13px; white-space: nowrap; color: var(--text); }
 .fin-amt.in { color: var(--success-text); }
+.fin-amt.out { color: var(--danger-text); }
 .li.tap .li-del { margin-left: -4px; }
 
 /* ---- accounts + recurring ---- */

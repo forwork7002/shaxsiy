@@ -355,7 +355,7 @@
     // oyni to'liq tasvirlaydigan uchta raqam
     const stats = `<div class="stat-grid mt">
       <div class="stat"><div class="stat-num num money good">${esc(plain(A.inc))}</div><div class="stat-label">${esc(t('fin.income'))}</div></div>
-      <div class="stat"><div class="stat-num num money">${esc(plain(A.out))}</div><div class="stat-label">${esc(t('fin.expense'))}</div></div>
+      <div class="stat"><div class="stat-num num money bad">${esc(plain(A.out))}</div><div class="stat-label">${esc(t('fin.expense'))}</div></div>
       <div class="stat"><div class="stat-num num money">${esc(plainSigned(A.net))}</div><div class="stat-label">${esc(t('fin.net'))}</div></div>
     </div>`;
 
