@@ -21,6 +21,7 @@ const ASSETS = [
   './css/onboard.css',
   './css/yusa-orb.css',
   './css/levels.css',
+  './css/install.css',
   './css/whoop-ui.css',
   './js/core.js',
   './js/i18n.js',
@@ -42,6 +43,7 @@ const ASSETS = [
   './js/yusa-orb.js',
   './js/levels.js',
   './js/app.js',
+  './js/install.js',
 ];
 // Shriftlar o'z faylimizda. Nomi o'zgarmagunicha mazmuni ham o'zgarmaydi, shuning
 // uchun ular ?v= siz keshlanadi — CSS ham aynan shu manzilni so'raydi.

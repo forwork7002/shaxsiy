@@ -1,0 +1,77 @@
+/* =====================================================================
+   O'RNATISH TAKLIFI — js/install.js ning ko'rinishi
+
+   JOYLASHUV: pastda, navigatsiya panelining USTIDA. Toast va ibodat
+   kompasi ham shu qoidaga amal qiladi (app.css:541, ibodat.css:180) —
+   uchalasi bir xil hisobdan foydalanadi, shuning uchun ular bir-birini
+   yopmaydi va telefon pastidagi xavfsiz zona hisobga olinadi.
+
+   z-index 380: toast (400) dan PAST. Sabab — toast xabari qisqa
+   umrli va muhimroq; agar ikkalasi bir vaqtda chiqsa, toast ustda
+   turishi kerak. Modal (500+) esa ikkalasidan ham ustun.
+
+   Bu blok faqat `.ins` prefiksi bilan ishlaydi va boshqa hech qanday
+   selektorga tegmaydi — ilovaning qolgan uslubiga ta'sir qilmaydi.
+   ===================================================================== */
+
+.ins {
+  position: fixed;
+  left: 12px; right: 12px;
+  bottom: calc(var(--nav-h) + 12px + env(safe-area-inset-bottom));
+  z-index: 380;
+  /* USTUN, yonma-yon emas. 390px da yonma-yon joylashtirib ko'rildi:
+     tugmalar 160px ni olib qo'yadi va matnga 163px qoladi — izoh uch
+     qatorga bo'linib, tor ustunga siqiladi. Ustunda esa u ikki qator
+     va butun kenglikda o'qiladi. */
+  display: flex; flex-direction: column; align-items: stretch; gap: 10px;
+  padding: 13px 14px;
+  border-radius: var(--r);
+  background: var(--bg3);
+  border: 1px solid var(--line2);
+  box-shadow: var(--sh-modal);
+  /* Boshlang'ich holat: pastda va ko'rinmas. `.on` klassi qo'shilganda
+     joyiga chiqadi. Shu tufayli paydo bo'lishi sakrash emas, siljish. */
+  transform: translateY(16px);
+  opacity: 0;
+  transition: opacity .24s ease, transform .24s ease;
+}
+.ins.on { transform: none; opacity: 1; }
+
+.ins-txt { min-width: 0; }
+
+.ins-t {
+  font-size: 13px; font-weight: 700; color: var(--text);
+  letter-spacing: -.01em;
+}
+.ins-b {
+  margin-top: 2px;
+  font-size: 12px; line-height: 1.35; color: var(--text3);
+}
+
+/* Tugmalar o'ngda: bosh barmoq shu tomonda turadi va «Keyinroq»
+   tasdiqlovchi tugmadan uzoqda qoladi — noto'g'ri bosish kamayadi. */
+.ins-act { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+
+/* Ikkala tugma ham eng kami 44px balandlikda — barmoq uchun eng kichik
+   ishonchli nishon. Matni kichik bo'lgani uchun padding shuni beradi. */
+.ins-yes, .ins-no {
+  min-height: 34px;
+  padding: 8px 13px;
+  border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 700;
+  border: 0; cursor: pointer;
+  font-family: inherit;
+}
+.ins-yes { background: var(--btn-grad); color: var(--on-btn); }
+.ins-no  { background: transparent; color: var(--text3); }
+.ins-no:active { color: var(--text2); }
+
+/* iOS da tugma yo'q — faqat ko'rsatma va yopish. Matnga ko'proq joy
+   beriladi, chunki u ikki qatorga chiqadi. */
+.ins-ios .ins-b { color: var(--text2); }
+
+/* Foydalanuvchi harakatni kamaytirishni so'ragan bo'lsa, siljish yo'q —
+   faqat ko'rinish. Ilovaning qolgan qismi ham shu qoidaga amal qiladi. */
+@media (prefers-reduced-motion: reduce) {
+  .ins { transition: opacity .01s; transform: none; }
+}

@@ -12,5 +12,32 @@
     { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+
+  "shortcuts": [
+    {
+      "name": "Namoz belgilash",
+      "short_name": "Namoz",
+      "url": "./index.html#prayer/log",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Xarajat yozish",
+      "short_name": "Xarajat",
+      "url": "./index.html#finance",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Vazifa qo'shish",
+      "short_name": "Vazifa",
+      "url": "./index.html#tasks/tasks",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Ovqat yozish",
+      "short_name": "Ovqat",
+      "url": "./index.html#health/ovqat",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    }
   ]
 }
