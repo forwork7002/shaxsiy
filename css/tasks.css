@@ -152,30 +152,6 @@
 .tk-dd-n { font-weight: 700; opacity: .65; }
 
 /* ---------- Odatlar ---------- */
-.tk-hcard { padding: 12px var(--tk-pad) 12px; }
-.tk-h { display: flex; align-items: center; gap: 11px; padding: 11px 2px; border-top: 1px solid var(--line); border-radius: 12px; transition: background .15s; }
-.tk-hd + .tk-h { border-top: 0; }
-.tk-h.tap { cursor: pointer; user-select: none; }
-@media (hover: hover) { .tk-h.tap:hover { background: var(--hover); } }
-.tk-em { flex: none; width: 22px; text-align: center; font-family: var(--emoji); font-size: 17px; line-height: 1; }
-.tk-h-b { flex: 1; min-width: 0; }
-.tk-h-top { display: flex; align-items: center; gap: 8px; }
-.tk-h-n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; font-weight: 600; color: var(--text); }
-.tk-h.done .tk-h-n { font-weight: 500; color: var(--text2); text-decoration: line-through; text-decoration-color: var(--text4); }
-.tk-h-bot { display: flex; align-items: center; gap: 12px; margin-top: 7px; }
-.tk-strip { display: flex; gap: 3px; flex: 1; min-width: 0; }
-.tk-strip i { flex: 1 1 0; max-width: 18px; height: 6px; border-radius: 2px; background: var(--line2); }
-.tk-strip i.on { background: var(--success); }
-.tk-strip i.miss { background: color-mix(in srgb, var(--danger) 40%, transparent); }
-.tk-strip i.open { background: transparent; box-shadow: inset 0 0 0 1px var(--line3); }
-.tk-strip i.off { opacity: .3; }
-.tk-hc { flex: none; display: flex; align-items: center; gap: 3px; }
-.tk-step { width: 30px; height: 30px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 9px;
-  border: 1px solid var(--line2); background: var(--glass); color: var(--text); cursor: pointer; transition: background .15s, border-color .15s; }
-@media (hover: hover) { .tk-step:hover { background: var(--hover); border-color: var(--line3); } }
-.tk-step:disabled { opacity: .3; cursor: default; }
-.tk-hc-n { min-width: 42px; text-align: center; font-size: 12px; font-weight: 700; color: var(--text2); font-family: var(--num); }
-.tk-hc-n small { font-size: 11px; font-weight: 600; color: var(--text4); }
 
 /* ---------- Maqsadlar ---------- */
 .tk-tabs { margin-bottom: 12px; }
@@ -213,18 +189,15 @@
 /* ---------- breakpoints ---------- */
 @media (min-width: 700px) {
   .tk { --tk-pad: 18px; }
-  .tk-h { padding: 9px 4px; }
 }
 @media (max-width: 480px){
   .tk-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; overflow: visible; padding-bottom: 0; }
   .tk-tabs button { width: 100%; min-width: 0; padding-left: 8px; padding-right: 8px; }
   .tk { --tk-pad: 12px; }
   .tk-hd { gap: 8px; }
-  .tk-strip i { max-width: 14px; }
 }
 @media (max-width: 380px){
   .tk-new-y { flex-basis: 74px; }
-  .tk-hc-n { min-width: 36px; }
 }
 
 /* ---------- ichkaridagi sahifalar ----------
@@ -232,6 +205,4 @@
    (habits.js › jadval·guruh·yakun·tahlil, books.js › kitob·ko'rgan), ya'ni
    ekranda ikki qator tanlagich ustma-ust tushadi. Ichkarisi maydaroq va
    chegarasiz: qaysi biri bo'lim, qaysi biri sahifa ekani shundan ko'rinadi. */
-.tk .hb-seg, .tk .bk-seg { margin: -2px 0 12px; padding: 0; gap: 2px; background: transparent; border: 0; }
-.tk .hb-seg button, .tk .bk-seg button { min-height: 34px; padding: 7px 10px; font-size: 12px; }
-#view .tk .hb-seg button.on, #view .tk .bk-seg button.on { background: var(--accent-soft); color: var(--accent-text); }
+.tk .bk-seg { margin: -2px 0 12px; padding: 0; gap: 2px; background: transparent; border: 0; } .tk .bk-seg button { min-height: 34px; padding: 7px 10px; font-size: 12px; } #view .tk .bk-seg button.on { background: var(--accent-soft); color: var(--accent-text); }

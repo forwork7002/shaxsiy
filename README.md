@@ -17,17 +17,17 @@ shaxsiy/  (bu repoda fayllar ildizda)
   js/core.js                         — yadro: saqlash, sanalar, i18n, router, UI kit, sync, migratsiya
   js/i18n.js  js/prayer.js           — matnlar; namoz vaqtlari + hijriy
   js/ai.js  js/whoop.js              — kutubxonalar: AI kartalar (D.ai), WHOOP (D.whoop) — view emas
-  js/today.js health.js food.js ibodat.js        — pastki panel: Bugun · Sog'liq · Ovqat · Ibodat
-  js/finance.js tasks.js nova.js history.js settings.js — «Yana»: Moliya · Vazifa · Nova · Tarix · Sozlamalar
+  js/today.js health.js food.js ibodat.js        — Asosiy · Sog'liq(Ovqat) · Ibodat
+  js/finance.js tasks.js habits.js books.js levels.js yusa.js settings.js — Moliya · Vazifa (Odat · Kitob · Maqsad) · daraja · Yusa AI · Sozlash
   js/onboard.js                      — birinchi kirish: ism, jins, tug'ilgan yil, bo'y, vazn, faollik, maqsad, WHOOP
   js/app.js  sw.js  manifest.json    — ishga tushirish, PWA
   api.py  db.py  legacy.py  requirements.txt  start.sh .env.example — server
   ARCHITECTURE.md                    — kod qoidalari (yangi bo'lim qo'shish uchun)
 ```
 
-Olib tashlangan (2026-09): `gym` (Sport jurnali — WHOOP mashg'ulotlari o'rnini bosdi), `learn` (Ta'lim), `stats`
-(oy/yil statistikasi Tarixda), Sog'liq ichidagi «Kofein» va «Stack». Eski ma'lumot blob va arxivda saqlanib
-qoladi (`core.js` kalitlarni tashlamaydi), lekin interfeysda o'qilmaydi.
+Olib tashlangan (2026-09): `gym` (Sport jurnali — WHOOP mashg'ulotlari o'rnini bosdi), `learn` (Ta'lim), `stats`,
+Tarix ekrani (2026-09-10) va uning `/api/history/*` yo'llari (2026-09-15), Sog'liq ichidagi «Kofein» va «Stack».
+Eski ma'lumot blob va arxivda saqlanib qoladi (`core.js` kalitlarni tashlamaydi), lekin interfeysda o'qilmaydi.
 
 ## Ishga tushirish
 

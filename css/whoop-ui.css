@@ -48,8 +48,8 @@
    o'lcham va oraliq bor edi (9.5/10/10.5/11/12px, .06–.13em) — ko'z
    ularni boshqa-boshqa narsa deb o'qirdi. Endi bitta: 11px, .15em.
    --------------------------------------------------------------------- */
-.eyebrow, .stat-label, .kpi-label, .field-label, .hero-eyebrow,
-.section-title, .dashed, .wh-trend-name, .wh-ready-label, .td-kpi-lab,
+.eyebrow, .stat-label, .kpi-label, .field-label,
+.section-title, .dashed, .wh-trend-name, .td-kpi-lab,
 .ring-sub, .arc-sub, .nav-lab, .top-sub, .wh-ring > span {
   font-size: 11px; font-weight: 600; letter-spacing: .15em;
   text-transform: uppercase; color: var(--text3);
@@ -61,7 +61,7 @@
 .section-title::before, #view .section-title::before { display: none; }
 .section-title::after { background: var(--line); opacity: 1; order: 1; }
 .section-title .right { order: 2; margin-left: 0; font-size: 11px; letter-spacing: .04em; text-transform: none; color: var(--text2); }
-.hero-eyebrow, .kpi-label, .stat-label { color: var(--text3); }
+.kpi-label, .stat-label { color: var(--text3); }
 
 /* ---------------------------------------------------------------------
    2. RAQAMLAR
@@ -69,14 +69,10 @@
    zich (-.04em) va JADVAL kengligida: 1 bilan 8 bir xil joy egallaydi,
    ya'ni har soniyada yangilanadigan son sakramaydi.
    --------------------------------------------------------------------- */
-.kpi-num, .hero-num, .stat-num, .ring-pct, .arc-num, .td-kpi-val,
-.wh-ready-num, .wh-trend-val, .stepper .val, .li-right {
+.kpi-num, .stat-num, .ring-pct, .arc-num, .td-kpi-val, .wh-trend-val, .stepper .val, .li-right {
   font-weight: 700; font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1; letter-spacing: -.04em; color: var(--text);
 }
-.hero-num { font-size: 46px; line-height: .95; }
-.hero-num small { font-size: 15px; font-weight: 600; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--text3); margin-left: 4px; }
 .kpi-num { font-size: 44px; line-height: .95; }
 .kpi-total { font-size: 15px; color: var(--text3); font-weight: 600; }
 .stat-num { font-size: 25px; line-height: 1; letter-spacing: -.035em; }
@@ -86,8 +82,7 @@
 .ring-pct { font-size: 27px; letter-spacing: -.045em; }
 .td-kpi-val { font-size: 23px; }
 .wh-trend-val { font-size: 22px; }
-@media (max-width: 400px) {
-  .hero-num { font-size: 40px; } .kpi-num { font-size: 38px; }
+@media (max-width: 400px) { .kpi-num { font-size: 38px; }
   .arc-num { font-size: 40px; } .stat-num { font-size: 22px; }
   .td-kpi-val { font-size: 20px; }
 }
@@ -104,7 +99,6 @@
   background: var(--card-solid); padding: 17px 16px; margin-bottom: 12px; }
 .card-head { margin-bottom: 14px; align-items: center; }
 .card-head .title { font-size: 13px; font-weight: 700; letter-spacing: .02em; }
-.divider { background: var(--line); margin: 16px -16px; }
 .card.flat { background: transparent; border: 1px solid var(--line); padding: 14px 15px; }
 
 /* Zona tasmasi — faqat HAQIQIY zonasi bor kartada.
@@ -137,7 +131,6 @@
 .hero-main { gap: 18px; margin-top: 10px; align-items: center; }
 .hero-title { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
 .hero-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
-.hero-foot { border-top: 1px solid var(--line); margin-top: 16px; padding-top: 14px; }
 
 /* ---------------------------------------------------------------------
    4. HALQA VA YOY
@@ -162,7 +155,6 @@
 .stat { background: var(--card2); border: 1px solid var(--line); border-radius: var(--r-sm);
   padding: 13px 12px 12px; }
 .stat-label { margin-top: 7px; }
-.stat-sub { font-size: 11px; color: var(--text4); margin-top: 4px; }
 /* Zona belgisi nuqtadan TASMAga aylandi: katakchaning tepasida chetdan chetga
    ingichka chiziq. Nuqta burchakda turganda uni topish uchun qarash kerak edi
    va uchta katakcha yonma-yon bo'lsa, uchta nuqta chalkashardi. Tasma esa
@@ -186,10 +178,6 @@
 .hbar { font-size: 12px; }
 .hbar-label { font-size: 11px; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--text3); width: 92px; }
 .hbar-val { font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
-.segbar { height: 5px; gap: 3px; margin: 12px 0 16px; }
-.segbar i { border-radius: 99px; background: var(--track); }
-.segbar i.on { background: var(--z-high); box-shadow: 0 0 8px var(--success-glow); }
-.segbar i.half { background: var(--z-mid); box-shadow: 0 0 8px var(--warning-glow); }
 .spark-labels { font-size: 11px; font-weight: 600; letter-spacing: .1em;
   text-transform: uppercase; color: var(--text4); margin-top: 7px; }
 .spark-target { stroke: var(--line3); stroke-dasharray: 2 4; }
@@ -355,17 +343,6 @@
    ekranning eng katta yuzasini egallardi va ostidagi hamma narsa
    shunga qarab boshqacha ko'rinardi. Endi rang — faqat 3px.
    --------------------------------------------------------------------- */
-.wh-ready { background: var(--card2); border: 1px solid var(--line);
-  border-left: 3px solid var(--zc, var(--line3)); border-radius: var(--r-sm); padding: 14px 15px; }
-.wh-ready.good { --zc: var(--z-high); background: var(--card2); border-color: var(--line); border-left-color: var(--z-high); }
-.wh-ready.warn { --zc: var(--z-mid);  background: var(--card2); border-color: var(--line); border-left-color: var(--z-mid); }
-.wh-ready.bad  { --zc: var(--z-low);  background: var(--card2); border-color: var(--line); border-left-color: var(--z-low); }
-.wh-ready-num { font-size: 30px; color: var(--zc, var(--text)); }
-.wh-ready.good .wh-ready-num { color: var(--z-high); }
-.wh-ready.warn .wh-ready-num { color: var(--z-mid); }
-.wh-ready.bad  .wh-ready-num { color: var(--danger-text); }
-.wh-ready-text { font-size: 13px; margin-top: 3px; }
-.wh-ready-side b { font-variant-numeric: tabular-nums; letter-spacing: -.02em; }
 .wh-trend-row { padding: 16px 0; border-top-color: var(--line); }
 .wh-trend-foot { font-size: 11px; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; color: var(--text4); margin-top: 6px; }
 .wh-brand { font-size: 11px; font-weight: 700; letter-spacing: .15em; text-transform: uppercase; }
@@ -392,8 +369,7 @@
    sabab uni bosish uchun `!important` dan boshqa yo'l yo'q. */
 [data-theme="light"] .ring-fill,
 [data-theme="light"] .arc rect.on { filter: none !important; }
-[data-theme="light"] .bar-fill, [data-theme="light"] .segbar i.on,
-[data-theme="light"] .segbar i.half, [data-theme="light"] .toggle.on,
+[data-theme="light"] .bar-fill, [data-theme="light"] .toggle.on,
 [data-theme="light"] .chk:checked, [data-theme="light"] .chk.on,
 [data-theme="light"] .zone.z-good, [data-theme="light"] .zone.z-warn,
 [data-theme="light"] .zone.z-bad { box-shadow: none; }
@@ -401,7 +377,6 @@
 /* Kirish ekrani — bir xil tilda */
 .auth-card { border-radius: var(--r); background: var(--card-solid); border-color: var(--card-line); }
 .auth-title { font-size: 15px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--text3); }
-.auth-user.on { background: var(--btn-grad); color: var(--on-btn); }
 .auth-ic { border-radius: 50%; background: transparent; border: 1px solid color-mix(in srgb, var(--success) 40%, transparent); }
 
 /* ---------------------------------------------------------------------
@@ -453,10 +428,8 @@
    narsa uning atrofida joylashadi.
    --------------------------------------------------------------------- */
 .card, .hero { padding: 20px 18px; margin-bottom: 14px; }
-.divider { margin: 18px -18px; }
 .page { padding: 6px 18px 32px; }
 .section-title { margin: 32px 0 14px; }
-.hero-num { font-size: 58px; letter-spacing: -.05em; }
 .kpi-num { font-size: 52px; letter-spacing: -.05em; }
 .arc-num { font-size: 56px; letter-spacing: -.05em; }
 .arc-val { margin-top: -52px; }
@@ -466,15 +439,13 @@
 .stat-num { font-size: 27px; }
 .top-title { font-size: 30px; letter-spacing: -.04em; }
 @media (max-width: 400px) {
-  .card, .hero { padding: 17px 15px; }
-  .divider { margin: 16px -15px; }
-  .hero-num { font-size: 46px; } .kpi-num { font-size: 42px; }
+  .card, .hero { padding: 17px 15px; } .kpi-num { font-size: 42px; }
   .arc-num { font-size: 46px; } .arc-val { margin-top: -44px; }
   .stat-num { font-size: 23px; } .td-kpi-val { font-size: 21px; }
   .top-title { font-size: 25px; }
 }
 /* Kengroq ekranda sahifa ham kengayadi — «keng» talabi shu yerda ham. */
-@media (min-width: 960px) { .top, .page { max-width: 960px; } .page.wide { max-width: 1120px; } }
+@media (min-width: 960px) { .top, .page { max-width: 960px; } }
 
 /* ---------------------------------------------------------------------
    17. RAQAMLAR TEKIS TURSIN — Onest bilan bu majburiy
@@ -502,8 +473,8 @@ body, .inp, .sel, .ta, button, input, select, textarea {
    raqamlar shu yangi joyni egallaydi. Faqat ULAR: sarlavha ham 800 ga
    chiqsa, sahifada ikkita "eng qattiq" narsa paydo bo'ladi va ierarxiya
    yo'qoladi. Yozuv 700 da qoladi. */
-.hero-num, .kpi-num, .arc-num, .top-title { font-weight: 800; }
-.ring-pct, .wh-ready-num, .stat-num, .td-kpi-val { font-weight: 700; }
+.kpi-num, .arc-num, .top-title { font-weight: 800; }
+.ring-pct, .stat-num, .td-kpi-val { font-weight: 700; }
 
 /* ---------------------------------------------------------------------
    18. OSMON — ilovaning o'ziga xos qismi
@@ -737,7 +708,6 @@ html.sky-turn body::after { animation: skyTurn 2.6s var(--ease-out); }
 .card, .hero { padding: 13px 15px; margin-bottom: 9px; }
 .card-head { margin-bottom: 9px; }
 .section-title { margin: 18px 0 8px; }
-.divider { margin: 12px -15px; }
 .page { padding: 4px 15px 28px; }
 .td-grp { padding: 10px 0; }
 .td-strip2-item { padding: 9px 10px; }
@@ -746,6 +716,5 @@ html.sky-turn body::after { animation: skyTurn 2.6s var(--ease-out); }
 
 @media (max-width: 400px) {
   .card, .hero { padding: 12px 13px; margin-bottom: 8px; }
-  .divider { margin: 11px -13px; }
   .page { padding: 4px 13px 26px; }
 }

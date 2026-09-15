@@ -59,7 +59,6 @@
       t = setTimeout(() => fn(...a), ms);
     };
   };
-  D.by = (key, dir = 1) => (a, b) => (a[key] > b[key] ? dir : a[key] < b[key] ? -dir : 0);
   D.deep = (o) => JSON.parse(JSON.stringify(o));
   D.pad2 = (n) => String(n).padStart(2, '0');
 
@@ -211,7 +210,6 @@
       ['uy', 'Uy/Remont', '🏠'], ['boshqa', 'Boshqa', '📦'], ['maosh', 'Maosh', '💼'],
     ].map(([id, name, icon]) => ({ id, name, icon }));
   }
-  D.defaultCats = defaultCats;
 
   /* ------------------------------------------------------------------ */
   /* migration from the old Шахсий mini-app export                       */
@@ -268,7 +266,6 @@
       return false;
     }
   }
-  D.lsGet = lsGet; D.lsSet = lsSet;
 
   D.ui = fill(lsGet(UI_KEY), { view: 'today', sub: {}, viewDate: null, filters: {}, collapsed: {} });
   if (D.ui.view === 'nova') D.ui.view = 'yusa';                 // eski nom bilan yopilgan bo'lim
@@ -296,7 +293,6 @@
     if (!lsTimer) lsTimer = setTimeout(() => { lsTimer = 0; saveLocalNow(); }, 400);
   }
   function saveLocalForce() { lsDirty = true; saveLocalNow(); }
-  function saveLocalCancel() { lsDirty = false; if (lsTimer) { clearTimeout(lsTimer); lsTimer = 0; } }
   /** Chiqish nuqtalari uchun: bayroqqa qaramay bir marta yozadi. Modullarning
       o'z kechiktirishlari (today.js dagi kunlik eslatma — D.S ga darrov yoziladi,
       D.save() esa 300 ms kutiladi) shu bilan qutqariladi. */
@@ -815,7 +811,6 @@
     return sym.length === 1 ? `${sign}${sym}${s}` : `${sign}${s}\u00A0${sym}`;
   };
   D.fmtPct = (x, d = 0) => (Math.round((+x || 0) * 10 ** d) / 10 ** d) + '%';
-  D.fmtKg = (kg) => { if (kg == null || kg === '') return '—'; const u = D.S.settings.weightUnit; return u === 'lb' ? D.round(kg * 2.20462, 1) + ' lb' : D.round(+kg, 1) + ' kg'; };
 
   /* ------------------------------------------------------------------ */
   /* i18n runtime                                                        */
@@ -892,7 +887,6 @@
 
   // emoji: the record's own, else the sphere default (never persisted — a later sphere change updates it)
   const SPHERE_EMOJI = { ruh: '🕌', aql: '📘', qalb: '💚', tana: '🏃', boshqa: '✅', aralash: '✨' };
-  D.SPHERE_EMOJI = SPHERE_EMOJI;
   D.habitEmoji = (h) => (h && h.emoji) || SPHERE_EMOJI[h && h.sphere] || SPHERE_EMOJI.boshqa;
 
   // tick/count mutators shared by Bugun and Vazifa. None of them save or rerender — callers do.
@@ -1102,7 +1096,6 @@
     heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5l7 7Z"/>',
     fire: '<path fill="currentColor" stroke="none" d="M12 2c1 4-3 5-3 9a3 3 0 0 0 6 0c0-1-.5-2-.5-2 2 1 3.5 3 3.5 5.5A6 6 0 0 1 6 14.5C6 9 12 6 12 2Z"/>',
     eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/>',
-    eyeOff: '<path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><path d="M1 1l22 22M6.53 6.53A18.6 18.6 0 0 0 1 12s4 8 11 8a9.26 9.26 0 0 0 5.47-1.53"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
     minus: '<path d="M5 12h14"/>',
     x: '<path d="M18 6 6 18M6 6l12 12"/>',
@@ -1117,37 +1110,30 @@
     clock: '<circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 3"/>',
     scale: '<path d="M16 16.5c0 1.5-2 2.5-4 2.5s-4-1-4-2.5M12 3v3M3 8l3 8h6l-3-8M21 8l-3 8h-6l3-8"/><path d="M3 8h18"/>',
     dumbbell: '<path d="M6.5 6.5h11M6.5 17.5h11M3 10v4M21 10v4M6 8v8M18 8v8"/><path d="M6 12h12"/>',
-    coffee: '<path d="M17 8h1a4 4 0 1 1 0 8h-1M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M6 2v2M10 2v2M14 2v2"/>',
     pill: '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
     sparkles: '<path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2Z"/><path d="M5 3v4M3 5h4M19 17v4M17 19h4"/>',
     search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
-    menu: '<path d="M4 6h16M4 12h16M4 18h16"/>',
     grid: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
-    home: '<path d="m3 11 9-8 9 8v9a2 2 0 0 1-2 2h-4v-6h-6v6H5a2 2 0 0 1-2-2Z"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     mosque: '<path d="M4 21h16M5 21v-7M19 21v-7M7 14h10M7 14a5 5 0 0 1 10 0M12 4v3M12 3l1-1M12 3l-1-1"/><path d="M8 21v-3a2 2 0 0 1 4 0M12 18a2 2 0 0 1 4 0v3"/>',
     star: '<path d="m12 2 3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>',
     edit: '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
     trash: '<path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>',
     trend: '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
-    trendDown: '<path d="m22 17-8.5-8.5-5 5L2 7"/><path d="M16 17h6v-6"/>',
     info: '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
     alert: '<path d="m10.3 3.9-8.2 14.2A2 2 0 0 0 3.8 21h16.4a2 2 0 0 0 1.7-2.9L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>',
     refresh: '<path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3v6h-6"/>',
     link: '<path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/>',
     bolt: '<path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/>',
     flag: '<path d="M4 22V4a1 1 0 0 1 1-1h11l-1 4 1 4H5"/>',
-    smile: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/>',
     hands: '<path d="M11 14V6a2 2 0 1 0-4 0v8M7 14V8a2 2 0 1 0-4 0v7a7 7 0 0 0 14 0v-3a2 2 0 1 0-4 0M15 12V9a2 2 0 1 1 4 0v6"/>',
     beads: '<circle cx="12" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="19" cy="14" r="2"/><circle cx="15" cy="19" r="2"/><circle cx="9" cy="19" r="2"/><circle cx="5" cy="14" r="2"/><circle cx="6" cy="8" r="2"/>',
     brain: '<path d="M12 4a3 3 0 0 0-3 3v10a3 3 0 0 0 6 0V7a3 3 0 0 0-3-3Z"/><path d="M9 8a3 3 0 0 0-3 3v2a3 3 0 0 0 3 3M15 8a3 3 0 0 1 3 3v2a3 3 0 0 1-3 3"/>',
     apple: '<path d="M12 6c-2-2-6-1-7 3s2 9 4 10 3-1 3-1 1 2 3 1 5-6 4-10-5-5-7-3Z"/><path d="M12 6c0-2 1-3 2-4"/>',
-    timer: '<path d="M10 2h4M12 14v-4"/><circle cx="12" cy="14" r="8"/>',
     layers: '<path d="m12 2 10 5-10 5L2 7Z"/><path d="m2 12 10 5 10-5M2 17l10 5 10-5"/>',
     compass: '<circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.2 6.4-6.4 2.2 2.2-6.4Z"/>',
     camera: '<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13" r="3"/>',
     list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
-    more: '<circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/>',
     logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
     key: '<circle cx="8" cy="15" r="4"/><path d="m10.9 12.1 9.1-9.1M17 5l3 3M14 8l3 3"/>',
     shield: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/>',
@@ -1160,7 +1146,6 @@
     const p = P[name] || P.info;
     return `<svg class="ic" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" ${extra}>${p}</svg>`;
   };
-  D.icons = P;
 
   /* ------------------------------------------------------------------ */
   /* charts (return SVG/HTML strings)                                    */
@@ -1698,7 +1683,6 @@
     if (side) side.innerHTML = D.viewList().filter((v) => v.nav !== false)
       .map((v) => `<button class="side-tab ${current === v.id ? 'on' : ''}" data-act="go" data-view="${v.id}">${D.ic(v.icon, 18)}<span>${D.esc(D.t('nav.' + v.id))}</span></button>`).join('');
   };
-  D.closeMore = () => {};
 
   /* ------------------------------------------------------------------ */
   /* event delegation                                                    */

@@ -152,7 +152,6 @@
     close();
     return out || '<p class="muted">…</p>';
   }
-  D.yusaMd = md; // exposed for reuse (e.g. insights)
 
   // Suhbat konteksti bitta joyda tug'iladi — js/ai.js dagi chatSystem(): u har bir
   // bo'lim kartasi ko'radigan raqamlarni va WHOOP'ning so'nggi 14 kunini beradi.

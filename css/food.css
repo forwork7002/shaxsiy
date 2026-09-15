@@ -3,16 +3,6 @@
 .fd-extra .sep, .fd-part .sep, .fd-day-n .sep { color: var(--text3); margin: 0 5px; }
 
 /* ---- kun xulosasi: chapda kkal halqasi, o'ngda bitta oddiy jumla ---- */
-.fd-hero { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
-.fd-hero .ring-wrap { flex: none; }
-.fd-hero .ring-pct { font-size: 21px; }
-.fd-hero .ring-sub { font-size: 11px; color: var(--text3); font-weight: 600; }
-.fd-hero-side { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 5px; }
-.fd-hero-lab { font-size: 11px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; color: var(--text3); }
-.fd-hero-msg { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3; overflow-wrap: anywhere; }
-.fd-hero-msg.bad { color: var(--danger-text); }
-.fd-hero-burn { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text3); }
-.fd-hero-burn .ic { color: var(--warning-text); flex: none; }
 .fd-tgt { margin-top: 2px; }
 
 /* me'yor oynasi: bir qator matn, ostida to'rtta raqam */

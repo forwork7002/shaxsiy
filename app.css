@@ -164,7 +164,6 @@ button { cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action
 a { color: var(--info-text); text-decoration: none; }
 svg.ic { display: inline-block; vertical-align: middle; flex: none; }
 [hidden] { display: none !important; }
-.hide { display: none !important; }
 @media (max-width: 768px){ ::-webkit-scrollbar { width: 0; height: 0; display: none; } html, body { scrollbar-width: none; } }
 body.modal-open { position: fixed; left: 0; right: 0; width: 100%; overflow: hidden; }
 @media (prefers-reduced-motion: reduce){ *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; } }
@@ -174,15 +173,12 @@ body.modal-open { position: fixed; left: 0; right: 0; width: 100%; overflow: hid
 .side { display: none; }
 .main { flex: 1; min-width: 0; }
 .page { max-width: 720px; margin: 0 auto; padding: 4px 18px 28px; }
-.page.wide { max-width: 1000px; }
 .section { margin-top: 10px; }
 .section-title { display: flex; align-items: center; gap: 12px; margin: 18px 0 10px; font-size: 11px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--text3); }
 .section-title::before { content: ''; width: 18px; height: 1px; background: var(--text3); opacity: .6; }
 .section-title::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--line2), transparent); }
 .section-title .right { margin-left: auto; letter-spacing: 0; text-transform: none; font-weight: 600; }
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .row { display: flex; align-items: center; gap: 8px; }
 .row.wrap { flex-wrap: wrap; }
 .row.between { justify-content: space-between; }
@@ -190,7 +186,6 @@ body.modal-open { position: fixed; left: 0; right: 0; width: 100%; overflow: hid
 .grow { flex: 1; min-width: 0; }
 .mt { margin-top: 12px; } .mt-s { margin-top: 6px; } .mb { margin-bottom: 12px; } .mb-s { margin-bottom: 6px; }
 .center { text-align: center; } .right { text-align: right; }
-@media (max-width: 480px){ .grid3, .grid4 { grid-template-columns: 1fr 1fr; } }
 @media (min-width: 960px){
   body { padding-bottom: 24px; }
   .side { display: flex; flex-direction: column; gap: 4px; width: var(--side-w); flex: none; position: sticky; top: 0; height: 100vh; height: 100dvh; padding: 20px 12px; border-right: 1px solid var(--line); background: var(--bg2); }
@@ -238,7 +233,6 @@ p { margin: 0 0 8px; }
 .kpi-total { font-family: var(--num); font-size: 16px; color: var(--text3); }
 .kpi-label { font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); margin-left: 2px; }
 @media (max-width: 480px){ .kpi-num { font-size: 32px; } }
-.divider { height: 1px; background: var(--line); margin: 14px 0; }
 
 /* ---------- stat tiles ---------- */
 .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 9px; }
@@ -251,7 +245,6 @@ p { margin: 0 0 8px; }
 .stat-num.money { font-size: 17px; letter-spacing: -.02em; }
 @media (max-width: 480px){ .stat-num { font-size: 20px; } .stat-num.money { font-size: 15px; } }
 .stat-label { margin-top: 5px; font-size: 11px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--text3); }
-.stat-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
 .zone { position: absolute; top: 9px; right: 9px; width: 7px; height: 7px; border-radius: 50%; background: var(--line3); }
 .zone.z-good { background: var(--success); box-shadow: 0 0 7px var(--success-glow); }
 .zone.z-warn { background: var(--warning); box-shadow: 0 0 7px var(--warning-glow); }
@@ -293,8 +286,6 @@ p { margin: 0 0 8px; }
 @keyframes pop { from { transform: rotate(45deg) scale(0); } to { transform: rotate(45deg) scale(1); } }
 .chk.big { width: 28px; height: 28px; border-radius: 9px; }
 .chk.big:checked::after, .chk.big.on::after { left: 9px; top: 4px; width: 7px; height: 13px; }
-.handle { color: var(--text4); cursor: grab; font-size: 14px; letter-spacing: -2px; user-select: none; padding: 0 2px; }
-.li.drag-over { border-top: 2px solid var(--success); }
 
 /* ---------- chips ---------- */
 .pill { display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: var(--r-pill); background: var(--glass); border: 1px solid var(--line); color: var(--text3); font-size: 11px; font-weight: 600; letter-spacing: .02em; white-space: nowrap; transition: background .2s, color .2s, border-color .2s; }
@@ -354,7 +345,7 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
    2026-09-09 tekshiruvi: sakkizta shunday qatorning birortasida ham belgi yo'q edi).
    O'ng chetdagi 26px asta so'nadi — kesilgan chip endi «davomi bor» deb o'qiladi.
    Niqob faqat shu tor qatorlarda, ya'ni skroll qimmatlashmaydi. */
-.tabs, .yu-chips, .yusa-chips, .fin-chips, .hs-year, .hm-year {
+.tabs, .yu-chips, .yusa-chips, .fin-chips, .hm-year {
   -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent);
   mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent);
 }
@@ -368,9 +359,6 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--success); cursor: pointer; border: 3px solid var(--bg3); }
 .stepper { display: flex; align-items: center; gap: 8px; }
 .stepper .val { flex: 1; text-align: center; font-family: var(--num); font-size: 22px; font-weight: 700; color: var(--text); }
-.emoji-row { display: flex; gap: 6px; }
-.emoji-row button { flex: 1; font-size: 22px; padding: 8px 0; border-radius: 12px; border: 1.5px solid var(--line2); background: var(--f-input); transition: background .15s, border-color .15s; line-height: 1; }
-.emoji-row button.on { border-color: var(--success); background: color-mix(in srgb, var(--success) 12%, transparent); transform: scale(1.06); }
 .toggle { position: relative; width: 44px; height: 26px; border-radius: 13px; background: var(--line2); border: 0; padding: 0; flex: none; transition: background .2s; }
 .toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--text); transition: transform .2s; }
 .toggle.on { background: var(--success); }
@@ -390,11 +378,6 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .hbar { display: flex; align-items: center; gap: 8px; font-size: 12px; margin: 6px 0; }
 .hbar-label { width: 96px; flex: none; color: var(--text3); font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .hbar-val { min-width: 52px; text-align: right; font-weight: 700; color: var(--text); font-size: 12px; flex: none; }
-.segbar { display: flex; gap: 4px; height: 6px; margin: 10px 0 14px; }
-.segbar:empty { display: none; }
-.segbar i { flex: 1; background: var(--line); border-radius: 3px; transition: background .3s, box-shadow .3s; }
-.segbar i.on { background: var(--success); box-shadow: 0 0 6px var(--success-glow); }
-.segbar i.half { background: var(--warning); }
 .ring-wrap { position: relative; flex: none; }
 .ring-wrap svg { width: 100%; height: 100%; display: block; overflow: visible; }
 .ring-fill { transition: stroke-dashoffset .5s var(--ease-out), stroke .5s var(--ease-out); }
@@ -402,10 +385,8 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .ring-val { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; text-align: center; }
 .ring-pct { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1; letter-spacing: -.03em; }
 .ring-sub { font-size: 11px; color: var(--text3); font-weight: 600; margin-top: 3px; font-family: var(--num); }
-.ring-row { display: flex; align-items: center; gap: 16px; }
 .spheres { flex: 1; display: flex; flex-direction: column; gap: 7px; min-width: 0; }
 .sph { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-.sph .nm { width: 54px; flex: none; color: var(--text3); font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sph .n { width: 36px; text-align: right; font-weight: 700; font-family: var(--num); font-size: 12px; color: var(--text); flex: none; }
 
 /* jonli nuqta puls: sync indikatori va Ibodat vaqt qatori ishlatadi */
@@ -447,7 +428,6 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .top { max-width: 720px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 12px) 18px 6px; }
 .top-row { display: flex; align-items: center; gap: 10px; }
 .top-txt { flex: 1; min-width: 0; }
-.top-gap { flex: 1; }
 .top-btn { width: 38px; height: 38px; flex: none; border-radius: 50%; border: 1px solid var(--line); background: var(--card-bg); color: var(--text2); display: grid; place-items: center; padding: 0; transition: background .16s, color .16s; }
 .top-btn:active { background: var(--hover); color: var(--text); }
 .top-btn.sm { width: 32px; height: 32px; }
@@ -543,12 +523,10 @@ i.top-av { background: linear-gradient(150deg, var(--accent), color-mix(in srgb,
 .toast span { overflow: hidden; text-overflow: ellipsis; }
 .toast-undo { border: 0; background: transparent; color: var(--success-text); font-weight: 700; padding: 0; font-size: 13px; }
 @media (min-width: 960px){ .toast { bottom: 24px; } }
-.kbd { font-family: var(--mono); font-size: 11px; padding: 2px 6px; border-radius: 5px; background: var(--inset); border: 1px solid var(--line2); color: var(--text3); }
 .error-card pre { white-space: pre-wrap; font-size: 11px; max-height: 200px; overflow: auto; }
 .banner { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--warning) 10%, transparent); border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent); color: var(--warning-text); font-size: 12px; margin-bottom: 12px; }
 .banner.bad { background: color-mix(in srgb, var(--danger) 10%, transparent); border-color: color-mix(in srgb, var(--danger) 30%, transparent); color: var(--danger-text); }
 .banner.good { background: color-mix(in srgb, var(--success) 10%, transparent); border-color: color-mix(in srgb, var(--success) 30%, transparent); color: var(--success-text); }
-@media (min-width: 960px){ .fab { bottom: 24px; right: 24px; } }
 
 /* ---------- loading skeleton ---------- */
 .skel-card { pointer-events: none; }
@@ -574,7 +552,7 @@ i.top-av { background: linear-gradient(150deg, var(--accent), color-mix(in srgb,
 /* Ilgari sarlavhalar boshqa oilaga o'tardi. Endi hammasi Onest — farqni vazn va
    o'lcham ko'rsatadi. O'zgaruvchan shrift bo'lgani uchun matn 450 da tura oladi:
    qorong'i fonda 400 ozgina ingichka, 500 esa og'ir ko'rinardi. */
-.kpi-num, .stat-num, .hero-num, .ring-pct, .arc-num { font-weight: 700; font-variant-numeric: tabular-nums; }
+.kpi-num, .stat-num, .ring-pct, .arc-num { font-weight: 700; font-variant-numeric: tabular-nums; }
 body { font-weight: 450; }
 .li-text, .help, p, .hero-sub { font-weight: 450; }
 .title, h1, h2, h3 { font-weight: 700; letter-spacing: -.01em; }
@@ -603,11 +581,6 @@ body { font-weight: 450; }
 .auth-btn { width: 100%; min-height: 46px; margin-top: 2px; }
 .auth-err { width: 100%; text-align: center; font-size: 12px; color: var(--danger-text); }
 /* login: pick who you are */
-.auth-users { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; width: 100%; margin-bottom: 4px; }
-.auth-user { flex: 1 1 96px; min-height: 44px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line2); background: var(--glass);
-  color: var(--text2); font-size: 14px; font-weight: 700; transition: background .15s, border-color .15s, color .15s, transform .1s; }
-.auth-user.on { background: var(--btn-grad); color: var(--on-btn); border-color: transparent; }
-.auth-user:active { transform: scale(.97); }
 .auth-or { width: 100%; text-align: center; font-size: 12px; color: var(--text4); margin: 4px 0; }
 .auth-google { font-weight: 700; }
 .auth-tg { margin-top: -2px; }

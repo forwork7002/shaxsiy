@@ -14,27 +14,8 @@
 .wh-trend-foot span:last-child { margin-left: auto; }
 
 /* Bugun bo'limidagi tayyorlik chizig'i */
-.wh-ready { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--r-sm); margin-bottom: 12px;
-  background: var(--inset); border: 1px solid var(--line); }
-.wh-ready.good { background: color-mix(in srgb, var(--success) 9%, transparent); border-color: color-mix(in srgb, var(--success) 28%, transparent); }
-.wh-ready.warn { background: color-mix(in srgb, var(--warning) 9%, transparent); border-color: color-mix(in srgb, var(--warning) 28%, transparent); }
-.wh-ready.bad { background: color-mix(in srgb, var(--danger-text) 9%, transparent); border-color: color-mix(in srgb, var(--danger-text) 28%, transparent); }
-.wh-ready-num { font-family: var(--num); font-size: 26px; font-weight: 700; line-height: 1; letter-spacing: -.03em; flex: none; }
-.wh-ready.good .wh-ready-num { color: var(--success-text); }
-.wh-ready.warn .wh-ready-num { color: var(--warning-text); }
-.wh-ready.bad .wh-ready-num { color: var(--danger-text); }
-.wh-ready-num small { font-size: 12px; margin-left: 1px; }
-.wh-ready-body { flex: 1; min-width: 0; }
-.wh-ready-label { display: block; font-size: 11px; font-weight: 700; letter-spacing: .10em; text-transform: uppercase; color: var(--text3); }
-.wh-ready-text { display: block; font-size: 13px; color: var(--text); line-height: 1.35; margin-top: 2px; }
-.wh-ready-side { display: flex; gap: 10px; flex: none; font-size: 11px; color: var(--text3); text-align: right; }
-.wh-ready-side b { display: block; font-family: var(--num); font-size: 13px; color: var(--text2); font-weight: 700; }
-@media (max-width: 400px){ .wh-ready-side { gap: 0; } .wh-ready-side span:first-child:not(:last-child) { display: none; } }
-
-.wh-auto { font-size: 11px; color: var(--info-text); display: inline-flex; align-items: center; gap: 4px; }
 
 /* WHOOP kun kartasi — Sog'liq bo'limining boshida */
-.wh-day .hero-main { align-items: center; }
 .wh-notes { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); display: grid; gap: 6px; }
 .wh-note { display: flex; align-items: flex-start; gap: 8px; padding: 8px 11px; border-radius: 11px; font-size: 12px; line-height: 1.45;
   background: var(--row-bg); border: 1px solid var(--row-line); color: var(--text2); }
@@ -73,14 +54,6 @@
 @media (prefers-reduced-motion: reduce){ .wh-fresh.live i::after, .wh-dot::after { animation: none; opacity: 0; } }
 
 /* live strain row inside the hero */
-.wh-strain { margin-top: 16px; padding: 12px 13px; border-radius: 14px; background: var(--glass); border: 1px solid var(--line); }
-.wh-strain-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.wh-strain-lab { font-size: 12px; font-weight: 700; color: var(--text2); display: inline-flex; align-items: center; gap: 7px; }
-.wh-strain-lab em { font-style: normal; font-size: 11px; font-weight: 700; letter-spacing: .06em; padding: 2px 7px; border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--success) 16%, transparent); color: var(--success-text); }
-.wh-strain-val { font-size: 26px; font-weight: 700; letter-spacing: -.03em; color: var(--text); line-height: 1; }
-.wh-strain-foot { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; font-size: 12px; color: var(--text3); }
-.wh-strain-foot b { color: var(--text2); }
 
 /* gauge: value against a target tick */
 .wh-gauge { position: relative; height: 10px; margin-top: 10px; border-radius: 6px; background: var(--line); overflow: visible; }
@@ -139,15 +112,9 @@
 .wh-foot .tiny { margin-top: 2px; }
 
 /* Bugun strip additions */
-.wh-ready-fresh { font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--text4); margin-left: 6px; }
-.wh-ready-fresh.stale { color: var(--warning-text); }
 .wh-dot { position: relative; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--success); margin-left: 4px; vertical-align: 2px; }
 
 /* ---------- Sog'liq → Tana: profil, tana, sinx, yosh paneli ---------- */
-.wh-body-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 13px; color: var(--text2); }
-.wh-body-row:last-child { border-bottom: 0; }
-.wh-body-row b { color: var(--text); font-weight: 700; text-align: right; word-break: break-all; }
-.wh-body-row b small { font-size: 11px; font-weight: 600; color: var(--text3); margin-left: 2px; }
 .wh-body-link { border: 0; background: transparent; padding: 2px 4px; margin: -2px 0; color: var(--info-text); font-size: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; border-radius: 6px; cursor: pointer; }
 @media (hover: hover) { .wh-body-link:hover { background: var(--hover); } }
 
