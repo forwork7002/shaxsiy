@@ -1774,6 +1774,25 @@
     if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'z' && !ev.target.matches('input,textarea,[contenteditable]')) { ev.preventDefault(); D.undo.pop(); }
   });
 
+  /* Telefon klaviaturasidagi tugma nima deyishi.
+     Yuqoridagi tinglovchi `input[data-enter]` da Enter bosilganda yozuvni
+     saqlaydi — ya'ni ilova uchun bu maydonlar «tayyor» degan ma'noda.
+     Lekin telefon klaviaturasi buni bilmaydi va sukut bo'yicha «kegingi»
+     yoki lupa ko'rsatadi: foydalanuvchi saqlash uchun klaviaturani yopib,
+     tugmani qidirishi kerak bo'ladi.
+     `enterkeyhint` shu belgini o'zgartiradi. Uchta joyda (tasks.js:612,
+     668 va today.js:347) u qo'lda yozilgan edi, qolgan o'n sakkiztasida
+     yo'q — chunki har bir yangi maydonda uni eslab qo'yish kerak edi.
+     Shuning uchun markazdan qo'yiladi: mexanizm bitta joyda turibdi,
+     belgisi ham shu yerdan kelsin.
+     `:not([enterkeyhint])` — qo'lda boshqacha qiymat yozilgan maydon
+     (masalan `search`) tegilmay qoladi. */
+  D.on('view:rendered', () => {
+    const root = D.$('#view');
+    if (!root) return;
+    for (const el of root.querySelectorAll('input[data-enter]:not([enterkeyhint])')) el.setAttribute('enterkeyhint', 'done');
+  });
+
   // Cyrillic ↔ Latin transliteration (Uzbek) — ro'yxatlarni saralash uchun
   const CYR = [['ё', 'yo'], ['ю', 'yu'], ['я', 'ya'], ['ч', 'ch'], ['ш', 'sh'], ['ц', 'ts'], ['ғ', 'g'], ['қ', 'q'], ['ў', 'o'], ['ҳ', 'h'], ['х', 'x'], ['ж', 'j'],
     ['а', 'a'], ['б', 'b'], ['в', 'v'], ['г', 'g'], ['д', 'd'], ['е', 'e'], ['з', 'z'], ['и', 'i'], ['й', 'y'], ['к', 'k'], ['л', 'l'], ['м', 'm'], ['н', 'n'], ['о', 'o'],
