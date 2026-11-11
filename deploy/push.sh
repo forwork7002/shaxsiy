@@ -106,8 +106,17 @@ tar czf - \
 # iOS va ma'lumot yaxlitligi tuzatishlarisiz, lekin haqiqiy bazaga yozadigan.
 # Papka bor bo'lsa mijoz fayllarini asosiydan ko'chiramiz; yo'q bo'lsa tegmaymiz
 # (api.py u holda 404 beradi — eski serverdagidek).
-echo "▸ /yangi/ oldindan ko'rish nusxasi sinxronlanmoqda…"
-ssh "$HOST" "cd $APP_DIR && if [ -d yangi ]; then rm -rf yangi.new && mkdir -p yangi.new && cp -a index.html app.css sw.js manifest.json css js fonts icons yangi.new/ && rm -rf yangi.old && mv yangi yangi.old && mv yangi.new yangi && rm -rf yangi.old && echo '  - sinxronlandi'; else echo '  - papka yoq, otkazib yuborildi'; fi"
+# 2026-11-11: /yangi/ da ASOSIYDAN YANGIROQ qobiq (dash dizayn-2026-10, v136) turgan va
+# haqiqiy foydalanuvchilar o'shandan kirayotgan edi — bu sinxron uni jimgina v135 ga
+# tushirib yuborardi. Endi /yangi/ versiyasi asosiydan katta bo'lsa, unga tegilmaydi
+# (u o'z yo'li bilan yuboriladi). Ataylab ustidan yozish: SYNC_YANGI=1.
+YANGI="$(ssh "$HOST" "sed -n \"s/^const CACHE = 'dash-v\([0-9]*\).*';/\1/p\" $APP_DIR/yangi/sw.js 2>/dev/null" || true)"
+if printf '%s' "$YANGI" | grep -qE '^[0-9]+$' && [ -n "$VER" ] && [ "$YANGI" -gt "${VER#v}" ] && [ "${SYNC_YANGI:-0}" != "1" ]; then
+  echo "▸ /yangi/ da yangiroq qobiq (v$YANGI > $VER) — tegilmadi"
+else
+  echo "▸ /yangi/ oldindan ko'rish nusxasi sinxronlanmoqda…"
+  ssh "$HOST" "cd $APP_DIR && if [ -d yangi ]; then rm -rf yangi.new && mkdir -p yangi.new && cp -a index.html app.css sw.js manifest.json css js fonts icons yangi.new/ && rm -rf yangi.old && mv yangi yangi.old && mv yangi.new yangi && rm -rf yangi.old && echo '  - sinxronlandi'; else echo '  - papka yoq, otkazib yuborildi'; fi"
+fi
 
 if [ "$MODE" = "--setup" ]; then
   echo "▸ Serverni sozlash…"

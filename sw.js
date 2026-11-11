@@ -151,7 +151,8 @@ self.addEventListener('pushsubscriptionchange', (e) => {
     let sub = e.newSubscription || null;
     const old = e.oldSubscription || null;
     if (!sub && old && old.options) sub = await self.registration.pushManager.subscribe(old.options);
-    if (old) await post('api/push/unsubscribe', { endpoint: old.endpoint }).catch(() => null);
-    if (sub) await post('api/push/subscribe', { subscription: sub.toJSON() });
+    // Mutlaq yo'l: /yangi/ dagi service worker uchun nisbiy 'api/…' → /yangi/api/… (404) bo'lardi
+    if (old) await post('/api/push/unsubscribe', { endpoint: old.endpoint }).catch(() => null);
+    if (sub) await post('/api/push/subscribe', { subscription: sub.toJSON() });
   })().catch(() => null));
 });
