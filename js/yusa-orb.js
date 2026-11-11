@@ -136,7 +136,7 @@
   // Bo'limning nomi endi \u00abOvqat\u00bb, birinchi sahifasining nomi ham \u00abOvqat\u00bb \u2014
   // shu sababli u yerda faqat bo'lim nomi yoziladi, \u00abOvqat \u00b7 Ovqat\u00bb emas.
   function ctxLabel(page) {
-    if (page === 'food') return t('nav.health');
+    if (page === 'food') return t('nav.food');
     const base = t('nav.' + page);
     return page === 'health' ? `${base} \u00b7 ${t('hl.sub.' + healthSub())}` : base;
   }

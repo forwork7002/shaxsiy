@@ -1,120 +1,182 @@
-/* ==== finance ==== */
-.fin-top { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-.fin-top .seg { flex: 1; margin: 0; min-width: 0; }
-.fin-top .seg button { padding: 8px 6px; font-size: 13px; min-height: 40px; }
+/* ==== finance ==== Moliya. «Yorug' qog'oz» (2026-10-09).
+   Oy:       yozish kartasi (doim ochiq) · oy natijasi (halqa + chiziqcha) ·
+             pul qayerga ketdi · yozuvlar
+   Hisoblar: jami qoldiq (bo'lakli halqa + 30 kunlik chiziq) · hisoblar ·
+             doimiy to'lovlar
+   Karta, pill, plitka, chip, kalit va tugma materiali app.css da; bu yerda
+   faqat shu ekranga xos sinflar. Rang — tokenlardan; ochiq yozilgan yagona
+   ranglar 7 kunlik ustunlarniki (dizayn hujjati A.9), ular quyida ikkala
+   tema uchun alohida berilgan. */
+.fin { display: block; --fin-b1: #F7B9A4; --fin-b2: #F0805F; --fin-b3: #C2412A; }
+/* Qorong'ida «to'q» degani — yorqinroq: bugungi ustun eng ko'zga tashlanadigani. */
+:root:not([data-theme="light"]) .fin { --fin-b1: color-mix(in srgb, var(--coral) 42%, var(--card-bg)); --fin-b2: #E8734F; --fin-b3: #FFA283; }
+.fin-hd { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.fin-hd h2 { min-width: 0; font-size: 18px; font-weight: 600; letter-spacing: -.02em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fin-note { margin: 12px 2px 0; font-size: 12px; line-height: 1.5; color: var(--text3); }
+.fin-cnt { font-size: 14px; color: var(--text3); white-space: nowrap; }
+.fin-cnt.strong { font-weight: 600; color: var(--text); }
+.fin-empty { padding: 22px 8px 10px; }
+.fin-link { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 2px; border: 0; background: transparent; color: var(--text3); font-size: 13px; font-weight: 600; text-align: left; }
+.fin-link.bad { color: var(--danger-text); }
+@media (hover: hover) { .fin-link:hover { color: var(--text); } .fin-link.bad:hover { color: var(--danger-text); opacity: .8; } }
 
-.fin-nav .label { display: flex; flex-direction: column; align-items: center; gap: 2px; }
-.fin-nav-lbl { font-size: 15px; }
-.fin-nav-today { border: 0; background: transparent; color: var(--accent-text); font-size: 13px; font-weight: 600; padding: 4px 10px; min-height: 32px; border-radius: 8px; }
-@media (hover: hover) { .fin-nav-today:hover { background: var(--hover); } }
+/* --- 1. Kirim yoki chiqim yozish --- */
+.fin-add .card-head { margin-bottom: 14px; }
+.fin-types { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+/* Tanlanmagan — kulrang; Chiqim tanlansa marjon, Kirim tanlansa yashil:
+   pulning yo'nalishi yozuvni o'qimasdan, rangdan ko'rinsin. */
+.fin-type { display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; padding: 0 10px; border: 2px solid transparent; border-radius: 14px;
+  background: var(--card2); color: var(--seg-text); font-size: 15px; font-weight: 600; transition: background .15s, color .15s, border-color .15s; }
+.fin-type.out.on { background: var(--coral-soft); border-color: var(--coral); color: var(--coral-text); }
+.fin-type.in.on { background: var(--success-soft); border-color: var(--success); color: var(--success-text); }
+.fin-lbl { display: block; margin: 14px 0 6px; font-size: 13px; font-weight: 600; color: var(--text2); }
+.fin-amt-w { position: relative; }
+.fin-amount { min-height: 58px; padding: 0 70px 0 16px; border-radius: 16px; font-size: 22px; font-weight: 600; letter-spacing: -.02em; }
+.fin-amount::placeholder { font-weight: 600; }
+@media (pointer: coarse) { .fin-amount { font-size: 22px; } }
+.fin-cur { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); font-size: 15px; font-weight: 600; color: var(--text3); pointer-events: none; }
+/* Tekshiruv qatori: bo'sh maydonda — qisqartmalar izohi, summa yozilganda —
+   «= 250 000 so'm · Oziq-ovqat» (tahlilchi nimani tushungani). */
+.fin-eq { min-height: 18px; margin-top: 6px; font-size: 12px; font-weight: 600; color: var(--text3); }
+.fin-eq.on { font-size: 13px; color: var(--text); }
+.fin-pick .chip { min-height: 44px; }
+.fin-pick .chip .ic { flex: none; }
+.fin-more { margin-top: 10px; }
+.fin-more summary { display: flex; align-items: center; gap: 8px; min-height: 44px; list-style: none; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text2); }
+.fin-more summary::-webkit-details-marker { display: none; }
+.fin-more summary > span { flex: none; }
+.fin-more summary > i { flex: 1; min-width: 0; font-style: normal; font-weight: 500; color: var(--text3); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fin-more summary > .ic { color: var(--text3); transition: transform .2s; }
+.fin-more[open] summary > .ic { transform: rotate(180deg); }
+.fin-more-b { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; padding-bottom: 4px; }
+.fin-more-b > :first-child, .fin-more-b > input[type="date"]:last-child { grid-column: 1 / -1; }
+.fin-go { margin-top: 12px; }
+/* Summa yo'q — tugma xira (o'chirilgan emas: bosilsa nima yetishmasligini aytadi). */
+.fin-go.dim { opacity: .4; }
+@media (max-width: 380px) { .fin-amount, .fin-amount::placeholder { font-size: 19px; } }
 
-/* ---- qahramon: OYNING OQIMI ----
-   Kunlik chiqim chizig'i kartaning ichidagi qo'shimchadan sahifaning bosh
-   elementiga aylandi: balandligi ikki baravar, chetdan chetgacha. Bitta
-   raqam «oy qanday ketyapti» ni ayta olmaydi, shakl esa aytadi. */
-.fin-hero { padding: 0; overflow: hidden; }
-.fin-flow { padding: 14px 15px 6px; }
-.fin-flow-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 10px; }
-.fin-flow-max { font-size: 11px; color: var(--text3); white-space: nowrap; }
-.fin-flow-max b { color: var(--text2); font-weight: 600; }
-.fin-flow-c { margin: 0 -5px; }
-.fin-hero-b { padding: 4px 15px 15px; }
+/* --- 2. Oy natijasi / Jami qoldiq: halqa + izoh ustuni --- */
+.fin-rings { display: flex; align-items: center; gap: 14px; margin-top: 12px; }
+.fin-ring-w { position: relative; width: 176px; height: 176px; flex: none; }
+.fin-ring-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.fin-ring-t { stroke-width: 18; stroke: color-mix(in srgb, var(--coral) 18%, transparent); }
+.fin-ring-t.acc { stroke: color-mix(in srgb, var(--accent) 13%, transparent); }
+.fin-ring-f { stroke-width: 18; stroke-linecap: round; transition: stroke-dashoffset .5s var(--ease-out); }
+/* Oyning o'tgan ulushi — halqani kesib o'tadigan chiziqcha (yorug'da qora). */
+.fin-ring-k { stroke: var(--text); stroke-width: 3.5; stroke-linecap: round; }
+.fin-ring-s circle { stroke-width: 18; }
+.fin-ring-c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; text-align: center; }
+.fin-ring-c b { font-size: 38px; font-weight: 600; letter-spacing: -.05em; line-height: 1; color: var(--text); }
+.fin-ring-c b small { margin-left: 1px; font-size: 16px; font-weight: 600; letter-spacing: 0; }
+.fin-ring-c span { max-width: 92px; margin-top: 4px; font-size: 11px; font-weight: 600; line-height: 1.3; color: var(--text3); }
+.fin-ring-c.acc b { font-size: 32px; }
+.fin-ring-c b.bad { color: var(--danger-text); }
+.fin-legs { flex: 1; min-width: 0; display: grid; gap: 12px; }
+.fin-leg { --c: var(--success); display: grid; gap: 1px; min-width: 0; }
+.fin-leg.out { --c: var(--coral); } .fin-leg.net { --c: var(--accent); }
+.fin-leg-n { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 12px; font-weight: 600; color: var(--text2); }
+.fin-leg b { font-size: 20px; font-weight: 600; letter-spacing: -.03em; line-height: 1.2; color: var(--text); white-space: nowrap; }
+.fin-leg b.sm { font-size: 17px; }
+.fin-leg.net b { color: var(--accent-text); } .fin-leg.neg b { color: var(--danger-text); }
+.fin-adv { margin-top: 14px; }
+.fin-tiles { margin-top: 10px; }
+/* Uch plitka yonma-yon: «540 ming» bir qatorga sig'ishi uchun raqam bir pog'ona kichik. */
+.fin-tiles .ptile-v { font-size: 16px; letter-spacing: -.02em; white-space: nowrap; }
+.fin-tiles .ptile-n { line-height: 1.35; }
+@media (max-width: 372px) { .fin-ring-w { width: 148px; height: 148px; } .fin-rings { gap: 10px; } .fin-ring-c b { font-size: 32px; } .fin-ring-c.acc b { font-size: 27px; } .fin-leg b { font-size: 18px; } .fin-leg b.sm { font-size: 15px; } }
 
-/* Ikkita raqam qutisiz, bitta qatorda: ular qahramon emas, izoh. */
-.fin-sum { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.fin-sum .tag { font-size: 13px; padding: 6px 11px; }
+/* oxirgi 7 kun chiqimi: o'rtachadan baland kun to'qroq, bugun eng to'q */
+.fin-w7, .fin-l30 { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.fin-w7h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--text3); }
+.fin-w7h b { font-weight: 600; color: var(--text); }
+.fin-w7g { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.fin-w7c { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; color: var(--text3); }
+.fin-w7v { font-size: 11px; font-weight: 600; color: var(--text2); white-space: nowrap; }
+.fin-w7t { display: flex; align-items: flex-end; width: 100%; max-width: 22px; height: 56px; border-radius: 6px; background: var(--track); overflow: hidden; }
+.fin-w7t i { display: block; width: 100%; border-radius: 6px; background: var(--fin-b1); }
+.fin-w7c.hi .fin-w7t i { background: var(--fin-b2); }
+.fin-w7c.today .fin-w7t i { background: var(--fin-b3); }
+.fin-w7d { font-size: 11px; white-space: nowrap; }
+.fin-w7c.today .fin-w7d { font-weight: 700; color: var(--text); }
 
-/* Kategoriya nomi kesilmasin: 92px da «TRANSPO…» bo'lib qolardi. */
-.fin-cats .hbar { margin: 9px 0; }
-.fin-cats .hbar-label { width: 122px; font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--text2); }
-@media (max-width: 380px){ .fin-cats .hbar-label { width: 100px; } }
+/* --- 3. Pul qayerga ketdi: bitta rang, kuchni uzunlik aytadi --- */
+.fin-cl, .fin-tl, .fin-al, .fin-sl { list-style: none; margin: 0; padding: 0; }
+.fin-c { display: flex; align-items: center; gap: 12px; padding: 7px 0; }
+.fin-c-b { flex: 1; min-width: 0; }
+.fin-c-r { display: flex; align-items: baseline; gap: 8px; }
+.fin-c-r b { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fin-c-v { font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.fin-c-r i { width: 36px; flex: none; font-style: normal; font-size: 12px; color: var(--text3); text-align: right; }
+.fin-c-bar { display: block; height: 6px; margin-top: 7px; border-radius: 4px; background: var(--track); overflow: hidden; }
+.fin-c-bar i { display: block; height: 100%; min-width: 4px; border-radius: 4px; background: var(--coral-2); transition: width .4s var(--ease-out); }
+.fin-hint { margin-top: 8px; border-top: 1px solid var(--line); }
 
-/* ---- hero: the one number ---- */
-.fin-hero .kpi-num { font-size: clamp(30px, 10vw, 46px); }
-.fin-hero .card-head { align-items: center; gap: 8px; flex-wrap: wrap; }
-.fin-subnote { margin: -4px 2px 8px; font-size: 12px; color: var(--text3); }
-.fin-notes { display: flex; flex-direction: column; gap: 3px; margin-top: 10px; padding-top: 9px; border-top: 1px solid var(--line); font-size: 12px; color: var(--text3); }
-.fin-spark { padding-top: 10px; margin-top: 10px; border-top: 1px solid var(--line); }
-.fin-nosnap { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; font-size: 12px; color: var(--text3); text-align: center; }
-
-.fin-hint { margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--line); }
-.fin-link { display: inline-flex; align-items: center; gap: 5px; border: 0; background: transparent; color: var(--text3); font-size: 12px; font-weight: 600; padding: 6px 0; min-height: 40px; text-align: left; }
-@media (hover: hover) { .fin-link:hover { color: var(--info-text); } }
-
-/* ---- quick add: amount → chip → done ---- */
-.fin-amount { width: 100%; margin-bottom: 10px; border-radius: var(--r-pill); min-height: 56px; font-size: 24px; font-weight: 600; letter-spacing: -.02em; text-align: center; }
-@media (max-width: 380px){ .fin-amount { font-size: 20px; min-height: 52px; } }
-.fin-chips { display: flex; gap: 7px; overflow-x: auto; scrollbar-width: none; padding: 2px 0 8px; margin: 0 -2px; scroll-padding: 2px; }
-.fin-chips::-webkit-scrollbar { display: none; }
-.fin-chip { flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 8px 13px; min-height: 40px; border-radius: var(--r-pill);
-  border: 0; background: var(--card2); color: var(--text2); font-size: 13px; font-weight: 600; white-space: nowrap; transition: background .15s, color .15s; }
-.fin-chip span { font-size: 15px; line-height: 1; }
-@media (hover: hover) { .fin-chip:hover { background: var(--hover); } }
-.fin-chip.on { color: #fff; background: var(--accent); }
-/* Yig'iq forma: yopiq holda faqat summa va tugma ko'rinadi. */
-.fin-add-top { display: flex; align-items: center; gap: 8px; }
-.fin-add-top .fin-amount { flex: 1; margin-bottom: 0; text-align: left; padding-left: 14px; }
-/* Bu tugmada ataylab `btn icon` klasslari YO'Q: ular butun ilova bo'ylab
-   qoplangan (shaffof fon, dumaloq shakl, yorug' mavzuda --text rangi) va
-   ularning ustidan yozish uchun har safar aniqlik oshirish kerak bo'lardi.
-   O'z klassi — o'z uslubi: fon matn rangida, belgi esa fon rangida, ya'ni
-   ikkala mavzuda ham o'zi teskari bo'ladi. */
-.fin-add-go { width: 52px; height: 52px; flex: none; display: inline-flex; align-items: center; justify-content: center;
-  border: 0; border-radius: 50%; padding: 0; cursor: pointer; background: var(--accent); color: #fff; box-shadow: var(--sh-btn); transition: transform .1s; }
-.fin-add-go:active { transform: scale(.94); }
-.fin-add-go .ic { color: inherit; }
-.fin-add-less { width: 44px; height: 52px; flex: none; }
-.fin-add:not(.open) .fin-add-x, .fin-add:not(.open) .fin-add-less { display: none; }
-.fin-add.open .fin-add-x { margin-top: 12px; }
-.fin-add.open #finTypeSeg { width: 100%; margin-bottom: 10px; }
-@media (max-width: 380px){ .fin-add-go { width: 52px; height: 52px; } .fin-add-less { height: 52px; } }
-
-.fin-add-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.fin-add-row .inp, .fin-add-row .sel { min-height: 44px; }
-.fin-add-row .sel { grid-column: 1 / -1; }
-@media (min-width: 560px){ .fin-add-row { grid-template-columns: 1.4fr 1fr 1fr; } .fin-add-row .sel { grid-column: auto; } }
-
-.fin-search { position: relative; margin-bottom: 10px; }
-.fin-search .inp { padding-left: 38px; min-height: 44px; }
-.fin-search-ic { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--text3); display: inline-flex; pointer-events: none; }
-
-.fin-day { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 14px 2px 4px; font-size: 13px; font-weight: 500; color: var(--text3); }
-.fin-day .num { color: var(--text2); font-size: 13px; }
-.fin-ico { width: 42px; height: 42px; flex: none; display: inline-flex; align-items: center; justify-content: center; font-size: 19px; border-radius: 50%; background: var(--card2); border: 0; }
-/* Kategoriya belgisi endi chiziqli ikonka (ilgari emoji edi). Rangi
-   matnniki bilan bir xil — kategoriya ranggi ma'no bildirmaydi, chunki
-   moliyada rang kirim/chiqimni anglatadi va u summada ko'rsatiladi. */
-.fin-ico .ic, .fin-chip-i .ic { color: var(--text2); }
-.fin-chip.on .fin-chip-i .ic { color: inherit; }
-.fin-chip-i { display: inline-flex; align-items: center; }
-.fin-amt { font-weight: 600; font-size: 13px; white-space: nowrap; color: var(--text); }
+/* --- 4. Yozuvlar --- */
+.fin-search { position: relative; }
+.fin-search .inp { min-height: 46px; padding-left: 42px; border-color: transparent; background: var(--card2); -webkit-appearance: none; appearance: none; }
+.fin-search .inp:focus { border-color: var(--ctl); }
+.fin-search-ic { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); display: inline-flex; color: var(--text3); pointer-events: none; }
+.fin-day { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; padding: 16px 0 8px; border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 600; color: var(--text2); }
+.fin-day .num { font-weight: 500; color: var(--text3); white-space: nowrap; }
+.fin-tx { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 60px; padding: 10px 0; border: 0; background: transparent; color: var(--text); font: inherit; text-align: left; }
+.fin-tx-b { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.fin-tx-b b { font-size: 15px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fin-tx-b span { font-size: 13px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Moliyada rang — yo'nalish: kirim yashil «+», chiqim oddiy matn rangida «−». */
+.fin-amt { flex: none; font-size: 16px; font-weight: 600; letter-spacing: -.02em; white-space: nowrap; color: var(--text); }
 .fin-amt.in { color: var(--success-text); }
-.fin-amt.out { color: var(--text); }
-.li.tap .li-del { margin-left: -4px; }
+.fin-all { display: flex; align-items: center; justify-content: center; gap: 4px; width: 100%; min-height: 48px; margin-top: 6px; padding-top: 6px; border: 0; border-top: 1px solid var(--line);
+  background: transparent; color: var(--accent-text); font-size: 15px; font-weight: 600; }
+@media (hover: hover) { .fin-tx:hover, .fin-acc:hover { background: var(--hover); } }
 
-/* ---- accounts + recurring ---- */
-.fin-acc-ic { --c: var(--boshqa); width: 36px; height: 36px; flex: none; display: inline-flex; align-items: center; justify-content: center; border-radius: 11px; color: var(--c);
-  background: color-mix(in srgb, var(--c) 12%, transparent); border: 1px solid color-mix(in srgb, var(--c) 30%, transparent); }
-.fin-acc-body { cursor: pointer; border-radius: 8px; }
-.fin-bal { flex: none; border: 1px solid transparent; background: transparent; color: var(--text); font-weight: 600; font-size: 14px; padding: 8px 10px; min-height: 40px; border-radius: 10px; white-space: nowrap; transition: background .15s, border-color .15s; }
-@media (hover: hover) { .fin-bal:hover { background: var(--hover); border-color: var(--line2); } }
-.fin-bal.bad { color: var(--danger-text); }
-.fin-bal-edit { display: flex; flex-direction: column; gap: 6px; }
-.fin-bal-edit .inp { width: 100%; min-height: 40px; font-weight: 600; }
-.fin-bal-ok { color: var(--success-text); }
-.li .btn.icon, .li .li-del { min-width: 40px; min-height: 40px; }
+/* --- Hisoblar: jami qoldiq --- */
+.fin-d30 { flex: none; font-size: 12px; }
+.fin-leg-n .ellipsis { min-width: 0; }
+.fin-line { display: block; width: 100%; height: 72px; margin-top: 10px; color: var(--accent); overflow: visible; }
+.fin-line-p { fill: none; stroke: currentColor; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.fin-line-l { display: flex; justify-content: space-between; gap: 10px; margin-top: 4px; font-size: 11px; color: var(--text3); }
+.fin-nosnap { display: flex; align-items: center; justify-content: center; gap: 6px; min-height: 56px; margin-top: 6px; font-size: 12px; color: var(--text3); text-align: center; }
 
-.fin-sub { align-items: flex-start; flex-wrap: wrap; row-gap: 6px; }
-.fin-sub .li-body { flex: 1 1 200px; cursor: pointer; border-radius: 8px; }
-.fin-sub.due { box-shadow: inset 3px 0 0 0 var(--danger-text); background: color-mix(in srgb, var(--danger) 6%, transparent); }
-.fin-side { display: flex; align-items: center; gap: 6px; flex: none; margin-left: auto; }
-.fin-side .btn.sm { min-height: 40px; }
+/* --- Hisoblar ro'yxati: qator bosilsa qoldiq shu yerda tahrirlanadi --- */
+.fin-al li + li, .fin-sub + .fin-sub { border-top: 1px solid var(--line); }
+.fin-acc { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 62px; padding: 10px 0; border: 0; background: transparent; color: var(--text); font: inherit; text-align: left; }
+/* Ikonka foni — halqadagi bo'lak rangi; qoldig'i musbat bo'lmagan hisobda kulrang. */
+.ico.fin-acc-ic { --c: #fff; --cb: var(--text3); }
+.fin-acc-b, .fin-sub-b { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.fin-acc-b b, .fin-sub-b b, .fin-acc-edb b { font-size: 15px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fin-acc-b span, .fin-sub-b span { font-size: 13px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fin-acc-r, .fin-sub-r { flex: none; display: grid; gap: 2px; justify-items: end; }
+.fin-acc-r b, .fin-sub-r b { font-size: 15px; font-weight: 600; letter-spacing: -.02em; color: var(--text); white-space: nowrap; }
+.fin-acc-r b.bad { color: var(--danger-text); }
+.fin-acc-r span { font-size: 13px; color: var(--text3); }
+.fin-acc-ed { display: flex; align-items: flex-start; gap: 10px; padding: 12px 0 4px; }
+.fin-acc-ed > .ico { margin-top: 2px; }
+.fin-acc-edb { flex: 1; min-width: 0; display: grid; gap: 8px; }
+.fin-acc-edb .inp { font-weight: 600; }
+.fin-acc-eda { display: flex; flex-wrap: wrap; gap: 0 18px; }
+.fin-ib { width: 44px; height: 44px; flex: none; margin-top: 30px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: var(--card2); color: var(--text2); }
+.fin-ib.ok { background: var(--success-soft); color: var(--success-text); }
+.fin-plus { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 48px; margin-top: 4px; padding-top: 4px; border: 0; border-top: 1px solid var(--line);
+  background: transparent; color: var(--text); font-size: 14px; font-weight: 600; }
+
+/* --- Doimiy to'lovlar --- */
+.fin-sub { padding: 14px 0 12px; }
+.fin-sub:last-child { padding-bottom: 6px; }
+.fin-sub-top { display: flex; align-items: flex-start; gap: 12px; cursor: pointer; border-radius: 12px; }
+.fin-sub-r .pill { font-size: 12px; padding: 3px 9px; }
+.fin-sub-bot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; padding-left: 48px; }
+/* Kalit va yozuvi — bitta tugma: bosiladigan joy 44px, kalitning o'zi kichik. */
+.fin-auto { display: inline-flex; align-items: center; gap: 10px; min-width: 0; min-height: 44px; padding: 0; border: 0; background: transparent; color: var(--text2); font-size: 14px; font-weight: 500; }
+.fin-auto .toggle { display: block; }
+.fin-auto span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn.fin-pay { flex: none; min-height: 44px; padding: 0 18px; font-size: 14px; font-weight: 600; }
+.fin-paid { flex: none; display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: var(--r-pill); background: var(--success-soft); color: var(--success-text); font-size: 14px; font-weight: 600; }
+/* to'lov tahriri oynasidagi «Avto-yechish» belgisi */
 .fin-check { gap: 10px; cursor: pointer; color: var(--text); font-size: 14px; padding: 6px 0; user-select: none; }
 
-/* Chiqim qizil, Kirim yashil — pulning yo'nalishi rangdan ko'rinsin, yozuvni
-   o'qimasdan ham. Fon to'q emas, yumshoq: to'q qizil ustidagi oq yozuv ikkala
-   mavzuda ham yomon o'qilardi, rangli yozuv esa har doim aniq turadi. */
-#finTypeSeg button[data-type="out"] { color: var(--danger-text); }
-#finTypeSeg button[data-type="in"] { color: var(--success-text); }
-#view #finTypeSeg button[data-type="out"].on { background: color-mix(in srgb, var(--danger) 22%, transparent); color: var(--danger-text); }
-#view #finTypeSeg button[data-type="in"].on { background: color-mix(in srgb, var(--success) 22%, transparent); color: var(--success-text); }
+/* --- Oy tanlash (pastki oyna) --- */
+.fin-ms-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.fin-ms-b { width: 48px; height: 48px; flex: none; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: var(--card2); color: var(--text); }
+.fin-ms-l { flex: 1; min-width: 0; text-align: center; font-size: 18px; font-weight: 600; letter-spacing: -.02em; color: var(--text); }
+.fin-ms-q { margin: 16px 0 6px; }
+.fin-ms .btn.main { margin-top: 10px; }

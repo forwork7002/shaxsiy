@@ -1,4 +1,4 @@
-/* Asosiy: 2×2 plitka. Ishga tushirish: node tests/test_today_tiles.js */
+/* Asosiy: bosh karta, odat va vazifani belgilash. Ishga tushirish: node tests/test_today_tiles.js */
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..');
 global.window = global; global.self = global;
@@ -43,40 +43,94 @@ function ok(name, cond, extra) { n++; if (cond) { console.log('  ok   ' + name);
 const count = (s, re) => (s.match(re) || []).length;
 const render = () => D.views.today.render();
 
-console.log('\n1. WHOOP ulangan — to\'rtta plitka');
+console.log('\n1. WHOOP ulangan — bosh karta, uyqu, zo\'riqish');
 D.S.whoop.connected = true;
+D.whoop.day = () => ({ recovery: 72, stages: { deep: 5520000, rem: 6480000, light: 13860000, awake: 840000 }, bedTs: '2026-09-14T18:40:00.000Z', wakeTs: '2026-09-15T02:05:00.000Z' });
+D.whoop.workoutsOn = () => [{ mins: 52 }];
+D.S.habits = [{ id: 'h1', name: 'Kitob', sphere: 'aql', active: true, schedule: { type: 'daily' }, order: 0 },
+  { id: 'h2', name: 'Zikr', sphere: 'ruh', active: true, schedule: { type: 'daily' }, target: { n: 99, unit: 'marta' }, order: 1 },
+  { id: 'h3', name: 'Bomdod', sphere: 'ruh', active: true, schedule: { type: 'daily' }, order: 2 }];
+D.prayer = { matchName: (n) => (n === 'Bomdod' ? 'bomdod' : null) };
+D.S.tasks = [{ id: 't1', text: 'Hisobot', date: TODAY, done: false, priority: 3 }, { id: 't2', text: 'Eski ish', date: '2020-01-01', done: false, priority: 2 }];
+D.S.goals = [{ id: 'g1', text: 'Maqsad', dir: 'shaxsiy', priority: 1, year: +TODAY.slice(0, 4), done: false }];
 let h = render();
-ok('to\'rtta .tile', count(h, /class="card tile/g) === 4, count(h, /class="card tile/g));
-ok('Tiklanish → Tana/ready', /data-view="health" data-sub="ready"/.test(h));
-ok('Uyqu → Tana/sleep', /data-sub="sleep"/.test(h));
-ok('Zo\'riqish → Tana/strain', /data-sub="strain"/.test(h));
-ok('Ovqat → Tana/ovqat', /data-sub="ovqat"/.test(h));
-ok('tiklanish raqami 72 %', /72<small>%<\/small>/.test(h));
-ok('holat so\'zi oddiy registrda («Yuqori»)', /tile-state good">Yuqori</.test(h));
-ok('uyqu «7s 30d»', /7<small>s<\/small> 30<small>d<\/small>/.test(h));
+ok('bosh karta yashil', /hero--yashil/.test(h));
+ok('uch halqa', count(h, /class="td-rg-f"/g) === 3, count(h, /class="td-rg-f"/g));
+ok('o\'rtada 72 %', /<b class="num">72<small>%<\/small><\/b>/.test(h));
+ok('bosh karta → Tana/ready', /data-view="health" data-sub="ready"/.test(h));
+ok('Uyqu kartasi → Tana/sleep', /td-sleep" data-act="go" data-view="health" data-sub="sleep"/.test(h));
+ok('Zo\'riqish kartasi → Tana/strain', /td-strain" data-act="go" data-view="health" data-sub="strain"/.test(h));
 ok('zo\'riqish 12,4', /12,4/.test(h));
-ok('ovqat 640 kkal, me\'yor 2 877', /640<small>kkal<\/small>/.test(h) && /2[\s\u00A0\u202F]877/.test(h), (h.match(/data-sub="ovqat"[^>]*>[\s\S]{0,260}/) || [''])[0]);
-ok('yoy faqat tiklanishda', count(h, /tile-arc/g) === 1);
-ok('eski hero yo\'q', !/td-rings|td-ready|td-strip2/.test(h));
-ok('katta harfli holat yo\'q', !/TAYYOR|DAM OL/.test(h));
+ok('uyqu bosqichlari to\'rtta', count(h, /class="dot" style="--c:#/g) === 4, count(h, /class="dot" style="--c:#/g));
+ok('yotish/turish vaqti ISO satrdan o\'qiladi (23:40 · 07:05)', /23:40 da yotdingiz · 07:05 da turdingiz/.test(h), (h.match(/td-foot[^<]*<\/p>|td-foot num">[^<]*/) || [''])[0]);
+ok('yetti kunlik ustunlar', count(h, /class="td-w7c/g) === 7, count(h, /class="td-w7c/g));
+ok('ustun kunni ochadi (tdPickDay)', count(h, /data-act="tdPickDay"/g) === 7);
+ok('eski plitka va hafta chizig\'i yo\'q', !/class="card tile|td-week|td-wd |td-pr-rows/.test(h));
+ok('Ovqat plitkasi yo\'q (Tanada bor)', !/data-sub="ovqat"/.test(h));
 
-console.log('\n2. Soat ulanmagan — Kun + Ovqat');
+console.log('\n2. Odat va vazifa shu sahifada belgilanadi');
+ok('odat katagi: namoz nomli odat chiqarilgan', count(h, /data-act="tdHabit"/g) === 2, count(h, /data-act="tdHabit"/g));
+ok('«Yangi odat» katagi', /data-act="tdHabitNew"/.test(h));
+ok('vazifa katagi: bugungi + kechikkan', count(h, /data-act="tdTask"/g) === 2, count(h, /data-act="tdTask"/g));
+ok('kechikkan vazifa «vaqti o\'tdi»', /td-tag late/.test(h));
+ok('muhim vazifa «Muhim»', /td-tag imp/.test(h));
+D.act.tdHabit({ dataset: { id: 'h1', kind: 'h' } });
+ok('oddiy odat bosilsa S.logs ga yoziladi', (D.S.logs[TODAY] || []).includes('h1'));
+D.act.tdHabit({ dataset: { id: 'h1', kind: 'h' } });
+ok('yana bosilsa belgi olinadi va bo\'sh kun kaliti o\'chadi', !D.S.logs[TODAY]);
+D.act.tdHabit({ dataset: { id: 'h2', kind: 'h' } });
+ok('tasbeh odati bir bosishda 33', (D.S.counts[TODAY] || {}).h2 === 33, D.S.counts[TODAY]);
+D.act.tdHabit({ dataset: { id: 'h2', kind: 'h' } }); D.act.tdHabit({ dataset: { id: 'h2', kind: 'h' } });
+ok('me\'yorga yetganda bajarilgan (S.logs)', (D.S.counts[TODAY] || {}).h2 === 99 && (D.S.logs[TODAY] || []).includes('h2'));
+h = render();
+ok('bajarilgan odat yashil belgi bilan', /td-hb done/.test(h) && /td-hb-ok/.test(h));
+let asked = '';
+D.loadView = (v) => { asked = v; return { then: (f) => f() }; };
+let toggled = null; D.act.tkToggle = (el) => { toggled = el.dataset.id; };
+D.act.tdTask({ dataset: { id: 't1' } });
+D.act.tdTask({ dataset: { id: 't1' } });   // modul yuklanayotganda ikkinchi bosish — e'tiborga olinmasligi kerak
+let toggles = 0; const tk0 = D.act.tkToggle; D.act.tkToggle = (el) => { toggles++; tk0(el); };
+const lateChecks = () => {
+  ok('vazifa Vazifa bo\'limining o\'z amali bilan belgilanadi', asked === 'tasks' && toggled === 't1', { asked, toggled });
+  ok('yuklanish paytidagi ikkinchi bosish takrorlanmaydi', toggles === 1, toggles);
+};
+ok('maqsad kartasi → Vazifa/goals', /td-gl[^>]*data-view="tasks" data-sub="goals"/.test(h));
+ok('Kun yakuni qatori', /data-act="tdWrap"/.test(h));
+
+console.log('\n2b. Tiklanish hali kelmagan kun — uyqu va zo\'riqish baribir ko\'rinadi');
+{ const di = D.whoop.dayInsight;
+  D.whoop.dayInsight = () => ({ recovery: null, sleepH: 6.5, needH: 8, gapH: -1.5, metPct: 81, perf: 80, strain: 5.2, kcal: 1800, hrv: null, rhr: null, resp: null });
+  const hh = render();
+  ok('bosh karta chiziladi, o\'rtada «—»', /td-rings-c wait"><b class="num">—<\/b>/.test(hh), (hh.match(/td-rings-c[^<]*<b[^<]*<\/b>/) || [''])[0]);
+  ok('tushuntirish qutisi bor', /hali hisoblanmagan/i.test(hh));
+  ok('uyqu va zo\'riqish kartalari bor', /td-sleep/.test(hh) && /td-strain/.test(hh));
+  ok('NaN / undefined yo\'q', !/NaN|undefined/.test(hh));
+  ok('«ma\'lumot yo\'q» kartasi chiqmaydi', !/td-nowh/.test(hh));
+  D.whoop.dayInsight = () => ({ recovery: null, sleepH: null, strain: null });
+  ok('umuman ma\'lumot bo\'lmasa — bitta karta', /td-nowh/.test(render()));
+  D.whoop.dayInsight = di; }
+
+console.log('\n3. Soat ulanmagan — bitta karta');
 D.S.whoop.connected = false;
 h = render();
-ok('ikkita .tile', count(h, /class="card tile/g) === 2, count(h, /class="card tile/g));
-ok('soat plitkasi id=tdKun', /id="tdKun"/.test(h));
-ok('soat plitkasida vaqt bor (HH:MM)', /\d{1,2}:\d{2}<\/span>/.test(h));
+ok('«WHOOP ulanmagan» kartasi', /td-nowh/.test(h) && /WHOOP ulanmagan/.test(h));
+ok('halqa yo\'q', !/td-rings/.test(h));
+ok('odatlar baribir bor', /td-habits/.test(h));
 
-console.log('\n3. O\'tgan kun — faqat Ovqat');
+console.log('\n4. O\'tgan kun');
+D.S.whoop.connected = true;
 D.ui.viewDate = '2026-09-10';
 h = render();
-ok('bitta .tile', count(h, /class="card tile/g) === 1, count(h, /class="card tile/g));
+ok('daraja kartasi yo\'q', !/td-lv"/.test(h));
+ok('«Yangi odat» katagi yo\'q', !/tdHabitNew/.test(h));
 D.ui.viewDate = null;
 
-console.log('\n4. Hafta chizig\'i');
-h = render();
-ok('tanlangan kun .on', /td-wd on/.test(h));
-ok('chiziqcha (.td-wd-b) yo\'q', !/td-wd-b/.test(h));
+console.log('\n5. Uch til');
+ok('yangi kalitlar uchala tilda', ['uz', 'uzk', 'ru'].every((l) => { D.S.settings.lang = l; return ['today.now', 'today.hb.sub', 'today.tk.title', 'today.gl.left', 'today.strain.note', 'today.explain', 'today.hi.day'].every((k) => D.t(k) !== k); }));
+D.S.settings.lang = 'uz';
 
+setTimeout(() => {
+lateChecks();
 console.log(`\n${fail ? 'YIQILDI' : 'O\'TDI'}: ${n - fail}/${n}`);
 process.exit(fail ? 1 : 0);
+}, 20);

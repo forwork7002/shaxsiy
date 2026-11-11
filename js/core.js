@@ -893,7 +893,7 @@
       const dark = t === 'dark' || (t === 'auto' && !(window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches));
       document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
       const meta = D.$('meta[name=theme-color]');
-      if (meta) meta.content = dark ? '#050506' : '#faf7f2';
+      if (meta) meta.content = dark ? '#0B0C10' : '#F2F3F5';
       if (D.tg && D.tg.setHeaderColor) { try { D.tg.setHeaderColor(dark ? '#0a0a0b' : '#faf7f2'); D.tg.setBackgroundColor(dark ? '#050506' : '#faf7f2'); } catch (e) {} }
     },
     set(t) { D.S.settings.theme = t; D.save(); D.theme.apply(); D.rerender(); },
@@ -1262,6 +1262,23 @@
     fire: '<path fill="currentColor" stroke="none" d="M12 2c1 4-3 5-3 9a3 3 0 0 0 6 0c0-1-.5-2-.5-2 2 1 3.5 3 3.5 5.5A6 6 0 0 1 6 14.5C6 9 12 6 12 2Z"/>',
     eye: '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
+    sunrise: '<path d="M12 3v6M8.5 6.5 12 3l3.5 3.5M4 18h16M6.5 14a5.5 5.5 0 0 1 11 0M2.5 14h1.5M20 14h1.5M3 21h18"/>',
+    sunset: '<path d="M12 9V3M8.5 5.5 12 9l3.5-3.5M4 18h16M6.5 14a5.5 5.5 0 0 1 11 0M2.5 14h1.5M20 14h1.5M3 21h18"/>',
+    pin: '<path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+    home: '<path d="M4 10.5 12 4l8 6.5V19a1.5 1.5 0 0 1-1.5 1.5h-4V15h-5v5.5h-4A1.5 1.5 0 0 1 4 19z"/>',
+    coffee: '<path d="M5 9h11v5a5 5 0 0 1-5 5h-1a5 5 0 0 1-5-5zM16 10h1.5a2.5 2.5 0 0 1 0 5H16M8 3v2.5M12 3v2.5"/>',
+    car: '<path d="M5 11l1.6-4.2A2 2 0 0 1 8.5 5.5h7a2 2 0 0 1 1.9 1.3L19 11M4 11h16a1 1 0 0 1 1 1v4.5H3V12a1 1 0 0 1 1-1zM6 16.5V18M18 16.5V18M7 14h.01M17 14h.01"/>',
+    basket: '<path d="M4 9h16l-1.4 9.2a2 2 0 0 1-2 1.8H7.4a2 2 0 0 1-2-1.8zM8.5 9l2-5M15.5 9l-2-5M9.5 13v3M14.5 13v3"/>',
+    bank: '<path d="M3 9.5 12 4l9 5.5M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',
+    card: '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18M7 15h3"/>',
+    cash: '<rect x="3" y="6.5" width="18" height="11" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6.5 10v4M17.5 10v4"/>',
+    phone: '<rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 17.5h2"/>',
+    wifi: '<path d="M3.5 9.5a12.5 12.5 0 0 1 17 0M6.5 13a8 8 0 0 1 11 0M9.5 16.3a3.6 3.6 0 0 1 5 0M12 19.5h.01"/>',
+    play: '<rect x="3" y="5.5" width="18" height="13" rx="3"/><path d="m10.5 9.5 4 2.5-4 2.5z"/>',
+    arrowR: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    walk: '<circle cx="12.5" cy="4.5" r="1.8"/><path d="M12.5 8.5 10 13l3 2.5 1 5M10.5 9.5 8 11l-1 3M13.5 10.5 16 13l2 .5M10.5 15.5 9 21"/>',
+    sliders: '<path d="M6 4v6M6 14v6M12 4v2M12 10v10M18 4v9M18 17v3M3.5 12h5M9.5 8h5M15.5 15h5"/>',
+    more: '<circle cx="5.5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="18.5" cy="12" r="1.2"/>',
     minus: '<path d="M5 12h14"/>',
     x: '<path d="M18 6 6 18M6 6l12 12"/>',
     chevL: '<path d="M15 18l-6-6 6-6"/>',
@@ -1729,16 +1746,13 @@
   /* Pastki panelda beshta joy va hammasi haqiqiy bo'lim: o'rtadagisi ham */
   /* tugma emas, yorliq. Qaysi beshtasi ekani shu ro'yxatda turadi —      */
   /* view.primary emas, chunki tartib ham, soni ham qat'iy.              */
-  /* O'rtasi — TABS[2], kapsuladan tashqaridagi ko'k doira (#fab).        */
-  /* joyga qo'yiladi: bosh barmoq ekranning markaziga eng oson yetadi.    */
+  /* 2026-10-09: beshalasi ham kapsulada; o'ngdagi alohida doira (#fab)   */
+  /* endi bo'lim emas, «+» — qo'shish tugmasi (D.act.fab).                */
   /* ------------------------------------------------------------------ */
   /* Yorliqqa kirmagan bo'limlar yo'qolgani yo'q, boshqa eshikdan kiriladi:
      Sozlash — tepa o'ngdagi profil surati (uning birinchi kartasi profil),
      Odat va Kitob — Vazifa ichidagi sahifalar, Yusa AI — suzuvchi to'garak. */
   const TABS = ['today', 'prayer', 'health', 'finance', 'tasks'];
-  /* O'rtadagi ko'tarilgan joyning indeksi. Bitta son — panelning chizilishi
-     ham, CSS dagi doira ham shundan kelib chiqadi. */
-  const MID = 2;
   /* Yorliq belgisi — chiziqli ikonka, bo'limning o'z `icon` maydonidan
      (D.view() da beriladi). Yon panel allaqachon shuni chizardi, ya'ni endi
      ikkala panel bitta belgini ko'rsatadi.
@@ -1784,15 +1798,43 @@
        Bo'lim boshqaruvi (sana strelkalari) bu yerdan olib tashlandi: kun
        tanlash har bo'limning o'z sahifasida — Asosiyda kun chizig'i,
        Ovqatda 7 kunlik chizma, Ibodatda sahifaning o'z strelkalari. */
+    /* O'ng burchak: sukutda profil surati. Bo'lim o'z pillini bersa
+       (view.topRight — Ibodatda shahar, Tanada WHOOP, Moliyada oy), o'sha
+       turadi; profil esa Asosiy sahifadagi suratdan ochiladi. */
+    let right = '';
+    try { right = v.topRight ? v.topRight() : ''; } catch (e) { right = ''; }
+    if (!right) right = `<button class="top-btn top-avatar" data-act="openProfile" aria-label="${D.esc(D.t('nav.settings'))}">${avatarMini()}</button>`;
     el.innerHTML = `<div class="top-row">${left}
         <div class="top-txt"><h1 class="top-title">${D.esc(title)}</h1>${sub ? `<p class="top-sub">${sub}</p>` : ''}</div>
-        <button class="top-btn top-avatar" data-act="openProfile" aria-label="${D.esc(D.t('nav.settings'))}">${avatarMini()}</button></div>`;
+        ${right}</div>`;
   };
   // Profil surati hali kelmagan bo'lsa ham bir narsa turishi kerak — bosh harf.
   function avatarMini() {
     try { if (D.profile && D.profile.avatarHtml) return D.profile.avatarHtml(38, 'pf-av'); } catch (e) {}
     return '<i class="top-av"></i>';
   }
+  /* «+» — tez qo'shish. Bo'lim o'z amalini bersa (view.fab), o'sha ishlaydi:
+     Moliyada yozish formasi darrov ochiladi. Aks holda — nima qo'shilishini
+     so'raydigan qisqa ro'yxat. Har qator MAVJUD formani ochadi, yangi yozish
+     yo'li yo'q: ma'lumot avvalgi funksiyalar orqali, avvalgi shaklda yoziladi. */
+  const FAB_ROWS = [['task', 'checkSq'], ['money', 'wallet'], ['food', 'apple'], ['habit', 'fire']];
+  D.act.fab = () => {
+    const v = D.views[current];
+    if (v && typeof v.fab === 'function') { try { if (v.fab() !== false) return; } catch (e) { console.error(e); } }
+    D.sheet(`<div class="fab-menu">${FAB_ROWS.map(([k, ic]) =>
+      `<button class="fab-row" data-act="fabPick" data-k="${k}"><span class="ico">${D.ic(ic, 18)}</span><span>${D.esc(D.t('fab.' + k))}</span>${D.ic('chevR', 18)}</button>`).join('')}</div>`,
+      { title: D.t('fab.title') });
+  };
+  const focusSoon = (sel) => setTimeout(() => { const e = D.$(sel); if (e) { e.focus(); if (e.scrollIntoView) e.scrollIntoView({ block: 'center' }); } }, 350);
+  D.act.fabPick = (el) => {
+    const k = el.dataset.k;
+    D.closeSheet();
+    const viaHabits = (act) => D.loadView('habits').then(() => { if (D.act[act]) D.act[act](); });
+    if (k === 'task') viaHabits('hbAddTask');
+    else if (k === 'habit') viaHabits('hbAddHabit');
+    else if (k === 'money') D.loadView('finance').then(() => { D.go('finance', 'month'); focusSoon('#finAmount'); });   // yozish kartasi faqat «Oy» da
+    else if (k === 'food') { D.ui.viewDate = null; D.saveUi(); D.go('health', 'ovqat'); focusSoon('#fdText'); }   // «+» har doim BUGUNGA yozadi
+  };
   D.act.openProfile = () => { if (D.profile && D.profile.open) D.profile.open(); else D.go('settings'); };
   /* Orqaga. Ilgari bu D.go chaqirardi, ya'ni tarixga OLDINGA yozuv qo'shardi:
      tugmani bosib qaytgan odam telefonning orqaga ishorasini bosganda yana
@@ -1843,17 +1885,15 @@
         <span class="nav-ic"><span class="nav-em">${D.ic(v.icon || 'grid', 22)}</span>${b ? `<i class="nav-badge num">${D.fmtNum(b)}</i>` : ''}</span>
         <span class="nav-lab">${lab}</span></button>`;
     };
-    /* Kapsulada TO'RTTA yorliq; o'rtadagisi (TABS[MID] — Tana) kapsuladan
-       chiqib, o'ngdagi alohida ko'k doiraga (#fab, index.html) tushadi.
-       TABS massivi o'zgarmaydi: D.act.back, badge va D.ui.from unga tayanadi. */
-    if (nav) nav.innerHTML = TABS.filter((id, i) => i !== MID).map(btn).join('');
+    /* Kapsulada BESHTA yorliq. #fab — «+»: bo'lim emas, tugma, shuning uchun
+       unda faol holat yo'q. Belgisi va yozuvi shu yerda qo'yiladi (til
+       almashsa aria-label ham almashsin). */
+    if (nav) nav.innerHTML = TABS.map(btn).join('');
     if (fab) {
-      const mid = TABS[MID], v = D.views[mid] || {};
-      fab.classList.toggle('on', current === mid);
-      fab.setAttribute('data-act', 'go');
-      fab.setAttribute('data-view', mid);
-      fab.setAttribute('aria-label', D.t('nav.' + mid));
-      fab.innerHTML = D.ic(v.icon || 'heart', 26);
+      fab.setAttribute('data-act', 'fab');
+      fab.removeAttribute('data-view');
+      fab.setAttribute('aria-label', D.t('fab.add'));
+      fab.innerHTML = D.ic('plus', 26);
     }
     // Katta ekranda yon panel qoladi va u yerda hamma bo'lim ko'rinadi —
     // u yerda joy siqilmaydi, yashirishning ma'nosi yo'q.

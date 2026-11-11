@@ -1,13 +1,15 @@
 /* =====================================================================
-   Dash — Соғлиқ (health).
+   Dash — Tana (health): bo'limning qobig'i.
+   «Yorug' qog'oz», 2026-10-09 — egasi tasdiqlagan dizayn hujjati, 6-bo'lim.
 
-   Uchta bo'limcha, qo'lda kiritish yo'q: Tayyorlik · Uyqu · Zo'riqish.
+   To'rt bo'limcha, qo'lda kiritish yo'q: Ovqat · Tayyorlik · Uyqu · Zo'riqish.
    Har bir raqam WHOOP'dan keladi va yaxlitlanmaydi — vaqt soat+daqiqada,
    qolgan o'lchovlar WHOOP bergan aniqlikda.
 
-   Bu modul o'zi hech narsa chizmaydi: sahifalarni `whoop.js` beradi
-   (hero · vitals · sleepPage · strainPage · trendCard · bodyCard · footer),
-   bu yerda faqat kun navigatsiyasi, bo'limchalar va WHOOP ulanish amallari.
+   Bu modul o'zi hech narsa chizmaydi: Ovqatni `food.js`, qolgan uchtasini
+   `whoop.js` beradi (bodyMap · hero · vitals · trendCard · bodyCard ·
+   sleepPage · strainPage · footer). Bu yerda faqat sarlavha (doim «Tana»,
+   o'ngda «WHOOP · HH:MM» pilli), bo'limchalar va WHOOP ulanish amallari.
 
    Class prefix: hl-
    ===================================================================== */
@@ -40,6 +42,8 @@
     'hl.wh.notConfigured': ['Serverda WHOOP kalitlari sozlanmagan', 'Серверда WHOOP калитлари созланмаган', 'На сервере не настроены ключи WHOOP'],
     'hl.wh.disconnectQ': ["WHOOP ulanishini uzasizmi? Keshdagi ma'lumotlar o'chadi.", 'WHOOP уланишини узасизми? Кешдаги маълумотлар ўчади.', 'Отключить WHOOP? Кэшированные данные будут удалены.'],
     'hl.wh.disconnected': ['WHOOP uzildi', 'WHOOP узилди', 'WHOOP отключён'],
+    'hl.pill.aria': ['WHOOP, oxirgi yangilanish {t}. Hozir yangilash', 'WHOOP, охирги янгиланиш {t}. Ҳозир янгилаш', 'WHOOP, последнее обновление {t}. Обновить сейчас'],
+    'hl.pill.never': ['hali yo‘q', 'ҳали йўқ', 'ещё нет'],
   };
   const TABLES = { uz: {}, uzk: {}, ru: {} };
   for (const k of Object.keys(T)) { TABLES.uz[k] = T[k][0]; TABLES.uzk[k] = T[k][1]; TABLES.ru[k] = T[k][2]; }
@@ -58,16 +62,20 @@
   /* ------------------------------------------------------------------ */
   /* render                                                              */
   /* ------------------------------------------------------------------ */
-  // Tayyorlik: kun holati (hero) → aniq o'lchovlar jadvali → tendensiya → tana.
-  // Tendensiya, tana va yosh o'sha kunga emas, bugungi holatga tegishli — sana
-  // chizig'i o'tgan kunda turganda ularni ko'rsatish yolg'on bo'lardi, shuning
-  // uchun ular faqat bugun ko'rinadi.
+  // Har bo'lak o'z qobig'ida: bittasi yiqilsa sahifaning qolgani chiziladi.
+  const safe = (fn) => { try { return fn() || ''; } catch (e) { console.error('health', e); D.logError(e); return `<div class="card flat"><div class="small muted">${esc(D.t('error.view'))}</div></div>`; } };
+
+  // Tayyorlik: tana xaritasi → tiklanish halqasi → aniq o'lchovlar jadvali →
+  // tendensiya → tana. Tendensiya va tana o'sha kunga emas, bugungi holatga
+  // tegishli — o'tgan kun ochilganda ularni ko'rsatish yolg'on bo'lardi,
+  // shuning uchun ular faqat bugun ko'rinadi.
   function renderReady(k) {
     const today = k === D.today();
-    return D.whoop.hero(k) + D.whoop.vitals(k) + (today ? D.whoop.trendCard() + D.whoop.bodyCard() : '');
+    return safe(() => D.whoop.bodyMap(k)) + safe(() => D.whoop.hero(k)) + safe(() => D.whoop.vitals(k))
+      + (today ? safe(() => D.whoop.trendCard()) + safe(() => D.whoop.bodyCard()) : '');
   }
-  function renderSleep(k) { return D.whoop.sleepPage(k); }
-  function renderStrain(k) { return D.whoop.strainPage(k); }
+  function renderSleep(k) { return safe(() => D.whoop.sleepPage(k)); }
+  function renderStrain(k) { return safe(() => D.whoop.strainPage(k)); }
 
   const renderOvqat = (k) => (D.food && D.food.page ? D.food.page(k) : '');
   const PAGES = { ovqat: renderOvqat, ready: renderReady, sleep: renderSleep, strain: renderStrain };
@@ -88,14 +96,14 @@
 
   function render() {
     const sub = curSub();
-    // Soat ulanmagan: faqat Ovqat yorlig'i ko'rsatiladi, qolgan uchtasi bir xil
-    // bo'sh sahifaga olib borardi. Nima bo'layotganini footer'dagi ulanish kartasi aytadi.
-    const tabs = whoopOn() ? SUBS : ['ovqat'];
-    const seg = tabs.length > 1
-      ? `<div class="seg hl-seg">${tabs.map((s) => `<button class="${sub === s ? 'on' : ''}" data-act="sub" data-view="health" data-sub="${s}">${esc(D.t('hl.sub.' + s))}</button>`).join('')}</div>`
+    // Soat ulanmagan: faqat Ovqat ko'rsatiladi (yorliqlarsiz) — qolgan uchtasi bir
+    // xil bo'sh sahifaga olib borardi. Nima bo'layotganini oxiridagi ulash kartasi aytadi.
+    const on = whoopOn();
+    const seg = on
+      ? `<div class="seg four hl-seg" role="tablist">${SUBS.map((s) => `<button class="${sub === s ? 'on' : ''}" data-act="sub" data-view="health" data-sub="${s}" role="tab" aria-selected="${sub === s ? 'true' : 'false'}">${esc(D.t('hl.sub.' + s))}</button>`).join('')}</div>`
       : '';
     const k = viewKey();
-    return `<div class="hl">${seg}${PAGES[sub](k)}${whoopOn() ? D.whoop.footer() : D.whoop.bodyCard() + D.whoop.footer()}</div>`;
+    return `<div class="hl">${seg}${PAGES[sub](k)}${on ? '' : safe(() => D.whoop.bodyCard())}${safe(() => D.whoop.footer())}</div>`;
   }
 
   D.act.hlDateToday = () => { D.ui.viewDate = null; D.saveUi(); D.rerender(); };
@@ -150,17 +158,27 @@
   /* ------------------------------------------------------------------ */
   /* view                                                                */
   /* ------------------------------------------------------------------ */
-  /* Sarlavha ochiq sahifaga ergashadi: birinchi sahifada bo'limning o'z nomi
-     («Ovqat»), qolganida o'sha sahifaning nomi («Uyqu», «Zo'riqish»). Ilgari
-     sarlavha doim bo'lim nomi, izoh qatori esa sahifa nomi edi — ochilishida
-     «Ovqat» ustida «Ovqat · Bugun» deb takrorlanardi. Endi izohda faqat sana. */
+  /* Sarlavha doim bo'lim nomi — «Tana»; qaysi sahifa ochiqligini ostidagi
+     yorliqlar ko'rsatadi. Ustida sana (o'tgan kunda — «Bugun» havolasi bilan).
+     O'ngda profil surati o'rnida «WHOOP · 07:12» pilli: oxirgi sinx vaqti,
+     bosilsa hozir yangilaydi. Soat ulanmagan bo'lsa pill yo'q (profil surati qoladi). */
+  function syncTime() {
+    const ts = +(D.S.whoop && (D.S.whoop.lastSync || D.S.whoop.fetchedAt)) || 0;
+    if (!ts) return '';
+    const p = D.nowTz(new Date(ts));
+    return D.fmtTime(p.h, p.min);
+  }
   D.view({
     id: 'health', icon: 'heart', order: 20, nav: true, primary: true,
-    title() { const s = curSub(); return s === 'ovqat' ? D.t('nav.health') : D.t('hl.sub.' + s); },
+    title() { return D.t('nav.health'); },
     subtitle() {
-      const k = viewKey(), ago = D.daysBetween(k, D.today());
-      const day = ago === 0 ? D.t('common.today') : ago === 1 ? D.t('common.yesterday') : D.fmtDate(k, 'weekday');
-      return esc(day) + (ago ? ` · <button class="top-link" data-act="hlDateToday">${esc(D.t('btn.today'))}</button>` : '');
+      const k = viewKey();
+      return esc(D.fmtDate(k, 'weekday')) + (k === D.today() ? '' : ` · <button class="top-link" data-act="hlDateToday">${esc(D.t('btn.today'))}</button>`);
+    },
+    topRight() {
+      if (!whoopOn()) return '';
+      const tm = syncTime();
+      return `<button class="head-pill hl-pill" data-act="hlWhoopRefresh" aria-label="${esc(D.t('hl.pill.aria', { t: tm || D.t('hl.pill.never') }))}"><i class="dot"></i><span class="num">WHOOP${tm ? ' · ' + esc(tm) : ''}</span></button>`;
     },
     render,
   });

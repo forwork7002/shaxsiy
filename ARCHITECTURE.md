@@ -9,7 +9,7 @@ app/
   js/core.js        store, dates, i18n runtime, router, UI kit, icons, charts, undo, sync, migration
   js/i18n.js        string tables: uz (Latin), uzk (Cyrillic), ru
   js/prayer.js      prayer-time engine + hijri calendar (pure functions, no DOM)
-  js/today.js       Бугун: kunlik tahlil (WHOOP tayyorlik hero + uyqu/zo'riqish/HRV, kun chizig'i, namoz, xulosa plitkalari, odat+vazifa fokus ro'yxati, WHOOP mashg'ulotlari, AI, kun yakuni)
+  js/today.js       Asosiy: Bugungi holat (uch halqali bosh karta, HRV/puls/nafas, so'nggi 7 kun) · Uyqu · Zo'riqish · Daraja · Odatlar (shu yerda belgilanadi) · Bugungi vazifalar (shu yerda belgilanadi) · Yil maqsadlari · Kun yakuni
   js/tasks.js       Вазифа + Мақсад
   js/health.js      Соғлиқ: WHOOP qobig'i — ready · sleep · strain (uchta bo'limcha, qo'lda kiritish yo'q)
   js/food.js        Овқат: food logger (photo/text → /api/food/analyze → per-day meals, targets, WHOOP burn)
@@ -50,7 +50,9 @@ Suv faqat Бугун sahifasida yuritiladi; vazn WHOOP `body.weight_kilogram` da
 Data safety: `defaultState` / `normalize` / `D.merge` keep the `gym`, `learn`, `caffeine`, `stack`, `reviews` keys so old blobs and the archive stay intact — nothing in the UI reads them
 (Tarix still shows archived stack/caffeine facts on a past day's sheet, read-only).
 
-Bottom bar = `TABS` in core.js — beshta yorliq: today · prayer · health · finance · tasks (o'rtadagisi `MID`, ko'rinishi boshqacha, bosilishi bir xil). Yon panel (≥960px) `nav !== false` bo'lgan hamma bo'limni ko'rsatadi.
+Bottom bar = `TABS` in core.js — beshta yorliq kapsulada: today · prayer · health («Tana») · finance · tasks; o'ngda alohida `#fab` — «+» (2026-10-09 gacha u Tana bo'limi edi). Yon panel (≥960px) `nav !== false` bo'lgan hamma bo'limni ko'rsatadi.
+
+**Dizayn (2026-10-09, «Yorug' qog'oz»).** Egasi tasdiqlagan hujjat: `docs/superpowers/specs/2026-10-09-yorug-qogoz-design.md`. Yorug' tema asosiy; boshqaruv rangi u yerda qora (`--ctl`), ko'k — faqat o'lchov. Qorong'i tema o'z tokenlarida. Uchta egasining qarori shu sana bilan: (1) Asosiyda odat va vazifa belgilanadi; (2) namoz Ibodat sahifasining o'zida belgilanadi (yozuv yo'li hamon `D.prayerLog.set`); (3) Moliyada oylik byudjet va summani yashirish qaytarilmaydi.
 
 ## Conventions (every module follows these)
 
@@ -363,7 +365,8 @@ Layout: `.page`, `.section`, `.section-title`, `.grid2`, `.grid3`, `.row`, `.sta
 Card: `.card`, `.card-head`, `.eyebrow`, `.kpi`, `.kpi-num`, `.kpi-total`, `.kpi-label`, `.card.all-done`
 Tiles: `.stat-grid`, `.stat`, `.stat-num`, `.stat-label`, `.zone.z-good|z-warn|z-bad`
 Plitka (2×2): `.tiles` > `button.card.tile` > `.tile-head` (`.tile-lab` + `.ic`) · `.tile-state(.good|.warn|.bad|.sleep|.dim)` · `.tile-glow` | `.tile-arc` · `.tile-big` > `small` (js/today.js `tile()`)
-Qobiq: `.nav` (4 yorliq) + `#fab` (Tana; core.js `renderNav` belgisini va `.on` holatini yangilaydi); holat so'zi `.c-state(.good|.warn|.bad|.sleep|.dim)`; belgi doirasi `.ico`
+Qobiq: `.nav` (5 yorliq) + `#fab` («+» — `D.act.fab`: bo'lim `fab()` bersa o'sha, aks holda tez qo'shish ro'yxati); sarlavha o'ngidagi pill — bo'limning `topRight()` i (`.head-pill`); holat so'zi `.c-state(.good|.warn|.bad|.sleep|.dim)`; belgi katagi `.ico(.good|.info|.sleep|.warn|.bad|.coral)` (36px, burchak 12)
+«Yorug' qog'oz» (2026-10-09): bosh karta `.card.hero.hero--yashil|namoz|uyqu|kok|ovqat|qazo|tana` + `.hero-pill` · `.card-sub` · maslahat `.advice(.warn|.bad|.info|.tint)` · kichik plitka `.ptiles(.two)` > `.ptile(.flat)` > `.ptile-l/.ptile-v/.ptile-n` · tanlanadigan chip `.chips` > `.chip[aria-pressed]` · `.btn.main`, `.btn.good` · kalit `.toggle(.sm)` 52×32 · `.bar(.thin|.md|.thick)`
 List: `.list`, `.li` (row), `.li.done`, `.chk` (custom checkbox `<input type=checkbox class=chk>`), `.li-text`, `.li-meta`, `.li-del`, `.empty`
 Chips: `.pill`, `.pill.on`, `.tag` (+ `style="--c:var(--ruh)"`), `.streak`
 Controls: `.seg` > `button.on`, `.inp`, `.sel`, `.ta`, `.btn` (primary), `.btn.ghost`, `.btn.danger`, `.btn.sm`, `.btn.icon`, `.dashed`, `.slider`, `.stepper`, `.emoji-row`
@@ -371,6 +374,7 @@ Progress: `.bar` > `.bar-fill`, `.segbar` > `.seg-on`, `.ring-wrap`
 Typography: `.num` (mono tabular), `.muted`, `.small`, `.title`
 Misc: `.hm` heatmap, `.spark`, `.tabs` (sub-nav pills, horizontally scrollable)
 
+Tokens (2026-10-09 qo'shilgani): `--ctl --on-ctl --ctl-text --seg-bg --seg-on --seg-on-text --f-line --success-soft --warning-soft --danger-soft --violet-soft --coral-soft --amber --amber-text --coral --coral-2 --coral-text --hero-* --sh-card --sh-hero* --r-hero --toast-bg --overlay`.
 Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --info --accent --accent-text --accent-soft --accent-glow --card-bg --card2 --track --glass --inset --line --line2 --focus --r --r-sm --r-lg --r-tile --nav-h --sh --ruh --aql --qalb --tana --boshqa --aralash --font --mono`. Ko'k (`--accent`) faqat to'ldirish; ko'k matn — `--accent-text`.
 
 ## Data model (`D.S`, persisted as localStorage `dash.v2` and server `/api/data`)

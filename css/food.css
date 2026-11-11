@@ -1,72 +1,112 @@
-/* ==== food (Ovqat) ==== prefix fd-, tokens only, 320 px ga sig'adi
-   Tartib: 7 kun halqalari → kaloriya kartasi → 3 makro kartasi → suv →
-   «Nima yedingiz?» → tahlil → taom kartalari → kunlik hisobot → 7 kunlik ustunlar */
+/* ==== food (Tana › Ovqat) ==== prefix fd-
+   «Yorug' qog'oz» (2026-10-09, dizayn hujjati 6.1 va A.9).
+   Tartib: Kaloriya (bosh karta) → Oqsil, uglevod, yog' (+ maslahat yoki AI
+   kun xulosasi) → Suv → «Nima yedingiz?» → tahlil → kunning ovqatlari →
+   kunlik hisobot → so'nggi 7 kun.
+   Makro ranglari hujjat bergan ma'lumot qatorlari (A.9): oqsil #3B7BFF,
+   uglevod #F08C2E, yog' #E9B321. Ular :root da, chunki taomning to'liq
+   ko'rinishi oynada (sahifadan tashqarida) ochiladi. Izoh matni uchun
+   alohida, fonga qarab o'qiladigan juftlari bor. */
+:root { --fd-p: #3B7BFF; --fd-c: #F08C2E; --fd-f: #E9B321; --fd-over: #E5484D;
+  --fd-p-t: #8FB4FF; --fd-c-t: #FFB35C; --fd-f-t: #F5C542; --fd-near: #F5C542; }
+[data-theme="light"] { --fd-p-t: #1F5AE0; --fd-c-t: #A65800; --fd-f-t: #8A6300; --fd-near: #8A6300; }
+
+.fd-fine { margin: 12px 0 0; font-size: 12px; line-height: 1.5; color: var(--text3); }
+.fd-side { flex: none; font-size: 14px; color: var(--text3); white-space: nowrap; }
+.fd-side b { font-weight: 700; color: var(--text); }
+.fd-link { border: 0; background: transparent; min-height: 44px; padding: 13px 2px; margin: -13px 0; color: var(--accent-text); font: inherit; font-weight: 600; cursor: pointer; }
 .fd-extra .sep, .fd-part .sep { color: var(--text3); margin: 0 5px; }
 
-/* me'yor oynasi: to'rtta alohida katak (.fd-ed-grid bilan bir xil) */
-.fd-tg-auto { margin-top: 10px; }
+/* ---- Kaloriya: bosh karta ----
+   Katta raqam — qolgani; oshgan bo'lsa ortiqchasi, qizil. Chiziq (14px)
+   yeyilgan kaloriyani makro ulushlariga bo'lib ko'rsatadi. Butun karta
+   me'yor oynasini ochadi. */
+.fd-hero { cursor: pointer; }
+.fd-hero:active { transform: scale(.995); }
+.fd-hero:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
+.fd-hero-big { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; margin-top: 2px; }
+.fd-hero-big b { font-size: 60px; font-weight: 600; letter-spacing: -.05em; line-height: 1; color: var(--text); }
+.fd-hero-big span { font-size: 16px; font-weight: 600; color: var(--text2); }
+.fd-hero.over .fd-hero-big b, .fd-hero.over .fd-hero-big span { color: var(--danger-text); }
+.fd-hero-sub { margin: 10px 0 0; font-size: 14px; color: var(--text2); }
+.fd-hero-sub b { font-weight: 700; color: var(--text); }
+.fd-stack { display: flex; gap: 2px; height: 14px; margin-top: 16px; border-radius: 7px; background: color-mix(in srgb, var(--text) 8%, transparent); overflow: hidden; }
+.fd-stack i { min-width: 3px; border-radius: 7px; }
+.fd-stack .p, .fd-leg .p { background: var(--fd-p); } .fd-stack .c, .fd-leg .c { background: var(--fd-c); } .fd-stack .f, .fd-leg .f { background: var(--fd-f); }
+.fd-stack .k { background: var(--line3); }
+.fd-leg { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 12px; font-size: 13px; color: var(--text2); }
+.fd-leg span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.fd-leg .dot { width: 10px; height: 10px; border-radius: 3px; }
+.fd-leg b { font-weight: 500; }
+@media (max-width: 372px) { .fd-hero-big b { font-size: 52px; } }
+@media (prefers-reduced-motion: reduce) { .fd-hero:active { transform: none; } }
 
-/* ---- 7 kun halqalari ----
-   Har kun — raqamli halqa: me'yorning qancha qismi yeyilgani yashil, oshgan
-   kun (kkal yoki biror makro) to'liq qizil, yozuvsiz kun bo'sh iz.
-   Tanlangan kun kulrang fonda. Kunni almashtirish shu yerda. */
-.fd-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 2px; margin: 0 0 12px; }
-.fd-dc { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; min-height: 0;
-  padding: 7px 0 8px; border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text3);
-  transition: background .15s; }
-.fd-dc-w { font-size: 11px; font-weight: 600; line-height: 1.1; white-space: nowrap; }
-.fd-dc-r { position: relative; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%;
-  transition: transform .12s var(--ease-spring); }
-.fd-dc-r svg { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
-.fd-dc-r circle { fill: none; stroke-width: 3.5; }
-.fd-dc-r .tr { stroke: var(--track); }
-.fd-dc-r .fl { stroke: var(--success); stroke-linecap: round; transition: stroke-dashoffset .5s var(--ease-out); }
-.fd-dc.over .fl { stroke: var(--danger); }
-.fd-dc-r b { position: relative; font-size: 14px; font-weight: 600; color: var(--text2); }
-.fd-dc.today .fd-dc-w { color: var(--accent-text); }
-.fd-dc.on { background: var(--card2); color: var(--text); }
-.fd-dc.on .fd-dc-r { background: var(--inset); }
-.fd-dc.on .fd-dc-r b { color: var(--text); }
-.fd-dc:active .fd-dc-r { transform: scale(.92); }
-.fd-dc:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
-@media (max-width: 360px){ .fd-dc-r { width: 36px; height: 36px; } .fd-dc-r b { font-size: 13px; } }
+/* ---- Oqsil, uglevod, yog': uch chiziq + maslahat ---- */
+.fd-m + .fd-m { margin-top: 16px; }
+.fd-m-h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 15px; }
+.fd-m-h > b { font-weight: 600; color: var(--text); }
+.fd-m-h span { color: var(--text3); white-space: nowrap; }
+.fd-m-h span b { font-weight: 700; color: var(--text); }
+.fd-m .bar { margin-top: 8px; }
+.fd-m p { margin: 6px 0 0; font-size: 12px; font-weight: 600; }
+.fd-m.p .bar-fill { background: var(--fd-p); } .fd-m.c .bar-fill { background: var(--fd-c); } .fd-m.f .bar-fill { background: var(--fd-f); }
+.fd-m.p p { color: var(--fd-p-t); } .fd-m.c p { color: var(--fd-c-t); } .fd-m.f p { color: var(--fd-f-t); }
+.fd-m.near p { color: var(--fd-near); }
+.fd-m.over .bar-fill { background: var(--fd-over); } .fd-m.over p { color: var(--danger-text); }
+.fd-adv { margin-top: 16px; }
+/* AI kun xulosasi o'sha maslahat qutisida: matn .ai-body (ai.css) uslubida,
+   faqat o'lchami qutiniki. Ostidagi tugma xulosani so'raydi / yangilaydi. */
+.fd-ai-b { font-size: 14px; line-height: 1.5; color: var(--text); overflow-wrap: anywhere; }
+.fd-ai-b li { color: var(--text); }
+.fd-ai-busy .fd-busy-row { padding: 0; }
+.fd-ai-err { margin-top: 10px; }
+.fd-mc .fd-ai-btn { margin-top: 12px; min-height: 44px; gap: 6px; }
+/* tola · shakar · tuz — AI bergan bo'lsa bitta jimgina qator */
+.fd-extra { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--text3); }
+.fd-extra b { font-family: var(--num); color: var(--text2); font-weight: 600; }
+.fd-extra.solo { margin-top: 14px; }
 
-/* ---- kaloriya kartasi: chapda katta qoldiq, o'ngda qalin halqa ----
-   Katta raqam — yeyilgani emas, qolgani. «qoldi» so'zi jim, «oshdi» —
-   qizil (makro kartalarida ham shunday). Butun karta me'yor oynasini ochadi. */
-.fd-hero { display: flex; align-items: center; gap: 14px; cursor: pointer; padding: 18px 18px 18px 20px;
-  transition: transform .12s var(--ease-spring); }
-.fd-hero:active { transform: scale(.985); }
-.fd-hero:focus-visible, .fd-meal:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
-.fd-hero-txt { flex: 1; min-width: 0; }
-.fd-hero-n { font-size: 44px; font-weight: 700; line-height: 1.05; letter-spacing: -.035em; color: var(--text); white-space: nowrap; }
-.fd-hero-l { margin-top: 4px; font-size: 15px; font-weight: 500; color: var(--text2); }
-.fd-st { color: var(--text3); }
-.fd-hero.over .fd-st, .fd-mc.over .fd-st { color: var(--danger-text); font-weight: 600; }
-.fd-hero-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.fd-chip { display: inline-flex; align-items: center; gap: 4px; min-height: 24px; padding: 2px 9px; border-radius: var(--r-pill);
-  background: var(--card2); color: var(--text2); font-size: 12px; font-weight: 600; white-space: nowrap; }
-.fd-chip .ic { flex: none; }
-/* halqa markazidagi belgi — kulrang doira ichida */
-.fd-ring-ic { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--card2); color: var(--text); }
-.fd-hero.over .fd-ring-ic { color: var(--danger-text); }
-@media (max-width: 360px){ .fd-hero { padding: 16px; gap: 10px; } .fd-hero-n { font-size: 38px; }
-  .fd-hero .ring-wrap { width: 84px !important; height: 84px !important; } .fd-hero .fd-ring-ic { width: 38px; height: 38px; } }
+/* ---- Suv: stakanlar (A.9: 24×32, ichilgan #5AA2FF / #2F7BEA) ----
+   Har stakan — tugma: eni katakka, balandligi 48px. Stakanlar qatorga teng
+   bo'linadi (--n food.js dan), 44px dan tor bo'lib qolmasligi uchun. */
+.fd-gls { display: grid; grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr)); margin: 0 -6px; }
+.fd-gl { display: grid; place-items: center; min-height: 48px; padding: 0; border: 0; border-radius: 12px; background: transparent; cursor: pointer; }
+.fd-gl svg { display: block; transition: transform .12s var(--ease-spring); }
+.fd-gl:active svg { transform: scale(.9); }
+.fd-gl .g { fill: var(--card-bg); stroke: var(--line3); stroke-width: 1.8; stroke-linejoin: round; }
+.fd-gl .l { fill: none; stroke: transparent; stroke-width: 1.6; stroke-linecap: round; }
+.fd-gl.on .g { fill: #5AA2FF; stroke: #2F7BEA; }
+.fd-gl.on .l { stroke: rgba(255,255,255,.85); }
+@media (prefers-reduced-motion: reduce) { .fd-gl svg { transition: none; } .fd-gl:active svg { transform: none; } }
 
-/* ---- uchta makro kartasi: raqam · nomi va holati · o'z rangidagi halqa ----
-   Nom ikki qatorga joy oladi — uzun «Uglevod oshdi» bo'lganda ham halqalar
-   bir chiziqda tursin. */
-.fd-mcs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
-.fd-mc { display: flex; flex-direction: column; min-width: 0; margin: 0; padding: 14px 12px; }
-.fd-mc-n { font-size: 22px; font-weight: 700; line-height: 1.1; letter-spacing: -.02em; color: var(--text); white-space: nowrap; }
-.fd-mc-n small { margin-left: 1px; font-size: 15px; font-weight: 600; }
-.fd-mc-l { margin: 3px 0 12px; min-height: 2.5em; font-size: 13px; font-weight: 500; line-height: 1.25; color: var(--text2); overflow-wrap: anywhere; }
-.fd-mc .ring-wrap { align-self: center; margin-top: auto; }
-.fd-mc .fd-ring-ic { width: 30px; height: 30px; color: var(--mc); }
-@media (max-width: 380px){ .fd-mcs { gap: 6px; } .fd-mc { padding: 12px 8px; } .fd-mc-n { font-size: 19px; } .fd-mc-n small { font-size: 13px; }
-  .fd-mc-l { font-size: 12px; } }
+/* ---- «Nima yedingiz?»: matn asosiy, kamera ikkinchi, qora yuborish tugmasi ---- */
+/* Maydon bir qatorli ko'rinadi (56px), lekin <textarea>: uzun tavsifda o'zi
+   o'sadi (field-sizing; eski brauzerda food.js › fdDraft), tugmalar pastda qoladi. */
+.fd-cap .title label { cursor: text; }
+.fd-cap-row { display: flex; align-items: flex-end; gap: 8px; }
+.fd-cap-row .fd-text { flex: 1; min-width: 0; min-height: 56px; max-height: 168px; padding: 14px 16px; border-radius: 16px;
+  font-size: 16px; line-height: 1.5; resize: none; field-sizing: content; overflow-x: hidden; }
+.fd-cap-row .fd-text::placeholder { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fd-cam, .fd-send { flex: none; display: grid; place-items: center; width: 56px; height: 56px; padding: 0; border: 0; border-radius: 16px; }
+.fd-cam { position: relative; background: var(--card2); color: var(--text); cursor: pointer; }
+.fd-cam:focus-within { outline: 2px solid var(--ring); outline-offset: 2px; }
+.fd-send { background: var(--ctl); color: var(--on-ctl); transition: background .15s, opacity .15s; }
+.fd-send.ghost, .fd-send:disabled { background: var(--text3); opacity: .55; cursor: not-allowed; }
+/* Fayl tanlagich ko'rinmaydi, lekin FOKUSNI oladi. `hidden` bo'lsa yorliqning
+   o'zi fokus olmaydi va kamera tugmasiga klaviatura bilan yetib bo'lmaydi. */
+.fd-pick { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip-path: inset(50%); }
+@media (max-width: 372px) { .fd-cam, .fd-send { width: 50px; height: 56px; } .fd-cap-row { gap: 6px; } }
 
-/* ---- makro qatori: tahlil natijasi va taomning to'liq ko'rinishi ---- */
+/* ---- tahlil: rasm → nom → katta kkal → makrolar → tarkib → bitta maslahat ---- */
+.fd-busy-row { display: flex; align-items: center; gap: 10px; color: var(--text3); font-size: 14px; padding: 6px 0; }
+.fd-busy-row .ic { color: var(--violet-text); animation: aiPulse 1.4s ease-in-out infinite; }
+.fd-preview { width: 100%; max-height: 170px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--line); margin-bottom: 10px; display: block; }
+.fd-busy .fd-fine { margin-top: 4px; overflow-wrap: anywhere; }
+.fd-res-name { font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.3; overflow-wrap: anywhere; }
+.fd-big { display: flex; align-items: baseline; gap: 6px; margin: 4px 0 12px; }
+.fd-big b { font-family: var(--num); font-size: 30px; font-weight: 600; color: var(--text); line-height: 1.1; }
+.fd-big span { font-size: 13px; color: var(--text3); font-weight: 600; }
+.fd-big-g { margin-left: auto; font-family: var(--num); }
 .fd-macros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .fd-macros-flat .fd-macro-val { margin-bottom: 0; }
 .fd-mi { display: inline-flex; margin-right: 5px; vertical-align: -2px; color: var(--mc); }
@@ -74,179 +114,127 @@
 .fd-macro-lab { font-size: 13px; font-weight: 500; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fd-macro-val { font-size: 16px; font-weight: 600; color: var(--text); margin: 1px 0 6px; white-space: nowrap; }
 .fd-macro-val small { font-size: 11px; font-weight: 600; color: var(--text3); }
-
-/* tola · shakar · tuz — AI bergan bo'lsa bitta jimgina qator */
-.fd-extra { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 12px; color: var(--text3); }
-.fd-extra b { font-family: var(--num); color: var(--text2); font-weight: 600; }
-/* kun sahifasida — makro kartalari ostida, kartasiz */
-.fd-extra.solo { margin: -4px 4px 12px; padding: 0; border-top: 0; }
-
-/* ---- suv: bitta qator, ikkita tugma ----
-   Suv ilgari Asosiy sahifada turardi va o'sha sahifadagi yagona bosiladigan
-   narsa bo'lib qolgandi. U ham ichiladigan narsa — shuning uchun kkal bilan
-   bir sahifada, xulosa ostida. Bitta qator: nomi, chizig'i, hisobi va
-   ikkita tugma. Karta balandligi qasddan past — bu sahifaning asosiy ishi
-   emas, kamera ostidan siljib ketmasligi kerak. */
-.fd-water { display: flex; align-items: center; gap: 10px; padding: 10px 12px; }
-.fd-water-ic { flex: none; display: inline-flex; color: var(--info-text); }
-.fd-water-l { flex: none; font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -.01em; }
-.fd-water-bar { flex: 1; min-width: 24px; }
-.fd-water-bar .bar-fill { background: var(--info); }
-.fd-water.full .fd-water-bar .bar-fill { background: var(--success); }
-.fd-water-n { flex: none; font-size: 13px; font-weight: 600; color: var(--text); }
-.fd-water-n small { font-size: 11px; font-weight: 500; color: var(--text3); }
-.fd-water.full .fd-water-n { color: var(--success-text); }
-.fd-water-b { flex: none; width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--line2);
-  background: var(--inset); color: var(--text2); display: grid; place-items: center; transition: background .15s, color .15s; }
-.fd-water-b:active { background: var(--hover); color: var(--text); }
-.fd-water-b[disabled] { opacity: .35; }
-@media (max-width: 360px){ .fd-water { gap: 7px; padding: 10px; } .fd-water-b { width: 32px; height: 32px; } }
-
-/* ---- «Nima yedingiz?» — bo'limning asosiy ishi ----
-   Ko'pchilik taomni suratga olmaydi, yozib tushuntiradi. Shuning uchun
-   kartaning boshida savol va katta matn maydoni; rasm va galereya —
-   ostidagi ikkita kichik ghost tugma. «Tahlil» matn yozilgunicha ghost
-   bo'lib turadi (sinfni food.js almashtiradi) — kartada ikkita to'ldirilgan
-   yuza bo'lib, qaysi biri asosiy ekani ko'rinmay qolmasin.
-   Tugmalarning FONI ham, YOZUV RANGI ham bu yerda yozilmaydi (2026-09-15
-   dagi yorug' temadagi «qora ustida qora» xatosi shundan chiqqan edi). */
-.fd-cap { padding: 14px; }
-.fd-cap-t { display: block; font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -.01em; margin-bottom: 8px; }
-.fd-cap .fd-text { min-height: 84px; font-size: 15px; line-height: 1.45; resize: vertical; }
-.fd-cap-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
-.fd-cap-row .fd-pickb { gap: 6px; flex: none; }
-.fd-cap-row .fd-send { margin-left: auto; gap: 6px; min-width: 104px; }
-.fd-cap-hint { margin-top: 8px; }
-@media (max-width: 380px){ .fd-cap { padding: 12px; } .fd-cap-row { gap: 6px; }
-  .fd-cap-row .fd-pickb span { display: none; } .fd-cap-row .fd-send { min-width: 0; flex: 1; } }
-
-/* Fayl tanlagich ko'rinmaydi, lekin FOKUSNI oladi. Ilgari u `hidden` edi:
-   `<label>` ning o'zi fokus olmaydi, ichidagi input esa yashirin edi —
-   ya'ni tugmaga klaviatura bilan umuman yetib bo'lmasdi. Endi Tab kelganda
-   halqa yorliqning atrofida chiziladi. */
-.fd-pick { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0;
-  border: 0; overflow: hidden; clip-path: inset(50%); }
-.fd-cap label.btn { position: relative; cursor: pointer; }
-.fd-cap label.btn:focus-within { outline: 2px solid var(--ring); outline-offset: 2px; }
-
-/* ---- tahlil: rasm → nom → katta kkal → makrolar → tarkib → bitta maslahat ---- */
-.fd-busy-row { display: flex; align-items: center; gap: 10px; color: var(--text3); font-size: 13px; padding: 6px 0; }
-.fd-busy-row .ic { color: var(--violet-text); animation: aiPulse 1.4s ease-in-out infinite; }
-.fd-preview { width: 100%; max-height: 170px; object-fit: cover; border-radius: var(--r-sm); border: 1px solid var(--line); margin-bottom: 10px; display: block; }
-.fd-res-eyebrow { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 500; color: var(--text2); margin-bottom: 10px; }
-.fd-res-eyebrow .ic { color: var(--violet-text); }
-.fd-res-name { font-size: 16px; font-weight: 600; color: var(--text); line-height: 1.3; overflow-wrap: anywhere; }
-.fd-rough { font-size: 11px; font-weight: 600; color: var(--text3); white-space: nowrap; }
-.fd-big { display: flex; align-items: baseline; gap: 6px; margin: 4px 0 12px; }
-.fd-big b { font-family: var(--num); font-size: 30px; font-weight: 600; color: var(--text); line-height: 1.1; }
-.fd-big span { font-size: 13px; color: var(--text3); font-weight: 600; }
-.fd-big-g { margin-left: auto; font-family: var(--num); }
 .fd-parts { margin-top: 12px; padding-top: 4px; border-top: 1px solid var(--line); }
-.fd-part { font-size: 12px; color: var(--text2); padding: 7px 0; border-bottom: 1px solid var(--line); }
+.fd-part { font-size: 13px; color: var(--text2); padding: 7px 0; border-bottom: 1px solid var(--line); }
 .fd-part-top { display: flex; gap: 10px; align-items: baseline; }
-.fd-part-mac { margin-top: 2px; font-size: 11px; color: var(--text3); }
+.fd-part-mac { margin-top: 2px; font-size: 12px; color: var(--text3); }
 .fd-part:last-child { border-bottom: 0; }
 .fd-part .grow { overflow-wrap: anywhere; }
 .fd-part .num { color: var(--text3); white-space: nowrap; font-size: 12px; }
-.fd-advice { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--text2); line-height: 1.45; padding: 8px 10px; border-radius: var(--r-sm); background: var(--inset); border: 1px dashed var(--line2); margin: 12px 0 10px; }
-.fd-advice .ic { color: var(--violet-text); flex: none; margin-top: 2px; }
+.fd-advice { margin: 12px 0 10px; }
 .fd-tips { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 4px; }
-.fd-res-acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
-.fd-res-acts .btn.icon { margin-left: auto; }
 
-/* ---- bitta taomning to'liq ko'rinishi (modal) ---- */
+/* Baho va qayta ishlanganlik — nom ostida pill; «AI shunday tushundi» —
+   AI qanday porsiya deb olganini ko'rsatadi, noto'g'ri bo'lsa pastdagi
+   «Tuzatish» qatoriga bitta gap yoziladi. */
+.fd-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.fd-asm { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: 13px; color: var(--text2); line-height: 1.45; }
+.fd-asm .ic { flex: none; margin-top: 1px; color: var(--text3); }
+.fd-asm b { font-weight: 600; color: var(--text); }
+.fd-fix { display: flex; gap: 8px; margin-top: 12px; }
+.fd-fix .inp { flex: 1; min-width: 0; }
+.fd-fix .btn { flex: none; gap: 6px; }
+@media (max-width: 372px) { .fd-fix { flex-wrap: wrap; } .fd-fix .btn { flex: 1; } }
+
+/* Batafsil tarkib — <details>: ochiq/yopiqligini brauzerning o'zi eslaydi,
+   sahifa qayta chizilishiga bog'liq emas. Sarlavha qatori 44px. */
+.fd-det { margin-top: 12px; border-top: 1px solid var(--line); }
+.fd-det summary { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; list-style: none; font-size: 14px; font-weight: 600; color: var(--text2); }
+.fd-det summary::-webkit-details-marker { display: none; }
+.fd-det summary::after { content: ""; width: 7px; height: 7px; margin: 0 4px 3px auto; border-right: 1.5px solid var(--text3); border-bottom: 1.5px solid var(--text3); transform: rotate(45deg); transition: transform .15s; }
+.fd-det[open] summary::after { transform: rotate(-135deg); margin-bottom: -3px; }
+.fd-det summary:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 6px; }
+.fd-nut-g { font-size: 12px; font-weight: 600; color: var(--text3); margin: 10px 0 2px; }
+.fd-nut-g:first-child { margin-top: 2px; }
+.fd-nut { display: grid; grid-template-columns: minmax(0, 1.3fr) auto minmax(40px, 1fr) 40px; gap: 10px; align-items: center; padding: 5px 0; font-size: 13px; }
+.fd-nut-l { color: var(--text2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fd-nut-lim { font-size: 11px; color: var(--text3); }
+.fd-nut-v { color: var(--text); font-weight: 600; white-space: nowrap; text-align: right; }
+.fd-nut-v small { font-size: 11px; font-weight: 500; color: var(--text3); }
+.fd-nut-p { color: var(--text3); text-align: right; white-space: nowrap; }
+@media (max-width: 372px) { .fd-nut { gap: 7px; grid-template-columns: minmax(0, 1.4fr) auto minmax(28px, 1fr) 36px; } }
+@media (prefers-reduced-motion: reduce) { .fd-det summary::after { transition: none; } }
+.fd-res-acts { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.fd-res-acts .btn { min-height: 44px; gap: 6px; }
+.fd-res-acts .btn.icon { width: 44px; height: 44px; margin-left: auto; }
+
+/* ---- bitta taomning to'liq ko'rinishi (oyna) ---- */
 .fd-note { margin-top: 12px; padding: 8px 10px; border-radius: var(--r-sm); background: var(--inset); font-size: 12px; color: var(--text2); line-height: 1.45; overflow-wrap: anywhere; }
 .fd-when { margin-top: 10px; font-size: 12px; color: var(--text3); }
 
-/* ---- taom kartalari ----
-   Rasm bo'lsa chapda to'liq balandlikda, o'ngda nomi va vaqti, olov bilan
-   kaloriya, ostida uchta makro o'z rangidagi belgisi bilan. */
-.fd-sec-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 22px 4px 10px; }
-.fd-sec-t { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: -.02em; color: var(--text); }
-.fd-sec-t .muted { font-weight: 600; }
-.fd-meal { display: flex; align-items: stretch; margin-bottom: 10px; padding: 0; overflow: hidden; cursor: pointer;
-  transition: transform .12s var(--ease-spring); }
-.fd-meal:active { transform: scale(.985); }
-.fd-meal-ph { flex: none; width: 38%; max-width: 180px; min-height: 128px; object-fit: cover; display: block; background: var(--inset); }
-.fd-meal-b { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 8px; padding: 14px 14px 14px 16px; }
-.fd-meal-top { display: flex; align-items: flex-start; gap: 8px; }
-.fd-meal-name { flex: 1; min-width: 0; font-size: 16px; font-weight: 600; line-height: 1.3; color: var(--text); overflow-wrap: anywhere;
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.fd-time { flex: none; padding: 3px 8px; border-radius: var(--r-pill); background: var(--card2); font-size: 12px; font-weight: 600; color: var(--text2); }
-.fd-meal-k { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--text2); }
-.fd-meal-k .ic { flex: none; color: var(--text); }
-.fd-meal-k b { font-size: 19px; font-weight: 700; letter-spacing: -.01em; color: var(--text); }
-.fd-meal-sc { margin-left: auto; font-size: 12px; font-weight: 600; color: var(--text3); }
-.fd-mm { display: flex; flex-wrap: wrap; gap: 6px 14px; }
-.fd-mm-i { display: inline-flex; align-items: center; gap: 4px; font-size: 14px; }
-.fd-mm-i .ic { flex: none; color: var(--mc); }
-.fd-mm-i b { font-weight: 600; color: var(--text); }
-@media (hover: hover) { .fd-meal:hover { border-color: var(--line3); } }
-@media (max-width: 360px){ .fd-meal-ph { width: 34%; min-height: 116px; } .fd-meal-b { padding: 12px; gap: 6px; } .fd-mm { gap: 4px 10px; } }
-@media (prefers-reduced-motion: reduce){ .fd-hero, .fd-meal, .fd-dc-r { transition: none; }
-  .fd-hero:active, .fd-meal:active, .fd-dc:active .fd-dc-r { transform: none; } }
+/* ---- kunning ovqatlari: vaqt · nom va makrolar · kkal ---- */
+.fd-ml { list-style: none; margin: 0; padding: 0; }
+.fd-ml li + li { border-top: 1px solid var(--line); }
+.fd-meal { display: flex; align-items: flex-start; gap: 12px; width: 100%; min-height: 44px; padding: 14px 0; border: 0; background: transparent; color: var(--text); font: inherit; text-align: left; cursor: pointer; }
+.fd-ml li:first-child .fd-meal { padding-top: 2px; }
+.fd-ml li:last-child .fd-meal { padding-bottom: 2px; }
+.fd-meal:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 8px; }
+.fd-meal-t { flex: none; width: 42px; padding-top: 2px; font-size: 14px; font-weight: 500; color: var(--text3); }
+.fd-meal-ph { flex: none; width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: var(--card2); }
+.fd-meal-b { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.fd-meal-b b { font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--text); overflow-wrap: anywhere; }
+.fd-meal-b span { font-size: 12px; color: var(--text3); }
+/* o'ngda kkal, ostida 10 ballik baho pilli (AI baholagan taomda) */
+.fd-meal-k { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; font-size: 15px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.fd-meal-k b { font-weight: 700; }
+.fd-meal-sc { padding: 2px 9px; font-size: 12px; font-weight: 700; }
+.fd-none { display: flex; align-items: center; gap: 12px; }
+.fd-none > div { flex: 1; min-width: 0; }
+.fd-none b { display: block; font-size: 15px; font-weight: 600; color: var(--text); }
+.fd-none p { margin: 2px 0 0; font-size: 13px; line-height: 1.45; color: var(--text3); }
 
-/* ---- so'nggi 7 kun ---- */
-.fd-avg { font-size: 12px; color: var(--text2); font-weight: 600; white-space: nowrap; }
-.fd-avg .muted { font-weight: 600; }
+/* ---- kunlik hisobot: hukm qatorlari (nuqta + matn) va ochiladigan jadval ---- */
+.fd-rep-row { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.45; color: var(--text2); }
+.fd-rep-row + .fd-rep-row { margin-top: 6px; }
+.fd-rep-row .dot { flex: none; width: 8px; height: 8px; margin-top: 6px; border-radius: 50%; background: var(--line3); }
+.fd-rep-row.good .dot { background: var(--z-high); } .fd-rep-row.warn .dot { background: var(--z-mid); } .fd-rep-row.bad .dot { background: var(--z-low); }
+.fd-rep-row b { font-weight: 600; color: var(--text); }
+.fd-rep-none { margin-top: 0; }
 
-/* ---- tahrir oynasi ----
-   Qismli taom: har qatorda nom + makrolar, gramm katagi va olib tashlash.
-   Jami ostida qismlardan hisoblanadi; oxirida «Qism qo'shish» — gap bilan. */
+/* ---- so'nggi 7 kun (A.6): ustun ustida qiymat, uzuq chiziq — me'yor ----
+   Har ustun — tugma (kunni ochadi). To'r kartaning chekkasiga 10px chiqadi:
+   360px ekranda ham ustunning bosiladigan eni 44px bo'lsin. */
+.fd-wk { position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); margin: 4px -10px 0; }
+.fd-wk-c { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; padding: 0; border: 0; background: transparent; color: var(--text3); font: inherit; cursor: pointer; }
+.fd-wk-t { box-sizing: border-box; display: flex; align-items: flex-end; justify-content: center; width: 100%; height: 114px; padding-top: 18px; }
+.fd-wk-t i { position: relative; display: block; width: 100%; max-width: 30px; border-radius: 8px; background: var(--track); }
+.fd-wk-c.na .fd-wk-t i { height: 4px !important; }
+.fd-wk-c.ok .fd-wk-t i, .fd-wk-leg .ok { background: color-mix(in srgb, var(--z-high) 70%, var(--card-bg)); }
+.fd-wk-c.over .fd-wk-t i, .fd-wk-leg .over { background: color-mix(in srgb, var(--danger) 62%, var(--card-bg)); }
+.fd-wk-c.now .fd-wk-t i, .fd-wk-leg .now { background: color-mix(in srgb, var(--accent) 42%, var(--card-bg)); }
+.fd-wk-t b { position: absolute; font-style: normal; left: 50%; bottom: calc(100% + 3px); transform: translateX(-50%); font-size: 11px; font-weight: 600; color: var(--text2); white-space: nowrap; }
+.fd-wk-d { height: 18px; font-size: 11px; line-height: 18px; white-space: nowrap; }
+.fd-wk-c.today .fd-wk-d, .fd-wk-c.on .fd-wk-d { font-weight: 700; color: var(--text); }
+.fd-wk-c.on:not(.today) .fd-wk-t i { box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px var(--ctl); }
+.fd-wk-c:focus-visible { outline: 2px solid var(--ring); outline-offset: -2px; border-radius: 10px; }
+.fd-wk-c:disabled { opacity: .4; cursor: default; }
+/* me'yor chizig'i: 96px lik ustun maydonida --t ulushida (ostida 18px kun nomi + 6px oraliq) */
+.fd-wk-line { position: absolute; left: 10px; right: 10px; bottom: calc(24px + 96px * var(--t, 0)); height: 0; border-top: 1.5px dashed #9AA1AB; z-index: 1; pointer-events: none; }
+.fd-wk-leg { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 14px; font-size: 13px; color: var(--text2); }
+.fd-wk-leg span { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.fd-wk-leg .dot { width: 10px; height: 10px; border-radius: 3px; }
+.fd-wk-leg .ln { width: 16px; height: 0; border-top: 1.5px dashed #9AA1AB; }
+
+/* ---- tahrir va me'yor oynalari ----
+   Me'yor: to'rtta alohida katak. Qismli taom: har qatorda nom + makrolar,
+   gramm katagi va olib tashlash. Jami ostida qismlardan hisoblanadi; oxirida
+   «Qism qo'shish» — gap bilan. Qismsiz taom — o'sha to'rt katak. */
+.fd-tg-auto { margin-top: 10px; }
 .fd-ed-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 10px; }
 .fd-ed-f { margin-bottom: 8px; }
 .fd-ed-items { margin: 6px 0 10px; }
 .fd-ed-item { display: flex; gap: 8px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
 .fd-ed-item:last-child { border-bottom: 0; }
 .fd-ed-in { flex: 1; min-width: 0; }
-.fd-ed-nm { font-size: 13px; color: var(--text); overflow-wrap: anywhere; }
-.fd-ed-mac { font-size: 11px; color: var(--text3); margin-top: 2px; }
-.fd-ed-g { width: 76px; flex: none; text-align: right; }
+.fd-ed-nm { font-size: 14px; color: var(--text); overflow-wrap: anywhere; }
+.fd-ed-mac { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.fd-ed-g { width: 76px; min-height: 44px; flex: none; text-align: right; }
 .fd-ed-u { flex: none; font-size: 12px; color: var(--text3); }
-.fd-ed-tot { padding: 10px 12px; border-radius: var(--r-sm); background: var(--inset); margin-bottom: 12px; }
+.fd-ed-item .btn.icon { width: 44px; height: 44px; }
+.fd-ed-tot { padding: 12px 14px; border-radius: 16px; background: var(--card2); margin-bottom: 12px; }
 .fd-ed-tot .fd-big { margin: 0 0 8px; }
 .fd-ed-tot .fd-big b { font-size: 22px; }
 .fd-ed-tot .help { margin-top: 8px; }
 .fd-ed-addrow { display: flex; gap: 8px; }
-.fd-ed-addrow .inp { flex: 1; min-width: 0; }
-.fd-ed-addrow .btn { flex: none; }
-
-/* ---- tahlil tafsilotlari ----
-   Baho va qayta ishlanganlik — nom ostida pill; «AI shunday tushundi» —
-   AI qanday porsiya deb olganini ko'rsatadi, noto'g'ri bo'lsa pastdagi
-   «Tuzatish» qatoriga bitta gap yoziladi. */
-.fd-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
-.fd-score.mid { background: color-mix(in srgb, var(--warning) 14%, transparent); color: var(--warning-text); }
-.fd-asm { display: flex; gap: 8px; align-items: flex-start; margin-top: 12px; font-size: 12px; color: var(--text2); line-height: 1.45; }
-.fd-asm .ic { flex: none; margin-top: 2px; color: var(--text3); }
-.fd-asm b { font-weight: 600; color: var(--text); }
-.fd-fix { display: flex; gap: 8px; margin-top: 4px; }
-.fd-fix .inp { flex: 1; min-width: 0; }
-.fd-fix .btn { flex: none; }
-
-/* Batafsil tarkib — <details>: ochiq/yopiqligini brauzerning o'zi eslaydi,
-   sahifa qayta chizilishiga bog'liq emas. */
-.fd-det { margin-top: 12px; border-top: 1px solid var(--line); }
-.fd-det summary { display: flex; align-items: center; gap: 6px; padding: 10px 0 4px; cursor: pointer; list-style: none; font-size: 13px; font-weight: 600; color: var(--text2); }
-.fd-det summary::-webkit-details-marker { display: none; }
-.fd-det summary::after { content: ""; width: 7px; height: 7px; margin-left: auto; border-right: 1.5px solid var(--text3); border-bottom: 1.5px solid var(--text3); transform: rotate(45deg); transition: transform .15s; }
-.fd-det[open] summary::after { transform: rotate(-135deg); }
-.fd-det summary:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: 6px; }
-.fd-nut-g { font-size: 12px; font-weight: 600; color: var(--text3); margin: 10px 0 2px; }
-.fd-nut { display: grid; grid-template-columns: minmax(0, 1.3fr) auto minmax(40px, 1fr) 40px; gap: 10px; align-items: center; padding: 5px 0; font-size: 12px; }
-.fd-nut-l { color: var(--text2); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.fd-nut-lim { font-size: 11px; color: var(--text3); }
-.fd-nut-v { color: var(--text); font-weight: 600; white-space: nowrap; text-align: right; }
-.fd-nut-v small { font-size: 11px; font-weight: 500; color: var(--text3); }
-.fd-nut-p { color: var(--text3); text-align: right; white-space: nowrap; }
-@media (max-width: 360px){ .fd-nut { gap: 7px; grid-template-columns: minmax(0, 1.4fr) auto minmax(28px, 1fr) 36px; } }
-
-/* ---- kunlik hisobot ---- */
-.fd-rep-row { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--text2); line-height: 1.45; padding: 3px 0; }
-.fd-rep-row .zone { position: static; flex: none; margin-top: 6px; }
-.fd-rep-row b { color: var(--text); font-weight: 600; }
-.fd-rep .help { margin-top: 6px; }
-.fd-ai { margin-top: 12px; padding: 10px 12px; border-radius: var(--r-sm); background: var(--inset); font-size: 13px; color: var(--text2); line-height: 1.5; }
-.fd-ai p { margin: 0 0 6px; }
-.fd-ai p:last-child { margin-bottom: 0; }
-.fd-rep .banner { margin-top: 10px; }
+.fd-ed-addrow .inp { flex: 1; min-width: 0; min-height: 44px; }
+.fd-ed-addrow .btn { flex: none; min-height: 44px; gap: 6px; }

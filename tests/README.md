@@ -59,3 +59,17 @@ Ishga tushirish:
     node tests/test_sky.js
     node tests/test_tasks.js
     node tests/visual.js          # Chrome kerak, alohida
+
+2026-10-09 («Yorug' qog'oz») dan keyin qo'shilgan va yangilangan sinovlar:
+
+- `test_nav.js` — beshta yorliq kapsulada, `#fab` — «+» (tez qo'shish ro'yxati yoki bo'limning o'z `fab()` i)
+- `test_today_tiles.js` — Asosiy: bosh karta, odat va vazifani shu sahifada belgilash
+  (yozuv `D.habits.toggle/bump`, `D.media.toggle` va Vazifa bo'limining `tkToggle` i orqali)
+- `test_ibodat_seg.js` — Ibodat: namozni sahifaning o'zida belgilash (`D.prayerLog.set`),
+  buzuq holatning HTML ga tushmasligi, qazo va ro'za amallari
+- `test_tana.js`, `test_moliya.js` — Tana va Moliya sahifalarining chizilishi va amallari
+
+Hammasini birga:
+
+    for t in tests/test_*.js; do node "$t" >/dev/null 2>&1 || echo "FAIL $t"; done
+

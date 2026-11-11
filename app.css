@@ -24,6 +24,17 @@
    qolmadi va yangi joyga ham yozilmaydi (tests/test_css_rules.js tekshiradi);
    11px quyi chegara o'z joyida. Buni o'zaro hal qilmang — o'zgartirish
    egasining qarori, javobni sana bilan shu yerga yozing.
+
+   «YORUG' QOG'OZ» (2026-10-09, egasi tasdiqlagan dizayn hujjati).
+   Egasi asosan yorug' rejimda ishlatadi, shuning uchun yangi ko'rinish
+   yorug' tema uchun chizilgan: oq karta kulrang fonda soya bilan turadi,
+   har sahifaning birinchi kartasi («bosh karta», .hero--*) ma'nosiga qarab
+   och rangli gradient oladi. BOSHQARUV RANGI YORUG' TEMADA QORA (#0E1116):
+   asosiy tugma, FAB, tanlangan chip. 2026-09-15 dagi «urg'u rang — ko'k»
+   qarori yorug' tema uchun shu bilan almashdi; ko'k u yerda faqat o'lchov
+   (zo'riqish, havola). Qorong'i tema o'z tokenlari bilan qoladi — u yerda
+   boshqaruv hamon ko'k. Shu sabab boshqaruv --accent dan emas, alohida
+   --ctl / --on-ctl / --ctl-text tokenlaridan o'qiydi.
    ---------- */
 :root {
   --bg: #0B0C10; --bg2: #0F1015; --bg3: #15171D;
@@ -53,6 +64,24 @@
   --title-grad: linear-gradient(180deg,#FFFFFF 0%,#9AA0A8 130%);
   --wash1: transparent; --wash2: transparent; --wash3: transparent; --grain: transparent;
   --ruh: #8FB4FF; --aql: #4FE07F; --qalb: #FF8AA3; --tana: #FFB35C; --boshqa: #8A9099; --aralash: #B9A6FF;
+  /* Boshqaruv (2026-10-09): tugma, FAB, tanlangan chip, faol yorliq. */
+  --ctl: #2F6BFF; --on-ctl: #FFFFFF; --ctl-text: #8FB4FF;
+  --seg-bg: #15171D; --seg-text: #8A9099; --seg-on: #2F6BFF; --seg-on-text: #FFFFFF; --seg-sh: 0 6px 18px -6px var(--accent-glow);
+  --f-line: transparent; --grip: rgba(255,255,255,.22); --overlay: rgba(0,0,0,.5);
+  --toast-bg: #15171D; --toast-fg: #F5F6F8; --good-fill: #157A3D;
+  /* Och fonlar — holat pilli, belgi katagi, maslahat qutisi. */
+  --success-soft: rgba(52,208,106,.14); --warning-soft: rgba(245,165,36,.16); --danger-soft: rgba(255,91,91,.14);
+  --violet-soft: rgba(167,139,250,.16); --coral-soft: rgba(255,138,101,.15);
+  --amber: #F5A524; --amber-text: #F7B955; --coral: #FF8A65; --coral-2: #FF9D7E; --coral-text: #FF9D7E;
+  /* Bosh karta gradientlari: qorong'ida karta rangiga ozgina tus qo'shiladi. */
+  --hero-yashil: linear-gradient(180deg, color-mix(in srgb, #34D06A 13%, #15171D) 0%, #15171D 62%);
+  --hero-namoz:  linear-gradient(180deg, color-mix(in srgb, #F5A524 14%, #15171D) 0%, #15171D 62%);
+  --hero-uyqu:   linear-gradient(180deg, color-mix(in srgb, #A78BFA 15%, #15171D) 0%, #15171D 62%);
+  --hero-kok:    linear-gradient(180deg, color-mix(in srgb, #2F6BFF 15%, #15171D) 0%, #15171D 62%);
+  --hero-ovqat:  linear-gradient(180deg, color-mix(in srgb, #FF8A3C 14%, #15171D) 0%, #15171D 62%);
+  --hero-qazo:   linear-gradient(180deg, color-mix(in srgb, #F5A524 11%, #15171D) 0%, #15171D 62%);
+  --hero-tana:   radial-gradient(circle at 50% 42%, rgba(52,208,106,.13) 0, rgba(52,208,106,0) 54%), linear-gradient(180deg, color-mix(in srgb, #34D06A 8%, #15171D) 0%, #15171D 100%);
+  --sh-hero: none; --sh-hero-yashil: none; --sh-hero-namoz: none; --sh-hero-uyqu: none; --sh-hero-kok: none; --sh-hero-ovqat: none;
   /* Butun ilova — bitta oila: Mulish (css/fonts.css da nega aynan shu
      yozilgan: o'zbek apostrofi va raqam kengliklari). Farq faqat vazn va
      o'lchamda; 800 hech qayerda yo'q — rasmlardagi yengillik shundan. */
@@ -60,47 +89,74 @@
   --num: var(--font);
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
-  /* Burchaklar: karta 24, plitka 20, kiritish/ichki 14, pastki oyna 28. */
-  --r: 24px; --r-sm: 14px; --r-xs: 9px; --r-lg: 28px; --r-tile: 20px; --r-pill: 999px;
+  /* Burchaklar: karta 26, bosh karta 30, ichki plitka 16, kiritish 14, pastki oyna 28. */
+  --r: 26px; --r-hero: 30px; --r-sm: 14px; --r-xs: 9px; --r-lg: 28px; --r-tile: 16px; --r-pill: 999px;
   --sh: none; --sh-modal: 0 32px 80px rgba(0,0,0,.7); --sh-card: none;
   --sh-nav: 0 14px 40px rgba(0,0,0,.55);
   --sh-btn: 0 10px 26px -10px var(--accent-glow);
   --ease-out: cubic-bezier(.22,1,.36,1); --ease-spring: cubic-bezier(.34,1.56,.64,1); --ease-sheet: cubic-bezier(.32,.72,0,1);
-  /* Panel egallagan joy: kapsula 66 + suzish 18. Toast, Yusa oynasi va sahifa
-     to'ldirishi shu bitta sondan hisoblaydi. */
-  --nav-h: 84px; --side-w: 220px;
+  /* Panel egallagan joy: kapsula 66 + suzish 16 + nafas. Toast, Yusa oynasi va
+     sahifa to'ldirishi shu bitta sondan hisoblaydi — oxirgi karta panel
+     ostida qolmasin. */
+  --nav-h: 100px; --side-w: 220px;
   color-scheme: dark;
 }
 /* Yorug' tema — o'sha til oq qog'ozda. Ko'k bir pog'ona to'q (#2358E8, oq
    ustida 5,8:1), zona ranglari oq fonda o'qilishi uchun to'qlashadi, yonish
    o'chadi (oq ustida u iflos dog' bo'lardi). */
 [data-theme="light"] {
-  --bg: #F2F3F6; --bg2: #EBEDF1; --bg3: #FFFFFF;
-  --text: #0E1116; --text2: #4B515B; --text3: #5F656F; --text4: #5F656F;
+  --bg: #F2F3F5; --bg2: #EBEDF0; --bg3: #FFFFFF;
+  /* --text4 = --text3. Dizayn hujjatida eng och matn #6B7280, lekin u faqat
+     oq ustida 4,8:1 beradi: tusli yuzada (daraja zinasi) 4,1:1 ga tushdi —
+     tests/visual.js topdi. Modullar --text4 ni har xil yuzada ishlatadi,
+     shuning uchun token AA dan o'tadigan qiymatda qoldi. */
+  --text: #0E1116; --text2: #3D434C; --text3: #5F6672; --text4: #5F6672;
   --ink-on-light: #0E1116;
-  --accent-text: #1F5AE0; --success-text: #157A3D; --warning-text: #8A6300;
-  --info-text: #1F5AE0; --violet-text: #5B48C7;
+  --accent-text: #1F5AE0; --success-text: #157A3D; --warning-text: #8A4B00;
+  --info-text: #1F5AE0; --violet-text: #5B3FC4;
   --success: #1FA854; --success-glow: rgba(31,168,84,.30);
-  --warning: #C9930A; --warning-glow: rgba(201,147,10,.30);
-  --danger: #E03B3B; --danger-text: #C12B2B;
+  --warning: #E08A0C; --warning-glow: rgba(224,138,12,.30);
+  --danger: #E5484D; --danger-text: #B42318;
   --info: #2358E8; --accent: #2358E8; --violet: #7C5CE6;
-  --accent-soft: rgba(35,88,232,.12); --accent-glow: rgba(35,88,232,.30);
-  --z-high: #1FA854; --z-mid: #C9930A; --z-low: #E03B3B;
+  --accent-soft: #EEF3FF; --accent-glow: rgba(35,88,232,.30);
+  /* Zona: tiklanish ≥67 yashil, 34–66 sariq, <34 qizil. */
+  --z-high: #1FA854; --z-mid: #F2B53A; --z-low: #E5484D;
   --strain: #2358E8; --sleep: #7C5CE6; --recovery: #1FA854;
-  --glass: #F1F2F5; --inset: rgba(14,17,22,.04); --recess: rgba(14,17,22,.03);
-  --card-bg: #FFFFFF; --card-solid: #FFFFFF; --card2: #F1F2F5; --card-line: rgba(14,17,22,.08); --sheen: transparent;
-  --row-bg: #FFFFFF; --row-line: rgba(14,17,22,.08);
-  --line: rgba(14,17,22,.08); --line2: rgba(14,17,22,.14); --line3: rgba(14,17,22,.26);
-  --track: rgba(14,17,22,.09); --nav: rgba(255,255,255,.94);
+  --glass: #F6F7F9; --inset: rgba(14,17,22,.04); --recess: rgba(14,17,22,.03);
+  --card-bg: #FFFFFF; --card-solid: #FFFFFF; --card2: #F6F7F9; --card-line: transparent; --sheen: transparent;
+  --row-bg: #FFFFFF; --row-line: #EEF0F3;
+  --line: #EEF0F3; --line2: #E2E5EA; --line3: #D5DAE1;
+  --track: #EEF1F4; --nav: rgba(255,255,255,.97);
   --hover: rgba(14,17,22,.05); --focus: rgba(35,88,232,.6); --ring: #0E1116;
-  --f-input: #F1F2F5; --f-input-focus: #FFFFFF;
-  --btn-grad: #2358E8; --on-btn: #FFFFFF;
+  --f-input: #FFFFFF; --f-input-focus: #FFFFFF;
+  --btn-grad: #0E1116; --on-btn: #FFFFFF;
   --title-grad: linear-gradient(180deg,#0E1116 0%,#3C424A 130%);
   --wash1: transparent; --wash2: transparent; --wash3: transparent; --grain: transparent;
-  --ruh: #1F5AE0; --aql: #157A3D; --qalb: #C4265A; --tana: #B96A00; --boshqa: #666C75; --aralash: #5B48C7;
-  --sh: none; --sh-modal: 0 24px 70px rgba(14,17,22,.20); --sh-card: none;
-  --sh-nav: 0 10px 30px rgba(14,17,22,.14);
-  --sh-btn: 0 10px 26px -10px var(--accent-glow);
+  --ruh: #2452D6; --aql: #0F7A47; --qalb: #BA2650; --tana: #A65800; --boshqa: #5F6672; --aralash: #5B3FC4;
+  --ctl: #0E1116; --on-ctl: #FFFFFF; --ctl-text: #0E1116;
+  --seg-bg: #E6E8EC; --seg-text: #4B515B; --seg-on: #FFFFFF; --seg-on-text: #0E1116; --seg-sh: 0 1px 3px rgba(17,24,39,.12);
+  --f-line: #D5DAE1; --grip: #D5DAE1; --overlay: rgba(14,17,22,.42);
+  --toast-bg: #0E1116; --toast-fg: #FFFFFF;
+  --success-soft: #E8F6EE; --warning-soft: #FFF4E5; --danger-soft: #FDECEC;
+  --violet-soft: #EFEBFE; --coral-soft: #FFF0EA;
+  --amber: #E08A0C; --amber-text: #8A4B00; --coral: #E8572F; --coral-2: #F0805F; --coral-text: #B4361F;
+  --hero-yashil: linear-gradient(180deg,#E6F7EE 0%,#F5FCF8 42%,#FFFFFF 100%);
+  --hero-namoz:  radial-gradient(circle at 92% -8%, rgba(255,186,64,.42) 0, rgba(255,186,64,0) 48%), linear-gradient(180deg,#FFF2D6 0%,#FFF9EE 50%,#FFFFFF 100%);
+  --hero-uyqu:   radial-gradient(circle at 92% -8%, rgba(139,124,246,.30) 0, rgba(139,124,246,0) 46%), linear-gradient(180deg,#EFEBFF 0%,#F8F6FF 48%,#FFFFFF 100%);
+  --hero-kok:    linear-gradient(180deg,#E8F0FF 0%,#F5F8FF 48%,#FFFFFF 100%);
+  --hero-ovqat:  radial-gradient(circle at 95% -10%, rgba(255,160,90,.30) 0, rgba(255,160,90,0) 46%), linear-gradient(180deg,#FFF0E3 0%,#FFF9F3 48%,#FFFFFF 100%);
+  --hero-qazo:   linear-gradient(180deg,#FFF3E2 0%,#FFFAF3 46%,#FFFFFF 100%);
+  --hero-tana:   radial-gradient(circle at 50% 42%, rgba(31,168,84,.15) 0, rgba(31,168,84,0) 54%), linear-gradient(180deg,#EEF4FA 0%,#FFFFFF 100%);
+  --sh: none; --sh-modal: 0 24px 70px rgba(14,17,22,.20);
+  --sh-card: 0 1px 2px rgba(17,24,39,.04), 0 12px 30px -16px rgba(17,24,39,.16);
+  --sh-hero: 0 1px 2px rgba(17,24,39,.04), 0 16px 36px -18px rgba(17,24,39,.22);
+  --sh-hero-yashil: 0 1px 2px rgba(17,24,39,.04), 0 16px 36px -18px rgba(20,110,60,.26);
+  --sh-hero-namoz: 0 1px 2px rgba(17,24,39,.04), 0 16px 36px -18px rgba(150,95,10,.30);
+  --sh-hero-uyqu: 0 1px 2px rgba(17,24,39,.04), 0 16px 36px -18px rgba(76,52,170,.28);
+  --sh-hero-kok: 0 1px 2px rgba(17,24,39,.04), 0 16px 36px -18px rgba(30,70,170,.28);
+  --sh-hero-ovqat: 0 1px 2px rgba(17,24,39,.04), 0 16px 36px -18px rgba(170,90,20,.28);
+  --sh-nav: 0 1px 2px rgba(17,24,39,.06), 0 18px 40px -14px rgba(17,24,39,.30);
+  --sh-btn: none;
   color-scheme: light;
 }
 
@@ -150,7 +206,7 @@ body, .inp, .sel, .ta, button, input, select, textarea { font-variant-numeric: t
 .app { display: flex; min-height: 100vh; min-height: 100dvh; }
 .side { display: none; }
 .main { flex: 1; min-width: 0; }
-.page { max-width: 720px; margin: 0 auto; padding: 4px 16px 28px; }
+.page { max-width: 720px; margin: 0 auto; padding: 12px 16px 28px; }
 .section { margin-top: 10px; }
 /* Bo'lim sarlavhasi — Ultrahuman'dagidek: katta nom, chapida ixtiyoriy belgi,
    o'ngida ko'k havola. Chiziqlar va katta harf ketdi. */
@@ -194,24 +250,69 @@ p { margin: 0 0 8px; }
    Ichidan yoritilgan: pastdan xira nur (statik radial gradient — hech qachon
    animatsiya qilinmaydi). Chegara juda ingichka: karta ko'mir fondan o'zi
    ajralib turadi. Tepadagi zona tasmasi yo'q — zonani holat so'zi aytadi. */
-.card, .hero { position: relative; background: var(--card-bg); border: 1px solid var(--card-line); border-radius: var(--r); padding: 18px; margin-bottom: 12px;
+.card, .hero { position: relative; background: var(--card-bg); border: 1px solid var(--card-line); border-radius: var(--r); padding: 20px; margin-bottom: 12px; box-shadow: var(--sh-card);
   overflow: hidden; content-visibility: auto; contain-intrinsic-size: auto 280px;
   transition: background .3s ease, border-color .3s ease; }
 .card::before, .hero::before { content: ''; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
   background: radial-gradient(90% 70% at 50% 108%, rgba(255,255,255,.055), transparent 70%); }
-[data-theme="light"] .card::before, [data-theme="light"] .hero::before { background: radial-gradient(90% 70% at 50% 108%, rgba(14,17,22,.025), transparent 70%); }
+/* Yorug'da ichki nur yo'q: oq kartani kulrang fondan soya ajratadi. */
+[data-theme="light"] .card::before, [data-theme="light"] .hero::before { display: none; }
 .card > *, .hero > * { position: relative; }
 .card.flat { background: transparent; border: 1px solid var(--line); padding: 14px 16px; }
 .card.flat::before { display: none; }
 .card.all-done::before { background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--success) 12%, transparent), transparent 60%); }
 .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
-.card-head .title { flex: 1; min-width: 0; }
+.card-head .title { flex: 1; min-width: 0; font-size: 18px; font-weight: 600; letter-spacing: -.02em; color: var(--text); }
 .card-head > .ic:last-child { color: var(--text3); }
 .kpi { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
 .kpi-num { font-size: 56px; font-weight: 600; font-variant-numeric: tabular-nums; letter-spacing: -.035em; color: var(--text); line-height: .95; }
 .kpi-total { font-family: var(--num); font-size: 17px; font-weight: 500; color: var(--text3); }
 .kpi-label { font-size: 13px; font-weight: 500; color: var(--text3); margin-left: 2px; }
-@media (max-width: 400px){ .card, .hero { padding: 16px; } .kpi-num { font-size: 48px; } }
+@media (max-width: 400px){ .card, .hero { padding: 18px; } .kpi-num { font-size: 48px; } }
+
+/* ---------- bosh karta ----------
+   Har sahifaning birinchi katta kartasi. Rang — ma'no: yashil tiklanish va
+   kirim, iliq sariq namoz, binafsha uyqu, ko'k zo'riqish va hisoblar, to'q
+   sariq ovqat va qazo. Gradient yuqoridan pastga oqqa so'nadi, ya'ni
+   kartaning quyi yarmidagi mayda yozuv har doim oq ustida turadi. */
+.hero[class*="hero--"], .card[class*="hero--"] { border-radius: var(--r-hero); padding: 18px 20px 20px; border-color: transparent; box-shadow: var(--sh-hero); }
+.hero[class*="hero--"]::before, .card[class*="hero--"]::before { display: none; }
+.hero--yashil { background: var(--hero-yashil); box-shadow: var(--sh-hero-yashil) !important; }
+.hero--namoz  { background: var(--hero-namoz);  box-shadow: var(--sh-hero-namoz) !important; }
+.hero--uyqu   { background: var(--hero-uyqu);   box-shadow: var(--sh-hero-uyqu) !important; }
+.hero--kok    { background: var(--hero-kok);    box-shadow: var(--sh-hero-kok) !important; }
+.hero--ovqat  { background: var(--hero-ovqat);  box-shadow: var(--sh-hero-ovqat) !important; }
+.hero--qazo   { background: var(--hero-qazo); }
+.hero--tana   { background: var(--hero-tana); }
+/* Bosh karta tepasidagi kichik pill («WHOOP · 07:12», «Kunlik reja: 5»). */
+.hero-pill { display: inline-flex; align-items: center; gap: 6px; flex: none; padding: 5px 11px; border-radius: var(--r-pill); background: var(--card-bg);
+  box-shadow: inset 0 0 0 1px var(--line2); font-size: 12px; font-weight: 600; color: var(--text2); white-space: nowrap; }
+/* Karta sarlavhasi ostidagi izoh qatori. */
+.card-sub { margin: -8px 0 12px; font-size: 13px; color: var(--text3); }
+
+/* ---------- maslahat qutisi ----------
+   Oq fon, ingichka chegara, chapda belgi, 14px matn. */
+.advice { display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border-radius: 16px; background: var(--card-bg);
+  box-shadow: inset 0 0 0 1px var(--line2); font-size: 14px; line-height: 1.45; color: var(--text); }
+.advice > .ic { flex: none; margin-top: 2px; color: var(--success-text); }
+.advice.warn > .ic { color: var(--amber-text); } .advice.bad > .ic { color: var(--danger-text); } .advice.info > .ic { color: var(--accent-text); }
+.advice.tint { background: var(--accent-soft); box-shadow: none; }
+.advice b { font-weight: 700; }
+
+/* ---------- kichik plitka (.ptile) ----------
+   2 yoki 3 ustunli to'r; ichida yorliq, raqam, qisqa baho. Bosh karta
+   ichida oq va chegarali, oddiy karta ichida .flat — kulrang, chegarasiz.
+   (.tile nomi band: u Asosiydagi eski 2×2 kvadrat.) */
+.ptiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ptiles.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ptile { min-width: 0; padding: 12px; border-radius: 16px; background: var(--card-bg); box-shadow: inset 0 0 0 1px var(--line2); }
+.ptile.flat { border-radius: 14px; background: var(--card2); box-shadow: none; }
+.ptile-l { display: block; font-size: 12px; font-weight: 600; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ptile-v { display: block; margin-top: 3px; font-size: 19px; font-weight: 600; letter-spacing: -.03em; color: var(--text); line-height: 1.2; overflow-wrap: anywhere; }
+.ptile-v small { font-size: 12px; font-weight: 500; letter-spacing: 0; color: var(--text4); }
+.ptile-n { display: block; margin-top: 3px; font-size: 11px; font-weight: 600; color: var(--text4); }
+.ptile-n.good { color: var(--success-text); } .ptile-n.warn { color: var(--amber-text); } .ptile-n.bad { color: var(--danger-text); }
+@media (max-width: 360px){ .ptile { padding: 10px; } .ptile-v { font-size: 17px; } }
 
 /* ---------- plitka (2×2) ----------
    Kvadrat karta: tepada yorliq + «›», holat so'zi, pastda katta raqam.
@@ -268,7 +369,10 @@ p { margin: 0 0 8px; }
 @media (hover: hover) { .li-del:hover { color: var(--danger-text); background: var(--hover); } }
 @media (hover: hover) { .btn.icon:hover { color: var(--text); background: var(--hover); } }
 /* Belgi doirasi — qatorning chap chetida (kategoriya emoji, bo'lim belgisi). */
-.ico { width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; flex: none; background: var(--card2); color: var(--text2); font-size: 19px; font-family: var(--emoji); }
+.ico { --c: var(--text2); --cb: var(--card2); width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center; flex: none; background: var(--cb); color: var(--c); font-size: 18px; font-family: var(--emoji); }
+.ico.good { --c: var(--success-text); --cb: var(--success-soft); } .ico.info { --c: var(--accent-text); --cb: var(--accent-soft); }
+.ico.sleep { --c: var(--violet-text); --cb: var(--violet-soft); } .ico.warn { --c: var(--amber-text); --cb: var(--warning-soft); }
+.ico.bad { --c: var(--danger-text); --cb: var(--danger-soft); } .ico.coral { --c: var(--coral-text); --cb: var(--coral-soft); }
 .empty { display: flex; flex-direction: column; align-items: center; justify-content: center;
   text-align: center; gap: 6px; padding: 28px 18px; color: var(--text3); font-size: 13px; line-height: 1.5; }
 .empty-ic { width: 46px; height: 46px; border-radius: var(--r-pill); display: grid; place-items: center;
@@ -285,25 +389,34 @@ p { margin: 0 0 8px; }
 
 /* ---------- chip va teg ----------
    Chegarasiz: rang 14% fon + rangli matn. Oddiy registr. */
-.pill { display: inline-flex; align-items: center; gap: 5px; padding: 6px 11px; border-radius: var(--r-pill); background: var(--card2); border: 0; color: var(--text2); font-size: 13px; font-weight: 600; white-space: nowrap; transition: background .2s, color .2s; }
-.pill.on { background: color-mix(in srgb, var(--warning) 14%, transparent); color: var(--warning-text); }
-.pill.good { background: color-mix(in srgb, var(--success) 14%, transparent); color: var(--success-text); }
-.pill.bad { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger-text); }
+.pill { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--r-pill); background: var(--card2); border: 0; color: var(--text2); font-size: 13px; font-weight: 600; white-space: nowrap; transition: background .2s, color .2s; }
+.pill.on, .pill.warn { background: var(--warning-soft); color: var(--amber-text); }
+.pill.good { background: var(--success-soft); color: var(--success-text); }
+.pill.bad { background: var(--danger-soft); color: var(--danger-text); }
+.pill.sleep { background: var(--violet-soft); color: var(--violet-text); }
+.pill.coral { background: var(--coral-soft); color: var(--coral-text); }
 .pill.info { background: var(--accent-soft); color: var(--accent-text); }
 .pill.big { padding: 8px 13px; font-size: 13px; }
 button.pill { min-height: 40px; padding: 8px 14px; }
 .tag { --c: var(--boshqa); display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--r-pill); font-size: 12px; font-weight: 600; white-space: nowrap;
   background: color-mix(in srgb, var(--c) 14%, transparent); border: 0; color: var(--c); }
 .tag.good { --c: var(--success-text); } .tag.bad { --c: var(--danger-text); } .tag.info { --c: var(--accent-text); }
+/* Tanlanadigan chip: oq ↔ boshqaruv rangi. Holat pilli (.pill) bilan
+   adashtirmang — u bosilmaydi. */
+.chip { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: var(--r-pill); border: 1.5px solid var(--f-line);
+  background: var(--card-bg); color: var(--text); font-size: 14px; font-weight: 600; white-space: nowrap; transition: background .15s, color .15s, border-color .15s; }
+:root:not([data-theme="light"]) .chip { background: var(--card2); }
+.chip[aria-pressed="true"], .chip.on { background: var(--ctl); border-color: var(--ctl); color: var(--on-ctl); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--text3)); display: inline-block; flex: none; }
 .streak { display: inline-flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 600; color: var(--warning-text); font-family: var(--num); }
 
 /* ---------- boshqaruv ----------
    Asosiy tugma — ko'k kapsula, oq yozuv (ikkala temada). Ghost — ichki
    rang (--card2), chegarasiz. Segment va chip: faol bo'lak ko'k. */
-.inp, .sel, .ta { width: 100%; min-width: 0; padding: 12px 15px; border: 1px solid transparent; border-radius: var(--r-sm); background: var(--f-input); color: var(--text); font-size: 15px; outline: none; transition: border-color .2s, background .2s; }
+.inp, .sel, .ta { width: 100%; min-width: 0; min-height: 50px; padding: 12px 16px; border: 1.5px solid var(--f-line); border-radius: var(--r-sm); background: var(--f-input); color: var(--text); font-size: 15px; outline: none; transition: border-color .2s, background .2s; }
 .inp::placeholder, .ta::placeholder { color: var(--text3); }
-.inp:focus, .sel:focus, .ta:focus { border-color: var(--accent); background: var(--f-input-focus); }
+.inp:focus, .sel:focus, .ta:focus { border-color: var(--ctl); background: var(--f-input-focus); }
 .inp:focus-visible, .sel:focus-visible, .ta:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; }
 .inp.sm, .sel.sm { padding: 9px 12px; font-size: 13px; min-height: 40px; }
 @media (pointer: coarse) { .inp, .sel, .ta, .inp.sm, .sel.sm { font-size: 16px; } }
@@ -326,13 +439,18 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .btn.sm { padding: 0 16px; font-size: 13px; min-height: 40px; }
 .btn.xs { padding: 0 13px; font-size: 12px; min-height: 36px; }
 .btn.block { width: 100%; white-space: normal; line-height: 1.3; }
+/* Sahifaning asosiy amali: to'liq enli, 54px, burchagi 16. */
+.btn.main { width: 100%; min-height: 54px; border-radius: 16px; font-size: 16px; font-weight: 600; white-space: normal; }
+.btn.main:disabled { opacity: .4; }
+.btn.good { background: var(--good-fill); color: #fff; }
 .btn.icon, .btn.sq { width: 42px; height: 42px; padding: 0; flex: none; border-radius: 50%; background: var(--card2); color: var(--text2); box-shadow: none; }
 .dashed { width: 100%; padding: 12px; border: 1px dashed var(--line3); border-radius: var(--r-sm); background: transparent; color: var(--text3); font-size: 13px; font-weight: 600; transition: color .2s, border-color .2s, background .2s; }
 @media (hover: hover) { .dashed:hover { color: var(--text); border-style: solid; background: var(--card2); } }
-.seg { display: flex; gap: 4px; padding: 4px; background: var(--card-bg); border: 1px solid var(--card-line); border-radius: var(--r-pill); margin-bottom: 14px; overflow-x: auto; scrollbar-width: none; }
+.seg { display: flex; gap: 2px; padding: 4px; background: var(--seg-bg); border: 0; border-radius: 16px; margin-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
 .seg::-webkit-scrollbar { display: none; }
-.seg button { flex: 1; padding: 8px 10px; min-height: 40px; border: 0; background: transparent; color: var(--text3); border-radius: var(--r-pill); font-size: 13px; font-weight: 600; white-space: nowrap; transition: background .15s, color .15s; }
-.seg button.on { background: var(--accent); color: #fff; box-shadow: 0 6px 18px -6px var(--accent-glow); }
+.seg button { flex: 1; padding: 8px 10px; min-height: 40px; border: 0; background: transparent; color: var(--seg-text); border-radius: 12px; font-size: 14px; font-weight: 600; white-space: nowrap; transition: background .15s, color .15s; }
+.seg button.on, .seg button[aria-selected="true"] { background: var(--seg-on); color: var(--seg-on-text); box-shadow: var(--seg-sh); }
+.seg.four button { font-size: 13px; padding: 8px 4px; }
 .seg.compact { display: inline-flex; margin: 0; }
 .seg.compact button { flex: none; padding: 7px 12px; font-size: 13px; min-height: 36px; }
 .tabs { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; margin-bottom: 10px; scrollbar-width: none; }
@@ -342,7 +460,7 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
   mask-image: linear-gradient(90deg, #000 calc(100% - 26px), transparent);
 }
 .tabs button { flex: none; padding: 8px 14px; min-height: 38px; border-radius: var(--r-pill); border: 0; background: var(--card2); color: var(--text3); font-size: 13px; font-weight: 600; white-space: nowrap; transition: background .15s, color .15s; }
-.tabs button.on { background: var(--accent); color: #fff; }
+.tabs button.on { background: var(--ctl); color: var(--on-ctl); }
 .slider { -webkit-appearance: none; appearance: none; width: 100%; height: 36px; background: transparent; outline: none; margin: 0; touch-action: pan-y; }
 .slider::-webkit-slider-runnable-track { height: 6px; border-radius: 3px; background: var(--track); }
 .slider::-moz-range-track { height: 6px; border-radius: 3px; background: var(--track); }
@@ -350,10 +468,16 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .slider::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: var(--text); cursor: pointer; border: 3px solid var(--bg); }
 .stepper { display: flex; align-items: center; gap: 8px; }
 .stepper .val { flex: 1; text-align: center; font-family: var(--num); font-size: 22px; font-weight: 600; color: var(--text); }
-.toggle { position: relative; width: 44px; height: 26px; border-radius: 13px; background: var(--line2); border: 0; padding: 0; flex: none; transition: background .2s; }
-.toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--text); transition: transform .2s; }
+.toggle { position: relative; width: 52px; height: 32px; border-radius: 16px; background: var(--line3); border: 0; padding: 0; flex: none; transition: background .2s; }
+.toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 26px; height: 26px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(14,17,22,.25); transition: transform .2s; }
 .toggle.on { background: var(--success); }
-.toggle.on::after { transform: translateX(18px); background: #fff; }
+.toggle.on::after { transform: translateX(20px); }
+.toggle.sm { width: 40px; height: 24px; border-radius: 12px; }
+.toggle.sm::after { width: 18px; height: 18px; }
+.toggle.sm.on::after { transform: translateX(16px); }
+/* Kalit 32px, bosiladigan joy esa 44px bo'lishi kerak. */
+.toggle::before { content: ''; position: absolute; inset: -6px -4px; }
+.toggle.sm::before { inset: -10px -4px; }
 .input-row { display: flex; gap: 8px; align-items: center; }
 .input-row .inp, .input-row .sel { flex: 1; }
 .form-foot { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--line); }
@@ -364,8 +488,8 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 /* ---------- o'sish chiziqlari ----------
    Rels 4px, yo'lak deyarli ko'rinmas, to'ldirish ko'k; bajarilganda yashil.
    Nur (uchidagi porlash) faqat modul o'zi so'raganda (.td-lv-rail). */
-.bar { flex: 1; height: 4px; background: var(--track); border-radius: 3px; overflow: hidden; display: block; min-width: 40px; }
-.bar.thin { height: 3px; } .bar.thick { height: 10px; border-radius: 6px; }
+.bar { flex: 1; height: 6px; background: var(--track); border-radius: 4px; overflow: hidden; display: block; min-width: 40px; }
+.bar.thin { height: 4px; } .bar.md { height: 8px; } .bar.thick { height: 14px; border-radius: 7px; }
 .bar-fill { display: block; height: 100%; border-radius: inherit; background: var(--accent); transition: width .4s var(--ease-out), background .3s; }
 .hbar { display: flex; align-items: center; gap: 8px; font-size: 13px; margin: 8px 0; }
 .hbar-label { width: 104px; flex: none; color: var(--text2); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -431,7 +555,7 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
    osmonning eng kuchli joyida turadi, shuning uchun --text2 (asr fazasida
    6,3:1; --text3 u yerda 3,6:1 ga tushardi). Profil surati ko'k halqa bilan. */
 .dash-title { margin: 0; font-size: 20px; font-weight: 700; letter-spacing: -.02em; color: var(--text); line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.top { max-width: 720px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 16px) 16px 8px; }
+.top { max-width: 720px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 24px) 20px 0; }
 .top-row { display: flex; align-items: center; gap: 12px; }
 .top-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .top-btn { width: 40px; height: 40px; flex: none; border-radius: 50%; border: 0; background: var(--card2); color: var(--text2); display: grid; place-items: center; padding: 0; transition: background .16s, color .16s; }
@@ -440,57 +564,69 @@ input[type="date"].inp, input[type="time"].inp { color-scheme: dark; }
 .top-btn[disabled] { opacity: .35; }
 .top-link { border: 0; background: transparent; padding: 0; color: var(--accent-text); font: inherit; font-weight: 600; }
 .top-avatar { width: 42px; height: 42px; overflow: hidden; background: transparent; box-shadow: 0 0 0 1px rgba(255,255,255,.10), 0 0 0 5px var(--accent-soft); }
+[data-theme="light"] .top-avatar { box-shadow: none; }
+[data-theme="light"] .top-btn .pf-av-ini { background: var(--ctl) !important; }
 .top-btn .pf-av-img, .top-btn .pf-av-ini, i.top-av { width: 42px; height: 42px; border-radius: 50%; display: block; }
 .top-btn .pf-av-ini { display: grid; place-items: center; font-size: 15px; font-weight: 700; color: #fff; }
 i.top-av { background: linear-gradient(150deg, #5A8DFF, var(--accent)); }
-.top-title { margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -.025em; line-height: 1.15; color: var(--text);
+.top-title { margin: 0; font-size: 30px; font-weight: 600; letter-spacing: -.035em; line-height: 1.1; color: var(--text);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.top-sub { order: -1; margin: 0 0 3px; font-size: 13px; font-weight: 500; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (max-width: 360px) { .top-title { font-size: 24px; } }
+.top-sub { order: -1; margin: 0 0 3px; font-size: 14px; font-weight: 500; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 360px) { .top-title { font-size: 26px; } }
+/* Sarlavha o'ngidagi oq pill: Ibodatda shahar, Tanada WHOOP, Moliyada oy. */
+.head-pill { display: inline-flex; align-items: center; gap: 6px; flex: none; min-height: 40px; padding: 0 14px; border: 0; border-radius: var(--r-pill);
+  background: var(--card-bg); box-shadow: 0 1px 2px rgba(17,24,39,.06), inset 0 0 0 1px var(--line2); font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.head-pill .dot { --c: var(--success); }
 
 /* ---------- pastki panel + FAB ----------
-   To'rtta yorliq kapsulada, chekkadan uzilib suzadi; o'ngda alohida ko'k
-   doira — Tana bo'limi (core.js renderNav: TABS[MID] kapsuladan chiqib
-   #fab ga tushadi). Fon to'liq rangda, blursiz — blur har aylantirishda
-   butun panelni qayta kompozit qilardi (2026-09-10 da o'lchangan).
-   Faol yorliq: ko'k belgi + yozuv + ostida 4px nuqta. */
-.nav { position: fixed; left: 16px; right: 98px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 40;
-  display: grid; grid-template-columns: repeat(4, 1fr); height: 66px; padding: 0 2px;
-  border-radius: 33px; background: var(--nav); border: 1px solid var(--line2); box-shadow: var(--sh-nav); }
-.nav-tab { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-  min-height: 0; padding: 0; border: 0; background: transparent; color: var(--text3);
-  font-size: 11px; font-weight: 600; transition: color .16s; }
+   (2026-10-09) Oq kapsulada BESHTA yorliq — Asosiy · Ibodat · Tana · Moliya ·
+   Vazifa; o'ngda alohida 62px doira — «+» (qo'shish). Ilgari o'sha doira
+   Tana bo'limi edi va kapsulada to'rtta yorliq turardi. Fon to'liq rangda,
+   blursiz — blur har aylantirishda butun panelni qayta kompozit qilardi
+   (2026-09-10 da o'lchangan). Faol yorliq: qalin yozuv + ostida 4px nuqta. */
+.nav { position: fixed; left: 14px; right: 88px; bottom: calc(16px + env(safe-area-inset-bottom)); z-index: 40;
+  display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: 66px; padding: 0 4px;
+  border-radius: 33px; background: var(--nav); border: 1px solid var(--line); box-shadow: var(--sh-nav); }
+.nav-tab { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px;
+  min-width: 0; min-height: 0; padding: 0; border: 0; background: transparent; color: var(--text4);
+  font-size: 11px; font-weight: 500; transition: color .16s; }
 .nav-ic { position: relative; display: flex; padding: 0; }
 .nav-em { display: flex; transition: transform .12s var(--ease-spring); }
 .nav-em .ic { stroke-width: 1.9; }
 .nav-lab { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nav-tab.on { color: var(--accent-text); }
+.nav-tab.on { color: var(--ctl-text); font-weight: 700; }
 .nav-tab.on .nav-em .ic { stroke-width: 2.2; }
-.nav-tab.on::after { content: ''; position: absolute; bottom: 7px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--accent-text); }
+.nav-tab.on::after { content: ''; position: absolute; bottom: 6px; left: 50%; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: var(--ctl-text); }
 .nav-tab:active .nav-em { transform: scale(.88); }
 /* Belgi — tabular raqamdan CHIQARILADI: u hech narsa bilan tekislanmaydi,
    tnum faqat kenglik qo'shardi. */
-.nav-badge { position: absolute; top: -6px; right: -10px; min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px;
-  background: var(--danger); color: #fff; font-size: 11px; font-weight: 700; line-height: 17px; text-align: center;
-  font-variant-numeric: proportional-nums; font-feature-settings: "tnum" 0; box-shadow: 0 0 0 2px var(--nav); }
+.nav-badge { position: absolute; top: -6px; right: -11px; min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px;
+  background: var(--danger); color: #fff; font-size: 11px; font-weight: 700; line-height: 18px; text-align: center; font-style: normal;
+  font-variant-numeric: proportional-nums; font-feature-settings: "tnum" 0; box-shadow: 0 0 0 2px var(--bg3); }
 .mark-em { font-family: var(--emoji); font-size: 14px; line-height: 1; }
-.fab { position: fixed; right: 16px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 40; width: 66px; height: 66px; padding: 0; border: 0; border-radius: 50%;
-  display: grid; place-items: center; color: #fff;
-  background: radial-gradient(120% 120% at 30% 20%, #6A9BFF, var(--accent) 60%);
-  box-shadow: 0 14px 34px -6px var(--accent-glow), inset 0 0 0 1px rgba(255,255,255,.12); transition: transform .12s var(--ease-spring); }
+.fab { position: fixed; right: 14px; bottom: calc(18px + env(safe-area-inset-bottom)); z-index: 40; width: 62px; height: 62px; padding: 0; border: 0; border-radius: 50%;
+  display: grid; place-items: center; background: var(--ctl); color: var(--on-ctl);
+  box-shadow: 0 16px 30px -10px rgba(14,17,22,.55); transition: transform .12s var(--ease-spring); }
 .fab:active { transform: scale(.94); }
-.fab.on { box-shadow: 0 14px 34px -6px var(--accent-glow), 0 0 0 3px var(--accent-soft), inset 0 0 0 1px rgba(255,255,255,.12); }
-.fab .ic { width: 26px; height: 26px; stroke-width: 2.1; }
-[data-theme="light"] .fab { background: radial-gradient(120% 120% at 30% 20%, #5B8BFF, var(--accent) 60%); }
+.fab .ic { width: 26px; height: 26px; stroke-width: 2.4; }
+:root:not([data-theme="light"]) .fab { box-shadow: 0 14px 34px -6px var(--accent-glow), inset 0 0 0 1px rgba(255,255,255,.12); }
+@media (max-width: 340px){ .nav { left: 8px; right: 78px; } .fab { right: 8px; } }
 @media (min-width: 960px){ .nav, .fab { display: none; } }
+/* «+» ochadigan ro'yxat (core.js › D.act.fab). */
+.fab-menu { display: grid; gap: 2px; }
+.fab-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 4px; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 15px; font-weight: 600; text-align: left; border-radius: 14px; }
+.fab-row > span:nth-child(2) { flex: 1; min-width: 0; }
+.fab-row > .ic:last-child { color: var(--text4); }
+@media (hover: hover) { .fab-row:hover { background: var(--hover); } }
+.fab-row:active { background: var(--hover); }
 
 /* ---------- pastki oyna ---------- */
-.sheet-bg { position: fixed; inset: 0; z-index: 110; background: rgba(0,0,0,.5); opacity: 0; visibility: hidden; transition: opacity .24s, visibility 0s .24s; }
+.sheet-bg { position: fixed; inset: 0; z-index: 110; background: var(--overlay); opacity: 0; visibility: hidden; transition: opacity .24s, visibility 0s .24s; }
 .sheet-bg.show { opacity: 1; visibility: visible; transition: opacity .24s, visibility 0s; }
-.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 115; max-height: 82vh; overflow-y: auto; overscroll-behavior: contain; background: var(--bg3); border-top: 1px solid var(--line2); border-radius: var(--r-lg) var(--r-lg) 0 0; padding: 10px 18px calc(22px + env(safe-area-inset-bottom)); transform: translateY(101%); visibility: hidden; transition: transform .3s var(--ease-sheet), visibility 0s .3s; }
+.sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 115; max-height: 82vh; overflow-y: auto; overscroll-behavior: contain; background: var(--bg3); border-top: 1px solid var(--line); border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: 0 -20px 50px rgba(14,17,22,.18); padding: 10px 20px calc(24px + env(safe-area-inset-bottom)); transform: translateY(101%); visibility: hidden; transition: transform .3s var(--ease-sheet), visibility 0s .3s; }
 .sheet.show { transform: translateY(0); visibility: visible; transition: transform .3s var(--ease-sheet), visibility 0s; }
 @media (min-width: 620px){ .sheet { left: 50%; right: auto; width: 460px; transform: translate(-50%, 101%); } .sheet.show { transform: translate(-50%, 0); } }
-.sheet-grip { display: block; width: 40px; height: 4px; border-radius: 99px; background: var(--line3); margin: 0 auto 14px; }
+.sheet-grip { display: block; width: 40px; height: 4px; border-radius: 99px; background: var(--grip); margin: 0 auto 14px; }
 /* Pastga surib yopish (core.js › swipeClose): chiziqcha atrofidagi keng joy ushlanadi */
 .sheet-grip { position: relative; touch-action: none; }
 .sheet-grip::before { content: ''; position: absolute; inset: -14px -60px; }
@@ -521,10 +657,10 @@ i.top-av { background: linear-gradient(150deg, #5A8DFF, var(--accent)); }
   .modal-head { touch-action: none; }
   @keyframes slideup { from { transform: translateY(100%); } to { transform: none; } }
 }
-.toast { position: fixed; left: 50%; bottom: calc(var(--nav-h) + 12px + env(safe-area-inset-bottom)); z-index: 400; transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: var(--r-pill); background: var(--bg3); border: 1px solid var(--line2); box-shadow: var(--sh-modal); color: var(--text); font-size: 13px; font-weight: 600; white-space: nowrap; max-width: calc(100vw - 32px); transition: opacity .2s, transform .2s; }
+.toast { position: fixed; left: 50%; bottom: calc(100px + env(safe-area-inset-bottom)); z-index: 400; transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none; display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-radius: var(--r-pill); background: var(--toast-bg); border: 0; box-shadow: 0 12px 30px -8px rgba(14,17,22,.45); color: var(--toast-fg); font-size: 13px; font-weight: 600; white-space: nowrap; max-width: calc(100vw - 32px); transition: opacity .2s, transform .2s; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
 .toast span { overflow: hidden; text-overflow: ellipsis; }
-.toast-undo { border: 0; background: transparent; color: var(--accent-text); font-weight: 700; padding: 0; font-size: 13px; }
+.toast-undo { border: 0; background: transparent; color: #8FB4FF; font-weight: 700; padding: 0; font-size: 13px; }
 @media (min-width: 960px){ .toast { bottom: 24px; } }
 .error-card pre { white-space: pre-wrap; font-size: 11px; max-height: 200px; overflow: auto; }
 .banner { display: flex; gap: 10px; align-items: center; padding: 11px 13px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--warning) 12%, transparent); color: var(--warning-text); font-size: 13px; font-weight: 500; margin-bottom: 12px; }

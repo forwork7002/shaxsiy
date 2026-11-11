@@ -103,7 +103,7 @@
 .tk-qk { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: -4px 0 14px; }
 .tk-qk button { min-height: 32px; padding: 6px 12px; border-radius: var(--r-pill); border: 0; background: var(--card2); color: var(--text3); font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s, color .15s; }
 @media (hover: hover) { .tk-qk button:hover { background: var(--hover); color: var(--text); } }
-.tk-qk button.on { background: var(--accent); color: #fff; }
+.tk-qk button.on { background: var(--ctl); color: var(--on-ctl); }
 .tk-qk-h { flex: 1 1 100%; font-size: 11px; line-height: 1.45; color: var(--text4); }
 
 .tk-pv-in { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin: -8px 0 10px; padding: 8px 10px;

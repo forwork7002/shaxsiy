@@ -1,105 +1,158 @@
-/* ==== today ==== Asosiy — kunning ko'zgusi. Ko'mir qobiq (2026-09-15).
-   Tartib: hafta chizig'i · Bugungi maqsad (qahramon) · 2×2 plitka (kit,
-   app.css › .tile) · Bugun cheklisti. Bu yerda faqat shu ekranga xos
-   sinflar; plitka va karta materiali app.css da. */
+/* ==== today ==== Asosiy. «Yorug' qog'oz» (2026-10-09).
+   Tartib: Bugungi holat (bosh karta) · Uyqu · Zo'riqish · Daraja · Odatlar ·
+   Bugungi vazifalar · Yil maqsadlari · Kun yakuni. Karta, pill, plitka va
+   chiziq materiali app.css da; bu yerda faqat shu ekranga xos sinflar. */
+.td { display: block; }
+.td-c { display: block; width: 100%; text-align: left; color: var(--text); font: inherit; cursor: pointer; }
+.td-c:active { transform: scale(.995); }
+.td-note { display: block; margin: 12px 2px 0; font-size: 12px; line-height: 1.5; color: var(--text3); }
+.td-foot { margin: 12px 0 0; padding-top: 12px; border-top: 1px solid var(--line); font-size: 13px; color: var(--text3); }
+.td-cnt { font-size: 14px; color: var(--text3); white-space: nowrap; }
+.td-more { display: inline-flex; align-items: center; gap: 2px; min-height: 44px; padding: 0 4px; border: 0; background: transparent; color: var(--accent-text); font-size: 14px; font-weight: 600; white-space: nowrap; }
 
-/* --- hafta chizig'i: yetti kun, tanlangani ko'k plitka ---
-   Kartaga o'ralmagan: u sahifaning boshqaruvi. Tanlov endi og'irlik bilan
-   emas, KO'K bilan — ko'k ilovada boshqaruv rangi (3-rasmdagi «17 Thu»). */
-.td-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-bottom: 14px; }
-.td-wd { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 9px 0 8px; border: 0; border-radius: 15px;
-  background: transparent; color: var(--text3); transition: background .16s, color .16s; }
-.td-wd-l { font-size: 11px; font-weight: 500; }
-.td-wd-n { font-size: 16px; font-weight: 600; letter-spacing: -.02em; color: var(--text2); line-height: 1.1; }
-.td-wd.today .td-wd-n { color: var(--text); }
-.td-wd.on { background: var(--accent); color: rgba(255,255,255,.8); box-shadow: 0 8px 22px -8px var(--accent-glow); }
-.td-wd.on .td-wd-n { color: #fff; font-weight: 700; }
-.td-wd[disabled] { opacity: .45; }
+/* --- Bugungi holat: uch halqa + izoh ustuni --- */
+.td-hero-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; cursor: pointer; }
+.td-hero-h h2 { font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
+.td-rings { display: flex; align-items: center; gap: 14px; margin-top: 12px; cursor: pointer; }
+.td-rings-w { position: relative; width: 176px; height: 176px; flex: none; }
+.td-rings-svg { display: block; width: 100%; height: 100%; }
+.td-rg-t.a { stroke: color-mix(in srgb, var(--success) 20%, transparent); }
+.td-rg-t.b { stroke: color-mix(in srgb, var(--violet) 18%, transparent); }
+.td-rg-t.c { stroke: color-mix(in srgb, var(--accent) 16%, transparent); }
+.td-rings-c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+.td-rings-c b { font-size: 30px; font-weight: 600; letter-spacing: -.04em; line-height: 1; color: var(--text); }
+.td-rings-c b small { font-size: 14px; font-weight: 600; letter-spacing: 0; }
+.td-rings-c.wait b, .td-rings-c.wait span { color: var(--text3); }
+.td-rings-c span { margin-top: 3px; font-size: 11px; font-weight: 600; color: var(--success-text); }
+.td-legs { flex: 1; min-width: 0; display: grid; gap: 12px; }
+.td-leg { --c: var(--success); display: grid; gap: 1px; min-width: 0; }
+.td-leg.b { --c: var(--violet); } .td-leg.c { --c: var(--accent); }
+.td-leg-n { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text2); }
+.td-leg-v { display: flex; align-items: baseline; flex-wrap: wrap; gap: 2px 6px; }
+.td-leg-v b { font-size: 21px; font-weight: 600; letter-spacing: -.03em; color: var(--text); line-height: 1.2; }
+.td-leg-v b i { font-style: normal; font-size: 13px; font-weight: 500; letter-spacing: 0; color: var(--text3); }
+.td-leg-s { font-size: 11px; font-weight: 600; color: var(--text3); white-space: nowrap; }
+.td-leg-s.good { color: var(--success-text); } .td-leg-s.warn { color: var(--amber-text); } .td-leg-s.bad { color: var(--danger-text); }
+.td-leg-s.sleep { color: var(--violet-text); } .td-leg-s.info { color: var(--accent-text); }
+.td-adv { margin-top: 14px; }
+.td-vitals { margin-top: 10px; }
+@media (max-width: 372px) { .td-rings-w { width: 148px; height: 148px; } .td-rings { gap: 10px; } .td-leg-v b { font-size: 19px; } }
 
-/* --- Bugungi maqsad — qahramon ---
-   Uch qavat: yorliq → holat so'zi (zanjir, ko'k) → raqam → rels → jumla. */
-.td-lv { display: block; width: 100%; text-align: left; cursor: pointer; transition: transform .1s; }
-.td-lv:active { transform: scale(.995); }
-.td-lv-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.td-lv-head > span { min-width: 0; font-size: 15px; font-weight: 500; letter-spacing: -.005em; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.td-lv-head .ic { color: var(--text3); flex: none; }
-.td-lv-hero { display: flex; align-items: baseline; gap: 6px; margin: 16px 0 14px; }
-.td-lv-hero b { font-size: 56px; font-weight: 600; line-height: 1; letter-spacing: -.035em; color: var(--text); }
-.td-lv-hero i { font-style: normal; font-size: 17px; font-weight: 500; color: var(--text3); }
-.td-lv-rail { display: block; height: 4px; border-radius: 3px; background: var(--track); }
-.td-lv-rail > i { display: block; position: relative; height: 100%; border-radius: 3px; background: var(--accent); transition: width .55s var(--ease-out); }
-/* Yagona nur — relsning uchida. 8px, yumshoq porlash. */
-.td-lv-rail > i::after { content: ''; position: absolute; right: -4px; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%;
-  background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
-.td-lv-rail.empty > i::after { display: none; }
-/* `>` SHART: bittasi ham tushib qolsa, qoida kartaning ICHIDAGI haftalik
-   relsga ham tegadi va u bajarilmagan turib yashil bo'lib qoladi. */
-.td-lv.done > .td-lv-rail > i { background: var(--success); }
-.td-lv.done > .td-lv-rail > i::after { background: var(--success); box-shadow: 0 0 10px var(--success-glow); }
-.td-lv-sub { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 12px; font-size: 14px; color: var(--text2); }
-.td-lv-sub .td-lv-rank { flex: none; color: var(--text3); }
-/* Daraja — kichik halqa martaba rangida: ichi shu darajada qancha yurilgani.
-   Kartaning bosh raqami kunlik maqsad bo'lib qoladi, lekin daraja endi
-   oddiy kulrang yozuv emas — bir qarashda «qaysi darajada» ekani ko'rinadi. */
-.td-lv-sub .td-lv-rank { display: inline-flex; align-items: center; gap: 7px; font-weight: 600; color: var(--text2); }
-.td-lv-rank > i { position: relative; width: 18px; height: 18px; flex: none; border-radius: 50%;
-  background: conic-gradient(var(--c) calc(var(--p, 0) * 1%), var(--track) 0); }
-.td-lv-rank > i::after { content: ''; position: absolute; inset: 3.5px; border-radius: 50%; background: var(--card-bg); }
-/* Haftalik sinov — bo'ysunuvchi: ingichka rels, nursiz, matni xiraroq. */
-.td-lv-w { display: block; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
-.td-lv-wrow { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
-.td-lv-wt { min-width: 0; font-size: 13px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.td-lv-wn { flex: none; font-size: 13px; font-weight: 600; color: var(--text2); letter-spacing: -.02em; }
-.td-lv-wn i { font-style: normal; font-weight: 500; color: var(--text3); }
-.td-lv-w .td-lv-rail { height: 3px; }
-.td-lv-w .td-lv-rail > i { background: var(--text3); }
-.td-lv-w .td-lv-rail > i::after { display: none; }
-.td-lv-w.done .td-lv-rail > i { background: var(--success); }
-@media (max-width: 400px) { .td-lv-hero b { font-size: 48px; } }
+/* oxirgi 7 kun: ustun — tiklanish, zona rangida; bosilsa o'sha kun */
+.td-w7 { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.td-w7h { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--text3); }
+.td-w7h b { font-weight: 600; color: var(--text); }
+.td-w7g { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.td-w7c { display: flex; flex-direction: column; align-items: center; gap: 5px; min-width: 0; padding: 2px 0; border: 0; border-radius: 10px; background: transparent; color: var(--text3); font: inherit; }
+.td-w7v { font-size: 11px; font-weight: 600; color: var(--text2); }
+.td-w7t { display: flex; align-items: flex-end; width: 100%; max-width: 22px; height: 56px; border-radius: 6px; background: var(--track); overflow: hidden; }
+.td-w7t i { display: block; width: 100%; border-radius: 6px; background: var(--line3); }
+.td-w7t i.good { background: var(--z-high); } .td-w7t i.warn { background: var(--z-mid); } .td-w7t i.bad { background: var(--z-low); }
+.td-w7d { font-size: 11px; white-space: nowrap; }
+.td-w7c.today .td-w7d { font-weight: 700; color: var(--text); }
+.td-w7c.on:not(.today) .td-w7t { box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 4px var(--ctl); }
+.td-w7c.on:not(.today) .td-w7d { font-weight: 700; color: var(--text); }
 
-/* --- Bugun cheklisti: namoz qatorlari + odat/vazifa/maqsad guruhlari ---
-   Hech narsa bu yerda belgilanmaydi. Rang faqat bajarilganda (yashil). */
-.td-day { padding-bottom: 8px; }
-.td-day-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
-.td-day-title { font-size: 15px; font-weight: 500; letter-spacing: -.005em; color: var(--text2); }
-.td-day-prog { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 600; color: var(--text); }
-.td-day-bar { width: 52px; }
-.td-day.all-done .td-day-bar .bar-fill { background: var(--success); }
-.td-kind { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--line3); }
+/* --- Uyqu va Zo'riqish kartalari --- */
+.td-c-h { display: flex; align-items: center; gap: 10px; }
+.td-c-h b { flex: 1; min-width: 0; font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
+.td-big { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin-top: 14px; }
+.td-big b { font-size: 28px; font-weight: 600; letter-spacing: -.035em; line-height: 1.1; color: var(--text); }
+.td-big i { font-style: normal; font-size: 13px; color: var(--text3); }
+.td-big em { margin-left: auto; font-style: normal; font-size: 13px; font-weight: 600; color: var(--accent-text); }
+.td-stg { display: flex; gap: 3px; height: 14px; margin-top: 14px; }
+.td-stg i { display: block; min-width: 4px; border-radius: 7px; }
+.td-stg-l { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; margin-top: 12px; font-size: 13px; color: var(--text2); }
+.td-stg-l span { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.td-stg-l b { margin-left: auto; font-weight: 600; color: var(--text); white-space: nowrap; }
+.td-sbar { position: relative; display: block; height: 14px; margin-top: 14px; border-radius: 7px; background: var(--track); }
+.td-sbar > i { display: block; height: 100%; border-radius: 7px; background: linear-gradient(90deg, #A5BFFF, #2358E8); }
+.td-sbar > u { position: absolute; top: -3px; bottom: -3px; border-radius: 6px; border: 1.5px solid var(--accent); background: color-mix(in srgb, var(--accent) 16%, transparent); }
+.td-scale { display: flex; justify-content: space-between; margin-top: 6px; font-size: 11px; color: var(--text3); }
+.td-scale i { font-style: normal; }
+.td-st { margin-top: 14px; }
+.td-nowh { display: flex; align-items: center; gap: 12px; }
+.td-nowh > div { flex: 1; min-width: 0; } .td-nowh b { display: block; font-size: 15px; font-weight: 600; color: var(--text); }
+.td-nowh p { margin: 2px 0 0; font-size: 13px; color: var(--text3); }
 
-/* guruh qatori: nuqta · nom · ingichka rels · hisob · o'q */
-.td-grp { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 0; border: 0; border-top: 1px solid var(--line);
-  background: transparent; color: var(--text); text-align: left; font: inherit; }
-.td-grp:first-of-type { border-top: 0; }
-.td-grp:active { background: var(--hover); }
-.td-grp-name { flex: 1; min-width: 0; font-size: 15px; font-weight: 500; letter-spacing: -.005em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.td-grp-bar { width: 48px; flex: none; }
-.td-grp-n { flex: none; font-size: 15px; font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; min-width: 42px; text-align: right; }
-.td-grp .ic { flex: none; color: var(--text3); }
-.td-grp.all .td-kind { background: var(--success); }
-.td-grp.all .bar-fill { background: var(--success); }
-.td-grp.all .td-grp-n { color: var(--success-text); }
+/* --- Daraja --- */
+.td-lv-top { display: flex; align-items: center; gap: 14px; }
+/* Olti burchakli nishon — daraja raqami bilan. */
+.td-hex { flex: none; width: 54px; height: 60px; display: grid; place-items: center; color: #fff; font-size: 22px; font-weight: 700;
+  background: linear-gradient(160deg, #3B6BFF, #1F3FA8); clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%); }
+.td-lv-t { flex: 1; min-width: 0; display: grid; gap: 4px; }
+.td-lv-t b { font-size: 18px; font-weight: 600; letter-spacing: -.02em; }
+.td-lv-t > span:not(.bar) { font-size: 13px; color: var(--text3); }
+.td-lv-t .bar { margin-top: 4px; }
+.td-lv-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); font-size: 14px; color: var(--text2); }
+.td-lv-row b { font-size: 16px; font-weight: 700; color: var(--text); }
+.td-lv-bar { display: block; margin-top: 8px; }
+.td-lv-bar .bar-fill { background: linear-gradient(90deg, #7FA2FF, #2358E8); }
+.td-lv.done .td-lv-bar .bar-fill { background: var(--success); }
+.td-lv-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.td-lv-pills .pill { padding: 6px 12px; max-width: 100%; }
+.td-lv-w > span { overflow: hidden; text-overflow: ellipsis; }
+.td-lv-w b { flex: none; color: var(--text); }
 
-/* namoz qatorlari: guruh sarlavhasi ostida, ichkariroq */
-.td-rows { display: flex; flex-direction: column; }
-.td-pr-rows { padding: 0 0 6px 20px; }
-.td-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 8px 0; border: 0; background: transparent; color: var(--text); text-align: left; font: inherit; }
-.td-row .td-kind { border: 1.5px solid var(--line3); background: transparent; }
-.td-row.done .td-kind { background: var(--success); border-color: var(--success); }
-.td-row-body { flex: 1; min-width: 0; }
-.td-row-name { display: block; font-size: 14px; font-weight: 500; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.td-row.done .td-row-name { color: var(--text); }
-.td-row-right { flex: none; font-size: 13px; font-weight: 500; color: var(--text3); font-variant-numeric: tabular-nums; }
-.td-row.done .td-row-right { color: var(--success-text); font-weight: 600; }
+/* --- Odatlar: to'rt ustun, 58px kvadrat --- */
+.td-hbs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 4px; }
+.td-hb { --c: var(--boshqa); display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 0; padding: 0; border: 0; background: transparent; color: var(--text); font: inherit; }
+.td-hb-sq { position: relative; display: grid; place-items: center; width: 58px; height: 58px; margin-bottom: 6px; border-radius: 18px; background: var(--card2); color: var(--text3); transition: transform .12s var(--ease-spring), background .2s; }
+.td-hb:active .td-hb-sq { transform: scale(.94); }
+.td-hb .mark-em { font-size: 24px; }
+.td-hb.done .td-hb-sq { background: color-mix(in srgb, var(--c) 13%, var(--card-bg)); color: var(--c); }
+.td-hb.part .td-hb-sq { color: var(--c); }
+.td-hb-ok { position: absolute; top: -5px; right: -5px; display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--success); color: #fff; border: 2px solid var(--card-bg); }
+.td-hb-ok .ic { stroke-width: 3; }
+.td-hb-sq > u { position: absolute; left: 8px; right: 8px; bottom: 7px; height: 4px; border-radius: 2px; background: var(--line2); overflow: hidden; }
+.td-hb-sq > u > i { display: block; height: 100%; border-radius: 2px; background: var(--c); }
+.td-hb-n { max-width: 100%; font-size: 12px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-hb-s { max-width: 100%; font-size: 11px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-hb.done .td-hb-s { font-weight: 600; color: var(--success-text); }
+.td-hb.part .td-hb-s { color: var(--c); }
+.td-hb.add .td-hb-sq { background: transparent; border: 1.5px dashed var(--line3); }
 
-/* ro'yxat ostidagi eshik — Kun yakuni */
-.td-links { border-top: 1px solid var(--line); margin-top: 4px; }
-.td-link { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 0; border: 0; border-top: 1px solid var(--line);
-  background: transparent; color: var(--text2); font-size: 14px; font-weight: 500; text-align: left; }
-.td-link:first-child { border-top: 0; }
-.td-link span { flex: 1; }
-.td-link .ic { color: var(--text3); }
-.td-link:active { color: var(--text); }
+/* --- Bugungi vazifalar --- */
+.td-tk { display: flex; align-items: flex-start; gap: 4px; padding: 6px 0; border-top: 1px solid var(--line); }
+.td-tasks .card-head + .td-tk { border-top: 0; }
+/* Katak 26px, bosiladigan joy 44px. */
+.td-tk-c { flex: none; display: grid; place-items: center; width: 44px; height: 44px; margin-left: -9px; padding: 0; border: 0; background: transparent; }
+.td-tk-c i { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 8px; border: 2px solid var(--line3); background: var(--card-bg); color: #fff; transition: background .15s, border-color .15s; }
+:root:not([data-theme="light"]) .td-tk-c i { border-color: var(--line3); background: transparent; }
+.td-tk-c.on i { background: var(--success); border-color: var(--success); }
+.td-tk-c .ic { stroke-width: 3; }
+.td-tk-b { flex: 1; min-width: 0; padding: 9px 0 6px; }
+.td-tk-t { display: flex; align-items: flex-start; gap: 8px; font-size: 15px; font-weight: 600; line-height: 1.35; color: var(--text); }
+.td-tk-t > span:first-child { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.td-tk.done .td-tk-t > span:first-child { font-weight: 500; color: var(--text3); text-decoration: line-through; }
+.td-tk-m { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 5px; font-size: 12px; color: var(--text3); }
+.td-tk-tm { display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: var(--text2); }
+.td-tk-rep { font-weight: 500; }
+.td-tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: var(--r-pill); background: var(--card2); color: var(--text2); font-size: 11px; font-weight: 600; white-space: nowrap; }
+.td-tag.late { background: var(--warning-soft); color: var(--amber-text); }
+.td-tag.imp { background: var(--danger-soft); color: var(--danger-text); }
+.td-tag.next { flex: none; padding: 3px 9px; background: var(--accent-soft); color: var(--accent-text); }
+.td-tk-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 8px; padding-top: 12px; border-top: 1px solid var(--line); }
+.td-tk-add { min-height: 46px; border-radius: 14px; }
+
+/* --- Yil maqsadlari --- */
+.td-gl { --c: var(--accent); display: grid; gap: 8px; width: 100%; padding: 14px 0; border: 0; border-top: 1px solid var(--line); background: transparent; color: var(--text); font: inherit; text-align: left; }
+.td-goals .card-head + .td-gl { border-top: 0; padding-top: 2px; }
+.td-gl:last-child { padding-bottom: 0; }
+.td-gl.d-oilaviy { --c: #F2577C; } .td-gl.d-ish { --c: var(--amber); } .td-gl.d-moliyaviy { --c: var(--success); }
+.td-gl-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.td-gl-h b { min-width: 0; font-size: 15px; font-weight: 600; overflow-wrap: anywhere; }
+.td-gl-h span { flex: none; font-size: 14px; font-weight: 700; }
+.td-gl .bar-fill { background: var(--c); }
+.td-gl-m { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text3); }
+.td-tag.dir { background: color-mix(in srgb, var(--c) 12%, var(--card-bg)); color: color-mix(in srgb, var(--c) 70%, var(--text)); }
+.td-goals .card-head { margin-bottom: 8px; }
+
+/* --- Kun yakuni qatori --- */
+.td-wrapbtn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 14px 20px; text-align: left; color: var(--text); font: inherit; }
+.td-wrapbtn-t { flex: 1; min-width: 0; display: grid; }
+.td-wrapbtn-t b { font-size: 15px; font-weight: 600; } .td-wrapbtn-t span { font-size: 12px; color: var(--text3); }
+.td-wrapbtn > .ic:last-child { color: var(--text3); }
 .td-wrap-count { text-align: right; margin-top: 4px; }
 
 /* --- kun yakuni oynasi: izoh + shukr --- */

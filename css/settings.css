@@ -42,7 +42,7 @@
 /* habits */
 .set-days { display: flex; gap: 4px; flex-wrap: wrap; }
 .set-day { width: 40px; height: 40px; padding: 0; border-radius: 10px; border: 1px solid transparent; background: var(--card2); color: var(--text3); font-size: 12px; font-weight: 600; transition: all .15s; }
-.set-day.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.set-day.on { background: var(--ctl); border-color: var(--ctl); color: var(--on-ctl); }
 .set-hab.off { opacity: .55; }
 .set-hab.off .li-text { color: var(--text2); }
 .set-edit { cursor: text; border-radius: 4px; padding: 1px 3px; margin: -1px -3px; transition: background .15s; font-weight: 600; }
@@ -71,7 +71,7 @@
   transition: background .15s, border-color .15s, transform .1s; }
 @media (hover: hover) { .set-emoji-chip:hover { background: var(--hover); border-color: var(--line3); } }
 .set-emoji-chip:active { transform: scale(.94); }
-.set-emoji-chip.on { background: var(--accent-soft); border-color: var(--accent); }
+.set-emoji-chip.on { background: var(--accent-soft); border-color: var(--ctl); }
 @media (max-width: 400px){ .set-emoji-row { grid-template-columns: repeat(8, 1fr); gap: 3px; } .set-emoji-chip { height: 36px; font-size: 16px; } }
 .modal .set-emoji-grid { margin-top: 2px; }
 

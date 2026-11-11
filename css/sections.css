@@ -6,11 +6,12 @@
    ===================================================================== */
 :root { --sec: var(--accent); --sec2: var(--accent); --sec-soft: var(--accent-soft); }
 
-/* Faol yorliq va segment — ko'k, ustida oq yozuv */
-#view .seg button.on { background: var(--accent); color: #fff; }
-#view .tabs button.on { background: var(--accent); color: #fff; }
+/* Faol yorliq va segment — boshqaruv tokenlaridan (app.css): yorug'da oq
+   bo'lak va qora chip, qorong'ida ko'k. */
+#view .seg button.on { background: var(--seg-on); color: var(--seg-on-text); }
+#view .tabs button.on { background: var(--ctl); color: var(--on-ctl); }
 #view .card-head > .title > .ic { color: var(--text3); }
-#view .btn:not(.ghost):not(.danger):not(.icon) { background: var(--btn-grad); color: var(--on-btn); }
+#view .btn:not(.ghost):not(.danger):not(.icon):not(.good) { background: var(--btn-grad); color: var(--on-btn); }
 
 /* ---------- hero ichi ----------
    Karta materiali (.hero) app.css da .card bilan bir xil; bu yerda faqat

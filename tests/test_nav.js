@@ -1,4 +1,4 @@
-/* Pastki panel: to'rtta yorliq kapsulada, Tana alohida #fab da.
+/* Pastki panel: beshta yorliq kapsulada, #fab — «+» (tez qo'shish).
    Ishga tushirish: node tests/test_nav.js */
 const fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..');
@@ -13,7 +13,7 @@ const el = mk();
 /* panel va FAB — haqiqiy DOM o'rniga yozuvni ushlab qoladigan qutilar */
 const navEl = mk(), fabEl = mk(), sideEl = mk(), viewEl = mk();
 fabEl.cls = new Set(); fabEl.classList = { add: (c) => fabEl.cls.add(c), remove: (c) => fabEl.cls.delete(c), contains: (c) => fabEl.cls.has(c), toggle: (c, on) => { on ? fabEl.cls.add(c) : fabEl.cls.delete(c); } };
-fabEl.attrs = {}; fabEl.setAttribute = (k, v) => { fabEl.attrs[k] = v; };
+fabEl.attrs = {}; fabEl.setAttribute = (k, v) => { fabEl.attrs[k] = v; }; fabEl.removeAttribute = (k) => { delete fabEl.attrs[k]; };
 const byId = { nav: navEl, fab: fabEl, side: sideEl, view: viewEl };
 global.document = { documentElement: el, body: el, head: el, addEventListener: noop, removeEventListener: noop,
   createElement: () => mk(), createDocumentFragment: () => mk(),
@@ -45,22 +45,30 @@ const count = (s, re) => (s.match(re) || []).length;
 console.log('\n1. Kapsula');
 D.renderNav();
 const h = navEl.innerHTML;
-ok('to\'rtta yorliq', count(h, /class="nav-tab/g) === 4, count(h, /class="nav-tab/g));
-ok('Tana kapsulada emas', !/data-view="health"/.test(h));
+ok('beshta yorliq', count(h, /class="nav-tab/g) === 5, count(h, /class="nav-tab/g));
+ok('Tana kapsulada', /data-view="health"/.test(h));
 ok('nav-mid sinfi yo\'q', !/nav-mid/.test(h));
-ok('tartib: today · prayer · finance · tasks', [...h.matchAll(/data-view="([a-z]+)"/g)].map((m) => m[1]).join(',') === 'today,prayer,finance,tasks');
+ok('tartib: today · prayer · health · finance · tasks', [...h.matchAll(/data-view="([a-z]+)"/g)].map((m) => m[1]).join(',') === 'today,prayer,health,finance,tasks');
+ok('Tana yorlig\'i «Tana» (Ovqat emas)', D.t('nav.health') === 'Tana', D.t('nav.health'));
 
-console.log('\n2. FAB');
+console.log('\n2. FAB — «+», bo\'lim emas');
 ok('belgi chizilgan', /<svg/.test(fabEl.innerHTML));
-ok('data-view=health', fabEl.attrs['data-view'] === 'health');
-ok('data-act=go', fabEl.attrs['data-act'] === 'go');
+ok('data-act=fab', fabEl.attrs['data-act'] === 'fab');
+ok('data-view yo\'q', fabEl.attrs['data-view'] === undefined);
 ok('aria-label bor', !!fabEl.attrs['aria-label']);
-ok('Asosiyda .on yo\'q', !fabEl.cls.has('on'));
+ok('fab.* uchala tilda', ['uz', 'uzk', 'ru'].every((l) => { D.S.settings.lang = l; return ['add', 'title', 'task', 'money', 'food', 'habit'].every((k) => D.t('fab.' + k) !== 'fab.' + k); }));
+D.S.settings.lang = 'uz';
 try { D.go('health'); } catch (e) { console.log('  (D.go xato — stub yetishmaydi: ' + e.message + ')'); }
 ok('joriy bo\'lim Tana', D.current() === 'health', D.current());
 D.renderNav();
-ok('Tanada .on bor', fabEl.cls.has('on'));
-ok('kapsulada faol yorliq yo\'q', !/nav-tab on/.test(navEl.innerHTML));
+ok('Tanada kapsuladagi yorliq faol', /class="nav-tab on"[^>]*data-view="health"/.test(navEl.innerHTML));
+let opened = '';
+D.sheet = (html) => { opened = html; };
+D.act.fab();
+ok('«+» to\'rt qatorli ro\'yxat ochadi', count(opened, /data-act="fabPick"/g) === 4, count(opened, /data-act="fabPick"/g));
+D.views.health.fab = () => { opened = 'own'; };
+D.act.fab();
+ok('bo\'lim o\'z amalini bersa, o\'sha ishlaydi', opened === 'own');
 
 console.log(`\n${fail ? 'YIQILDI' : 'O\'TDI'}: ${n - fail}/${n}`);
 process.exit(fail ? 1 : 0);

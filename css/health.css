@@ -1,7 +1,10 @@
-/* ==== health ==== (prefix hl-)
-   Sog'liq uchta bo'limchadan iborat va sahifalarni whoop.js chizadi,
-   shuning uchun bu yerda faqat qobiq: bo'limchalar va sana chizig'i.
-   Qolgan hamma qoida whoop.css'da. */
-.hl-seg button { padding: 8px 6px; font-size: 13px; min-height: 40px; }
+/* ==== health (Tana) ==== prefix hl-
+   «Yorug' qog'oz» (2026-10-09). Bo'lim to'rt sahifadan iborat: Ovqatni
+   food.js, qolgan uchtasini whoop.js chizadi — bu yerda faqat qobiq:
+   sarlavhadagi WHOOP pilli. Qolgan hamma qoida whoop.css va food.css da. */
+.hl { display: block; }
+/* «WHOOP · 07:12» — bosilsa hozir yangilaydi, shuning uchun bosiladigan joy 44px */
+.hl-pill { min-height: 44px; cursor: pointer; }
+.hl-pill:active { transform: scale(.98); }
 /* raqam yonidagi birlik ("7 soat 32 daq" dagi «soat»/«daq») — butun ilova bo'ylab bir xil */
 .stat-num small { font-size: 13px; font-weight: 500; color: var(--text3); margin-left: 2px; letter-spacing: 0; }

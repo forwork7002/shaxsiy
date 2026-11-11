@@ -1,9 +1,14 @@
 /* =====================================================================
    Ibodat — prayer times · qaza ledger · fasting
    view id 'prayer'. Reads D.prayer / D.hijri (prayer.js).
-   Namozni belgilash 2026-09-16 dan Vazifa › Trekkerdagi namoz jadvalida
-   (habits.js). Yozuvning yagona yo'li shu fayldagi D.prayerLog.set — u
-   holatni S.prayers ga yozadi va namoz nomli odatga ham ko'chiradi.
+
+   2026-10-09, EGASINING QARORI: namoz Ibodat sahifasining O'ZIDA
+   belgilanadi — «Bugungi namozlar» kartasida vaqti kirgan qator bosiladi
+   va Jamoat bilan / Yakka / Qazo bo'ldi tanlanadi. Vazifa › Trekkerdagi
+   namoz jadvali (2026-09-16) ham joyida qoldi. Yozuvning YAGONA yo'li —
+   shu fayldagi D.prayerLog.set: u holatni S.prayers ga yozadi va namoz
+   nomli odatga ham ko'chiradi. Aylana ishlatilmaydi (egasi rad etgan):
+   bosh kartada kun chizig'i turadi.
    ===================================================================== */
 (function () {
   'use strict';
@@ -201,6 +206,85 @@
       'ib.sourceGeo': 'Метод islom.uz · по вашим координатам',
     },
   });
+  /* Ibodat 3.0 (2026-10-09) — yangi kartalar uchun qatorlar */
+  D.i18n.add({
+    uz: {
+      'ib.h.now': 'Hozir: {p} vaqti', 'ib.h.night': 'Hozir: tun', 'ib.h.juma': 'Juma muborak', 'ib.h.until': '{p} namozigacha',
+      'ib.h.min': 'daqiqa', 'ib.h.hour': 'soat', 'ib.h.at': '{t} da kiradi',
+      'ib.day.title': 'Bugungi namozlar', 'ib.day.titleOn': '{d} namozlari', 'ib.day.count': "{a} / {b} o'qildi", 'ib.day.sub': 'Vaqti kirgan namozni bosib belgilang',
+      'ib.row.now': 'hozir', 'ib.row.in': '{t} keyin', 'ib.row.notYet': 'hali kirmagan', 'ib.row.mark': 'Belgilash', 'ib.row.juma': 'Juma',
+      'ib.c.jamaat': 'Jamoat bilan', 'ib.c.alone': 'Yakka', 'ib.c.qaza': "Qazo bo'ldi", 'ib.c.clear': 'Olib tashlash',
+      'ib.p.jamaat': 'Jamoat bilan', 'ib.p.alone': 'Yakka', 'ib.p.qaza': 'Qazo', 'ib.p.missed': "O'tkazib",
+      'ib.tahajjud': 'Tahajjud', 'ib.tahajjudSub': "kechasi o'qilgan nafl namoz",
+      'ib.wk.title': 'Bu hafta', 'ib.wk.onTime': 'vaqtida', 'ib.wk.sub': '{n} tasi jamoat bilan · {p}%', 'ib.wk.none': 'Hali belgilanmagan',
+      'ib.wk.lJ': 'Jamoat bilan', 'ib.wk.lA': 'Yakka', 'ib.wk.lQ': 'Qazo', 'ib.wk.lN': 'Hali kirmagan', 'ib.wk.lU': 'Belgilanmagan',
+      'ib.qib.cw': "shimoldan soat mili bo'yicha",
+      'ib.src.same': 'Vaqtlar islom.uz taqvimi bilan bir xil · {p}', 'ib.src.geo': "Vaqtlar joylashuvingiz bo'yicha hisoblangan · {p}", 'ib.src.change': "O'zgartirish",
+      'ib.qzh.left': 'namoz qoldi', 'ib.qzh.plan': 'Kunlik reja: {n}', 'ib.qzh.paid': "To'landi",
+      'ib.qzh.calc': "Kuniga {n} tadan o'qisangiz, {d} tugaydi.", 'ib.qzh.dateFmt': '{y}-yil {d}da',
+      'ib.qzt.more': 'Rejagacha yana {n} ta', 'ib.qzr.left': '{n} qoldi', 'ib.qzr.today': 'bugun +{n}', 'ib.qzr.none': "bugun hali yo'q",
+      'ib.qzr.sub': "O'qiganingizda «+» ni bosing", 'ib.qz.dayBtn': "Bir kunlik qazo o'qidim (5 vaqt)",
+      'ib.qz.set': 'Qazo sozlamalari', 'ib.qz.setSub': "boshlang'ich qarz, yillar bo'yicha hisob, kunlik reja",
+      'ib.fs.not': "Bugun sunnat ro'za kuni emas.", 'ib.fs.is': "Bugun — {f} ro'zasi kuni.", 'ib.fs.next': "Keyingisi: {d} — {f} ro'zasi",
+      'ib.fs.banned': "Bugun ro'za tutilmaydi.",
+      'ib.rm.until': 'Ramazongacha', 'ib.rm.days': '{n} kun', 'ib.rm.first': '1-Ramazon {y}',
+      'ib.mg.count': "{n} kun ro'za", 'ib.mg.sug': "sunnat ro'za kuni",
+      'ib.fq.owed': 'Qarz', 'ib.fq.done': 'Tutildi', 'ib.fq.left': 'Qoldi', 'ib.fq.days': '{n} kun', 'ib.fq.undo': 'Bekor', 'ib.fq.add': "Bitta qazo ro'za tutdim",
+      'ib.fq.ask': "Necha kun qazo ro'zangiz bor?", 'ib.fq.added': "Qazo ro'za qayd etildi", 'ib.fq.undone': 'Qayd olib tashlandi', 'ib.fq.already': "Bugun allaqachon ro'za belgilangan",
+      'ib.fq.tapEdit': "o'zgartirish",
+    },
+    uzk: {
+      'ib.h.now': 'Ҳозир: {p} вақти', 'ib.h.night': 'Ҳозир: тун', 'ib.h.juma': 'Жума муборак', 'ib.h.until': '{p} намозигача',
+      'ib.h.min': 'дақиқа', 'ib.h.hour': 'соат', 'ib.h.at': '{t} да киради',
+      'ib.day.title': 'Бугунги намозлар', 'ib.day.titleOn': '{d} намозлари', 'ib.day.count': '{a} / {b} ўқилди', 'ib.day.sub': 'Вақти кирган намозни босиб белгиланг',
+      'ib.row.now': 'ҳозир', 'ib.row.in': '{t} кейин', 'ib.row.notYet': 'ҳали кирмаган', 'ib.row.mark': 'Белгилаш', 'ib.row.juma': 'Жума',
+      'ib.c.jamaat': 'Жамоат билан', 'ib.c.alone': 'Якка', 'ib.c.qaza': 'Қазо бўлди', 'ib.c.clear': 'Олиб ташлаш',
+      'ib.p.jamaat': 'Жамоат билан', 'ib.p.alone': 'Якка', 'ib.p.qaza': 'Қазо', 'ib.p.missed': 'Ўтказиб',
+      'ib.tahajjud': 'Таҳажжуд', 'ib.tahajjudSub': 'кечаси ўқилган нафл намоз',
+      'ib.wk.title': 'Бу ҳафта', 'ib.wk.onTime': 'вақтида', 'ib.wk.sub': '{n} таси жамоат билан · {p}%', 'ib.wk.none': 'Ҳали белгиланмаган',
+      'ib.wk.lJ': 'Жамоат билан', 'ib.wk.lA': 'Якка', 'ib.wk.lQ': 'Қазо', 'ib.wk.lN': 'Ҳали кирмаган', 'ib.wk.lU': 'Белгиланмаган',
+      'ib.qib.cw': 'шимолдан соат мили бўйича',
+      'ib.src.same': 'Вақтлар islom.uz тақвими билан бир хил · {p}', 'ib.src.geo': 'Вақтлар жойлашувингиз бўйича ҳисобланган · {p}', 'ib.src.change': 'Ўзгартириш',
+      'ib.qzh.left': 'намоз қолди', 'ib.qzh.plan': 'Кунлик режа: {n}', 'ib.qzh.paid': 'Тўланди',
+      'ib.qzh.calc': 'Кунига {n} тадан ўқисангиз, {d} тугайди.', 'ib.qzh.dateFmt': '{y}-йил {d}да',
+      'ib.qzt.more': 'Режагача яна {n} та', 'ib.qzr.left': '{n} қолди', 'ib.qzr.today': 'бугун +{n}', 'ib.qzr.none': 'бугун ҳали йўқ',
+      'ib.qzr.sub': 'Ўқиганингизда «+» ни босинг', 'ib.qz.dayBtn': 'Бир кунлик қазо ўқидим (5 вақт)',
+      'ib.qz.set': 'Қазо созламалари', 'ib.qz.setSub': 'бошланғич қарз, йиллар бўйича ҳисоб, кунлик режа',
+      'ib.fs.not': 'Бугун суннат рўза куни эмас.', 'ib.fs.is': 'Бугун — {f} рўзаси куни.', 'ib.fs.next': 'Кейингиси: {d} — {f} рўзаси',
+      'ib.fs.banned': 'Бугун рўза тутилмайди.',
+      'ib.rm.until': 'Рамазонгача', 'ib.rm.days': '{n} кун', 'ib.rm.first': '1-Рамазон {y}',
+      'ib.mg.count': '{n} кун рўза', 'ib.mg.sug': 'суннат рўза куни',
+      'ib.fq.owed': 'Қарз', 'ib.fq.done': 'Тутилди', 'ib.fq.left': 'Қолди', 'ib.fq.days': '{n} кун', 'ib.fq.undo': 'Бекор', 'ib.fq.add': 'Битта қазо рўза тутдим',
+      'ib.fq.ask': 'Неча кун қазо рўзангиз бор?', 'ib.fq.added': 'Қазо рўза қайд этилди', 'ib.fq.undone': 'Қайд олиб ташланди', 'ib.fq.already': 'Бугун аллақачон рўза белгиланган',
+      'ib.fq.tapEdit': 'ўзгартириш',
+    },
+    ru: {
+      'ib.h.now': 'Сейчас: время {p}', 'ib.h.night': 'Сейчас: ночь', 'ib.h.juma': 'Джума мубарак', 'ib.h.until': 'До намаза {p}',
+      'ib.h.min': 'минут', 'ib.h.hour': 'ч', 'ib.h.at': 'наступит в {t}',
+      'ib.day.title': 'Намазы сегодня', 'ib.day.titleOn': 'Намазы {d}', 'ib.day.count': 'прочитано {a} / {b}', 'ib.day.sub': 'Нажмите на наступивший намаз, чтобы отметить',
+      'ib.row.now': 'сейчас', 'ib.row.in': 'через {t}', 'ib.row.notYet': 'ещё не наступил', 'ib.row.mark': 'Отметить', 'ib.row.juma': 'Джума',
+      'ib.c.jamaat': 'С джамаатом', 'ib.c.alone': 'Один', 'ib.c.qaza': 'Стал каза', 'ib.c.clear': 'Убрать',
+      'ib.p.jamaat': 'С джамаатом', 'ib.p.alone': 'Один', 'ib.p.qaza': 'Каза', 'ib.p.missed': 'Пропущен',
+      'ib.tahajjud': 'Тахаджуд', 'ib.tahajjudSub': 'ночной нафль-намаз',
+      'ib.wk.title': 'Эта неделя', 'ib.wk.onTime': 'вовремя', 'ib.wk.sub': '{n} с джамаатом · {p}%', 'ib.wk.none': 'Пока не отмечено',
+      'ib.wk.lJ': 'С джамаатом', 'ib.wk.lA': 'Один', 'ib.wk.lQ': 'Каза', 'ib.wk.lN': 'Ещё не наступил', 'ib.wk.lU': 'Не отмечен',
+      'ib.qib.cw': 'от севера по часовой стрелке',
+      'ib.src.same': 'Время совпадает с календарём islom.uz · {p}', 'ib.src.geo': 'Время рассчитано по вашим координатам · {p}', 'ib.src.change': 'Изменить',
+      'ib.qzh.left': 'намазов осталось', 'ib.qzh.plan': 'План на день: {n}', 'ib.qzh.paid': 'Восполнено',
+      'ib.qzh.calc': 'По {n} в день — закончите {d}.', 'ib.qzh.dateFmt': '{d} {y} г.',
+      'ib.qzt.more': 'До плана ещё {n}', 'ib.qzr.left': 'осталось {n}', 'ib.qzr.today': 'сегодня +{n}', 'ib.qzr.none': 'сегодня пока нет',
+      'ib.qzr.sub': 'Прочитали — нажмите «+»', 'ib.qz.dayBtn': 'Прочитал каза за день (5 намазов)',
+      'ib.qz.set': 'Настройки каза', 'ib.qz.setSub': 'начальный долг, расчёт по годам, план на день',
+      'ib.fs.not': 'Сегодня не день сунна-поста.', 'ib.fs.is': 'Сегодня — день поста «{f}».', 'ib.fs.next': 'Следующий: {d} — пост «{f}»',
+      'ib.fs.banned': 'Сегодня поститься нельзя.',
+      'ib.rm.until': 'До Рамадана', 'ib.rm.days': '{n} дн.', 'ib.rm.first': '1 Рамадана {y}',
+      'ib.mg.count': 'дней поста: {n}', 'ib.mg.sug': 'день сунна-поста',
+      'ib.fq.owed': 'Долг', 'ib.fq.done': 'Восполнено', 'ib.fq.left': 'Осталось', 'ib.fq.days': '{n} дн.', 'ib.fq.undo': 'Отмена', 'ib.fq.add': 'Держал один каза-пост',
+      'ib.fq.ask': 'Сколько дней каза-поста у вас есть?', 'ib.fq.added': 'Каза-пост записан', 'ib.fq.undone': 'Запись убрана', 'ib.fq.already': 'Пост на сегодня уже отмечен',
+      'ib.fq.tapEdit': 'изменить',
+    },
+  });
+
 
   /* ------------------------------------------------------------------ */
   /* constants + helpers                                                 */
@@ -396,68 +480,69 @@
   /* ------------------------------------------------------------------ */
   /* qaza — cards                                                        */
   /* ------------------------------------------------------------------ */
-  const PCOLOR = { bomdod: 'var(--info)', peshin: 'var(--success)', asr: 'var(--warning)', shom: 'var(--violet)', xufton: 'var(--danger-text)' };
+  /* Namoz belgisi: har vaqtning o'z rangi (bomdod tong, peshin quyosh, asr
+     past quyosh, shom botish, xufton oy). Rang CSS da (.ib-pi.p-*). */
+  const PICON = { bomdod: 'sunrise', quyosh: 'sun', peshin: 'sun', asr: 'sun', shom: 'sunset', xufton: 'moon', tahajjud: 'moon' };
+  const pIco = (id) => `<span class="ico ib-pi p-${id}">${D.ic(PICON[id] || 'sun', 19)}</span>`;
 
   function qzHero() {
-    const o = qzOwed(), td = qzTarget(), done = qzPaidOn(D.today());
+    const o = qzOwed(), td = qzTarget();
     if (!o.total) {
       const fresh = !o.all && !o.paid;   // nothing declared, nothing logged, nothing repaid
-      return `<div class="hero ib-qz-hero zero">
+      return `<div class="card hero hero--qazo ib-qz-hero zero">
         <div class="ib-qz-free ${fresh ? 'fresh' : ''}">${D.ic(fresh ? 'flag' : 'check', 30)}</div>
         <div class="ib-qz-free-t">${esc(t(fresh ? 'qz.start' : 'qz.free'))}</div>
         <div class="small muted">${esc(t(fresh ? 'qz.startSub' : 'qz.freeSub'))}</div>
         ${o.paid ? `<div class="ib-qz-freestat num">${D.fmtNum(o.paid)} <span>${esc(t('qz.paidAll'))}</span></div>` : ''}
       </div>`;
     }
-    const parts = PR.filter((p) => o.per[p] > 0).map((p) => ({ v: o.per[p], color: PCOLOR[p], label: `${t('prayer.' + p)}: ${o.per[p]}` }));
-    const cleared = o.all ? Math.round((o.paid / o.all) * 100) : 0;
-    const donut = D.chart.donut({ parts, size: 108, stroke: 13, center: `<span class="ib-qz-dn">${cleared}%</span><span class="ib-qz-dl">${esc(t('qz.paidAll'))}</span>` });
-    const pct = D.clamp((done / td) * 100, 0, 100);
-    const legend = PR.map((p) => `<span class="ib-qz-lg"><i style="background:${PCOLOR[p]}"></i>${esc(t('prayer.' + p))}<b class="num">${D.fmtNum(o.per[p])}</b></span>`).join('');
-    return `<div class="hero ib-qz-hero">
-      <div class="ib-qz-top">
-        <div class="ib-qz-main">
-          <div class="eyebrow">${esc(t('qz.debtShort'))}</div>
-          <div class="ib-qz-num num">${D.fmtNum(o.total)}</div>
-          <div class="ib-qz-unit">${esc(t('qz.debt'))}</div>
-          <div class="ib-qz-sub num">${esc(t('qz.daysWorth', { n: D.fmtNum(Math.ceil(o.total / 5)) }))}</div>
-        </div>
-        ${donut}
-      </div>
-      <div class="ib-qz-legend">${legend}</div>
-      <div class="ib-qz-today ${done >= td ? 'met' : ''}">
-        <div class="row between"><span class="eyebrow">${esc(t('qz.todayDone'))}</span><span class="num ib-qz-tn">${esc(t('qz.ofTarget', { n: done, t: td }))}</span></div>
-        <span class="bar thick mt-s"><i class="bar-fill" style="width:${pct.toFixed(1)}%"></i></span>
-        ${done >= td ? `<div class="small good mt-s">${D.ic('check', 13)} ${esc(t('qz.targetMet'))}</div>` : ''}
-      </div>
+    const cleared = o.all ? (o.paid / o.all) * 100 : 0;
+    // tugash sanasi: qoldiq / kunlik reja
+    const days = Math.ceil(o.total / td), end = D.addDays(D.today(), days);
+    const endTxt = t('ib.qzh.dateFmt', { y: end.slice(0, 4), d: D.fmtDate(end) });
+    return `<div class="card hero hero--qazo ib-qzh">
+      <div class="ib-h-top"><h2>${esc(t('qz.debtShort'))}</h2><span class="hero-pill num">${esc(t('ib.qzh.plan', { n: td }))}</span></div>
+      <div class="ib-big"><b class="num">${D.fmtNum(o.total)}</b><span>${esc(t('ib.qzh.left'))}</span></div>
+      <div class="ib-qzh-sub num">${esc(t('qz.daysWorth', { n: D.fmtNum(Math.ceil(o.total / 5)) }))}</div>
+      <div class="ib-qzh-row"><span>${esc(t('ib.qzh.paid'))}</span><b class="num">${D.fmtNum(o.paid)} / ${D.fmtNum(o.all)} · ${Math.round(cleared)}%</b></div>
+      <span class="bar md ib-bar-good"><i class="bar-fill" style="width:${D.clamp(cleared, 0, 100).toFixed(1)}%"></i></span>
+      <div class="advice warn ib-qzh-calc">${D.ic('calendar', 18)}<span>${esc(t('ib.qzh.calc', { n: td, d: endTxt }))}</span></div>
+    </div>`;
+  }
+  function qzTodayCard() {
+    const td = qzTarget(), done = qzPaidOn(D.today()), met = done >= td;
+    return `<div class="card ib-qzt ${met ? 'met' : ''}">
+      <div class="ib-qzh-row first"><b>${esc(t('qz.todayDone'))}</b><b class="num">${done} / ${td}</b></div>
+      <span class="bar md"><i class="bar-fill" style="width:${D.clamp((done / td) * 100, 0, 100).toFixed(1)}%"></i></span>
+      <div class="ib-qzt-n">${met ? `${D.ic('check', 14)} ${esc(t('qz.targetMet'))}` : esc(t('ib.qzt.more', { n: td - done }))}</div>
     </div>`;
   }
 
   function qzPayCard() {
-    const o = qzOwed(), k = D.today();
+    const o = qzOwed(), k = D.today(), s = qzScan(), b = QZ().base;
     const day = QZ().pay[k] || {};
-    const mx = Math.max(1, ...PR.map((p) => o.per[p]));
     const rows = PR.map((p) => {
       const owed = o.per[p], n = int(day[p]);
-      return `<div class="ib-qz-row ${owed ? '' : 'clear'}">
-        <span class="ib-qz-name">${esc(t('prayer.' + p))}</span>
-        <span class="ib-qz-bar"><i style="width:${((owed / mx) * 100).toFixed(1)}%;background:${PCOLOR[p]}"></i></span>
-        <span class="ib-qz-owed num">${owed ? D.fmtNum(owed) : '—'}</span>
-        <span class="ib-qz-step">
-          <button class="ib-qz-b" data-act="ibQzUnpay" data-id="${p}" ${n ? '' : 'disabled'} aria-label="−1">${D.ic('minus', 14)}</button>
-          <b class="num ${n ? 'on' : ''}">${n}</b>
-          <button class="ib-qz-b add" data-act="ibQzPay" data-id="${p}" ${owed ? '' : 'disabled'} aria-label="+1">${D.ic('plus', 14)}</button>
-        </span>
+      const all = int(b[p]) + s.missed[p], paid = all ? (s.paid[p] / all) * 100 : 0;
+      const name = esc(t('prayer.' + p));
+      return `<div class="ib-qzr ${owed ? '' : 'clear'}">
+        ${pIco(p)}
+        <div class="ib-qzr-b"><div class="ib-qzr-h"><b>${name}</b><span class="num">${owed ? esc(t('ib.qzr.left', { n: D.fmtNum(owed) })) : '—'}</span></div>
+          <span class="bar thin ib-bar-good"><i class="bar-fill" style="width:${D.clamp(paid, 0, 100).toFixed(1)}%"></i></span>
+          <div class="ib-qzr-t ${n ? 'on' : ''} num">${esc(n ? t('ib.qzr.today', { n }) : t('ib.qzr.none'))}</div></div>
+        <button class="ib-rb" data-act="ibQzUnpay" data-id="${p}" ${n ? '' : 'disabled'} aria-label="${name} −1"><i>${D.ic('minus', 18)}</i></button>
+        <button class="ib-rb add" data-act="ibQzPay" data-id="${p}" ${owed ? '' : 'disabled'} aria-label="${name} +1"><i>${D.ic('plus', 18)}</i></button>
       </div>`;
     }).join('');
-    const canDay = PR.every((p) => o.per[p] > 0);
-    return `<div class="card">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.pay'))}</div><div class="title">${esc(D.fmtDate(k, 'weekday'))}</div></div>
-        <span class="pill">${D.ic('clock', 12)} ${esc(t('qz.q1'))}</span></div>
-      <div class="small muted mb-s">${esc(t('qz.paySub'))}</div>
+    return `<div class="card ib-qzp">
+      <div class="card-head"><h2 class="title">${esc(t('qz.pay'))}</h2></div>
+      <p class="card-sub">${esc(t('ib.qzr.sub'))}</p>
       ${rows}
-      <button class="btn block mt" data-act="ibQzDay" ${canDay ? '' : 'disabled'}>${D.ic('layers', 15)} ${esc(t('qz.oneDay'))}</button>
     </div>`;
+  }
+  function qzDayBtn() {
+    const o = qzOwed(), canDay = PR.every((p) => o.per[p] > 0);
+    return `<button class="btn main ib-qz-day" data-act="ibQzDay" ${canDay ? '' : 'disabled'}>${D.ic('check', 20)} ${esc(t('ib.qz.dayBtn'))}</button>`;
   }
 
   function qzSetupCard() {
@@ -465,11 +550,12 @@
     const inputs = PR.map((p) => `<label class="ib-qz-in"><span>${esc(t('prayer.' + p))}</span>
       <input class="inp sm num" type="number" min="0" max="99999" inputmode="numeric" value="${int(b[p])}" data-change="ibQzBase" data-id="${p}" aria-label="${esc(t('prayer.' + p))}"></label>`).join('');
     return `<div class="card">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('qz.setup'))}</div><div class="title">${esc(t('qz.setupSub'))}</div></div></div>
+      <div class="card-head"><h2 class="title">${esc(t('qz.setup'))}</h2></div>
+      <p class="card-sub">${esc(t('qz.setupSub'))}</p>
       <div class="ib-qz-ins">${inputs}</div>
       <button class="btn ghost block mt" data-act="ibQzYears">${D.ic('calendar', 14)} ${esc(t('qz.byYears'))}</button>
       <div class="ib-qz-target mt">
-        <div class="grow"><div class="eyebrow">${esc(t('qz.target'))}</div><div class="small muted">${esc(t('qz.targetHint'))}</div></div>
+        <div class="grow"><b class="ib-lab">${esc(t('qz.target'))}</b><div class="small muted">${esc(t('qz.targetHint'))}</div></div>
         <input class="inp sm num" type="number" min="1" max="200" inputmode="numeric" value="${qzTarget()}" data-change="ibQzTarget" aria-label="${esc(t('qz.target'))}">
       </div>
       ${o.total || o.all || o.paid ? `<button class="btn ghost danger block mt" data-act="ibQzReset">${D.ic('trash', 14)} ${esc(t('qz.reset'))}</button>` : ''}
@@ -478,15 +564,12 @@
 
   function renderQaza() {
     const o = qzOwed();
-    // nothing owed and nothing ever repaid → the charts would all be flat zeroes.
-    // Lead straight to the one card that matters: declaring the backlog.
+    // nothing owed and nothing ever repaid → lead straight to the one card that matters: declaring the backlog.
     if (!o.total && !o.all && !o.paid) return qzHero() + qzSetupCard();
-    // Debt number, today's repayments, and the rest folded away underneath.
-    // The trend/pace/calendar charts were noise beside the one action that matters.
     const open = !!D.ui.collapsed.ibQzSet;
-    const more = `<button class="ib-more ${open ? 'on' : ''}" data-act="ibQzMore" aria-expanded="${open}">
-      ${D.ic('gear', 15)}<span class="grow">${esc(t('ib.qzMore'))}</span>${D.ic('chevD', 15)}</button>`;
-    return qzHero() + (o.total ? qzPayCard() : '') + more + (open ? qzSetupCard() : '');
+    const more = `<button class="card ib-linkrow ${open ? 'on' : ''}" data-act="ibQzMore" aria-expanded="${open}">
+      <span class="ico">${D.ic('gear', 18)}</span><span class="ib-linkrow-t"><b>${esc(t('ib.qz.set'))}</b><span>${esc(t('ib.qz.setSub'))}</span></span>${D.ic(open ? 'chevD' : 'chevR', 18)}</button>`;
+    return qzHero() + (o.total ? qzTodayCard() + qzPayCard() + qzDayBtn() : '') + more + (open ? qzSetupCard() : '');
   }
   D.act.ibQzMore = () => { D.ui.collapsed.ibQzSet = !D.ui.collapsed.ibQzSet; D.saveUi(); D.rerender(); };
 
@@ -544,44 +627,35 @@
   function qzBanner() {
     const o = qzOwed(); if (!o.total) return '';
     const done = qzPaidOn(D.today()), td = qzTarget(), met = done >= td;
-    return `<button class="ib-qz-remind ${met ? 'met' : ''}" data-act="sub" data-view="prayer" data-sub="qaza">
-      <i class="ib-qz-rdot">${D.ic(met ? 'check' : 'alert', 15)}</i>
-      <span class="ib-qz-rtext">${esc(met ? t('qz.remindDone', { n: D.fmtNum(o.total) }) : t('qz.remind', { n: D.fmtNum(o.total), d: done, t: td }))}</span>
-      <span class="ib-qz-rgo">${esc(t('qz.remindGo'))} ${D.ic('chevR', 13)}</span>
+    return `<button class="ib-qz-remind ${met ? 'met' : ''}" data-act="go" data-view="prayer" data-sub="qaza">
+      <i class="dot"></i>
+      <span class="ib-qz-rtext num">${esc(met ? t('qz.remindDone', { n: D.fmtNum(o.total) }) : t('qz.remind', { n: D.fmtNum(o.total), d: done, t: td }))}</span>
+      <span class="ib-qz-rgo">${esc(t('qz.remindGo'))} ${D.ic('chevR', 14)}</span>
     </button>`;
   }
 
-  /* date steppers (device-only) */
+  /* date (device-only) */
   function timesKey() { const k = F().ibTimesDate; return isDay(k) ? k : D.today(); }
-  /* Sana — tepa panelning chekkasida ikkita strelka. Kun va hijriy sana
-     sarlavha ostida yozilib turadi, shuning uchun sahifa ustida alohida
-     qator kerak emas: u sanani ikkinchi marta aytardi. */
-  /* Kun o'qi — sahifaning ichida, tepa panelda emas. Ibodatda kunni
-     almashtirishning boshqa yo'li yo'q: yon tomonga surish bo'limchani
-     almashtiradi, kunni emas. */
-  function dayBar() {
-    const k = timesKey();
-    return `<div class="ib-daybar">
-      <button class="btn ghost sq sm" data-act="ibShift" data-n="-1" aria-label="${esc(t('ib.prevDay'))}">${D.ic('chevL', 16)}</button>
-      <div class="ib-daybar-l">${esc(D.fmtDate(k, 'weekday'))}</div>
-      <button class="btn ghost sq sm" data-act="ibShift" data-n="1" aria-label="${esc(t('ib.nextDay'))}">${D.ic('chevR', 16)}</button>
-    </div>`;
-  }
-  /* Tepa paneldagi izoh qatori: hijriy sana va «bugunga qaytish».
-     Milodiy kun bu yerdan olib tashlandi — u sahifaning o'z kun o'qida
-     (dayBar) yozilib turadi va ikki joyda takrorlanishi shart emas. */
+  /* Sarlavha ustidagi qator: milodiy va hijriy sana. Boshqa kun ochilgan
+     bo'lsa — «Bugunga» havolasi. Kun «Bu hafta» jadvalidagi kun nomini
+     bosib tanlanadi (ilgari sahifada alohida strelkali qator turardi). */
   function daySub() {
     const td = D.today(), k = timesKey();
-    const hint = k === td ? t('common.today') : k === D.addDays(td, -1) ? t('common.yesterday') : '';
-    return esc(D.hijri.fmt(k)) + (hint ? ' · ' + esc(hint) : '')
+    return esc(D.fmtDate(k)) + ' · ' + esc(D.hijri.fmt(k))
       + (k === td ? '' : ` · <button class="top-link" data-act="ibToday">${esc(t('ib.backToday'))}</button>`);
   }
   D.act.ibShift = (el) => {
     const nk = D.addDays(timesKey(), +el.dataset.n || 0);
+    if (nk > D.today()) return;
     F().ibTimesDate = nk === D.today() ? null : nk;
     D.saveUi(); D.rerender();
   };
-  D.act.ibToday = () => { F().ibTimesDate = null; D.saveUi(); D.rerender(); };
+  D.act.ibDay = (el) => {
+    const k = el.dataset.key; if (!isDay(k) || k > D.today()) return;
+    F().ibTimesDate = k === D.today() ? null : k; openRow = null;
+    D.saveUi(); D.go('prayer', 'times');
+  };
+  D.act.ibToday = () => { F().ibTimesDate = null; D.saveUi(); D.go('prayer', sub()); };
 
   /* ------------------------------------------------------------------ */
   /* Bo'limcha tanlagichi — tepadagi segment (Tana va Vazifa bilan bir    */
@@ -629,7 +703,7 @@
   function unbindSwipe() { if (swipeOff) { swipeOff(); swipeOff = null; } }
 
   /* ------------------------------------------------------------------ */
-  /* 1. TIMES                                                            */
+  /* 1. VAQTLAR                                                           */
   /* ------------------------------------------------------------------ */
   function heroState() {
     const nx = D.prayer.next(); if (!nx) return null;
@@ -644,77 +718,147 @@
     const secs = Math.max(0, nx.minsLeft * 60 - p.s);
     return { nx, secs, pct };
   }
-  const fmtCountdown = (secs) => {
-    const h = Math.floor(secs / 3600), m = Math.floor((secs % 3600) / 60), s = secs % 60;
-    return (h ? h + ':' + D.pad2(m) : D.pad2(m)) + ':' + D.pad2(s);
-  };
-  const heroRing = (pct) => D.chart.ring({ pct, size: 84, stroke: 8, color: 'var(--accent)', label: D.ic('mosque', 22), sub: D.fmtPct(pct) });
+  /* Sanoq: bir soatgacha «35 daqiqa», undan ko'p bo'lsa «1:20 soat».
+     Daqiqada bir marta yangilanadi (tick). */
+  function countHtml(mins) {
+    const m = Math.max(0, Math.ceil(mins));
+    return m > 60 ? `<b class="num">${Math.floor(m / 60)}:${D.pad2(m % 60)}</b><span>${esc(t('ib.h.hour'))}</span>` : `<b class="num">${m}</b><span>${esc(t('ib.h.min'))}</span>`;
+  }
+  /* Kun chizig'i: besh namoz teng oraliqda. Chiziq bomdoddan hozirgi vaqtgacha
+     to'ladi: (joriy namoz indeksi + oraliqdagi ulush) / 4. */
+  function dayLine(k, hs) {
+    const list = D.prayer.list(k).filter((x) => x.id !== 'quyosh');
+    const nowM = nowMins();
+    let ci = -1;
+    list.forEach((x, i) => { if (x.mins <= nowM) ci = i; });
+    const frac = ci < 0 ? 0 : ci >= 4 ? 4 : ci + D.clamp((nowM - list[ci].mins) / Math.max(1, list[ci + 1].mins - list[ci].mins), 0, 1);
+    const nextId = hs && hs.nx.key === k ? hs.nx.id : null;
+    const stops = list.map((x, i) => {
+      const st = stateOf(k, x.id), entered = x.mins <= nowM;
+      const cls = st === 'jamaat' || st === 'alone' ? 'ok' : st === 'qaza' ? 'qz' : x.id === nextId ? 'next' : entered ? 'open' : '';
+      return `<span class="ib-dl-s ${cls}"><i>${cls === 'ok' ? D.ic('check', 14) : ''}</i><b>${esc(t('prayer.' + x.id))}</b><em class="num">${x.time}</em></span>`;
+    }).join('');
+    return `<div class="ib-dl"><span class="ib-dl-t"><i style="width:${(frac / 4 * 100).toFixed(1)}%"></i></span>${stops}</div>`;
+  }
   function heroHtml() {
-    const hs = heroState();
-    if (!hs) return `<div class="card ib-hero"><div class="eyebrow">${esc(t('ib.next'))}</div><div class="ib-hero-count num">—</div></div>`;
-    const { nx, secs, pct } = hs;
-    const cur = nx.current ? esc(t('prayer.' + nx.current)) : esc(t('ib.night'));
-    return `<div class="card ib-hero">
-      <div class="ib-hero-row">
-        <div class="ib-hero-main">
-          <div class="eyebrow">${esc(t('ib.next'))}</div>
-          <div class="ib-hero-name">${esc(t('prayer.' + nx.id))} <span class="num muted">${nx.time}</span></div>
-          <div class="ib-hero-count num" id="ibCountdown">${fmtCountdown(secs)}</div>
-          <div class="ib-hero-meta"><span>${esc(t('ib.left'))}</span><span>·</span><span>${esc(t('ib.current'))}: <b>${cur}</b></span></div>
-        </div>
-        <div id="ibHeroRing">${heroRing(pct)}</div>
-      </div>
+    const hs = heroState(), k = D.today();
+    if (!hs) return `<div class="card hero hero--namoz ib-hero"><div class="ib-h-until">${esc(t('ib.next'))}</div><div class="ib-count"><b class="num">—</b></div></div>`;
+    const { nx } = hs;
+    const juma = D.dowOf(k) === 5;
+    const cur = nx.current && nx.current !== 'quyosh' ? t('ib.h.now', { p: t('prayer.' + nx.current) }) : nx.current === 'quyosh' ? t('prayer.quyosh') : t('ib.h.night');
+    return `<div class="card hero hero--namoz ib-hero">
+      <div class="ib-h-top"><span class="hero-pill">${D.ic(nx.current ? 'sun' : 'moon', 14)} ${esc(cur)}</span>${juma ? `<span class="ib-h-juma">${esc(t('ib.h.juma'))}</span>` : ''}</div>
+      <div class="ib-h-until">${esc(t('ib.h.until', { p: t('prayer.' + nx.id) }))}</div>
+      <div class="ib-count" id="ibCountdown">${countHtml(hs.secs / 60)}</div>
+      <div class="ib-h-at"><span class="pill warn num">${esc(t('ib.h.at', { t: nx.time }))}</span></div>
+      <div id="ibDayLine">${dayLine(k, hs)}</div>
     </div>`;
   }
-  function timesTable(k) {
+  /* Bugungi namozlar. Vaqti kirgan qator bosiladi — ostida to'rtta chip
+     ochiladi. Tanlov D.prayerLog.set orqali yoziladi (Trekkerdagi jadval
+     bilan bir xil yo'l: S.prayers + namoz nomli odat). */
+  let openRow = null;
+  function prayersCard(k) {
     const td = D.today(), isToday = k === td;
     const list = D.prayer.list(k);
     const nowM = nowMins();
+    const five = list.filter((x) => x.id !== 'quyosh');
     let cur = null;
     if (isToday) for (const x of list) if (x.mins <= nowM) cur = x.id;
+    const juma = D.dowOf(k) === 5;
+    let done = 0;
     const rows = list.map((x) => {
-      const st = x.id !== 'quyosh' ? stateOf(k, x.id) : null;
-      const past = isToday ? x.mins <= nowM && x.id !== cur : k < td;
-      const cls = ['ib-time-row', x.id === cur ? 'now' : '', past ? 'past' : '', x.id === 'quyosh' ? 'quyosh' : ''].join(' ');
-      const stHtml = st ? `<span class="ib-time-state ib-c-${st}"><i class="ib-st-dot"></i>${esc(t('ib.st.' + st))}</span>` : '';
-      // Quyosh namoz vaqti emas — makruh oynasi qachon tugashini shu yerda aytamiz
-      const sub = x.id === 'quyosh' ? `<span class="ib-time-sub">${esc(t('ib.ishroq', { t: D.prayer.fmt(D.prayer.ishroq(k)) }))}</span>` : '';
-      return `<div class="${cls}"><i class="ib-time-dot"></i><span class="ib-time-name">${esc(t('prayer.' + x.id))}${sub}</span>${stHtml}<span class="ib-time-val num">${x.time}</span></div>`;
+      if (x.id === 'quyosh') {
+        return `<div class="ib-pr quyosh">${pIco('quyosh')}<div class="ib-pr-b"><b>${esc(t('prayer.quyosh'))}</b>
+          <span class="num">${x.time} · ${esc(t('ib.ishroq', { t: D.prayer.fmt(D.prayer.ishroq(k)) }))}</span></div></div>`;
+      }
+      const i = five.indexOf(x), end = five[i + 1] ? five[i + 1].time : null;
+      /* Holat saqlangan ma'lumotdan keladi va quyida class nomiga qo'shiladi —
+         shuning uchun faqat ma'lum to'rtta qiymat o'tadi, qolgani «belgilanmagan». */
+      const raw = stateOf(k, x.id);
+      const st = STATES.includes(raw) || raw === 'missed' ? raw : null;
+      const entered = !isToday || x.mins <= nowM;
+      if (st && st !== 'missed') done++;
+      const range = `${x.time}${end && entered ? ' – ' + (x.id === 'bomdod' ? (list.find((y) => y.id === 'quyosh') || {}).time || end : end) : ''}`;
+      const sub = !entered ? (x.mins - nowM <= 180 ? t('ib.row.in', { t: D.fmtMins(x.mins - nowM) }) : t('ib.row.notYet'))
+        : range + (isToday && x.id === cur ? ' · ' + t('ib.row.now') : '');
+      const right = !entered ? `<span class="ib-pr-tm num">${x.time}</span>`
+        : st ? `<span class="pill ib-st-${st}">${esc(t('ib.p.' + st))}</span>`
+        : `<span class="ib-pr-mark">${esc(t('ib.row.mark'))}</span>`;
+      const open = entered && openRow === x.id;
+      const chips = open ? `<div class="chips ib-pr-chips">${STATES.map((s) => `<button class="chip${st === s ? ' on' : ''}" data-act="ibSet" data-id="${x.id}" data-v="${s}" aria-pressed="${st === s}">${esc(t('ib.c.' + s))}</button>`).join('')}${st ? `<button class="chip ib-chip-x" data-act="ibSet" data-id="${x.id}" data-v="">${esc(t('ib.c.clear'))}</button>` : ''}</div>` : '';
+      const soon = !entered && x.mins - nowM <= 180;
+      const inner = `${pIco(x.id)}<div class="ib-pr-b"><b>${esc(t('prayer.' + x.id))}${juma && x.id === 'peshin' ? `<i class="ib-juma">${esc(t('ib.row.juma'))}</i>` : ''}</b>
+          <span class="num${soon ? ' soon' : ''}">${esc(sub)}</span></div>${right}`;
+      return entered
+        ? `<div class="ib-pr-w${open ? ' open' : ''}"><button type="button" class="ib-pr tap" data-act="ibRow" data-id="${x.id}" aria-expanded="${open}">${inner}</button>${chips}</div>`
+        : `<div class="ib-pr${soon ? ' soon' : ''}">${inner}</div>`;
     }).join('');
-    const duha = isToday && cur === 'quyosh'
-      ? `<div class="ib-note">${D.ic('sun', 13)} ${esc(t('ib.ishroqHint', { n: 20 }))}</div>` : '';
-    // Namoz vaqti — ishonch masalasi. Qayerdan kelgani va qachon solishtirilgani ko'rinib tursin.
-    // Ro'yxatdagi shaharda jadval islom.uz bilan aynan bir xil; GPS bilan esa
-    // hisob o'sha nuqtaga bo'ladi — buni "bir xil" deb aytish to'g'ri bo'lmaydi.
-    const src = D.prayer.listed()
-      ? `<div class="ib-src">${D.ic('check', 13)}<span>${esc(t('ib.source'))} <span class="muted">· ${esc(t('ib.sourceOn', { d: D.fmtDate(VERIFIED) }))}</span></span></div>`
-      : `<div class="ib-src geo">${D.ic('compass', 13)}<span>${esc(t('ib.sourceGeo'))}</span></div>`;
-    return `<div class="card">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('ib.timesFor'))}</div><div class="title">${esc(D.fmtDate(k, 'weekday'))}</div></div>
-        <span class="pill">${D.ic('moon', 12)} ${esc(D.hijri.fmt(k))}</span></div>
-      <div class="ib-times">${rows}</div>${duha}${src}
+    const tj = stateOf(k, 'tahajjud');
+    const tahajjud = `<div class="ib-pr">${pIco('tahajjud')}<div class="ib-pr-b"><b>${esc(t('ib.tahajjud'))}</b><span>${esc(t('ib.tahajjudSub'))}</span></div>
+      <button class="toggle${tj ? ' on' : ''}" data-act="ibTahajjud" role="switch" aria-checked="${tj ? 'true' : 'false'}" aria-label="${esc(t('ib.tahajjud'))}"></button></div>`;
+    return `<div class="card ib-day">
+      <div class="card-head"><h2 class="title">${esc(isToday ? t('ib.day.title') : t('ib.day.titleOn', { d: D.fmtDate(k) }))}</h2><span class="ib-cnt num">${esc(t('ib.day.count', { a: done, b: 5 }))}</span></div>
+      <p class="card-sub">${esc(t('ib.day.sub'))}</p>
+      ${rows}${tahajjud}
     </div>`;
   }
-  /* Joylashuv — vaqtning eng muhim sharti, shuning uchun jadval ostida
-     bitta qatorda turadi: shahar, GPS, va yig'ilgan usul sozlamalari. */
+  D.act.ibRow = (el) => { const id = el.dataset.id; openRow = openRow === id ? null : id; D.rerender(); };
+  D.act.ibSet = (el) => {
+    const k = timesKey(), id = el.dataset.id; if (!PR.includes(id)) return;
+    const v = el.dataset.v || null;
+    D.prayerLog.set(k, id, stateOf(k, id) === v ? null : v);
+    openRow = null;
+    haptic(v ? 'success' : 'light'); D.save(); D.rerender();
+  };
+  D.act.ibTahajjud = () => {
+    const k = timesKey();
+    D.prayerLog.set(k, 'tahajjud', !stateOf(k, 'tahajjud'));
+    haptic(); D.save(); D.rerender();
+  };
+
+  /* Bu hafta: 5 namoz × 7 kun (Du–Ya). Kun nomi bosilsa o'sha kun ochiladi. */
+  function weekCard(k) {
+    const td = D.today(), W = t('weekdaysShort');
+    const start = D.addDays(td, -((D.dowOf(td) + 6) % 7));
+    const days = []; for (let i = 0; i < 7; i++) days.push(D.addDays(start, i));
+    const nowM = nowMins(), tmToday = timesOf(td) || {};
+    let entered = 0, onTime = 0, jam = 0;
+    const head = `<span></span>` + days.map((d) => `<button type="button" class="ib-wk-d${d === k ? ' on' : ''}" data-act="ibDay" data-key="${d}" ${d > td ? 'disabled' : ''} aria-label="${esc(D.fmtDate(d, 'weekday'))}"><i>${esc(W[D.dowOf(d)])}</i></button>`).join('');
+    const rows = PR.map((p) => `<span class="ib-wk-n">${esc(t('prayer.' + p))}</span>` + days.map((d) => {
+      const st = stateOf(d, p);
+      const isIn = d < td || (d === td && tmToday[p] != null && tmToday[p] <= nowM);
+      if (isIn) { entered++; if (st === 'jamaat' || st === 'alone') onTime++; if (st === 'jamaat') jam++; }
+      const cls = st === 'jamaat' ? 'j' : st === 'alone' ? 'a' : st === 'qaza' ? 'q' : st === 'missed' ? 'm' : isIn ? 'u' : 'n';
+      return `<i class="ib-wk-c ${cls}"></i>`;
+    }).join('')).join('');
+    const pctOn = entered ? Math.round((onTime / entered) * 100) : 0;
+    return `<div class="card ib-wk">
+      <div class="card-head"><h2 class="title">${esc(t('ib.wk.title'))}</h2><span class="ib-cnt num"><b>${onTime} / ${entered}</b> ${esc(t('ib.wk.onTime'))}</span></div>
+      <p class="card-sub num">${esc(entered ? t('ib.wk.sub', { n: jam, p: pctOn }) : t('ib.wk.none'))}</p>
+      <div class="ib-wk-g">${head}${rows}</div>
+      <div class="legend ib-wk-l"><span><i class="ib-wk-c j"></i>${esc(t('ib.wk.lJ'))}</span><span><i class="ib-wk-c a"></i>${esc(t('ib.wk.lA'))}</span><span><i class="ib-wk-c q"></i>${esc(t('ib.wk.lQ'))}</span><span><i class="ib-wk-c u"></i>${esc(t('ib.wk.lU'))}</span><span><i class="ib-wk-c n"></i>${esc(t('ib.wk.lN'))}</span></div>
+    </div>`;
+  }
+  /* Joylashuv — vaqtning eng muhim sharti. */
   function placeName() {
     const c = D.prayer.conf();
     if (c.place) return c.place;
     const near = D.prayer.nearest(c.lat, c.lng);
-    return near ? near.n : D.round(c.lat, 2) + '\u00b0, ' + D.round(c.lng, 2) + '\u00b0';
+    return near ? near.n : D.round(c.lat, 2) + '°, ' + D.round(c.lng, 2) + '°';
   }
+  /* Manba qatori: vaqtlar qayerdan olingani + shaharni almashtirish. Tishli
+     g'ildirak hisoblash usuli sozlamalarini ochadi (Sozlashdagi karta). */
   function placeBar() {
     const open = !!D.ui.collapsed.ibPrayerSet;
     const body = open && D.settings && D.settings.prayerCard ? `<div class="ib-set-body">${D.settings.prayerCard()}</div>` : '';
     const busy = !!D.ui.ibGeoBusy;
-    return `<div class="ib-place">
-      <button class="ib-place-main" data-act="ibPickPlace">
-        ${D.ic('compass', 15)}
-        <span class="ib-place-name">${esc(busy ? t('ib.geoWait') : placeName())}</span>
-        <span class="ib-place-hint">${esc(t('ib.placeChange'))}</span>
-      </button>
-      <button class="ib-place-btn ${busy ? 'busy' : ''}" data-act="ibGeo" aria-label="${esc(t('ib.useGeo'))}">${D.ic('target', 16)}</button>
-      <button class="ib-place-btn ${open ? 'on' : ''}" data-act="ibSetToggle" aria-expanded="${open}" aria-label="${esc(t('ib.method'))}">${D.ic('gear', 16)}</button>
+    const txt = busy ? t('ib.geoWait') : t(D.prayer.listed() ? 'ib.src.same' : 'ib.src.geo', { p: placeName() });
+    return `<div class="card ib-src2">
+      ${D.ic(D.prayer.listed() ? 'check' : 'compass', 20)}
+      <span class="ib-src2-t">${esc(txt)}</span>
+      <button class="ib-link" data-act="ibPickPlace">${esc(t('ib.src.change'))}</button>
+      <button class="ib-gear${open ? ' on' : ''}" data-act="ibSetToggle" aria-expanded="${open}" aria-label="${esc(t('ib.method'))}">${D.ic('gear', 18)}</button>
     </div>${body}`;
   }
   D.act.ibSetToggle = () => { D.ui.collapsed.ibPrayerSet = !D.ui.collapsed.ibPrayerSet; D.saveUi(); D.rerender(); };
@@ -816,21 +960,19 @@
   function qiblaDeg() { const c = D.prayer.conf(); return D.prayer.qibla(c.lat, c.lng); }
 
   function qiblaDial(deg) {
-    const marks = [[0, 'N'], [90, 'E'], [180, 'S'], [270, 'W']].map(([a, l]) =>
-      `<g transform="rotate(${a} 80 80)"><line x1="80" y1="10" x2="80" y2="17" stroke="var(--line3)" stroke-width="2"/>
-        <text x="80" y="30" text-anchor="middle" font-size="11" fill="var(--text3)" transform="rotate(${-a} 80 ${24})">${l}</text></g>`).join('');
     let ticks = '';
-    for (let a = 0; a < 360; a += 15) if (a % 90) ticks += `<line x1="80" y1="11" x2="80" y2="15" stroke="var(--line2)" stroke-width="1.5" transform="rotate(${a} 80 80)"/>`;
+    for (const a of [90, 180, 270]) ticks += `<line x1="80" y1="14" x2="80" y2="24" stroke="var(--line3)" stroke-width="2.5" stroke-linecap="round" transform="rotate(${a} 80 80)"/>`;
     return `<div class="ib-qib-dial" id="ibQibDial">
       <svg viewBox="0 0 160 160" aria-hidden="true">
-        <circle cx="80" cy="80" r="72" fill="none" stroke="var(--line)" stroke-width="1.5"/>
-        <g id="ibQibRose">${ticks}${marks}</g>
+        <circle cx="80" cy="80" r="77" fill="var(--card2)" stroke="var(--line2)" stroke-width="2"/>
+        <g id="ibQibRose">${ticks}<text x="80" y="32" text-anchor="middle" font-size="17" font-weight="700" fill="var(--danger)">N</text></g>
         <g id="ibQibNeedle" transform="rotate(${deg.toFixed(1)} 80 80)">
-          <path d="M80 20 L89 78 L80 72 L71 78 Z" fill="var(--accent)"/>
-          <circle cx="80" cy="80" r="4" fill="var(--accent)"/>
+          <line x1="80" y1="80" x2="80" y2="30" stroke="var(--text)" stroke-width="5" stroke-linecap="round"/>
+          <rect x="70" y="14" width="20" height="20" rx="3" fill="var(--text)"/>
+          <rect x="70" y="19" width="20" height="4" fill="#E0A82E"/>
+          <circle cx="80" cy="80" r="8" fill="var(--card-bg)" stroke="var(--text)" stroke-width="4"/>
         </g>
       </svg>
-      <div class="ib-qib-kaaba">\u{1F54B}</div>
     </div>`;
   }
 
@@ -838,18 +980,17 @@
     const deg = qiblaDeg();
     const live = heading !== null;
     const shown = live ? (deg - heading + 360) % 360 : deg;
-    const note = live ? t('ib.qib.live')
-      : needPerm() ? ''
-      : t('ib.qib.static', { d: D.fmtNum(deg, 1) });
     return `<div class="card ib-qib">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('ib.qib.title'))}</div>
-        <div class="title num">${esc(D.fmtNum(deg, 1))}° <span class="muted">${esc(t('ib.qib.fromN'))}</span></div></div>
-        ${live ? `<span class="pill good">${D.ic('compass', 12)} ${esc(t('ib.qib.on'))}</span>` : ''}</div>
       ${qiblaDial(shown)}
-      ${note ? `<div class="ib-note">${esc(note)}</div>` : ''}
-      ${needPerm() ? `<button class="btn ghost sm block" data-act="ibQiblaOn">${D.ic('compass', 15)} ${esc(t('ib.qib.enable'))}</button>` : ''}
+      <div class="ib-qib-b">
+        <h2 class="title">${esc(t('ib.qib.title'))}</h2>
+        <div class="ib-qib-deg num">${esc(D.fmtNum(Math.round(deg)))}°</div>
+        <div class="ib-qib-n">${esc(live ? t('ib.qib.live') : t('ib.qib.cw'))}</div>
+        ${needPerm() ? `<button class="btn ghost sm ib-qib-btn" data-act="ibQiblaOn">${esc(t('ib.qib.enable'))}</button>` : live ? `<span class="pill good">${D.ic('compass', 13)} ${esc(t('ib.qib.on'))}</span>` : ''}
+      </div>
     </div>`;
   }
+
 
   /* Strelka soniyada o'nlab marta yangilanadi — sahifani qayta chizmaymiz,
      faqat bitta elementning burilishini o'zgartiramiz. */
@@ -911,14 +1052,14 @@
 
   function renderTimes() {
     const k = timesKey();
-    // Sanoq faqat bugun uchun ma'noli: boshqa kunni ko'rayotganda hero "hozir"ni,
-    // jadval esa o'sha kunni ko'rsatib, bir ekranda ikki xil kun chiqib qolardi.
-    const hero = k === D.today() ? heroHtml() : '';
-    return ramadanBanner(k) + hero + safe(() => suhoorCard(k)) + timesTable(k) + safe(qiblaCard) + placeBar();
+    // Sanoq faqat bugun uchun ma'noli: boshqa kunni ko'rayotganda bosh karta «hozir»ni,
+    // ro'yxat esa o'sha kunni ko'rsatib, bir ekranda ikki xil kun chiqib qolardi.
+    const hero = k === D.today() ? safe(heroHtml) : '';
+    return ramadanBanner(k) + hero + safe(qzBanner) + safe(() => suhoorCard(k)) + safe(() => prayersCard(k)) + safe(() => weekCard(k)) + safe(qiblaCard) + placeBar();
   }
 
   /* ------------------------------------------------------------------ */
-  /* 4. FASTING                                                          */
+  /* 4. RO'ZA                                                            */
   /* ------------------------------------------------------------------ */
   const fastRec = (k) => { const r = D.S.fasting[k]; return r && typeof r === 'object' ? r : null; };
   const fasted = (k) => { const r = fastRec(k); return !!(r && r.done); };
@@ -933,65 +1074,92 @@
   function fastTodayCard() {
     const td = D.today(), sug = D.hijri.sunnahFast(td), rec = fastRec(td), done = fasted(td);
     const type = rec && FTYPES.includes(rec.type) ? rec.type : penType(td);
-    return `<div class="card ${done ? 'all-done' : ''}">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('ib.fastToday'))}</div><div class="title">${esc(D.fmtDate(td, 'weekday'))}</div><div class="small muted">${esc(D.hijri.fmt(td))}</div></div>
-        ${sug ? `<span class="pill on">${D.ic('star', 12)} ${esc(t('ib.f.' + sug))}</span>` : `<span class="pill">${esc(t('ib.noSuggest'))}</span>`}</div>
-      <button class="ib-fast-toggle ${done ? 'on' : ''}" data-act="ibFastToggle" data-key="${td}" aria-pressed="${done}"><i class="chk big ${done ? 'on' : ''}" aria-hidden="true"></i>${esc(t('ib.fasted'))}</button>
-      ${done ? `<div class="row wrap mt"><span class="eyebrow">${esc(t('ib.fastType'))}</span>
-        <div class="seg compact">${FTYPES.map((f) => `<button class="${type === f ? 'on' : ''}" data-act="ibFastType" data-type="${f}">${esc(t('ib.ft.' + f))}</button>`).join('')}</div></div>` : ''}
+    const banned = D.hijri.forbiddenFast(td);
+    // keyingi sunnat ro'za kuni (ertadan boshlab 60 kun ichida)
+    const next = memo('nextSunnah', td, () => { for (let i = 1; i <= 60; i++) { const k = D.addDays(td, i), f = D.hijri.sunnahFast(k); if (f) return { k, f }; } return null; });
+    const types = D.hijri.isRamadan(td) ? FTYPES : FTYPES.filter((f) => f !== 'ramadan');
+    return `<div class="card ib-fs">
+      <div class="card-head"><h2 class="title">${esc(t('ib.fastToday'))}</h2><span class="pill num">${esc(D.hijri.fmt(td).replace(/\s+\d{4}$/, ''))}</span></div>
+      <p class="ib-fs-t">${esc(banned ? t('ib.fs.banned') : sug ? t('ib.fs.is', { f: t('ib.f.' + sug) }) : t('ib.fs.not'))}</p>
+      ${next ? `<p class="ib-fs-n">${esc(t('ib.fs.next', { d: D.fmtDate(next.k, 'weekday'), f: t('ib.f.' + next.f) }))}</p>` : ''}
+      <div class="ib-fs-row"><b>${esc(t('ib.fasted'))}</b>
+        <button class="toggle${done ? ' on' : ''}" data-act="ibFastToggle" data-key="${td}" role="switch" aria-checked="${done ? 'true' : 'false'}" aria-label="${esc(t('ib.fasted'))}" ${banned && !done ? 'disabled' : ''}></button></div>
+      ${done ? `<div class="chips ib-fs-chips">${types.map((f) => `<button class="chip${type === f ? ' on' : ''}" data-act="ibFastType" data-type="${f}" aria-pressed="${type === f}">${esc(t('ib.ft.' + f))}</button>`).join('')}</div>` : ''}
     </div>`;
   }
   function ramadanCard() {
     const td = D.today();
     if (!D.hijri.isRamadan(td)) {
       const n = memo('toRamadan', td, () => { let k = td; for (let i = 0; i < 400; i++) { if (D.hijri.isRamadan(k)) return i; k = D.addDays(k, 1); } return null; });
-      return n === null ? '' : `<div class="ib-note">${D.ic('moon', 13)} ${esc(t('ib.toRamadan', { n }))}</div>`;
+      if (n === null) return '';
+      const first = D.addDays(td, n), h = D.hijri.fromKey(first);
+      return `<div class="card hero hero--uyqu ib-rm">
+        <span class="ico ib-rm-ic">${D.ic('moon', 22)}</span>
+        <div><div class="ib-rm-l">${esc(t('ib.rm.until'))}</div><div class="ib-rm-n num">${esc(t('ib.rm.days', { n }))}</div>
+          <div class="ib-rm-d num">${esc(D.fmtDate(first))} ${first.slice(0, 4)}${h ? ' · ' + esc(t('ib.rm.first', { y: h.y })) : ''}</div></div>
+      </div>`;
     }
     const hm = hijriMonth(td); if (!hm) return '';
     let n = 0;
     for (let i = 0; i < hm.len; i++) if (fasted(D.addDays(hm.start, i))) n++;
     const d = hm.h.d, perDay = Math.round((PAGES / hm.len) * 10) / 10, page = Math.min(PAGES, Math.round((d * PAGES) / hm.len)), juz = Math.min(JUZ, Math.ceil((d * JUZ) / hm.len));
-    return `<div class="card ib-ramadan">
-      <div class="card-head"><div class="title">${D.ic('moon', 16)} ${esc(t('ib.ramadanMode'))}</div><span class="num small muted">${esc(t('ib.ramadanDay', { d }))}</span></div>
-      <div class="kpi"><span class="kpi-num">${n}</span><span class="kpi-total">/ ${hm.len}</span><span class="kpi-label">${esc(t('ib.ramadanProgress'))}</span></div>
-      <span class="bar thick mt-s"><i class="bar-fill" style="width:${((n / hm.len) * 100).toFixed(1)}%"></i></span>
-      <div class="mt"><div class="eyebrow">${esc(t('ib.khatm'))}</div><div class="small">${esc(t('ib.khatmHint', { p: perDay, page, juz }))}</div></div>
-      ${d > hm.len - 10 ? `<div class="banner good mt">${D.ic('sparkles', 14)} ${esc(t('ib.lastTen'))}</div>` : ''}
+    return `<div class="card hero hero--uyqu ib-ramadan">
+      <div class="ib-h-top"><h2>${esc(t('ib.ramadanMode'))}</h2><span class="hero-pill num">${esc(t('ib.ramadanDay', { d }))}</span></div>
+      <div class="ib-big"><b class="num">${n}</b><span class="num">/ ${hm.len} · ${esc(t('ib.ramadanProgress'))}</span></div>
+      <span class="bar md ib-bar-violet"><i class="bar-fill" style="width:${((n / hm.len) * 100).toFixed(1)}%"></i></span>
+      <div class="ib-rm-kh"><b>${esc(t('ib.khatm'))}</b><span>${esc(t('ib.khatmHint', { p: perDay, page, juz }))}</span></div>
+      ${d > hm.len - 10 ? `<div class="advice ib-rm-ten">${D.ic('sparkles', 18)}<span>${esc(t('ib.lastTen'))}</span></div>` : ''}
     </div>`;
   }
+  /* Hijriy oy jadvali: 7 ustun (Du–Ya), kun hafta kuniga to'g'rilab qo'yiladi. */
   function monthGrid() {
     const td = D.today(), hm = hijriMonth(td); if (!hm) return '';
+    const W = t('weekdaysShort');
     let n = 0, cells = '';
-    for (let i = 0; i < 30; i++) {
+    const lead = (D.dowOf(hm.start) + 6) % 7;
+    for (let i = 0; i < lead; i++) cells += '<i class="ib-hcell pad"></i>';
+    for (let i = 0; i < hm.len; i++) {
       const k = D.addDays(hm.start, i);
-      const inMonth = i < hm.len, future = k > td;
+      const future = k > td;
       const rec = fastRec(k), done = !!(rec && rec.done);
-      if (done && inMonth) n++;
-      const sug = inMonth && D.hijri.sunnahFast(k);
-      const cls = ['ib-hcell', done ? 'done ib-f-' + (FTYPES.includes(rec.type) ? rec.type : 'sunnah') : '', k === td ? 'today' : '', sug ? 'sug' : ''].join(' ');
-      cells += `<button class="${cls}" data-act="ibFastToggle" data-key="${k}" ${future || !inMonth ? 'disabled' : ''} title="${esc(D.fmtDate(k))}${sug ? ' · ' + esc(t('ib.f.' + sug)) : ''}"><span class="num">${inMonth ? i + 1 : ''}</span></button>`;
+      if (done) n++;
+      const sug = D.hijri.sunnahFast(k);
+      const cls = ['ib-hcell', done ? 'done ib-f-' + (FTYPES.includes(rec.type) ? rec.type : 'sunnah') : '', k === td ? 'today' : '', sug && sug !== 'ramadan' ? 'sug' : '', future ? 'future' : ''].join(' ');
+      cells += `<button class="${cls}" data-act="ibFastToggle" data-key="${k}" ${future ? 'disabled' : ''} aria-pressed="${done}" aria-label="${esc(D.fmtDate(k))}${sug ? ' · ' + esc(t('ib.f.' + sug)) : ''}"><span class="num">${i + 1}</span></button>`;
     }
-    const legend = FTYPES.map((f) => `<span><i class="dot" style="--c:var(--${{ ramadan: 'success', sunnah: 'info', qaza: 'warning', nafl: 'violet' }[f]})"></i>${esc(t('ib.ft.' + f))}</span>`).join('') + `<span><i class="dot" style="--c:var(--warning);width:5px;height:5px"></i>${esc(t('ib.sugDot'))}</span>`;
-    return `<div class="card">
-      <div class="card-head"><div><div class="eyebrow">${esc(t('ib.hijriMonth'))}</div><div class="title">${esc(D.t('hijri.months')[hm.h.m - 1])} ${hm.h.y}</div></div><span class="pill good">${esc(t('ib.fastedN', { n }))}</span></div>
+    const head = [1, 2, 3, 4, 5, 6, 0].map((d) => `<i>${esc(W[d])}</i>`).join('');
+    const LEG = { sunnah: 'sunnah', qaza: 'qaza', nafl: 'nafl' };
+    const legend = Object.keys(LEG).concat(D.hijri.isRamadan(td) ? ['ramadan'] : []).map((f) => `<span><i class="ib-lg ib-f-${f}"></i>${esc(t('ib.ft.' + f))}</span>`).join('')
+      + `<span><i class="ib-lg dotg"></i>${esc(t('ib.mg.sug'))}</span>`;
+    return `<div class="card ib-mg">
+      <div class="card-head"><h2 class="title">${esc(D.t('hijri.months')[hm.h.m - 1])} ${hm.h.y}</h2><span class="ib-cnt num">${esc(t('ib.mg.count', { n }))}</span></div>
+      <div class="ib-hhead">${head}</div>
       <div class="ib-hgrid">${cells}</div>
-      <div class="legend">${legend}</div>
+      <div class="legend ib-mg-l">${legend}</div>
     </div>`;
   }
+  const fastOwed = () => { const d = D.S.fasting._debt; return d && typeof d === 'object' ? Math.max(0, Math.floor(+d.owed || 0)) : 0; };
   function fastLedger() {
-    const owed = (() => { const d = D.S.fasting._debt; return d && typeof d === 'object' ? Math.max(0, Math.floor(+d.owed || 0)) : 0; })();
+    const owed = fastOwed();
     const logged = memo('qazaFasts', stateSig(), () => { let n = 0; for (const k of Object.keys(D.S.fasting)) { if (!isDay(k)) continue; const r = D.S.fasting[k]; if (r && r.done && r.type === 'qaza') n++; } return n; });
     const rem = Math.max(0, owed - logged);
-    return `<div class="card">
-      <div class="card-head"><div class="title">${D.ic('flag', 16)} ${esc(t('ib.qazaFast'))}</div></div>
-      <div class="stat-grid">
-        <div class="stat"><input class="inp sm num ib-owed" type="number" min="0" max="9999" inputmode="numeric" value="${owed}" data-change="ibFastOwed" aria-label="${esc(t('ib.owed'))}"><div class="stat-label">${esc(t('ib.owed'))}</div></div>
-        <div class="stat"><div class="stat-num num">${D.fmtNum(logged)}</div><div class="stat-label">${esc(t('ib.qazaDone'))}</div></div>
-        <div class="stat"><i class="zone ${rem ? 'z-warn' : 'z-good'}"></i><div class="stat-num num">${D.fmtNum(rem)}</div><div class="stat-label">${esc(t('ib.remaining'))}</div></div>
+    const todayRec = fastRec(D.today()), todayQaza = !!(todayRec && todayRec.done && todayRec.type === 'qaza');
+    const days = (n) => esc(t('ib.fq.days', { n: D.fmtNum(n) }));
+    return `<div class="card ib-fq">
+      <div class="card-head"><h2 class="title">${esc(t('ib.qazaFast'))}</h2></div>
+      <div class="ptiles">
+        <button type="button" class="ptile flat ib-fq-edit" data-act="ibFastOwedAsk"><span class="ptile-l">${esc(t('ib.fq.owed'))}</span><span class="ptile-v num">${days(owed)}</span><span class="ptile-n">${esc(t('ib.fq.tapEdit'))}</span></button>
+        <div class="ptile flat ib-fq-g"><span class="ptile-l">${esc(t('ib.fq.done'))}</span><span class="ptile-v num">${days(logged)}</span></div>
+        <div class="ptile flat ib-fq-w"><span class="ptile-l">${esc(t('ib.fq.left'))}</span><span class="ptile-v num">${days(rem)}</span></div>
+      </div>
+      <span class="bar md ib-bar-good ib-fq-bar"><i class="bar-fill" style="width:${owed ? D.clamp((logged / owed) * 100, 0, 100).toFixed(1) : 0}%"></i></span>
+      <div class="ib-fq-f">
+        <button class="btn ghost ib-fq-undo" data-act="ibFastQazaUndo" ${todayQaza ? '' : 'disabled'}>${esc(t('ib.fq.undo'))}</button>
+        <button class="btn main" data-act="ibFastQazaAdd" ${todayQaza ? 'disabled' : ''}>${D.ic('plus', 20)} ${esc(t('ib.fq.add'))}</button>
       </div>
     </div>`;
   }
-  const renderFasting = () => fastTodayCard() + ramadanCard() + monthGrid() + fastLedger();
+  const renderFasting = () => safe(fastTodayCard) + safe(ramadanCard) + safe(monthGrid) + safe(fastLedger);
 
   D.act.ibFastToggle = (el) => {
     const k = el.dataset.key; if (!isDay(k) || k > D.today()) return;
@@ -1007,11 +1175,36 @@
     if (r && r.done) { r.type = f; D.save(); }
     D.rerender();
   };
-  D.act.ibFastOwed = (el) => {
-    const v = D.clamp(Math.floor(+el.value || 0), 0, 9999);
+  function setFastOwed(raw) {
+    const v = D.clamp(Math.floor(+raw || 0), 0, 9999);
     const d = D.S.fasting._debt && typeof D.S.fasting._debt === 'object' ? D.S.fasting._debt : {};
     d.owed = v; D.S.fasting._debt = d;
     D.save(); D.rerender();
+  }
+  D.act.ibFastOwed = (el) => setFastOwed(el.value);
+  D.act.ibFastOwedAsk = async () => {
+    const v = await D.prompt({ title: t('ib.fq.ask'), value: String(fastOwed() || ''), type: 'number' });
+    if (v === null) return;
+    setFastOwed(String(v).replace(',', '.'));
+  };
+  /* «Bitta qazo ro'za tutdim» — bugungi kunni qazo ro'za qilib belgilaydi
+     (S.fasting[bugun] = {type:'qaza', done:true}); hisob shu yozuvlardan
+     sanaladi, alohida hisoblagich yo'q. «Bekor» o'sha yozuvni oladi. */
+  D.act.ibFastQazaAdd = () => {
+    const td = D.today(), r = fastRec(td);
+    /* Bugun allaqachon ro'za belgilangan bo'lsa — tegilmaydi. Ilgari boshqa
+       turdagi ro'za jimgina qazoga aylanardi va «Bekor» uni butunlay
+       o'chirardi: Ramazon kuni hisobdan tushib qolardi. Turini almashtirish
+       «Bugun ro'za» kartasidagi chiplar bilan qilinadi. */
+    if (r && r.done) { D.toast(t('ib.fq.already')); return; }
+    D.S.fasting[td] = { type: 'qaza', done: true };
+    haptic('success'); D.save(); D.rerender(); D.toast(t('ib.fq.added'));
+  };
+  D.act.ibFastQazaUndo = () => {
+    const td = D.today(), r = fastRec(td);
+    if (!(r && r.done && r.type === 'qaza')) return;
+    delete D.S.fasting[td];
+    haptic(); D.save(); D.rerender(); D.toast(t('ib.fq.undone'));
   };
 
   /* ------------------------------------------------------------------ */
@@ -1024,33 +1217,32 @@
     let hs;
     try { hs = heroState(); } catch (e) { return; }
     if (!hs) return;
-    // waqt rolled over (next prayer changed) → hero name/time/table highlight are stale: full rerender
+    // waqt rolled over (next prayer changed) → hero name/time/list are stale: full rerender
     if (lastId && hs.nx.id !== lastId) { stopTimer(); D.rerender(); return; }
     lastId = hs.nx.id;
     if (hs.secs <= 0) { stopTimer(); D.rerender(); return; }
-    D.patch('ibCountdown', fmtCountdown(hs.secs));
     const m = hs.nx.minsLeft;
-    if (m !== lastMin) { lastMin = m; D.patch('ibHeroRing', heroRing(hs.pct)); }
+    if (m !== lastMin) {
+      lastMin = m;
+      D.patch('ibCountdown', countHtml(hs.secs / 60));
+      try { D.patch('ibDayLine', dayLine(D.today(), hs)); } catch (e) {}
+    }
   }
 
   function render() {
-    // Eski «Qayd» havolasi (#prayer/log): namoz endi Vazifa › Trekkerda belgilanadi.
-    if (D.ui.sub.prayer === 'log') {
-      D.ui.sub.prayer = 'times'; D.saveUi();
-      setTimeout(() => D.go('tasks', 'habits', { fromHistory: true }), 0);
-    }
+    // Eski «Qayd» havolasi (#prayer/log): namoz endi shu sahifaning o'zida belgilanadi.
+    if (D.ui.sub.prayer === 'log') { D.ui.sub.prayer = 'times'; D.saveUi(); }
     const s = sub();
-    const day = s === 'times' ? safe(dayBar) : '';
     const body = s === 'qaza' ? safe(renderQaza) : s === 'fasting' ? safe(renderFasting) : safe(renderTimes);
-    // the qaza debt is the one thing that must never be out of sight
-    const remind = s === 'qaza' ? '' : safe(qzBanner);
     // No AI here: ibodat is for marking and reading times, not for advice.
-    return `<div class="ib">${segHtml()}${remind}${day}${body}</div>`;
+    return `<div class="ib">${segHtml()}${body}</div>`;
   }
 
   D.view({
     id: 'prayer', icon: 'mosque', order: 40, nav: true, primary: true,
-    subtitle() { const sb = sub(); return sb === 'times' ? daySub() : esc(t('ib.sub.' + sb)); },
+    subtitle() { return sub() === 'times' ? daySub() : esc(D.fmtDate(D.today())) + ' · ' + esc(D.hijri.fmt(D.today())); },
+    /* Sarlavha o'ngida shahar pilli — bosilsa shahar tanlash oynasi. */
+    topRight() { return `<button class="head-pill" data-act="ibPickPlace">${D.ic('pin', 15)}<span>${esc(placeName())}</span></button>`; },
     render,
     mount() {
       stopTimer();

@@ -1,5 +1,5 @@
 /* Service worker: cache-first app shell, network-first API. Bump CACHE on every release. */
-const CACHE = 'dash-v134';
+const CACHE = 'dash-v136';
 const V = '?v=' + CACHE.replace('dash-', '');
 const ASSETS = [
   './app.css',

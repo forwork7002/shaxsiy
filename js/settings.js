@@ -754,6 +754,20 @@
   let aiInfo = null, aiLoading = false, aiBusy = false, aiMsg = '';
   const aiForm = { kind: null, model: '', base: '' };
   const aiModels = {};   // kind → ['model', …] (tugma bosilganda)
+  /* Hisob almashganda (chiqish → boshqa odam kirishi, sahifa qayta yuklanmasdan)
+     oldingi odamning AI ma'lumoti — provayder, model, kalit niqobi, yozib
+     qo'yilgan manzil — xotirada qolmasin: aks holda yangi odam uni ko'rardi va
+     «Saqlash» eski odamning manzili bilan o'z kalitini yuborishi mumkin edi. */
+  let aiUid = D.me ? D.me.uid : null;
+  D.on('me:changed', () => {
+    // hodisa har /api/me so'rovidan keyin keladi — faqat ODAM almashganda tozalaymiz
+    const uid = D.me ? D.me.uid : null;
+    if (uid === aiUid) return;
+    aiUid = uid;
+    aiInfo = null; aiLoading = false; aiBusy = false; aiMsg = '';
+    aiForm.kind = null; aiForm.model = ''; aiForm.base = '';
+    for (const k of Object.keys(aiModels)) delete aiModels[k];
+  });
   /** Server xatosini odam tiliga: api_401 → «kalit qabul qilinmadi». */
   function aiErrText(e) {
     const m = String((e && e.message) || e || '');

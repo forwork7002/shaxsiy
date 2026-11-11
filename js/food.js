@@ -1,20 +1,26 @@
 /* =====================================================================
-   food.js — Ovqat: kunlik ovqat jurnali.
+   food.js — Ovqat: kunlik ovqat jurnali (Tana bo'limining birinchi sahifasi).
+   «Yorug' qog'oz», 2026-10-09 — egasi tasdiqlagan dizayn hujjati, 6.1-band.
    matn (asosiy yo'l) yoki rasm → /api/food/analyze → odamning O'Z AI'si
    (Sozlamalar › AI; ulamagan bo'lsa serverdagi umumiy kalit) →
    kkal · oqsil · uglevod · yog' + tola · shakar · to'yingan yog' · tuz · xolesterin
    + kaliy · kalsiy · temir · magniy · rux · A · C · D · B12 · folat — har bir qism uchun alohida.
-   Ko'rinish: 7 kun halqalari → kaloriya kartasi (qoldiq + halqa) → uchta makro kartasi → suv →
-   «Nima yedingiz?» → tahlil (tuzatish bilan) → taom kartalari → kunlik hisobot (me'yorga nisbatan +
-   AI xulosasi) → 7 kunlik grafik.
+   Ko'rinish: Kaloriya (bosh karta: qoldiq + makro chizig'i) → Oqsil, uglevod, yog' (uch chiziq +
+   maslahat: AI kun xulosasi bo'lsa o'sha, bo'lmasa oddiy qoida) → Suv (stakanlar) → «Nima yedingiz?» →
+   tahlil (tuzatish bilan) → kunning ovqatlari → kunlik hisobot (moddalar me'yorga nisbatan) →
+   so'nggi 7 kun (ustun bosilsa o'sha kun).
    Me'yorlar profildan (Mifflin-St Jeor × faollik ± maqsad) yoki qo'lda: kkal · oqsil · uglevod · yog' alohida kataklarda.
-   Me'yordan oshgan kun qizil: kartalarda «oshdi» so'zi, kunlar chizig'ida to'liq qizil halqa (D.food.overBy).
+   Me'yordan oshgan kun qizil: kartalarda «oshdi» so'zi, 7 kunlik grafikda qizil ustun (D.food.overBy).
    Rasm baytlari holatda saqlanmaydi — server /api/food/photo/<id> orqali beradi.
    D.food.page(k) · dayTotals(k) · targets() · recalcTargets() · parseTargets(matn) · fillTargets(o) · NUTR · dailyRef(k)
    ===================================================================== */
 (function () {
   'use strict';
   const esc = D.esc, t = D.t;
+  /* Rasm id si holatdan keladi va URL ga qo'shiladi: faqat server bergan
+     shakl (api.py › FOOD_ID_RE) o'tadi, aks holda «../» bilan boshqa yo'lga
+     so'rov yuborib bo'lardi. */
+  const photoOk = (id) => typeof id === 'string' && /^fp_[0-9a-f]{12,32}$/.test(id);
   // MAX_BYTES serverdagi FOOD_MAX_BYTES (1 500 000) dan kichik — base64 so'rov chegaraga tegmasin
   const MAX_SIDE = 1024, JPEG_Q = 0.82, MAX_BYTES = 1400000;
 
@@ -176,6 +182,44 @@
       'food.rep.aiFail': 'AI не ответил: {m}',
     },
   });
+
+  /* «Yorug' qog'oz» (2026-10-09) — yangi kartalarning matnlari. Bitta ixcham
+     jadval [uz, uzk, ru], uch tilga yoyiladi. */
+  const T9 = {
+    'food.g': ['g', 'г', 'г'],
+    'food.h.target': ["Me'yor {n} kkal", 'Меъёр {n} ккал', 'Норма {n} ккал'],
+    'food.h.left': ['kkal qoldi', 'ккал қолди', 'ккал осталось'], 'food.h.over': ['kkal oshdi', 'ккал ошди', 'ккал сверх нормы'], 'food.h.eaten': ['kkal yeyildi', 'ккал ейилди', 'ккал съедено'],
+    'food.h.ate': ['Yedingiz', 'Едингиз', 'Съедено'], 'food.h.burn': ["WHOOP bo'yicha sarf", 'WHOOP бўйича сарф', 'Расход по WHOOP'],
+    'food.h.note': ['Chiziq — yegan kaloriyangiz nimadan iborat. Kulrang qism — yana yeyish mumkin.', 'Чизиқ — еган калориянгиз нимадан иборат. Кулранг қисм — яна ейиш мумкин.', 'Полоса — из чего состоят съеденные калории. Серая часть — сколько ещё можно съесть.'],
+    'food.h.noteOver': ["Chiziq — yegan kaloriyangiz nimadan iborat. Kunlik me'yor to'ldi.", 'Чизиқ — еган калориянгиз нимадан иборат. Кунлик меъёр тўлди.', 'Полоса — из чего состоят съеденные калории. Дневная норма выполнена.'],
+    'food.h.noteNoTg': ["Chiziq — yegan kaloriyangiz nimadan iborat. Me'yor yozilsa qoldiq ham ko'rinadi.", 'Чизиқ — еган калориянгиз нимадан иборат. Меъёр ёзилса қолдиқ ҳам кўринади.', 'Полоса — из чего состоят съеденные калории. Укажите норму — появится остаток.'],
+    'food.h.none': ["Bu kunda hali taom yozilmagan — chiziq birinchi ovqatdan keyin to'ladi.", 'Бу кунда ҳали таом ёзилмаган — чизиқ биринчи овқатдан кейин тўлади.', 'За этот день ещё ничего не записано — полоса заполнится после первой еды.'],
+    'food.m.title': ["Oqsil, uglevod, yog'", 'Оқсил, углевод, ёғ', 'Белки, углеводы, жиры'],
+    'food.m.left': ['{n} g qoldi', '{n} г қолди', 'осталось {n} г'], 'food.m.near': ["deyarli to'ldi · {n} g qoldi", 'деярли тўлди · {n} г қолди', 'почти норма · осталось {n} г'],
+    'food.m.full': ["me'yor to'ldi", 'меъёр тўлди', 'норма выполнена'], 'food.m.over': ['{n} g oshdi', '{n} г ошди', 'сверх нормы на {n} г'],
+    'food.adv.kcalOver': ["Kaloriya me'yordan {n} kkal oshdi. Kunning qolganini yengil o'tkazing.", 'Калория меъёрдан {n} ккал ошди. Куннинг қолганини енгил ўтказинг.', 'Калории выше нормы на {n} ккал. Остаток дня — полегче.'],
+    'food.adv.over': ["{m} me'yordan {n} g oshdi — keyingi ovqatda kamaytiring.", '{m} меъёрдан {n} г ошди — кейинги овқатда камайтиринг.', '{m}: выше нормы на {n} г — в следующий приём поменьше.'],
+    'food.adv.p': ["Oqsil kam: yana {n} g kerak. Tovuq, baliq, tuxum yoki tvorog qo'shing.", 'Оқсил кам: яна {n} г керак. Товуқ, балиқ, тухум ёки творог қўшинг.', 'Белка мало: нужно ещё {n} г. Добавьте курицу, рыбу, яйца или творог.'],
+    'food.adv.c': ["Uglevoddan hali {n} g qoldi — guruch, non yoki meva sig'adi.", 'Углеводдан ҳали {n} г қолди — гуруч, нон ёки мева сиғади.', 'Углеводов осталось {n} г — подойдут рис, хлеб или фрукты.'],
+    'food.adv.f': ["Yog'dan hali {n} g qoldi — yong'oq yoki zaytun moyi sig'adi.", 'Ёғдан ҳали {n} г қолди — ёнғоқ ёки зайтун мойи сиғади.', 'Жиров осталось {n} г — подойдут орехи или оливковое масло.'],
+    'food.adv.ok': ["Uchala makro ham me'yorga yaqin — yaxshi kun.", 'Учала макро ҳам меъёрга яқин — яхши кун.', 'Все три макроса близки к норме — хороший день.'],
+    'food.w.note': ['1 stakan — {ml} ml. Stakanni bosib belgilang.', '1 стакан — {ml} мл. Стаканни босиб белгиланг.', '1 стакан — {ml} мл. Нажмите на стакан, чтобы отметить.'],
+    'food.w.glass': ['{n}-stakan', '{n}-стакан', 'Стакан {n}'],
+    'food.in.ph': ['Masalan: 2 ta somsa va choy', 'Масалан: 2 та сомса ва чой', 'Например: 2 самсы и чай'],
+    'food.in.help': ["Oddiy so'z bilan yozing yoki rasmga oling — kaloriya, oqsil, uglevod va yog' o'zi hisoblanadi.", 'Оддий сўз билан ёзинг ёки расмга олинг — калория, оқсил, углевод ва ёғ ўзи ҳисобланади.', 'Опишите простыми словами или сфотографируйте — калории, белки, углеводы и жиры посчитаются сами.'],
+    'food.ml.today': ['Bugungi ovqatlar', 'Бугунги овқатлар', 'Еда за сегодня'], 'food.ml.day': ['Ovqatlar', 'Овқатлар', 'Еда за день'],
+    'food.ml.sum': ['{n} ta · {k} kkal', '{n} та · {k} ккал', '{n} · {k} ккал'],
+    'food.emptyT': ['Hali taom yozilmagan', 'Ҳали таом ёзилмаган', 'Пока ничего не записано'],
+    'food.emptyS': ['Yuqorida yozing yoki rasmga oling — qolganini ilova hisoblaydi.', 'Юқорида ёзинг ёки расмга олинг — қолганини илова ҳисоблайди.', 'Опишите или сфотографируйте выше — остальное посчитает приложение.'],
+    'food.wk.avg': ["o'rtacha {n} kkal", 'ўртача {n} ккал', 'в среднем {n} ккал'],
+    'food.wk.in': ["me'yorda", 'меъёрда', 'в норме'], 'food.wk.over': ["me'yordan oshgan", 'меъёрдан ошган', 'выше нормы'],
+    'food.wk.today': ['bugun (davom etmoqda)', 'бугун (давом этмоқда)', 'сегодня (ещё идёт)'], 'food.wk.target': ["me'yor {n}", 'меъёр {n}', 'норма {n}'],
+  };
+  {
+    const tb = { uz: {}, uzk: {}, ru: {} };
+    for (const k of Object.keys(T9)) { tb.uz[k] = T9[k][0]; tb.uzk[k] = T9[k][1]; tb.ru[k] = T9[k][2]; }
+    D.i18n.add(tb);
+  }
 
   /* ------------------------------------------------------------------ */
   /* holat                                                               */
@@ -397,8 +441,6 @@
     return Object.keys(o).length ? o : null;
   };
   const OVER_LAB = { p: 'food.protein', c: 'food.carbs', f: 'food.fat' };
-  /* «+320 kkal» yoki «Oqsil +12 g» */
-  const overText = (x, n) => (x === 'kcal' ? `+${D.fmtNum(n)} ${t('food.kcal')}` : `${t(OVER_LAB[x])} +${D.fmtNum(n)} g`);
 
   /* ------------------------------------------------------------------ */
   /* SUV                                                                  */
@@ -446,20 +488,39 @@
   D.act.fdWater = (el) => {
     const day = key();
     const h = D.S.health[day] || (D.S.health[day] = { weight: null, sleep: null, bed: null, wake: null, water: 0, mood: null, tags: [], note: '' });
-    h.water = Math.max(0, (+h.water || 0) + (+el.dataset.d || 0));
+    const cur = Math.max(0, +h.water || 0);
+    /* Stakan mutlaq sonni yuboradi (data-n), farq shu yerda — HOZIRGI qiymatdan
+       hisoblanadi: eskirgan DOM boshqa songa qo'llanib ketmaydi. Oxirgi to'lgan
+       stakan bosilsa bittaga kamayadi. */
+    const n = el.dataset.n != null ? Math.max(0, Math.floor(+el.dataset.n || 0)) : null;
+    const next = n != null ? (n === cur ? cur - 1 : n) : Math.max(0, cur + (+el.dataset.d || 0));
+    h.water = Math.max(0, next);
+    // bir bosishda bir nechta stakan kamaysa — qaytarish imkoni
+    if (cur - h.water > 1) { const back = cur; setTimeout(() => D.toast(`${t('food.water')}: ${D.fmtNum(h.water)}`, { undo: () => { const x = D.S.health[day]; if (x) { x.water = back; D.save(); D.rerender(); } } }), 0); }
     try { if (D.tg && D.tg.HapticFeedback) D.tg.HapticFeedback.impactOccurred('light'); } catch (e) { /* noop */ }
     D.save(); D.rerender();
   };
+  /* Stakanlar (A.9: 24×32 SVG). Bosilgan stakangacha belgilanadi; oxirgi
+     to'lgan stakan bosilsa bittaga kamayadi. Yozish yo'li o'sha — fdWater,
+     farq (data-d) shu yerda hisoblanadi. */
+  const GLASS = '<svg viewBox="0 0 24 32" width="24" height="32" aria-hidden="true"><path class="g" d="M3.5 3.5h17l-1.9 23.2a2 2 0 0 1-2 1.8H7.4a2 2 0 0 1-2-1.8L3.5 3.5z"/><path class="l" d="M4.7 9.5h14.6"/></svg>';
   function waterCard(k) {
     const w = D.food.water(k);
-    return `<div class="card fd-water ${w.n >= w.goal ? 'full' : ''}">
-      <span class="fd-water-ic">${D.ic('droplet', 16)}</span>
-      <span class="fd-water-l">${esc(t('food.water'))}</span>
-      <span class="bar thin fd-water-bar"><i class="bar-fill" style="width:${w.pct.toFixed(0)}%"></i></span>
-      <span class="fd-water-n num">${D.fmtNum(w.n)}<small> / ${D.fmtNum(w.goal)}</small></span>
-      <button class="fd-water-b" data-act="fdWater" data-d="-1" aria-label="−1 ${esc(t('food.waterUnit'))}" ${w.n ? '' : 'disabled'}>${D.ic('minus', 15)}</button>
-      <button class="fd-water-b" data-act="fdWater" data-d="1" aria-label="+1 ${esc(t('food.waterUnit'))}">${D.ic('plus', 15)}</button>
-    </div>`;
+    const ml = Math.max(50, +D.S.settings.waterMl || 250);
+    // me'yordan oshib ichilganda ham keyingi stakan uchun bitta bo'sh joy qoladi
+    const count = Math.min(30, Math.max(w.goal, w.n + (w.n >= w.goal ? 1 : 0)));
+    // qatorda ko'pi bilan 6 ta (360px ekranda ham har biri 44px dan keng), qatorlar teng bo'linadi
+    const perRow = Math.ceil(count / Math.ceil(count / 6));
+    let cells = '';
+    for (let n = 1; n <= count; n++) {
+      const on = n <= w.n;
+      cells += `<button type="button" class="fd-gl${on ? ' on' : ''}" data-act="fdWater" data-n="${n}" aria-pressed="${on}" aria-label="${esc(t('food.w.glass', { n }))}">${GLASS}</button>`;
+    }
+    return `<section class="card fd-water${w.n >= w.goal ? ' full' : ''}">
+      <div class="card-head"><h2 class="title">${esc(t('food.water'))}</h2><span class="fd-side num"><b>${D.fmtNum(w.n)}</b> / ${D.fmtNum(w.goal)} ${esc(t('food.waterUnit'))}</span></div>
+      <div class="fd-gls" style="--n:${perRow}">${cells}</div>
+      <p class="fd-fine">${esc(t('food.w.note', { ml: D.fmtNum(ml) }))}</p>
+    </section>`;
   }
 
   /** Kunning WHOOP sarfi: bugun jonli sikl, boshqa kunlar — sikl kkal. */
@@ -633,6 +694,9 @@
      bilan to'ldirilgan va ishlaydigan. */
   D.act.fdDraft = (el) => {
     draft = el.value;
+    /* Maydon bir qatordan boshlanadi va matnga qarab o'sadi. Yangi brauzerda
+       buni CSS o'zi qiladi (field-sizing), eskisida — shu ikki qator. */
+    if (el.style && el.scrollHeight) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight + 3, 168) + 'px'; }
     const card = el.closest && el.closest('.fd-cap');
     const b = card && card.querySelector('.fd-send');
     if (!b) return;
@@ -874,20 +938,21 @@
   /* ------------------------------------------------------------------ */
   /* ko'rinish                                                           */
   /* ------------------------------------------------------------------ */
-  /* Makro uchligi — har biri o'z rangi va belgisi bilan: oqsil ko'k tuxum,
-     uglevod to'q sariq bug'doy, yog' sariq tomchi. Kun kartalarida ham,
-     bitta taom tahlilida ham, taomlar ro'yxatida ham bir xil. */
-  const MACROS = [['p', 'food.protein', 'var(--info)', 'egg'], ['c', 'food.carbs', 'var(--tana)', 'wheat'], ['f', 'food.fat', 'var(--warning)', 'droplet']];
+  /* Makro uchligi — har biri o'z rangida (A.9): oqsil ko'k, uglevod to'q
+     sariq, yog' sariq. Kun kartalarida ham, bitta taom tahlilida ham bir xil.
+     Ranglar food.css dagi --fd-p / --fd-c / --fd-f. */
+  const MACROS = [['p', 'food.protein', 'var(--fd-p)', 'egg'], ['c', 'food.carbs', 'var(--fd-c)', 'wheat'], ['f', 'food.fat', 'var(--fd-f)', 'droplet']];
+  const KC = { p: 4, c: 4, f: 9 };   // 1 g → kkal
   function macroRow(tot) {
     return `<div class="fd-macros fd-macros-flat">${MACROS.map(([x, lab, col, ic]) => `<div class="fd-macro" style="--mc:${col}">
       <div class="fd-macro-lab"><span class="fd-mi">${D.ic(ic, 13)}</span>${esc(t(lab))}</div>
-      <div class="fd-macro-val num">${D.fmtNum(r0(tot[x] || 0))}<small> g</small></div>
+      <div class="fd-macro-val num">${D.fmtNum(r0(tot[x] || 0))}<small> ${esc(t('food.g'))}</small></div>
     </div>`).join('')}</div>`;
   }
-  /* Tola · shakar · tuz — kun xulosasi ostida bitta jimgina qator (to'liq ro'yxat hisobotda). */
+  /* Tola · shakar · tuz — makro chiziqlari ostida bitta jimgina qator (to'liq ro'yxat hisobotda). */
   const EXTRA = ['fib', 'sug', 'salt'];
   function extraLine(tot, cls) {
-    const parts = EXTRA.filter((x) => num(tot[x]) !== null).map((x) => `${esc(t('food.n.' + x))} <b class="num">${fmtN(x, tot[x])}</b> g`);
+    const parts = EXTRA.filter((x) => num(tot[x]) !== null).map((x) => `${esc(t('food.n.' + x))} <b class="num">${fmtN(x, tot[x])}</b> ${esc(t('food.g'))}`);
     return parts.length ? `<div class="fd-extra${cls ? ' ' + cls : ''}">${parts.join('<span class="sep">·</span>')}</div>` : '';
   }
   /* Moddalar jadvali. «%» — kunlik me'yorga (yoki chegaraga) nisbatan.
@@ -915,156 +980,204 @@
   // <details> — ochiq/yopiqligi brauzerning o'zida, qayta chizishga bog'liq emas
   function detailsBlock(tot, mode, open, label) {
     const body = nutrTable(tot, mode);
-    return body ? `<details class="fd-det"${open ? ' open' : ''}><summary>${D.ic('list', 14)} ${esc(t(label || 'food.details'))}</summary><div class="fd-det-b">${body}</div></details>` : '';
+    return body ? `<details class="fd-det"${open ? ' open' : ''}><summary>${D.ic('list', 16)} ${esc(t(label || 'food.details'))}</summary><div class="fd-det-b">${body}</div></details>` : '';
   }
+  /* 10 ballik baho (6.1-band): ≥8 yashil, 5–7 sariq, <5 qizil. Sinf nomi
+     shu yerda tanlanadi — holatdagi qiymat sinfga o'zi tushmaydi. */
+  const scoreCls = (s) => (s >= 8 ? 'good' : s >= 5 ? 'warn' : 'bad');
   function chips(o) {
     const out = [];
-    if (num(o.score) !== null) { const s = r0(o.score); out.push(`<span class="pill fd-score ${s >= 7 ? 'good' : s >= 4 ? 'mid' : 'bad'}">${esc(t('food.score', { n: s }))}</span>`); }
+    if (num(o.score) !== null) { const s = r0(o.score); out.push(`<span class="pill ${scoreCls(s)}">${esc(t('food.score', { n: s }))}</span>`); }
     if (PROC.includes(o.proc)) out.push(`<span class="pill">${esc(t('food.proc.' + o.proc))}</span>`);
     if (o.rough) out.push(`<span class="pill">${esc(t('food.rough'))}</span>`);
     return out.length ? `<div class="fd-chips">${out.join('')}</div>` : '';
   }
-  const asmLine = (s) => (s ? `<div class="fd-asm">${D.ic('eye', 14)}<span><b>${esc(t('food.asm'))}:</b> ${esc(s)}</span></div>` : '');
-  const adviceBlock = (o) => (o.advice || (o.tips && o.tips.length)
-    ? `<div class="fd-advice">${D.ic('sparkles', 14)}<div class="grow">${o.advice ? `<div>${esc(o.advice)}</div>` : ''}${o.tips && o.tips.length ? `<ul class="fd-tips">${o.tips.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}</div></div>`
-    : '');
+  const asmLine = (s) => (s ? `<div class="fd-asm">${D.ic('eye', 16)}<span><b>${esc(t('food.asm'))}:</b> ${esc(s)}</span></div>` : '');
+  // maslahat va tavsiyalar holatdan keladi: ro'yxat bo'lmasa (buzilgan yozuv) tashlab ketiladi
+  function adviceBlock(o) {
+    const tips = Array.isArray(o.tips) ? o.tips.filter((s) => typeof s === 'string' && s) : [];
+    if (!o.advice && !tips.length) return '';
+    return `<div class="advice tint fd-advice">${D.ic('sparkles', 18)}<div class="grow">${o.advice ? `<div>${esc(o.advice)}</div>` : ''}${tips.length ? `<ul class="fd-tips">${tips.map((s) => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}</div></div>`;
+  }
   // tarkib — bitta taomdan iborat bo'lsa nomning o'zi va makro qatori yetarli, takrorlash ortiqcha
   const partsBlock = (items) => (Array.isArray(items) && items.length > 1
     ? `<div class="fd-parts">${items.map((i) => `<div class="fd-part">
-        <div class="fd-part-top"><span class="grow">${esc(i.name)}</span><span class="num">${r0(i.grams)} g<span class="sep">·</span>${D.fmtNum(r0(i.kcal))} ${esc(t('food.kcal'))}</span></div>
-        <div class="fd-part-mac num">${esc(t('food.pS'))} ${fmt1(i.p)} · ${esc(t('food.cS'))} ${fmt1(i.c)} · ${esc(t('food.fS'))} ${fmt1(i.f)} g</div>
+        <div class="fd-part-top"><span class="grow">${esc(i.name)}</span><span class="num">${r0(i.grams)} ${esc(t('food.g'))}<span class="sep">·</span>${D.fmtNum(r0(i.kcal))} ${esc(t('food.kcal'))}</span></div>
+        <div class="fd-part-mac num">${esc(t('food.pS'))} ${fmt1(i.p)} · ${esc(t('food.cS'))} ${fmt1(i.c)} · ${esc(t('food.fS'))} ${fmt1(i.f)} ${esc(t('food.g'))}</div>
       </div>`).join('')}</div>`
     : '');
 
-  /* Katta raqam — yeyilgani emas, QOLGANI: «640 · Kaloriya qoldi». Oshib
-     ketgan bo'lsa ortiqchasi va so'z qizil: «320 · Kaloriya oshdi».
-     Me'yor yo'q bo'lsa qoldiq ham yo'q — unda yeyilgani yoziladi. */
-  function state(v, max) {
-    if (!max) return { n: v, w: t('food.eaten'), over: false };
-    return v > max ? { n: v - max, w: t('food.overW'), over: true } : { n: max - v, w: t('food.leftW'), over: false };
-  }
-  const ringIc = (ic, size) => `<span class="fd-ring-ic">${D.ic(ic, size)}</span>`;
-
-  /* 7 kunlik chiziq: har kun — halqa. Halqa me'yorning qancha qismi yeyilganini
-     ko'rsatadi, me'yordan oshgan kun (kkal yoki biror makro) to'liq qizil.
-     Tanlangan kun kulrang fonda. Kunni almashtirish shu yerda. */
-  function dayStrip(k) {
-    const tg = D.food.targets(), WS = t('weekdaysShort'), td = D.today();
-    // Juda eski kun tanlangan bo'lsa chiziq o'sha kun atrofiga suriladi
-    const end = k < D.addDays(td, -6) ? D.addDays(k, 3) : td;
-    const R = 17, C = 2 * Math.PI * R;
-    return `<div class="fd-strip">${D.lastDays(7, end).map((d) => {
-      const tot = D.food.dayTotals(d), ov = D.food.overBy(tot, tg);
-      const pct = !tot ? 0 : ov || !tg.kcal ? 100 : D.clamp((tot.kcal / tg.kcal) * 100, 0, 100);
-      const lab = `${WS[D.dowOf(d)]} ${D.fmtDate(d, 'dm')}: ${tot ? `${D.fmtNum(tot.kcal)} ${t('food.kcal')}` : '—'}${ov ? ` · ${t('food.overTitle')}: ${Object.keys(ov).map((x) => overText(x, ov[x])).join(', ')}` : ''}`;
-      return `<button class="fd-dc${d === k ? ' on' : ''}${ov ? ' over' : ''}${d === td ? ' today' : ''}" data-act="fdGo" data-day="${esc(d)}" aria-pressed="${d === k}" aria-label="${esc(lab)}" title="${esc(lab)}" ${d > td ? 'disabled' : ''}>
-        <span class="fd-dc-w">${esc(WS[D.dowOf(d)])}</span>
-        <span class="fd-dc-r"><svg viewBox="0 0 40 40" aria-hidden="true"><circle class="tr" cx="20" cy="20" r="${R}"/>${pct > 0 ? `<circle class="fl" cx="20" cy="20" r="${R}" stroke-dasharray="${C.toFixed(2)}" stroke-dashoffset="${(C * (1 - pct / 100)).toFixed(2)}"/>` : ''}</svg><b class="num">${D.parseKey(d).d}</b></span>
-      </button>`;
-    }).join('')}</div>`;
-  }
-
-  /* Kun kartasi: chapda katta qoldiq, ostida «yeyildi / me'yor» va WHOOP sarfi;
-     o'ngda qalin halqa. Butun karta bosiladi — me'yor oynasi ochiladi. */
+  /* KALORIYA — bosh karta. Katta raqam yeyilgani emas, QOLGANI: «860 kkal
+     qoldi». Oshib ketgan bo'lsa ortiqchasi, qizil: «320 kkal oshdi». Me'yor
+     yo'q bo'lsa qoldiq ham yo'q — unda yeyilgani yoziladi.
+     Chiziq: yeyilgan kaloriya me'yorga nisbatan, ichi makro ulushlariga
+     bo'lingan (oqsil va uglevod 4, yog' 9 kkal/g); qolgani kulrang.
+     Butun karta bosiladi — me'yor oynasi ochiladi (fdTargets). */
   function summary(k) {
     const tg = D.food.targets(), tot = D.food.dayTotals(k) || { kcal: 0, p: 0, c: 0, f: 0 };
-    const s = state(tot.kcal, tg.kcal), burn = burned(k);
-    const pct = tg.kcal ? (tot.kcal / tg.kcal) * 100 : 0;
-    return `<div class="card fd-hero${s.over ? ' over' : ''}" data-act="fdTargets" role="button" tabindex="0" aria-label="${esc(`${D.fmtNum(s.n)} ${t('food.kcalWord')} ${s.w} · ${t('food.targets')}`)}">
-      <div class="fd-hero-txt">
-        <div class="fd-hero-n num">${D.fmtNum(s.n)}</div>
-        <div class="fd-hero-l">${esc(t('food.kcalWord'))} <span class="fd-st">${esc(s.w)}</span></div>
-        <div class="fd-hero-meta">
-          ${tg.kcal ? `<span class="fd-chip num">${D.fmtNum(tot.kcal)} / ${D.fmtNum(tg.kcal)} ${esc(t('food.kcal'))}</span>` : `<span class="fd-chip">${D.ic('target', 12)} ${esc(t('food.setTarget'))}</span>`}
-          ${burn !== null ? `<span class="fd-chip num" title="${esc(t('food.burned', { n: D.fmtNum(burn) }))}">${D.ic('bolt', 12)} ${D.fmtNum(burn)}</span>` : ''}
-        </div>
-      </div>
-      ${D.chart.ring({ pct, size: 100, stroke: 12, color: s.over ? 'var(--danger)' : 'var(--text)', glow: false, label: ringIc('flame', 18) })}
-    </div>`;
+    const over = !!tg.kcal && tot.kcal > tg.kcal;
+    const big = !tg.kcal ? tot.kcal : over ? tot.kcal - tg.kcal : tg.kcal - tot.kcal;
+    const word = t(!tg.kcal ? 'food.h.eaten' : over ? 'food.h.over' : 'food.h.left');
+    const burn = burned(k), sub = [];
+    if (tg.kcal) sub.push(`${esc(t('food.h.ate'))} <b>${D.fmtNum(tot.kcal)}</b>`);
+    if (burn !== null) sub.push(`${esc(t('food.h.burn'))} <b>${D.fmtNum(burn)}</b>`);
+    const mk = MACROS.map(([x]) => (+tot[x] || 0) * KC[x]), sum = D.sum(mk);
+    const fill = tg.kcal ? D.clamp(tot.kcal / tg.kcal, 0, 1) : tot.kcal ? 1 : 0;
+    // makrosiz yozilgan taom (faqat kkal) — chiziq bitta kulrang bo'lak bilan to'ladi
+    const bar = sum ? MACROS.map(([x], n) => (mk[n] > 0 ? `<i class="${x}" style="width:${((mk[n] / sum) * fill * 100).toFixed(1)}%"></i>` : '')).join('')
+      : fill ? `<i class="k" style="width:${(fill * 100).toFixed(1)}%"></i>` : '';
+    const leg = sum ? `<div class="fd-leg">${MACROS.map(([x, lab], n) => `<span><i class="dot ${x}"></i>${esc(t(lab))} <b class="num">${Math.round((mk[n] / sum) * 100)}%</b></span>`).join('')}</div>` : '';
+    const note = !tot.kcal ? t('food.h.none') : over ? t('food.h.noteOver') : t(tg.kcal ? 'food.h.note' : 'food.h.noteNoTg');
+    return `<section class="card hero hero--ovqat fd-hero${over ? ' over' : ''}" data-act="fdTargets" role="button" tabindex="0" aria-label="${esc(`${D.fmtNum(big)} ${word} · ${t('food.targets')}`)}">
+      <div class="card-head"><h2 class="title">${esc(t('food.kcalWord'))}</h2><span class="hero-pill num">${tg.kcal ? esc(t('food.h.target', { n: D.fmtNum(tg.kcal) })) : esc(t('food.setTarget'))}</span></div>
+      <div class="fd-hero-big"><b class="num">${D.fmtNum(big)}</b><span>${esc(word)}</span></div>
+      ${sub.length ? `<p class="fd-hero-sub num">${sub.join(' · ')}</p>` : ''}
+      <div class="fd-stack" aria-hidden="true">${bar}</div>
+      ${leg}<p class="fd-fine">${esc(note)}</p>
+    </section>`;
   }
 
-  /* Uchta makro kartasi — kun kartasining kichik nusxasi: qoldiq grammda,
-     nomi va holati, ostida o'z rangidagi halqa. */
-  function macroCards(k) {
-    const tg = D.food.targets(), tot = D.food.dayTotals(k) || { kcal: 0, p: 0, c: 0, f: 0 };
-    return `<div class="fd-mcs">${MACROS.map(([x, lab, col, ic]) => {
-      const v = r0(tot[x] || 0), max = num(tg[x]) ? r0(tg[x]) : null, s = state(v, max);
-      return `<div class="card fd-mc${s.over ? ' over' : ''}" style="--mc:${col}" title="${esc(`${t(lab)}: ${D.fmtNum(v)}${max ? ' / ' + D.fmtNum(max) : ''} g`)}">
-        <div class="fd-mc-n num">${D.fmtNum(s.n)}<small>g</small></div>
-        <div class="fd-mc-l">${esc(t(lab))} <span class="fd-st">${esc(s.w)}</span></div>
-        ${D.chart.ring({ pct: max ? (v / max) * 100 : 0, size: 66, stroke: 10, color: col, glow: false, label: ringIc(ic, 14) })}
-      </div>`;
-    }).join('')}</div>`;
+  /* Oddiy qoida bo'yicha maslahat — AI xulosasi yo'q paytda: kaloriya oshgan
+     bo'lsa shu, biror makro oshgan bo'lsa shu, aks holda me'yoridan eng
+     orqada qolgan makro. Hammasi 90 % dan o'tgan bo'lsa — maqtov. */
+  function dayAdvice(tot, tg) {
+    if (!tot) return null;
+    const ov = D.food.overBy(tot, tg);
+    if (ov && ov.kcal) return ['warn', 'alert', t('food.adv.kcalOver', { n: D.fmtNum(ov.kcal) })];
+    if (ov) { const x = Object.keys(ov)[0]; return ['warn', 'alert', t('food.adv.over', { m: t(OVER_LAB[x]), n: D.fmtNum(ov[x]) })]; }
+    let low = null;
+    for (const [x] of MACROS) {
+      const max = num(tg[x]);
+      if (!max) continue;
+      const r = r0(tot[x]) / max;
+      if (!low || r < low.r) low = { x, r, left: r0(max) - r0(tot[x]) };
+    }
+    if (!low) return null;
+    return low.r >= 0.9 ? ['tint', 'check', t('food.adv.ok')] : ['tint', 'sparkles', t('food.adv.' + low.x, { n: D.fmtNum(low.left) })];
+  }
+  /* AI kun xulosasini O'QISH. notes() yo'q maydonni yaratib qo'yadi — u
+     yozish uchun; chizish holatga tegmasligi kerak, shuning uchun alohida. */
+  function noteOf(k) {
+    const N = (D.S.food || {}).notes, x = N && typeof N === 'object' && !Array.isArray(N) ? N[k] : null;
+    return x && typeof x.text === 'string' && x.text.trim() ? x : null;
+  }
+  /* Matn AI'dan keladi va holatda saqlanadi: D.ai.md avval esc() qiladi,
+     keyin faqat o'zi yozgan teglarni qo'shadi. ai.js yuklanmagan bo'lsa — oddiy matn. */
+  const aiText = (s) => (D.ai && D.ai.md ? D.ai.md(s) : `<p>${esc(s)}</p>`);
+
+  /* Oqsil, uglevod, yog' — uch chiziq: «52 / 170 g», ostida «118 g qoldi».
+     90 % dan o'tsa «deyarli to'ldi» (to'q sariq izoh), oshsa chiziq ham,
+     izoh ham qizil.
+     Maslahat qutisi (6.1-band): shu kun uchun AI xulosasi bo'lsa — o'sha
+     (S.food.notes[kun], fdDayAi yozadi), bo'lmasa oddiy qoida. Qoida faqat
+     bugungi kunda: o'tgan kun uchun «yana N g kerak» deyish ma'nosiz.
+     Qutining ostidagi tugma xulosani so'raydi yoki yangilaydi. */
+  function macroCard(k) {
+    const tg = D.food.targets(), tot = D.food.dayTotals(k), v0 = tot || { p: 0, c: 0, f: 0 };
+    const rows = MACROS.map(([x, lab]) => {
+      const v = r0(v0[x] || 0), max = num(tg[x]) ? r0(tg[x]) : null;
+      let cls = '', note = '';
+      if (max) {
+        const left = max - v;
+        if (left < 0) { cls = ' over'; note = t('food.m.over', { n: D.fmtNum(-left) }); }
+        else if (!left) { cls = ' near'; note = t('food.m.full'); }
+        else if (v / max >= 0.9) { cls = ' near'; note = t('food.m.near', { n: D.fmtNum(left) }); }
+        else note = t('food.m.left', { n: D.fmtNum(left) });
+      }
+      return `<div class="fd-m ${x}${cls}"><div class="fd-m-h"><b>${esc(t(lab))}</b><span class="num"><b>${D.fmtNum(v)}</b>${max ? ` / ${D.fmtNum(max)}` : ''} ${esc(t('food.g'))}</span></div>
+        ${max ? `<span class="bar md"><i class="bar-fill" style="width:${D.clamp((v / max) * 100, 0, 100).toFixed(0)}%"></i></span><p class="num">${esc(note)}</p>` : ''}</div>`;
+    }).join('');
+    // xulosa faqat taomi bor kunda: taomlar o'chirilsa eski xulosa ham ko'rinmaydi
+    const note = tot ? noteOf(k) : null, busyAi = dayAi === k;
+    const canAi = !!tot && !!(D.ai && D.ai.ask && D.ai.available && D.ai.available());
+    const rule = !note && !busyAi && k === D.today() ? dayAdvice(tot, tg) : null;
+    const box = busyAi ? `<div class="advice tint fd-adv fd-ai-busy"><span class="fd-busy-row">${D.ic('sparkles', 18)}<span>${esc(t('food.rep.aiBusy'))}</span><span class="ai-dots"><i></i><i></i><i></i></span></span></div>`
+      : note ? `<div class="advice tint fd-adv fd-ai">${D.ic('sparkles', 18)}<div class="grow ai-body fd-ai-b">${aiText(note.text)}</div></div>`
+      : rule ? `<div class="advice ${rule[0]} fd-adv">${D.ic(rule[1], 18)}<span>${esc(rule[2])}</span></div>` : '';
+    return `<section class="card fd-mc" data-k="fd-mc">
+      <div class="card-head"><h2 class="title">${esc(t('food.m.title'))}</h2></div>
+      ${rows}${extraLine(tot || {}, 'solo')}
+      ${box}
+      ${dayAiErr && !busyAi ? `<div class="advice bad fd-ai-err">${D.ic('alert', 18)}<span>${esc(dayAiErr)}</span></div>` : ''}
+      ${canAi && !busyAi ? `<button type="button" class="btn sm ghost fd-ai-btn" data-act="fdDayAi">${D.ic(note ? 'refresh' : 'sparkles', 16)} ${esc(t(note ? 'food.rep.aiAgain' : 'food.rep.ai'))}</button>` : ''}
+    </section>`;
   }
 
-  /* Asosiy yo'l — YOZISH. Ko'pchilik taomni suratga olmaydi, balki
-     «tushlikka 1 kosa osh, 2 bo'lak non» deb yozadi; shuning uchun
-     kartaning boshida savol va katta matn maydoni, rasm esa uning ostidagi
-     ikkita kichik tugma. Rasm bilan birga yozilgan matn — izoh bo'lib ketadi. */
+  /* «Nima yedingiz?» — matn asosiy, kamera ikkinchi. Maydon bir qatorli
+     ko'rinadi, lekin <textarea>: uzun tavsif («1 kosa osh, 2 bo'lak non…»)
+     sig'adi va maydon o'zi o'sadi; Enter — yuborish, Shift+Enter — yangi qator
+     (pastdagi keydown). Kamera tugmasi `capture`siz: telefonda brauzer o'zi
+     «kamera yoki galereya» deb so'raydi, ya'ni bitta tugma ikkala yo'lni ham
+     ochadi. Rasm bilan birga yozilgan matn — izoh bo'lib ketadi. Yuborish
+     tugmasi yozadigan narsa bo'lgandagina qora — bo'sh maydonda kulrang va o'chiq. */
   function capture() {
     const off = busy ? 'disabled' : '';
     const ready = !!draft.trim() && !busy;
-    return `<div class="card fd-cap" data-k="fd-cap">
-      <label class="fd-cap-t" for="fdText">${esc(t('food.ask'))}</label>
-      <textarea class="ta fd-text" id="fdText" rows="3" maxlength="600" placeholder="${esc(t('food.ph'))}" data-input="fdDraft" autocomplete="off" ${off}>${esc(draft)}</textarea>
+    return `<section class="card fd-cap" data-k="fd-cap">
+      <div class="card-head"><h2 class="title"><label for="fdText">${esc(t('food.ask'))}</label></h2></div>
       <div class="fd-cap-row">
-        <label class="btn ghost sm fd-pickb">${D.ic('camera', 16)}<span>${esc(t('food.camera'))}</span><input type="file" accept="image/*" capture="environment" class="fd-pick" aria-label="${esc(t('food.camera'))}" data-change="fdPhoto" ${off}></label>
-        <label class="btn ghost sm fd-pickb">${D.ic('grid', 16)}<span>${esc(t('food.gallery'))}</span><input type="file" accept="image/*" class="fd-pick" aria-label="${esc(t('food.gallery'))}" data-change="fdPhoto" ${off}></label>
-        <button class="btn fd-send${ready ? '' : ' ghost'}" data-act="fdSend" ${ready ? '' : 'disabled'}>${D.ic('sparkles', 16)}<span>${esc(t('food.send'))}</span></button>
+        <textarea class="ta fd-text" id="fdText" rows="1" maxlength="600" placeholder="${esc(t('food.in.ph'))}" data-input="fdDraft" autocomplete="off" enterkeyhint="send" ${off}>${esc(draft)}</textarea>
+        <label class="fd-cam" title="${esc(t('food.camera'))}">${D.ic('camera', 22)}<input type="file" accept="image/*" class="fd-pick" aria-label="${esc(t('food.camera'))}" data-change="fdPhoto" ${off}></label>
+        <button type="button" class="fd-send${ready ? '' : ' ghost'}" data-act="fdSend" aria-label="${esc(t('food.send'))}" ${ready ? '' : 'disabled'}>${D.ic('arrowR', 22)}</button>
       </div>
-      <div class="help fd-cap-hint">${esc(t('food.askHint'))}</div>
-    </div>`;
+      <p class="fd-fine">${esc(t('food.in.help'))} <button type="button" class="fd-link" data-act="fdAddManual">${esc(t('food.manual'))}</button></p>
+    </section>`;
   }
 
+  /* Tahlil kartasi — to'rt holat: kutish, xato (qayta urinish / qo'lda /
+     sozlamalar), «ovqat topilmadi», natija. Natijada: baho va ishonch pillari,
+     katta kkal, makrolar, «AI shunday tushundi», tarkib, moddalar, maslahat,
+     bitta gap bilan tuzatish qatori va Saqlash / Tahrirlash / Bekor. */
+  const previewImg = (src) => (src ? `<img class="fd-preview" src="${esc(src)}" alt="">` : '');
   function analysisCard() {
     if (busy && pending) {
       const said = pending.fix || pending.text;
-      return `<div class="card fd-res fd-busy" data-k="fd-busy">
-        ${pending.preview ? `<img class="fd-preview" src="${pending.preview}" alt="">` : ''}
-        <div class="fd-busy-row">${D.ic('sparkles', 16)}<span>${esc(t(pending.fix ? 'food.fixing' : 'food.busy'))}</span><span class="ai-dots"><i></i><i></i><i></i></span></div>
-        ${said ? `<div class="small muted">${esc(cut(said, 160))}</div>` : ''}
-      </div>`;
+      return `<section class="card fd-res fd-busy" data-k="fd-busy">
+        ${previewImg(pending.preview)}
+        <div class="fd-busy-row">${D.ic('sparkles', 18)}<span>${esc(t(pending.fix ? 'food.fixing' : 'food.busy'))}</span><span class="ai-dots"><i></i><i></i><i></i></span></div>
+        ${said ? `<p class="fd-fine">${esc(cut(said, 160))}</p>` : ''}
+      </section>`;
     }
     if (errorKind) {
-      return `<div class="card fd-res" data-k="fd-err"><div class="banner bad">${D.ic('alert', 16)}<span class="grow">${esc(errText(errorKind))}</span></div>
+      return `<section class="card fd-res" data-k="fd-err"><div class="advice bad">${D.ic('alert', 18)}<span>${esc(errText(errorKind))}</span></div>
         <div class="fd-res-acts">
-          ${errorKind === 'ai_not_configured' || errorKind === 'bad_key' ? `<button class="btn sm ghost" data-act="go" data-view="settings">${D.ic('gear', 14)} ${esc(t('food.toSettings'))}</button>` : ''}
-          ${(errorKind === 'ai_failed' || errorKind === 'rate') && pending ? `<button class="btn sm ghost" data-act="fdRetry">${D.ic('refresh', 14)} ${esc(t('food.retry'))}</button>` : ''}
-          <button class="btn sm" data-act="fdManual">${D.ic('edit', 14)} ${esc(t('food.manual'))}</button>
-          <button class="btn icon" data-act="fdDismiss" aria-label="${esc(t('btn.close'))}">${D.ic('x', 15)}</button>
-        </div></div>`;
+          ${errorKind === 'ai_not_configured' || errorKind === 'bad_key' ? `<button class="btn sm ghost" data-act="go" data-view="settings">${D.ic('gear', 16)} ${esc(t('food.toSettings'))}</button>` : ''}
+          ${(errorKind === 'ai_failed' || errorKind === 'rate') && pending ? `<button class="btn sm ghost" data-act="fdRetry">${D.ic('refresh', 16)} ${esc(t('food.retry'))}</button>` : ''}
+          <button class="btn sm" data-act="fdManual">${D.ic('edit', 16)} ${esc(t('food.manual'))}</button>
+          <button class="btn icon" data-act="fdDismiss" aria-label="${esc(t('btn.close'))}">${D.ic('x', 16)}</button>
+        </div></section>`;
     }
     if (!result) return '';
     const r = result;
     // model ovqat topmadi — nol raqamlarni ko'rsatishdan ko'ra shuni aytgan yaxshi
     if (!r.items.length && !r.total.kcal) {
-      return `<div class="card fd-res" data-k="fd-none">
-        ${r.preview ? `<img class="fd-preview" src="${r.preview}" alt="">` : ''}
-        <div class="banner"><span class="grow">${esc(r.advice || t('food.notFood'))}</span></div>
+      return `<section class="card fd-res" data-k="fd-none">
+        ${previewImg(r.preview)}
+        <div class="advice warn">${D.ic('info', 18)}<span>${esc(r.advice || t('food.notFood'))}</span></div>
         <div class="fd-res-acts">
-          <button class="btn sm ghost" data-act="fdManual">${D.ic('edit', 14)} ${esc(t('food.manual'))}</button>
-          <button class="btn icon" data-act="fdDismiss" aria-label="${esc(t('food.dismiss'))}">${D.ic('x', 15)}</button>
-        </div></div>`;
+          <button class="btn sm ghost" data-act="fdManual">${D.ic('edit', 16)} ${esc(t('food.manual'))}</button>
+          <button class="btn icon" data-act="fdDismiss" aria-label="${esc(t('food.dismiss'))}">${D.ic('x', 16)}</button>
+        </div></section>`;
     }
     const rough = r.confidence !== null && r.confidence < 0.45;
-    return `<div class="card fd-res" data-k="fd-result">
-      <div class="fd-res-eyebrow">${D.ic('sparkles', 13)} ${esc(t('food.result'))}</div>
-      ${r.preview ? `<img class="fd-preview" src="${r.preview}" alt="">` : ''}
+    return `<section class="card fd-res" data-k="fd-result">
+      <div class="card-head"><h2 class="title">${esc(t('food.result'))}</h2><span class="ico sleep fd-res-ic">${D.ic('sparkles', 18)}</span></div>
+      ${previewImg(r.preview)}
       <div class="fd-res-name">${esc(r.name)}</div>
       ${chips({ score: r.score, proc: r.proc, rough })}
-      <div class="fd-big"><b class="num">${D.fmtNum(r.total.kcal)}</b><span>${esc(t('food.kcal'))}</span>${r.grams ? `<span class="fd-big-g num">${D.fmtNum(r.grams)} g</span>` : ''}</div>
+      <div class="fd-big"><b class="num">${D.fmtNum(r.total.kcal)}</b><span>${esc(t('food.kcal'))}</span>${r.grams ? `<span class="fd-big-g num">${D.fmtNum(r.grams)} ${esc(t('food.g'))}</span>` : ''}</div>
       ${macroRow(r.total)}
       ${asmLine(r.asm)}
       ${partsBlock(r.items)}
       ${detailsBlock(r.total, 'meal', false)}
       ${adviceBlock(r)}
-      <div class="fd-fix"><input class="inp sm" id="fdFix" maxlength="300" placeholder="${esc(t('food.fixPh'))}" aria-label="${esc(t('food.fix'))}" data-enter="fdFix" autocomplete="off">
-        <button class="btn sm ghost" data-act="fdFix">${D.ic('edit', 14)} ${esc(t('food.fix'))}</button></div>
+      <div class="fd-fix"><input class="inp" id="fdFix" maxlength="300" placeholder="${esc(t('food.fixPh'))}" aria-label="${esc(t('food.fix'))}" data-enter="fdFix" autocomplete="off">
+        <button class="btn ghost" data-act="fdFix">${D.ic('edit', 16)} ${esc(t('food.fix'))}</button></div>
       <div class="fd-res-acts">
-        <button class="btn sm" data-act="fdSaveRes">${D.ic('check', 14)} ${esc(t('food.save'))}</button>
-        <button class="btn sm ghost" data-act="fdEditRes">${D.ic('edit', 14)} ${esc(t('food.edit'))}</button>
-        <button class="btn icon" data-act="fdDismiss" aria-label="${esc(t('food.dismiss'))}">${D.ic('x', 15)}</button>
-      </div></div>`;
+        <button class="btn sm" data-act="fdSaveRes">${D.ic('check', 16)} ${esc(t('food.save'))}</button>
+        <button class="btn sm ghost" data-act="fdEditRes">${D.ic('edit', 16)} ${esc(t('food.edit'))}</button>
+        <button class="btn icon" data-act="fdDismiss" aria-label="${esc(t('food.dismiss'))}">${D.ic('x', 16)}</button>
+      </div></section>`;
   }
 
   /* Saqlangan taomni bosganda avval o'sha tushunarli ko'rinish ochiladi —
@@ -1073,9 +1186,9 @@
     const k = el.dataset.day || key(), m = findMeal(k, el.dataset.id);
     if (!m) return;
     const when = timeOf(m, k);
-    const body = `${m.photo ? `<img class="fd-preview" src="/api/food/photo/${esc(m.photo)}" alt="">` : ''}
+    const body = `${photoOk(m.photo) ? `<img class="fd-preview" src="/api/food/photo/${esc(m.photo)}" alt="">` : ''}
       ${chips(m)}
-      <div class="fd-big"><b class="num">${D.fmtNum(r0(m.kcal))}</b><span>${esc(t('food.kcal'))}</span>${m.grams ? `<span class="fd-big-g num">${D.fmtNum(r0(m.grams))} g</span>` : ''}</div>
+      <div class="fd-big"><b class="num">${D.fmtNum(r0(m.kcal))}</b><span>${esc(t('food.kcal'))}</span>${m.grams ? `<span class="fd-big-g num">${D.fmtNum(r0(m.grams))} ${esc(t('food.g'))}</span>` : ''}</div>
       ${macroRow(m)}
       ${asmLine(m.asm)}
       ${partsBlock(m.items)}
@@ -1097,33 +1210,34 @@
     D.remove(meals(k), id, { label: m ? t('food.deleted') + ': ' + m.name : t('food.deleted') });
   };
 
-  /* Taom kartasi: rasm bo'lsa chapda katta, o'ngda nomi va vaqti, olov bilan
-     kaloriya, ostida uchta makro o'z belgisi bilan. Rasmsiz taom — o'sha
-     karta, faqat rasmsiz. Bosilsa to'liq ko'rinish ochiladi. */
-  function mealCard(m, k) {
-    const time = timeOf(m, k);
-    return `<div class="card fd-meal${m.photo ? ' ph' : ''}" data-k="${esc(m.id)}" data-act="fdView" data-id="${esc(m.id)}" data-day="${esc(k)}" role="button" tabindex="0">
-      ${m.photo ? `<img class="fd-meal-ph" src="/api/food/photo/${esc(m.photo)}" alt="" loading="lazy">` : ''}
-      <div class="fd-meal-b">
-        <div class="fd-meal-top"><span class="fd-meal-name">${esc(m.name)}</span>${time ? `<span class="fd-time num">${esc(time)}</span>` : ''}</div>
-        <div class="fd-meal-k">${D.ic('flame', 16)}<b class="num">${D.fmtNum(r0(m.kcal))}</b> ${esc(t('food.kcal'))}${num(m.score) !== null ? `<span class="fd-meal-sc num">${r0(m.score)}/10</span>` : ''}</div>
-        <div class="fd-mm">${MACROS.map(([x, lab, col, ic]) => `<span class="fd-mm-i" style="--mc:${col}" title="${esc(t(lab))}">${D.ic(ic, 14)}<b class="num">${r0(m[x])}g</b></span>`).join('')}</div>
-      </div>
-    </div>`;
+  /* Kunning ovqatlari — bitta kartada qatorlar: vaqt, nom, makro qatori,
+     o'ngda kkal va (AI baholagan bo'lsa) 10 ballik baho pilli. Tartib kun
+     bo'yicha (ertalabdan kechga). Qator bosilsa to'liq ko'rinish ochiladi
+     (fdView), tahrir undan keyin. */
+  function mealRow(m, k) {
+    const time = timeOf(m, k), sc = num(m.score) !== null ? r0(m.score) : null;
+    return `<li><button type="button" class="fd-meal" data-k="${esc(m.id)}" data-act="fdView" data-id="${esc(m.id)}" data-day="${esc(k)}">
+      <span class="fd-meal-t num">${esc(time || '—')}</span>
+      ${photoOk(m.photo) ? `<img class="fd-meal-ph" src="/api/food/photo/${esc(m.photo)}" alt="" width="40" height="40" loading="lazy">` : ''}
+      <span class="fd-meal-b"><b>${esc(m.name)}</b><span class="num">${MACROS.map(([x, lab]) => `${esc(t(lab))} ${D.fmtNum(r0(m[x]))}`).join(' · ')} ${esc(t('food.g'))}</span></span>
+      <span class="fd-meal-k num"><span><b>${D.fmtNum(r0(m.kcal))}</b> ${esc(t('food.kcal'))}</span>${sc !== null ? `<span class="pill ${scoreCls(sc)} fd-meal-sc" title="${esc(t('food.score', { n: sc }))}">${sc}/10</span>` : ''}</span>
+    </button></li>`;
   }
-  // eng yangisi tepada — «oxirgi yozilgan» birinchi ko'rinsin
   function mealList(k) {
-    const ms = mealsSorted(k).reverse();
-    return `<div class="fd-sec-h"><h2 class="fd-sec-t">${esc(t('food.meals'))}${ms.length ? ` <span class="muted num">${ms.length}</span>` : ''}</h2>
-        <button class="btn xs ghost" data-act="fdAddManual">${D.ic('plus', 13)} ${esc(t('food.manual'))}</button></div>
-      ${ms.length ? ms.map((m) => mealCard(m, k)).join('') : `<div class="card"><div class="empty">${esc(t('food.empty'))}</div></div>`}`;
+    const ms = mealsSorted(k), kcal = r0(D.sum(ms, (m) => +m.kcal || 0));
+    return `<section class="card fd-meals">
+      <div class="card-head"><h2 class="title">${esc(t(k === D.today() ? 'food.ml.today' : 'food.ml.day'))}</h2>
+        ${ms.length ? `<span class="fd-side num">${esc(t('food.ml.sum', { n: ms.length, k: D.fmtNum(kcal) }))}</span>` : ''}</div>
+      ${ms.length ? `<ul class="fd-ml">${ms.map((m) => mealRow(m, k)).join('')}</ul>`
+        : `<div class="fd-none"><span class="ico coral">${D.ic('apple', 19)}</span><div><b>${esc(t('food.emptyT'))}</b><p>${esc(t('food.emptyS'))}</p></div></div>`}
+    </section>`;
   }
 
 
   /* ------------------------------------------------------------------ */
-  /* Kunlik hisobot: hamma moddalar me'yorga nisbatan, qisqa xulosa       */
-  /* («Kam: D vitamini, kalsiy · Ortiqcha: tuz») va so'ralsa — odamning   */
-  /* o'z AI'sidan kun bo'yicha maslahat (S.food.notes[kun]).             */
+  /* AI kun xulosasi: odamning o'z AI'sidan kun bo'yicha maslahat         */
+  /* (S.food.notes[kun] = { text, ts }). «Oqsil, uglevod, yog'» kartasining */
+  /* maslahat qutisida ko'rinadi; tugmasi ham o'sha yerda.                */
   /* ------------------------------------------------------------------ */
   const N_EN = { fib: 'fibre', sug: 'sugars', satf: 'saturated fat', salt: 'salt', chol: 'cholesterol', k: 'potassium', ca: 'calcium', fe: 'iron',
     mg: 'magnesium', zn: 'zinc', va: 'vitamin A', vc: 'vitamin C', vd: 'vitamin D', b12: 'vitamin B12', fol: 'folate' };
@@ -1169,6 +1283,10 @@
     }
     dayAi = null; D.rerender();
   };
+
+  /* Kunlik hisobot: hamma moddalar me'yorga nisbatan va qisqa hukm
+     («Kam: D vitamini, kalsiy · Ortiqcha: tuz»). To'liq jadval — ochiladigan
+     qator ichida. Taomsiz kunda karta yo'q. */
   function reportCard(k) {
     const tot = D.food.dayTotals(k);
     if (!tot) return '';
@@ -1187,41 +1305,47 @@
     // eng keskinlari oldinda; uzun ro'yxat o'qilmaydi — beshtasi va «+N»
     const names = (arr) => arr.slice(0, 5).map(([x]) => t('food.n.' + x)).join(', ') + (arr.length > 5 ? ` +${arr.length - 5}` : '');
     lowP.sort((a, b) => a[1] - b[1]); overP.sort((a, b) => b[1] - a[1]);
-    const low = lowP.length ? [names(lowP)] : [], over = overP.length ? [names(overP)] : [];
-    const note = notes()[k], busyAi = dayAi === k, canAi = !!(D.ai && D.ai.available && D.ai.available());
-    const verdict = !tot.detail ? `<div class="help">${esc(t('food.rep.none'))}</div>`
-      : `${over.length ? `<div class="fd-rep-row"><span class="zone z-bad"></span><span><b>${esc(t('food.rep.over'))}:</b> ${esc(over.join(', '))}</span></div>` : ''}
-         ${low.length ? `<div class="fd-rep-row"><span class="zone z-warn"></span><span><b>${esc(t('food.rep.low'))}:</b> ${esc(low.join(', '))}</span></div>` : ''}
-         ${!over.length && !low.length ? `<div class="fd-rep-row"><span class="zone z-good"></span><span>${esc(t('food.rep.ok'))}</span></div>` : ''}
-         ${tot.detail < tot.n ? `<div class="help">${esc(t('food.rep.partial', { n: tot.n - tot.detail }))}</div>` : ''}`;
-    return `<div class="card fd-rep" data-k="fd-rep">
-      <div class="card-head"><div class="title">${D.ic('chart', 16)} ${esc(t('food.report'))}</div></div>
+    const row = (cls, label, text) => `<div class="fd-rep-row ${cls}"><i class="dot"></i><span>${label ? `<b>${esc(t(label))}:</b> ` : ''}${esc(text)}</span></div>`;
+    const verdict = !tot.detail ? `<p class="fd-fine fd-rep-none">${esc(t('food.rep.none'))}</p>`
+      : `${overP.length ? row('bad', 'food.rep.over', names(overP)) : ''}
+         ${lowP.length ? row('warn', 'food.rep.low', names(lowP)) : ''}
+         ${!overP.length && !lowP.length ? row('good', '', t('food.rep.ok')) : ''}
+         ${tot.detail < tot.n ? `<p class="fd-fine">${esc(t('food.rep.partial', { n: tot.n - tot.detail }))}</p>` : ''}`;
+    return `<section class="card fd-rep" data-k="fd-rep">
+      <div class="card-head"><h2 class="title">${esc(t('food.report'))}</h2></div>
       ${verdict}
       ${detailsBlock(tot, 'day', false, 'food.rep.all')}
-      ${busyAi ? `<div class="fd-busy-row">${D.ic('sparkles', 16)}<span>${esc(t('food.rep.aiBusy'))}</span><span class="ai-dots"><i></i><i></i><i></i></span></div>`
-        : note ? `<div class="fd-ai ai-body">${D.ai.md(note.text)}</div>` : ''}
-      ${dayAiErr && !busyAi ? `<div class="banner bad">${D.ic('alert', 16)}<span class="grow">${esc(dayAiErr)}</span></div>` : ''}
-      ${canAi && !busyAi ? `<button class="btn sm ghost mt-s" data-act="fdDayAi">${D.ic(note ? 'refresh' : 'sparkles', 14)} ${esc(t(note ? 'food.rep.aiAgain' : 'food.rep.ai'))}</button>` : ''}
-    </div>`;
+    </section>`;
   }
 
-  /* So'nggi 7 kun: ustunlar (me'yor — uzuq chiziq). Kunni tanlash tepadagi
-     halqalar chizig'ida, shuning uchun bu yerda kunma-kun qatorlar yo'q. */
+  /* So'nggi 7 kun: kkal ustunlari, uzuq chiziq — me'yor. Me'yorda — yashil,
+     oshgan — marjon, bugun (hali tugamagan) — och ko'k. Kunni tanlash shu
+     yerda: ustun bosilsa o'sha kun ochiladi (fdGo). Juda eski kun ochiq
+     bo'lsa oyna o'sha kun atrofiga suriladi. */
+  const kShort = (v) => (v >= 1000 ? `${D.fmtNum(v / 1000, 1)}k` : D.fmtNum(v));
   function weekCard(k) {
-    const tg = D.food.targets(), days = D.lastDays(7, k);
+    const tg = D.food.targets(), td = D.today(), WS = t('weekdaysShort');
+    const end = k < D.addDays(td, -6) ? D.addDays(k, 3) : td;
+    const days = D.lastDays(7, end);
     const tots = days.map((d) => D.food.dayTotals(d));
     const vals = tots.map((x) => (x ? x.kcal : 0));
-    const colorOf = (v, i) => (!v ? 'var(--line3)' : D.food.overBy(tots[i], tg) ? 'var(--danger-text)' : 'var(--success)');
-    const WS = t('weekdaysShort');
     const eaten = vals.filter((v) => v > 0);
     const avg = eaten.length ? Math.round(D.sum(eaten) / eaten.length) : null;
-    return `<div class="card fd-week">
-      <div class="card-head"><div class="title">${D.ic('chart', 16)} ${esc(t('food.week'))}</div>
-        ${avg !== null ? `<span class="fd-avg num">${D.fmtNum(avg)} ${esc(t('food.kcal'))} <span class="muted">${esc(t('food.avgDay'))}</span></span>` : ''}</div>
-      ${eaten.length
-        ? D.chart.bars({ values: vals, labels: days.map((d) => WS[D.dowOf(d)]), colors: vals.map(colorOf), height: 76, target: tg.kcal || null })
-        : `<div class="empty">${esc(t('food.weekEmpty'))}</div>`}
-    </div>`;
+    const max = Math.max(1, ...vals, tg.kcal || 0);
+    const cols = days.map((d, n) => {
+      const v = vals[n], ov = v ? D.food.overBy(tots[n], tg) : null;
+      const cls = !v ? 'na' : ov ? 'over' : d === td ? 'now' : 'ok';
+      const lab = `${D.fmtDate(d, 'weekday')}: ${v ? `${D.fmtNum(v)} ${t('food.kcal')}` : '—'}`;
+      return `<button type="button" class="fd-wk-c ${cls}${d === k ? ' on' : ''}${d === td ? ' today' : ''}" data-act="fdGo" data-day="${esc(d)}" aria-pressed="${d === k}" aria-label="${esc(lab)}" ${d > td ? 'disabled' : ''}>
+        <span class="fd-wk-t"><i style="height:${v ? Math.max(4, (v / max) * 100).toFixed(1) : 0}%">${v ? `<b class="num">${esc(kShort(v))}</b>` : ''}</i></span>
+        <span class="fd-wk-d">${esc(d === td ? t('common.today') : WS[D.dowOf(d)])}</span></button>`;
+    }).join('');
+    return `<section class="card fd-week">
+      <div class="card-head"><h2 class="title">${esc(t('food.week'))}</h2>${avg !== null ? `<span class="fd-side num">${esc(t('food.wk.avg', { n: D.fmtNum(avg) }))}</span>` : ''}</div>
+      <div class="fd-wk"${tg.kcal ? ` style="--t:${(tg.kcal / max).toFixed(4)}"` : ''}>${tg.kcal ? '<i class="fd-wk-line"></i>' : ''}${cols}</div>
+      ${eaten.length ? `<div class="fd-wk-leg"><span><i class="dot ok"></i>${esc(t('food.wk.in'))}</span><span><i class="dot over"></i>${esc(t('food.wk.over'))}</span><span><i class="dot now"></i>${esc(t('food.wk.today'))}</span>${tg.kcal ? `<span class="num"><i class="ln"></i>${esc(t('food.wk.target', { n: D.fmtNum(tg.kcal) }))}</span>` : ''}</div>`
+        : `<p class="fd-fine">${esc(t('food.weekEmpty'))}</p>`}
+    </section>`;
   }
   D.act.fdGo = (el) => {
     const d = el.dataset.day;
@@ -1233,15 +1357,14 @@
 
   D.on('day:changed', () => { if (D.current() === 'health') D.rerender(); });
 
-  /* Ovqat endi alohida bo'lim emas — Tana bo'limining birinchi sahifasi.
-     Tartib: 7 kun halqalari → kaloriya kartasi → uchta makro → suv →
-     «Nima yedingiz?» → tahlil → taomlar → kunlik hisobot → haftalik ustunlar. */
+  /* Ovqat alohida bo'lim emas — Tana bo'limining birinchi sahifasi.
+     Tartib: Kaloriya → makrolar (+ maslahat / AI xulosasi) → suv →
+     «Nima yedingiz?» → tahlil → kunning ovqatlari → kunlik hisobot → so'nggi 7 kun. */
   D.food.page = (day) => {
     const td = D.today();
     if (D.ui.viewDate && D.ui.viewDate >= td) { D.ui.viewDate = null; D.saveUi(); }
     const k = day || key();
-    return safe(() => dayStrip(k)) + safe(() => summary(k)) + safe(() => macroCards(k))
-      + safe(() => extraLine(D.food.dayTotals(k) || {}, 'solo')) + safe(() => waterCard(k)) + safe(() => capture())
+    return safe(() => summary(k)) + safe(() => macroCard(k)) + safe(() => waterCard(k)) + safe(() => capture())
       + safe(() => analysisCard()) + safe(() => mealList(k)) + safe(() => reportCard(k)) + safe(() => weekCard(k));
   };
 
@@ -1250,9 +1373,9 @@
     if (!el || !el.matches) return;
     // «Nima yedingiz?» maydonida Enter — yuborish (Shift+Enter — yangi qator)
     if (ev.key === 'Enter' && !ev.shiftKey && !ev.isComposing && el.matches('#fdText')) { ev.preventDefault(); D.act.fdSend(); return; }
-    // Enter/Space on the meal cards and the day card (core delegates clicks only)
+    // Kaloriya kartasi <section role="button"> — Enter/Space ni o'zi tutmaydi (core faqat bosishni kuzatadi)
     if (ev.key !== 'Enter' && ev.key !== ' ') return;
-    if (!el.matches('.fd-meal[data-act], .fd-hero[data-act]')) return;
+    if (!el.matches('.fd-hero[data-act]')) return;
     ev.preventDefault(); el.click();
   });
 })();
