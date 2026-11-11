@@ -305,6 +305,18 @@ check("buzilgan shifr — bo'sh holat, xato yo'q", P._read(bad)["subs"] == [])
 (TMP / "buzuq2.push").write_text("{yarim json")
 check("buzilgan JSON — bo'sh holat", P._read(TMP / "buzuq2.push")["items"] == [])
 check("tick buzilgan fayllar ustida yiqilmaydi", not raises(lambda: P.tick(time.time())))
+# Jonli serverda (11.11) oqim qulfi .lock.push ham *.push ga tushib, foydalanuvchi fayli
+# sifatida o'qilgan va har ishga tushishda ogohlantirish yozgan edi.
+lockf = TMP / ".lock.push"
+lockf.write_bytes(b"")
+class _Warns(__import__("logging").Handler):
+    def __init__(self): super().__init__(); self.got = []
+    def emit(self, r): self.got.append(r.getMessage())
+wh = _Warns(); P.log.addHandler(wh)
+P._seen.clear(); P.tick(time.time()); P.log.removeHandler(wh)
+check("oqim qulfi .lock.push foydalanuvchi fayli emas", lockf not in P._user_files() and (TMP / "buzuq2.push") in P._user_files())
+check("tick qulf faylini o'qimaydi va unga yozmaydi",
+      lockf.read_bytes() == b"" and not any(".lock.push" in m for m in wh.got), wh.got)
 check("MA_PUSH=0 — fon oqimi ishga tushmagan",
       not any(t.name == "push" for t in __import__("threading").enumerate()))
 
