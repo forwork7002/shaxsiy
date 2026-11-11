@@ -86,6 +86,11 @@
     };
     // yangi worker boshqaruvni olganda — ya'ni rostdan yangi nusxa tayyor bo'lganda
     navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadWorker) refresh(); });
+    // Eslatma bosildi, ilova ochiq edi — sw.js qayta yuklamasdan shu yerga bo'lim nomini yuboradi
+    navigator.serviceWorker.addEventListener('message', (e) => {
+      const d = e.data || {};
+      if (d.type === 'go' && typeof d.hash === 'string' && /^#[\w/-]*$/.test(d.hash) && d.hash.length > 1) location.hash = d.hash;
+    });
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('sw.js').then((reg) => {
         if (!reg) return;

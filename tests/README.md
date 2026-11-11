@@ -2,6 +2,11 @@
 
 - `test_security.py` — 71 ta xavfsizlik tekshiruvi (serverga yuborilmaydi)
 - `test_durability.py` — arxiv, siqish va zaxira qoidalari
+- `test_push.py` — push eslatmalar serveri (`push.py`, `/api/push/*`): shifr RFC 8291
+  namunasiga bayt-baytigacha mos, VAPID imzosi ochiq kalit bilan tasdiqlanadi,
+  ruxsatsiz manzilga (SSRF) so'rov ketmaydi, kirmasdan 401, bitta brauzer — bitta
+  hisob, eslatma ikki marta ketmaydi, 410 da obuna o'chadi, buzilgan fayl oqimni
+  yiqitmaydi (95 ta tekshiruv). Tarmoqqa chiqmaydi — yuborish soxta funksiya.
 - `test_prayer_fasting.js` — ro'za tutish man etilgan besh kun (`hijri.forbiddenFast`)
 - `test_prayer_waqt.js` — joriy namoz vaqti quyosh chiqishida almashadi (`prayer.next`)
 - `test_prayer_names.js` — odat nomidan namozni tanish (`prayer.matchName`)
@@ -22,6 +27,11 @@
   ulushi, oqsil qoidasi, BMR poli va suv me'yori (44 ta tekshiruv).
   Haqiqiy `core.js` + `whoop.js` + `food.js` yuklanadi: bu uch modul
   chegarasida ilgari faollik jadvali ikkiga bo'linib ketgan edi.
+
+- `test_remind.js` — eslatmalar jadvali (`js/remind.js`): mintaqa soati → lahza
+  (yozgi vaqt chegarasida ham), namoz «N daqiqa oldin» va o'chirilgan namozlar,
+  bajarilgan vazifa/odat eslatilmasligi, odat jadvalidagi kunlar, 800 ta chegara,
+  uchala tilda kalit nomi chiqib qolmasligi, serverga faqat yoqilganda yuborish (63 ta).
 
 - `visual.js` — **ko'rinish**: kesilish, WCAG kontrasti, 11px quyi chegarasi.
   320/360/412px x qorong'i/yorug' x oddiy/`prefers-contrast: more` = 12 holat.
@@ -58,4 +68,6 @@ Ishga tushirish:
     node tests/test_levels.js
     node tests/test_sky.js
     node tests/test_tasks.js
+    node tests/test_remind.js
+    .venv/bin/python tests/test_push.py
     node tests/visual.js          # Chrome kerak, alohida

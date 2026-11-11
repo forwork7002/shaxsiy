@@ -25,7 +25,7 @@ cd "$(dirname "$0")/.."
 # .env.example tar'da bor, tekshiruvda yo'q — ya'ni uning saqlanmagan
 # o'zgarishi ogohlantirishsiz serverga ketardi. Yangi fayl qo'shsangiz,
 # faqat shu yerga qo'shing.
-CORE=(index.html app.css css js fonts icons manifest.json sw.js api.py vault.py requirements.txt deploy)
+CORE=(index.html app.css css js fonts icons manifest.json sw.js api.py push.py vault.py requirements.txt deploy)
 OPT=(db.py legacy.py .env.example)   # bo'lmasa tar yiqilmasin (legacy.py — bir martalik import)
 SHIP=("${CORE[@]}" "${OPT[@]}")
 TAR=("${CORE[@]}")

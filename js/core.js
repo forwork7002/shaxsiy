@@ -87,6 +87,10 @@
         prayer: { lat: 41.300872, lng: 69.241813, fajr: 15.5, isha: 15.5, asr: 'hanafi',
                   offsets: { bomdod: 0, quyosh: 0, peshin: 0, asr: 0, shom: 0, xufton: 0 }, hijriOffset: 0, notify: false },
         caffeineLimit: 400, onboarded: false,
+        // Push eslatmalar (js/remind.js). on — hisobda kamida bitta qurilma obuna bo'lgan;
+        // prayer.off — o'chirilgan namozlar {asr:true} (massiv emas: fill() massivni standart bilan to'ldirmaydi).
+        remind: { on: false, prayer: { on: true, before: 10, off: {} }, tasks: { on: true, before: 0 },
+                  habits: { on: true }, evening: { on: false, time: '21:30' } },
       },
       // birthYear → yosh hisoblanadi; goal ovqat me'yorlari uchun; whoopAge/paceOfAging WHOOP ilovasidan qo'lda kiritiladi
       profile: { name: '', heightCm: null, weightKg: null, age: null, birthYear: null, sex: 'm', activity: 3, goal: 'keep',
@@ -1274,6 +1278,7 @@
     sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>',
     clock: '<circle cx="12" cy="12" r="10"/><path d="M12 7v5l3 3"/>',
     scale: '<path d="M16 16.5c0 1.5-2 2.5-4 2.5s-4-1-4-2.5M12 3v3M3 8l3 8h6l-3-8M21 8l-3 8h-6l3-8"/><path d="M3 8h18"/>',
+    bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
     dumbbell: '<path d="M6.5 6.5h11M6.5 17.5h11M3 10v4M21 10v4M6 8v8M18 8v8"/><path d="M6 12h12"/>',
     pill: '<path d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/>',
     /* moliya kategoriyalari uchun qo'shildi — ilgari bu yerda emoji turardi */
@@ -1518,7 +1523,8 @@
   /* Bo'lim emas, kutubxona, lekin birinchi ekranga ham kerak emas: u faqat
      Sozlashdagi profil kartasida chiziladi. Navbatning oxirida keladi va
      kelgach o'zi bir marta nishonlarni tekshiradi. */
-  const LAZY_LIBS = ['levels'];
+  // remind — push eslatmalar jadvali: birinchi ekranga kerak emas, lekin ochilishda bir marta jadvalni yangilaydi
+  const LAZY_LIBS = ['levels', 'remind'];
   D.preloadViews = () => {
     const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 200));
     const queue = Object.keys(lazySrc).map((id) => () => D.loadView(id))
@@ -2097,6 +2103,8 @@
         D.toast(D.t('auth.unsent'), { ms: 4000 });
         await new Promise((r) => setTimeout(r, 1400));
       }
+      // shu qurilmaga endi bu hisobning eslatmalari kelmasin (keyin boshqa odam kirishi mumkin)
+      try { if (D.remind && D.remind.detach) await Promise.race([D.remind.detach(), new Promise((r) => setTimeout(r, 6000))]); } catch (e) {}
       try { await D.fetchTimed('/api/logout', { method: 'POST', credentials: 'same-origin' }, 8000); } catch (e) {}
       try { localStorage.removeItem(LS_KEY); localStorage.removeItem(UI_KEY); } catch (e) {}
       D.device.uid = ''; D.device.name = ''; D.saveDevice();
