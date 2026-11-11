@@ -319,13 +319,18 @@ class Push:
             self._save(f, d)
         return res
 
+    def _user_files(self):
+        """Foydalanuvchi fayllari. Nuqta bilan boshlanganlari — xizmat fayllari (oqim qulfi
+        .lock.push ham *.push ga tushadi), uid fayl nomi hech qachon nuqtadan boshlanmaydi."""
+        return [f for f in self.dir.glob("*.push") if not f.name.startswith(".")]
+
     # -- obunalar --
     def subscribe(self, uid: str, sub: dict, contact: str, ua: str) -> int:
         now = int(time.time())
         rec = dict(sub, contact=contact, ua=_txt(ua, 160), at=now, ok=None, fails=0)
         # Bitta brauzer — bitta egasi. Hisob almashsa eski egasining eslatmalari kelmasin.
         mine = self.file(uid)
-        for f in self.dir.glob("*.push"):
+        for f in self._user_files():
             if f == mine:
                 continue
             try:
@@ -456,7 +461,7 @@ class Push:
     def tick(self, now: float = None) -> int:
         now = now or time.time()
         n = 0
-        for f in sorted(self.dir.glob("*.push")):
+        for f in sorted(self._user_files()):
             try:
                 mt = f.stat().st_mtime_ns
                 seen = self._seen.get(f)
