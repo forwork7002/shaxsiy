@@ -543,6 +543,32 @@ Haqiqiy zaxirada tekshirilgan (2026-09-17 nusxasi): 68 fayl va 1528 ta ustun, ek
 
 Guarded by `tests/test_durability.py` → «Shifrlash» bo'limlari (diskda ochiq matn yo'q, ko'chirish, unseal, noto'g'ri kalit).
 
+## Push eslatmalar — ilova yopiq bo'lsa ham (2026-11-11)
+
+Foydalanuvchi so'rovi: «push bilan eslatib tursin». Ilgari namoz eslatmasi sahifa ichidagi
+`setTimeout` + `new Notification` edi va faqat ilova ochiq turganda ishlardi — olib tashlandi.
+
+- **Kim nima qiladi.** Jadvalni mijoz tuzadi (`js/remind.js` → `build()`): namoz vaqtlari, tz va
+  odat jadvali faqat mijozda bor. U `POST /api/push/schedule` ga `[{id, at, title, body, url, tag}]`
+  yuboradi (namoz 30 kun, odat/kun yakuni 14 kun, vazifa 44 kun, ≤800 ta). Server (`push.py`) faqat
+  vaqti kelganini yuboradi: fon oqimi har 15 s, `data/.lock.push` flock — gunicorn ishchilaridan bittasi.
+- **Kutubxonasiz.** RFC 8291 (aes128gcm) va RFC 8292 (VAPID, ES256) `cryptography` bilan; RFC namunasiga
+  bayt-baytigacha sinalgan. VAPID kaliti birinchi so'rovda yaratiladi: `data/.vapid` (shifrlangan).
+  **Kalitni almashtirmang** — hamma obuna bekor bo'ladi (mijoz `heal()` qayta obuna qiladi, lekin
+  faqat ilova ochilganda).
+- **Saqlash.** `data/<uid>.push` (shifrlangan; `.json` emas — hisob sanog'iga kirmaydi; `set-register del`
+  uni `uid.*` bilan birga `.deleted` qiladi): `subs` (≤8 qurilma), `items`, `sent` («id@at», 3 kun).
+  Avval «yuborildi» deb yoziladi, keyin yuboriladi — ikki marta kelmaydi. 20 daqiqadan eski eslatma
+  (server to'xtab qolgan bo'lsa) yuborilmaydi. 404/410 — obuna o'chadi; 30 ketma-ket xato — tashlanadi.
+- **Xavfsizlik.** Endpoint faqat ma'lum push xizmatlari (FCM, Apple, Mozilla, WNS), https:443, yo'naltirishga
+  ergashmaydi (SSRF). Bitta brauzer — bitta hisob: boshqa hisob obuna bo'lsa avvalgisidan o'chadi;
+  chiqishda (`D.auth.logout`) obuna bekor qilinadi. Bildirishnoma bosilganda faqat o'z originidagi `./#…`.
+- **iPhone.** Push faqat «Uy ekraniga qo'shilgan» ilovada (iOS 16.4+); Safari tabida «ios» holati va yo'l-yo'riq.
+- **O'chirish.** `.env` da `MA_PUSH=0` — fon oqimi ishga tushmaydi (API ishlaydi, eslatma ketmaydi).
+- UI: Sozlash › Eslatmalar (`D.remind.body`); Ibodat › Vaqtlar kartasida `rmOpen` havolasi.
+
+Guarded by `tests/test_push.py` (server, 95) va `tests/test_remind.js` (jadval, 63).
+
 ## Verifying a deploy — "200" is not "works"
 
 Written after v98 (2026-09-15) shipped a live TypeError that every check passed.

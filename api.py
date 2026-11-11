@@ -1358,7 +1358,7 @@ def health():
            # qaysi model va qanday fikrlash darajasi ishlayotgani — .env ni ochmasdan tekshirish uchun
            "aiModel": (OPENAI_MODEL if AI_PROVIDER == "openai" else AI_MODEL) if AI_PROVIDER else None,
            "aiReasoning": OPENAI_REASONING if AI_PROVIDER == "openai" else None,
-           "telegram": bool(BOT_TOKEN), "users": len(USERS)}
+           "telegram": bool(BOT_TOKEN), "users": len(USERS), "push": True}
     _, err = current_user()
     if not err or client_ip() == "127.0.0.1":
         out["data"] = _data_health()
@@ -3238,6 +3238,85 @@ def food_sweep(uid: str, state: dict, force: bool = False) -> int:
 
 
 # ═══════════════════════ Statik fayllar ═══════════════════════
+
+# ─── Push eslatmalar (push.py) ─────────────────────────────────────────
+# Ilova yopiq bo'lsa ham telefonga keladigan eslatma. Jadvalni mijoz tuzadi (namoz,
+# vazifa, odat, kun yakuni), server faqat saqlaydi va vaqtida yuboradi. Butun mantiq
+# push.py da; bu yerda — faqat yo'llar va fon oqimini ishga tushirish.
+import push as webpush  # noqa: E402
+
+PUSH = webpush.Push(DATA_DIR, seal=vault.seal_text, open_text=vault.open_text, atomic_write=_atomic_write,
+                    file_lock=_file_lock, safe_uid=_safe_uid, log=log)
+
+
+@app.get("/api/push")
+def push_status():
+    uid, err = current_user()
+    if err:
+        return err
+    return jsonify(dict(PUSH.status(uid), key=PUSH.public_key()))
+
+
+@app.post("/api/push/subscribe")
+def push_subscribe():
+    uid, err = current_user()
+    if err:
+        return err
+    body = request.get_json(silent=True) or {}
+    sub = webpush.clean_sub(body.get("subscription"))
+    if not sub:
+        return jsonify({"error": "bad_subscription"}), 400
+    n = PUSH.subscribe(uid, sub, contact=base_url(), ua=request.headers.get("User-Agent", ""))
+    return jsonify({"ok": True, "subs": n, "id": webpush.sub_id(sub["endpoint"])})
+
+
+@app.post("/api/push/unsubscribe")
+def push_unsubscribe():
+    uid, err = current_user()
+    if err:
+        return err
+    ep = (request.get_json(silent=True) or {}).get("endpoint")
+    if not isinstance(ep, str) or not ep:
+        return jsonify({"error": "bad_endpoint"}), 400
+    return jsonify({"ok": True, "removed": PUSH.unsubscribe(uid, ep)})
+
+
+@app.post("/api/push/schedule")
+def push_schedule():
+    uid, err = current_user()
+    if err:
+        return err
+    if request.content_length and request.content_length > 512 * 1024:
+        return jsonify({"error": "too_large"}), 413
+    body = request.get_json(silent=True) or {}
+    items = webpush.clean_items(body.get("items"), time.time())
+    return jsonify(dict(PUSH.set_items(uid, items), ok=True))
+
+
+@app.post("/api/push/test")
+def push_test():
+    """Sinov xabari — «Sinab ko'rish» tugmasi. endpoint berilsa faqat o'sha qurilmaga."""
+    uid, err = current_user()
+    if err:
+        return err
+    body = request.get_json(silent=True) or {}
+    subs = PUSH.load(uid)["subs"]
+    ep = body.get("endpoint")
+    if isinstance(ep, str) and ep:
+        subs = [s for s in subs if s.get("endpoint") == ep]
+    if not subs:
+        return jsonify({"error": "no_subscription"}), 404
+    if not PUSH.test_allowed(uid):
+        return jsonify({"error": "rate_limited"}), 429
+    item = {"id": "test", "at": int(time.time()), "title": webpush._txt(body.get("title") or "Shaxsiy", 120),
+            "body": webpush._txt(body.get("body") or "", 240), "url": "./", "tag": "test"}
+    res = PUSH.deliver(uid, subs, webpush.payload_of(item))
+    log.info("push sinov (%s): %s", uid, res["codes"])
+    return jsonify(dict(res, ok=res["sent"] > 0))
+
+
+PUSH.start(fcntl)
+
 
 @app.get("/")
 def index():

@@ -1,5 +1,5 @@
 /* Service worker: cache-first app shell, network-first API. Bump CACHE on every release. */
-const CACHE = 'dash-v136';
+const CACHE = 'dash-v137';
 const V = '?v=' + CACHE.replace('dash-', '');
 const ASSETS = [
   './app.css',
@@ -41,6 +41,7 @@ const ASSETS = [
   './js/onboard.js',
   './js/yusa-orb.js',
   './js/levels.js',
+  './js/remind.js',
   './js/app.js',
   './js/install.js',
 ];
@@ -102,4 +103,55 @@ self.addEventListener('fetch', (e) => {
       return hit || net;
     })
   );
+});
+
+/* ---------------------------------------------------------------------
+   Push eslatmalar (server: push.py, jadval: js/remind.js).
+   Xabar ilova yopiq bo'lsa ham shu yerga keladi. Mazmun: {t, b, u, g, ts}
+   — sarlavha, matn, ochiladigan manzil (./#bo'lim), teg (bir xil teg
+   eskisining o'rnini egallaydi — masalan bir namozning ikki eslatmasi).
+   --------------------------------------------------------------------- */
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (x) { d = { t: e.data ? e.data.text() : '' }; }
+  const opts = {
+    body: d.b || '',
+    icon: './icons/icon-192.png',
+    badge: './icons/icon-192.png',
+    data: { url: typeof d.u === 'string' ? d.u : './' },
+    timestamp: d.ts ? d.ts * 1000 : Date.now(),
+    vibrate: [180, 90, 180],
+  };
+  // renotify tegsiz berilsa Chrome xato beradi
+  if (d.g) { opts.tag = String(d.g); opts.renotify = true; }
+  e.waitUntil(self.registration.showNotification(d.t || 'Shaxsiy', opts));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const raw = (e.notification.data && e.notification.data.url) || './';
+  const url = new URL(raw, self.registration.scope);
+  if (url.origin !== location.origin) return;
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+    const open = list.find((c) => c.url.startsWith(self.registration.scope));
+    if (open) {
+      // Ochiq ilova qayta yuklanmaydi — sahifa o'zi kerakli bo'limga o'tadi (app.js)
+      open.postMessage({ type: 'go', hash: url.hash });
+      return open.focus();
+    }
+    return self.clients.openWindow(url.href);
+  }));
+});
+
+// Brauzer obunani o'zi almashtirsa (kalit muddati, push xizmati) — serverga yangisini beramiz
+self.addEventListener('pushsubscriptionchange', (e) => {
+  const post = (path, body) => fetch(path, { method: 'POST', credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  e.waitUntil((async () => {
+    let sub = e.newSubscription || null;
+    const old = e.oldSubscription || null;
+    if (!sub && old && old.options) sub = await self.registration.pushManager.subscribe(old.options);
+    if (old) await post('api/push/unsubscribe', { endpoint: old.endpoint }).catch(() => null);
+    if (sub) await post('api/push/subscribe', { subscription: sub.toJSON() });
+  })().catch(() => null));
 });

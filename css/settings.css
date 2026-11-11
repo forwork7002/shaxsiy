@@ -162,3 +162,27 @@
 .set-ai-model .inp, .set-ai-model .sel { flex: 1; min-width: 0; }
 .set-ai-model .btn { flex: none; }
 .set-ai .help a { color: var(--accent-text); overflow-wrap: anywhere; }
+
+/* Eslatmalar (push, js/remind.js) — bo'lim ichida karta yo'q, boshqa bo'limlar kabi qatorlar */
+.rm-dev > .set-row:first-child { border-top: 0; }
+.rm-what > .set-sub-eyebrow:first-child { margin-top: 14px; }
+.rm-sub { display: flex; flex-direction: column; gap: 10px; padding: 0 0 12px; }
+/* «oldin» tanlovi: 5 ta tugma 360px da surilmasdan sig'adi */
+.rm-seg { display: flex; margin: 0; overflow: hidden; }
+.rm-seg button { flex: 1 1 auto; min-width: 0; padding: 7px 5px; min-height: 40px; font-size: 12.5px; overflow: hidden; text-overflow: ellipsis; }
+/* 320px (iPhone SE 1) — besh tugma bir qatorga sig'maydi: ikki qatorga bo'linadi, kesilmaydi */
+@media (max-width: 359px) {
+  .rm-seg { flex-wrap: wrap; border-radius: var(--r-sm); }
+  .rm-seg button { flex: 1 0 30%; border-radius: var(--r-xs); }
+}
+.rm-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.rm-chip { min-height: 36px; padding: 0 12px; border-radius: 999px; border: 1px solid var(--line2); background: var(--card2); color: var(--text3);
+  font-size: 13px; font-weight: 500; transition: background .15s, color .15s, border-color .15s; }
+.rm-chip.on { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-text); }
+@media (hover: hover) { .rm-chip:hover { border-color: var(--line3); } }
+.rm-hab { display: flex; align-items: center; gap: 6px; min-height: 48px; }
+.rm-hab + .rm-hab { border-top: 1px solid var(--line); }
+.rm-hab-n { flex: 1; min-width: 0; font-size: 14px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rm-time { flex: none; width: 136px; min-height: 40px; padding-left: 10px; padding-right: 8px; font-variant-numeric: tabular-nums; }
+.rm-x { flex: none; width: 40px; height: 40px; }
+.rm-x.btn.icon { background: transparent; color: var(--text3); }

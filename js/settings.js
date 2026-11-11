@@ -47,9 +47,7 @@
       'set.pr.method': 'Hisoblash usuli', 'set.pr.fajr': 'Bomdod burchagi', 'set.pr.isha': 'Xufton burchagi', 'set.pr.asr': 'Asr', 'set.pr.hanafi': 'Hanafiy', 'set.pr.shafi': "Shofe'iy",
       'set.pr.offsets': 'Tuzatishlar (daqiqa)', 'set.pr.offsetsHint': 'Mahalliy taqvimga moslash uchun ± daqiqa',
       'set.pr.hijri': 'Hijriy tuzatish', 'set.pr.hijriHint': "Hilol ko'rinishiga qarab ±2 kun",
-      'set.pr.notify': 'Eslatmalar', 'set.pr.notifyHint': "Har namozdan 10 daqiqa oldin (faqat dastur ochiq bo'lganda)",
-      'set.pr.notifyDenied': 'Bildirishnomalarga ruxsat berilmagan', 'set.pr.notifyNo': "Brauzer bildirishnomalarni qo'llamaydi",
-      'set.pr.notifyOn': 'Eslatmalar yoqildi', 'set.pr.notifyOff': "Eslatmalar o'chirildi", 'set.pr.notifBody': '{name} — 10 daqiqadan keyin ({time})',
+      'set.pr.notify': 'Eslatmalar', 'set.pr.notifyHint': "Ilova yopiq bo'lsa ham — Sozlash › Eslatmalar", 'set.pr.notifyGo': 'Sozlash',
       'set.f.cats': 'Kategoriyalar', 'set.f.namePh': 'Kategoriya nomi…', 'set.f.catDeleted': "Kategoriya o'chirildi: {name}", 'set.f.txCount': '{n} ta yozuv',
       'set.f.cantDelete': "Bu kategoriyani o'chirib bo'lmaydi", 'set.f.needName': 'Nom kiriting', 'set.f.added': "Kategoriya qo'shildi",
       'set.f.reassign': 'Yozuvlar «Boshqa»ga o\'tkaziladi',
@@ -100,9 +98,7 @@
       'set.pr.method': 'Ҳисоблаш усули', 'set.pr.fajr': 'Бомдод бурчаги', 'set.pr.isha': 'Хуфтон бурчаги', 'set.pr.asr': 'Аср', 'set.pr.hanafi': 'Ҳанафий', 'set.pr.shafi': 'Шофеъий',
       'set.pr.offsets': 'Тузатишлар (дақиқа)', 'set.pr.offsetsHint': 'Маҳаллий тақвимга мослаш учун ± дақиқа',
       'set.pr.hijri': 'Ҳижрий тузатиш', 'set.pr.hijriHint': 'Ҳилол кўринишига қараб ±2 кун',
-      'set.pr.notify': 'Эслатмалар', 'set.pr.notifyHint': 'Ҳар намоздан 10 дақиқа олдин (фақат дастур очиқ бўлганда)',
-      'set.pr.notifyDenied': 'Билдиришномаларга рухсат берилмаган', 'set.pr.notifyNo': 'Браузер билдиришномаларни қўлламайди',
-      'set.pr.notifyOn': 'Эслатмалар ёқилди', 'set.pr.notifyOff': 'Эслатмалар ўчирилди', 'set.pr.notifBody': '{name} — 10 дақиқадан кейин ({time})',
+      'set.pr.notify': 'Эслатмалар', 'set.pr.notifyHint': 'Илова ёпиқ бўлса ҳам — Созлаш › Эслатмалар', 'set.pr.notifyGo': 'Созлаш',
       'set.f.cats': 'Категориялар', 'set.f.namePh': 'Категория номи…', 'set.f.catDeleted': 'Категория ўчирилди: {name}', 'set.f.txCount': '{n} та ёзув',
       'set.f.cantDelete': 'Бу категорияни ўчириб бўлмайди', 'set.f.needName': 'Ном киритинг', 'set.f.added': 'Категория қўшилди',
       'set.f.reassign': 'Ёзувлар «Бошқа»га ўтказилади',
@@ -153,9 +149,7 @@
       'set.pr.method': 'Метод расчёта', 'set.pr.fajr': 'Угол Фаджра', 'set.pr.isha': 'Угол Иша', 'set.pr.asr': 'Аср', 'set.pr.hanafi': 'Ханафитский', 'set.pr.shafi': 'Шафиитский',
       'set.pr.offsets': 'Поправки (минуты)', 'set.pr.offsetsHint': 'Поправка в минутах под местный календарь',
       'set.pr.hijri': 'Поправка хиджры', 'set.pr.hijriHint': 'Сдвиг на ±2 дня по видимости хиляля',
-      'set.pr.notify': 'Напоминания', 'set.pr.notifyHint': 'За 10 минут до каждого намаза (только пока приложение открыто)',
-      'set.pr.notifyDenied': 'Уведомления не разрешены', 'set.pr.notifyNo': 'Браузер не поддерживает уведомления',
-      'set.pr.notifyOn': 'Напоминания включены', 'set.pr.notifyOff': 'Напоминания выключены', 'set.pr.notifBody': '{name} — через 10 минут ({time})',
+      'set.pr.notify': 'Напоминания', 'set.pr.notifyHint': 'Даже когда приложение закрыто — Настройки › Напоминания', 'set.pr.notifyGo': 'Настроить',
       'set.f.cats': 'Категории', 'set.f.namePh': 'Название категории…', 'set.f.catDeleted': 'Категория удалена: {name}', 'set.f.txCount': 'записей: {n}',
       'set.f.cantDelete': 'Эту категорию нельзя удалить', 'set.f.needName': 'Введите название', 'set.f.added': 'Категория добавлена',
       'set.f.reassign': 'Записи будут перенесены в «Другое»',
@@ -236,6 +230,12 @@
     const k = 'set.' + el.dataset.id;
     if (D.ui.collapsed[k] === false) delete D.ui.collapsed[k]; else D.ui.collapsed[k] = false;
     D.saveUi(); D.rerender();
+  };
+  /** Ibodat › Vaqtlar dagi «Sozlash» — Sozlash › Eslatmalar bo'limini ochib olib boradi.
+      remind.js kechiktirib yuklanadi, shuning uchun bu amal shu yerda (tugma doim ishlasin). */
+  D.act.rmOpen = () => {
+    D.ui.collapsed['set.remind'] = false; D.saveUi();
+    if (D.current() === 'settings') D.rerender(); else D.go('settings');
   };
   // S.food shakli — D.normalize (core.js) har doim to'ldiradi, shu yerda ikkinchi standart yo'q
   const FOOD = () => D.S.food;
@@ -879,26 +879,9 @@
   /* ------------------------------------------------------------------ */
   /* PRAYER                                                              */
   /* ------------------------------------------------------------------ */
-  let reminderTimers = [];
-  function clearReminders() { reminderTimers.forEach(clearTimeout); reminderTimers = []; }
-  function notifSupported() { return typeof Notification !== 'undefined' && typeof Notification.requestPermission === 'function'; }
-  function scheduleReminders() {
-    clearReminders();
-    try {
-      if (!D.S || !S().prayer || !S().prayer.notify || !notifSupported() || Notification.permission !== 'granted' || !D.prayer) return;
-      const p = D.nowTz(), nowM = p.h * 60 + p.min;
-      for (const x of D.prayer.list(D.keyOf(p.y, p.m, p.d))) {
-        if (x.id === 'quyosh') continue;
-        const at = x.mins - 10;
-        if (at <= nowM) continue;
-        const ms = (at - nowM) * 60000 - p.s * 1000;
-        reminderTimers.push(setTimeout(() => { try { new Notification(t('prayer.' + x.id), { body: t('set.pr.notifBody', { name: t('prayer.' + x.id), time: x.time }), tag: 'dash-prayer-' + x.id }); } catch (e) {} }, Math.max(1000, ms)));
-      }
-    } catch (e) { console.warn('reminders', e); }
-  }
-  D.on('boot', scheduleReminders);
-  D.on('day:changed', scheduleReminders);
-  D.on('state:changed', D.debounce(scheduleReminders, 1500)); // state may be replaced by pull/import/undo
+  /* Namoz eslatmasi 2026-11 dan push orqali (js/remind.js, Sozlash › Eslatmalar). Ilgarigi
+     sahifa-ichidagi taymerlar faqat ilova ochiq turganda ishlardi va telefonda deyarli
+     hech qachon kelmasdi — olib tashlandi. S.settings.prayer.notify kaliti holatda qoladi. */
 
   /** Namoz sozlamalari Sozlashda emas, faqat Ibodat › Vaqtlarda: gear tugmasi shuni ochadi.
       Vaqtlar jadvali va joylashuv o'sha ekranda yuqorida turibdi — bu yerda takrorlanmaydi. */
@@ -914,8 +897,6 @@
     const off = pr.offsets || {};
     // bo'sh maydon «usul yo'q» degan taassurot beradi — prayer.js nimadan foydalanayotgani ko'rsatiladi
     const eff = (() => { try { return D.prayer.conf(); } catch (e) { return { fajr: 15.5, isha: 15.5, asr: 'hanafi' }; } })();
-    const perm = notifSupported() ? Notification.permission : 'unsupported';
-    const notifyOn = !!pr.notify && perm === 'granted';
     return `
     <div class="card">
       <div class="card-head"><div class="title">${D.ic('sun')} ${t('set.pr.method')}</div></div>
@@ -931,10 +912,9 @@
       ${row(`${D.ic('moon', 14)} ${t('set.pr.hijri')}`, seg([-2, -1, 0, 1, 2].map((v) => ({ v: String(v), l: v > 0 ? '+' + v : String(v) })), String(+pr.hijriOffset || 0), 'setHijri', 'compact num'), t('set.pr.hijriHint'))}
     </div>
 
-    <div class="card">
-      ${row(`${D.ic('bolt', 14)} ${t('set.pr.notify')}`, `<button type="button" class="toggle ${notifyOn ? 'on' : ''}" data-act="setNotify" role="switch" aria-checked="${notifyOn}" aria-label="${esc(t('set.pr.notify'))}"></button>`,
-        perm === 'denied' ? t('set.pr.notifyDenied') : perm === 'unsupported' ? t('set.pr.notifyNo') : t('set.pr.notifyHint'))}
-    </div>`;
+    ${D.serverEnabled() ? `<div class="card">
+      ${row(`${D.ic('bell', 14)} ${t('set.pr.notify')}`, `<button type="button" class="btn ghost sm" data-act="rmOpen">${esc(t('set.pr.notifyGo'))}</button>`, esc(t('set.pr.notifyHint')))}
+    </div>` : ''}`;
   }
 
   D.act.setPrNum = (el) => {
@@ -943,20 +923,11 @@
     const lim = { fajr: [8, 21], isha: [8, 21] }[k];
     if (!lim) return;
     S().prayer[k] = D.clamp(v, lim[0], lim[1]);
-    D.save(); D.rerender(); scheduleReminders();
+    D.save(); D.rerender();
   };
-  D.act.setPrOffset = (el) => { S().prayer.offsets = S().prayer.offsets || {}; S().prayer.offsets[el.dataset.id] = D.clamp(Math.round(num(el.value) || 0), -60, 60); D.save(); D.rerender(); scheduleReminders(); };
-  D.act.setAsr = (el) => { S().prayer.asr = el.dataset.val === 'shafi' ? 'shafi' : 'hanafi'; D.save(); D.rerender(); scheduleReminders(); };
+  D.act.setPrOffset = (el) => { S().prayer.offsets = S().prayer.offsets || {}; S().prayer.offsets[el.dataset.id] = D.clamp(Math.round(num(el.value) || 0), -60, 60); D.save(); D.rerender(); };
+  D.act.setAsr = (el) => { S().prayer.asr = el.dataset.val === 'shafi' ? 'shafi' : 'hanafi'; D.save(); D.rerender(); };
   D.act.setHijri = (el) => { S().prayer.hijriOffset = D.clamp(+el.dataset.val || 0, -2, 2); D.save(); D.rerender(); };
-  D.act.setNotify = async () => {
-    const pr = S().prayer;
-    if (pr.notify) { pr.notify = false; clearReminders(); D.save(); D.rerender(); D.toast(t('set.pr.notifyOff')); return; }
-    if (!notifSupported()) { D.toast(t('set.pr.notifyNo')); return; }
-    let perm = Notification.permission;
-    if (perm !== 'granted') { try { perm = await Notification.requestPermission(); } catch (e) { perm = 'denied'; } }
-    if (perm !== 'granted') { pr.notify = false; D.save(); D.rerender(); D.toast(t('set.pr.notifyDenied')); return; }
-    pr.notify = true; D.save(); D.rerender(); scheduleReminders(); D.toast(t('set.pr.notifyOn'));
-  };
 
   /* ------------------------------------------------------------------ */
   /* FINANCE                                                             */
@@ -1277,7 +1248,7 @@
   /* Bitta sahifa: profil eng tepada, keyin tana, ovqat, ilova, ro'yxatlar,
      oxirida ma'lumot. Eski havolalar (#settings/prayer, /general, /finance…)
      shu sahifaga tushadi — sub endi hech narsani almashtirmaydi. */
-  let waitingProfile = false;
+  let waitingProfile = false, waitingRemind = false;
   D.i18n.add({
     uz: {
       'set.time.title': 'Vaqt va joy', 'set.time.zone': 'Vaqt mintaqasi', 'set.time.place': 'Namoz uchun shahar',
@@ -1368,6 +1339,11 @@
       waitingProfile = true;
       D.loadLib('profile').then(() => { waitingProfile = false; if (D.current() === 'settings') D.rerender(); });
     }
+    // eslatmalar ham fonda keladi (core.js LAZY_LIBS) — Sozlash undan oldin ochilsa kutamiz
+    if (D.serverEnabled() && !D.remind && !waitingRemind && D.loadLib) {
+      waitingRemind = true;
+      D.loadLib('remind').then(() => { waitingRemind = false; if (D.current() === 'settings') D.rerender(); });
+    }
     const s = S(), tz = (() => { try { return D.tzInfo(); } catch (e) { return null; } })();
     const langName = t('lang.short.' + D.lang());
     const themeName = t('theme.' + (s.theme || 'dark'));
@@ -1386,6 +1362,7 @@
           <span class="set-sec-chev">${D.ic('chevR', 16)}</span></button></div>` : ''}
         ${safe(() => section('body', 'scale', t('set.body'), bodySummary(), bodyCard))}
         ${safe(() => section('app', 'gear', t('set.sec.app'), appSum, () => appCard() + safe(timeCard), tzWarn))}
+        ${D.serverEnabled() && D.remind ? safe(() => section('remind', 'bell', D.remind.title(), D.remind.summary(), D.remind.body, D.remind.warn())) : ''}
         ${safe(() => section('food', 'apple', t('set.fd.title'), foodSummary(), renderFood))}
         ${D.serverEnabled() ? safe(() => section('ai', 'sparkles', t('set.ai.title'), aiSummary(), aiBody, aiWarn())) : ''}
         ${safe(() => section('habits', 'checkSq', t('set.h.title'), esc(t('set.sum.habits', { n: hs.filter((h) => h.active).length })), renderHabits))}
