@@ -57,7 +57,10 @@ VACUUM_DAYS = 30              # oyiga bir marta: compact o'chirgan joy diskka qa
 COUNT_TABLES = ("day_facts", "state_versions", "whoop_records", "chat_messages", "ai_cards")   # nusxa to'liqligi shular bo'yicha
 ZMAGIC = b"DZ1"               # siqilgan blob boshi (zlib) — oddiy matndan ajratib turadi
 DAY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-FOOD_MEAL_KEYS = ("id", "ts", "name", "grams", "kcal", "p", "c", "f", "photo", "items", "note", "src")   # surat baytlari hech qachon emas
+FOOD_MEAL_KEYS = ("id", "ts", "name", "grams", "kcal", "p", "c", "f", "photo", "items", "note", "src",   # surat baytlari hech qachon emas
+                  # to'liq tahlil (2026-09-24): tola…folat, baho, qayta ishlanganlik, AI izohi, odam yozgan asl matn
+                  "fib", "sug", "satf", "salt", "chol", "k", "ca", "fe", "mg", "zn", "va", "vc", "vd", "b12", "fol",
+                  "score", "proc", "advice", "tips", "asm", "desc")
 WHOOP_TS_KEY = {"cycle": "start", "recovery": "ts", "sleep": "end", "workout": "start"}   # _wh_merge bilan bir xil
 WHOOP_DAY_SHIFT_H = {"cycle": 12}   # mijoz (whoop.js/history.js) sikl kunini start+12h dan oladi — day_hint ham shunday
 

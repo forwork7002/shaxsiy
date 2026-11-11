@@ -7,7 +7,8 @@ Nima qiladi:
   • Har bir foydalanuvchi uchun data/<id>.json  (+ kunlik zaxira nusxalar data/backups/)
   • Profil: data/<id>.who.json (ism, email, provayder, sana) + data/<id>.avatar (surat) — /api/me, /api/me/avatar
   • WHOOP OAuth — tokenlar SERVERDA saqlanadi, brauzerga chiqmaydi; /api/whoop/data proksi
-  • Yusa AI — Anthropic API ga proksi, kalit faqat serverda
+  • AI — Anthropic / OpenAI'ga mos provayderlarga proksi; kalit faqat serverda. Umumiy kalit .env da,
+    har kim o'zinikini /api/me/ai orqali ulaydi (data/<uid>.ai, vault bilan shifrlangan)
   • Statik fayllarni (index.html, app.css, js/, css/) tarqatadi
 
 Env (start.sh):
@@ -38,12 +39,14 @@ import fcntl
 import hashlib
 import hmac
 import html
+import ipaddress
 import json
 import logging
 import os
 import re
 import secrets
 import shutil
+import socket
 import tempfile
 import threading
 import time
@@ -2356,17 +2359,129 @@ def ai_quota_ok(uid: str) -> bool:
     return True
 
 
-_ai_client = None
+# ── Qaysi AI: odamning o'zi ulagani yoki serverniki ─────────────────────────
+# Har bir so'rov «cfg» bilan yuradi: {kind, proto, key, model, base, own}.
+# Sim (proto) ikkita: "anthropic" — rasmiy SDK, "openai" — /chat/completions.
+# Gemini, OpenRouter, DeepSeek va boshqalar OpenAI'ga mos manzil beradi, ya'ni
+# ikkinchi sim bilan ishlaydi — faqat manzil boshqa. Odam o'z kalitini qo'ymasa
+# serverdagi umumiy kalit (.env) ishlaydi, ya'ni ilgarigidek.
+AI_KINDS = {
+    #  id           sim          manzil                                                     sukut modeli
+    "anthropic":  ("anthropic", "https://api.anthropic.com",                                "claude-opus-5"),
+    "openai":     ("openai",    "https://api.openai.com/v1",                                "gpt-5"),
+    "gemini":     ("openai",    "https://generativelanguage.googleapis.com/v1beta/openai",  "gemini-2.5-flash"),
+    "openrouter": ("openai",    "https://openrouter.ai/api/v1",                             "openai/gpt-5"),
+    "deepseek":   ("openai",    "https://api.deepseek.com/v1",                              "deepseek-chat"),
+    "custom":     ("openai",    "",                                                         ""),
+}
+# «Boshqa» manzilda lokal tarmoq (uydagi Ollama va h.k.) faqat shu yoqilsa ruxsat —
+# aks holda istalgan ro'yxatdan o'tgan odam serverning ichki tarmog'iga so'rov yubora olardi.
+AI_ALLOW_LOCAL = os.environ.get("MA_AI_LOCAL", "") == "1"
+AI_MODEL_RE = re.compile(r"^[\w.:/@+-]{1,120}$")
 
 
-def ai_client():
-    global _ai_client
-    if _ai_client is None:
+def ai_server_cfg():
+    """Serverdagi umumiy kalit (.env) — odam o'zinikini ulamagan bo'lsa shu ishlaydi."""
+    if AI_PROVIDER == "openai":
+        return {"kind": "openai", "proto": "openai", "key": OPENAI_KEY, "model": OPENAI_MODEL, "base": OPENAI_BASE, "own": False}
+    if AI_PROVIDER == "anthropic":
+        return {"kind": "anthropic", "proto": "anthropic", "key": AI_KEY, "model": AI_MODEL, "base": AI_KINDS["anthropic"][1], "own": False}
+    return None
+
+
+def ai_own_file(uid: str) -> Path:
+    # .json EMAS: DATA_DIR/*.json holat fayllari deb sanaladi (hisoblar soni, zaxira tekshiruvi)
+    f = user_file(uid)
+    return f.with_name(f.stem + ".ai")
+
+
+def ai_own_load(uid: str):
+    """Odam ulagan AI → cfg, yoki None (ulamagan / fayl buzilgan / ochilmadi).
+    Fayl butunligicha vault (AES-256-GCM) bilan yopiladi — WHOOP tokenlari kabi:
+    diskda, snapshot'da va tashqi zaxirada kalit ochiq yotmaydi."""
+    f = ai_own_file(uid)
+    try:
+        d = json.loads(vault.read_text(f))
+    except FileNotFoundError:
+        return None
+    except (OSError, ValueError, vault.VaultError) as e:
+        log.warning("Shaxsiy AI fayli o'qilmadi (%s): %s", uid, e)
+        return None
+    if not isinstance(d, dict) or d.get("kind") not in AI_KINDS or not str(d.get("key") or "").strip():
+        return None
+    proto, base, model = AI_KINDS[d["kind"]]
+    if d["kind"] == "custom":
+        base = str(d.get("base") or "")
+    return {"kind": d["kind"], "proto": proto, "key": str(d["key"]), "model": str(d.get("model") or model), "base": base, "own": True}
+
+
+def ai_own_save(uid: str, cfg: dict) -> None:
+    _atomic_write(ai_own_file(uid), vault.seal_text(json.dumps({
+        "kind": cfg["kind"], "model": cfg["model"], "base": cfg["base"] if cfg["kind"] == "custom" else "",
+        "key": cfg["key"], "at": int(time.time())})))
+
+
+def ai_cfg(uid: str):
+    """Shu odam uchun ishlaydigan AI: avval o'zi ulagani, bo'lmasa serverniki, bo'lmasa None."""
+    return ai_own_load(uid) or ai_server_cfg()
+
+
+def ai_base_ok(base: str) -> bool:
+    """«Boshqa» provayder manzili: faqat https va faqat ochiq internetdagi manzil.
+    Manzilni istalgan ro'yxatdan o'tgan odam yozadi — tekshiruvsiz server o'zining
+    ichki tarmog'iga (127.0.0.1, 10.x, 169.254.169.254 metadata) so'rov yuboruvchi
+    vositaga aylanardi. Har so'rov oldidan qayta tekshiriladi: DNS keyin o'zgarishi mumkin."""
+    try:
+        u = urllib.parse.urlsplit(base)
+        port = u.port
+    except ValueError:
+        return False
+    if not u.hostname or u.username or u.password or u.query or u.fragment:
+        return False
+    if u.scheme != "https" and not (AI_ALLOW_LOCAL and u.scheme == "http"):
+        return False
+    try:
+        infos = socket.getaddrinfo(u.hostname, port or (443 if u.scheme == "https" else 80), proto=socket.IPPROTO_TCP)
+    except (OSError, UnicodeError):
+        return False
+    if not infos:
+        return False
+    for info in infos:
+        try:
+            ip = ipaddress.ip_address(str(info[4][0]).split("%")[0])
+        except ValueError:
+            return False
+        if not ip.is_global and not AI_ALLOW_LOCAL:
+            return False
+    return True
+
+
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """AI manziliga yo'naltirish (3xx) qabul qilinmaydi: tekshirilgan ochiq manzil
+    javobida ichki manzilga «o'tib ket» deyishi mumkin edi."""
+    def redirect_request(self, req, fp, code, msg, headers, newurl):  # noqa: D401
+        return None
+
+
+_AI_HTTP = urllib.request.build_opener(_NoRedirect())
+
+
+_ai_clients: dict = {}
+
+
+def ai_client(cfg: dict):
+    """Anthropic mijozi — kalit bo'yicha keshlanadi (har so'rovda yangi ulanish ochilmasin)."""
+    k = hashlib.sha256(cfg["key"].encode("utf-8")).hexdigest()
+    c = _ai_clients.get(k)
+    if c is None:
         import anthropic  # lazily — kutubxona bo'lmasa server baribir ishlaydi
+        if len(_ai_clients) > 64:
+            _ai_clients.clear()
         # max_retries ataylab past: SDK sukut bo'yicha ikki marta qayta uriniladi
         # (90 s × 3 = 270 s) va bu gunicorn chegarasidan ikki barobar oshardi.
-        _ai_client = anthropic.Anthropic(api_key=AI_KEY, timeout=float(AI_TIMEOUT), max_retries=1)
-    return _ai_client
+        c = anthropic.Anthropic(api_key=cfg["key"], timeout=float(AI_TIMEOUT), max_retries=1)
+        _ai_clients[k] = c
+    return c
 
 
 def ai_budget(v) -> int:
@@ -2379,37 +2494,160 @@ def ai_budget(v) -> int:
     return max(AI_MIN_TOKENS, min(n, AI_MAX_TOKENS))
 
 
-def ai_openai(system: str, msgs: list, max_tokens: int, timeout: float = None):
-    """OpenAI chat completions. (natija, None) yoki (None, (xato, status)).
-    gpt-5 oilasi `max_tokens` va `temperature`ni rad etadi — faqat `max_completion_tokens` yuboriladi.
-    msgs[].content matn yoki content-parts ro'yxati (text + image_url) bo'lishi mumkin."""
-    body = {"model": OPENAI_MODEL, "messages": ([{"role": "system", "content": system}] if system else []) + msgs,
-            "max_completion_tokens": max_tokens}
-    if OPENAI_REASONING in ("minimal", "low", "medium", "high") and (OPENAI_MODEL.startswith("gpt-5") or OPENAI_MODEL.startswith("o")):
-        body["reasoning_effort"] = OPENAI_REASONING   # faqat fikrlaydigan modellar qabul qiladi
-    req = urllib.request.Request(OPENAI_BASE + "/chat/completions", data=json.dumps(body).encode("utf-8"), method="POST",
-                                 headers={"Authorization": "Bearer " + OPENAI_KEY, "Content-Type": "application/json", "User-Agent": USER_AGENT})
+def _oa_official(cfg: dict) -> bool:
+    return urllib.parse.urlsplit(cfg["base"]).hostname == "api.openai.com"
+
+
+def _oa_body(cfg: dict, system: str, msgs: list, max_tokens: int, stream: bool = False) -> dict:
+    """OpenAI'ning o'zi `max_tokens`ni gpt-5 oilasida rad etadi — `max_completion_tokens` kerak;
+    unga mos boshqa provayderlar (Gemini, DeepSeek, OpenRouter…) esa odatiy `max_tokens`ni biladi."""
+    body = {"model": cfg["model"], "messages": ([{"role": "system", "content": system}] if system else []) + msgs}
+    if _oa_official(cfg):
+        body["max_completion_tokens"] = max_tokens
+        m = cfg["model"]
+        if OPENAI_REASONING in ("minimal", "low", "medium", "high") and (m.startswith("gpt-5") or m.startswith("o")):
+            body["reasoning_effort"] = OPENAI_REASONING   # faqat fikrlaydigan modellar qabul qiladi
+        if stream:
+            body["stream_options"] = {"include_usage": True}   # tokenlar hisobi oxirgi bo'lakda keladi
+    else:
+        body["max_tokens"] = max_tokens
+    if stream:
+        body["stream"] = True
+    return body
+
+
+def _oa_open(cfg: dict, path: str, body, timeout: float):
+    """So'rovni ochadi. body=None → GET. Xato HTTPError sifatida ko'tariladi."""
+    headers = {"Authorization": "Bearer " + cfg["key"], "User-Agent": USER_AGENT}
+    if body is not None:
+        headers["Content-Type"] = "application/json"
+    req = urllib.request.Request(cfg["base"].rstrip("/") + path, data=json.dumps(body).encode("utf-8") if body is not None else None,
+                                 method="POST" if body is not None else "GET", headers=headers)
+    return _AI_HTTP.open(req, timeout=timeout)
+
+
+def _oa_errmsg(e) -> str:
+    """HTTPError tanasidan odam o'qiydigan xabar. Gemini xatoni ro'yxat ichida beradi."""
+    raw = e.read().decode("utf-8", "replace")[:600]
     try:
-        with urllib.request.urlopen(req, timeout=timeout if timeout is not None else AI_TIMEOUT) as r:
-            j = json.loads(r.read().decode("utf-8") or "{}")
-    except urllib.error.HTTPError as e:
-        raw = e.read().decode("utf-8", "replace")[:400]
+        j = json.loads(raw)
+        if isinstance(j, list) and j:
+            j = j[0]
+        err = j.get("error") if isinstance(j, dict) else None
+        msg = (err.get("message") if isinstance(err, dict) else err) or raw
+    except Exception:  # noqa: BLE001
+        msg = raw
+    return str(msg).strip()
+
+
+def _ai_fail(code: int, msg: str):
+    if code == 429:
+        return ("rate_limited", 429)
+    return (f"api_{code}: {msg[:160]}", 502)
+
+
+def ai_openai(cfg: dict, system: str, msgs: list, max_tokens: int, timeout: float = None):
+    """/chat/completions. (natija, None) yoki (None, (xato, status)).
+    msgs[].content matn yoki content-parts ro'yxati (text + image_url) bo'lishi mumkin."""
+    if cfg["own"] and cfg["kind"] == "custom" and not ai_base_ok(cfg["base"]):
+        return None, ("ai_bad_base", 400)
+    body = _oa_body(cfg, system, msgs, max_tokens)
+    for attempt in (0, 1):
         try:
-            msg = (json.loads(raw).get("error") or {}).get("message") or raw
-        except Exception:  # noqa: BLE001
-            msg = raw
-        log.warning("OpenAI %s: %s", e.code, msg[:200])
-        if e.code == 429:
-            return None, ("rate_limited", 429)
-        return None, (f"api_{e.code}: {msg[:160]}", 502)
-    except Exception as e:  # noqa: BLE001
-        log.warning("OpenAI ulanish: %s", e)
-        return None, ("ai_connection", 502)
+            with _oa_open(cfg, "/chat/completions", body, timeout if timeout is not None else AI_TIMEOUT) as r:
+                j = json.loads(r.read().decode("utf-8") or "{}")
+            break
+        except urllib.error.HTTPError as e:
+            msg = _oa_errmsg(e)
+            # yangi modellar eski fikrlash darajasini («minimal») rad etishi mumkin — bir marta usiz
+            if e.code == 400 and attempt == 0 and "reasoning_effort" in body and "reason" in msg.lower():
+                body.pop("reasoning_effort", None)
+                continue
+            log.warning("AI (%s) %s: %s", cfg["kind"], e.code, msg[:200])
+            return None, _ai_fail(e.code, msg)
+        except Exception as e:  # noqa: BLE001
+            log.warning("AI (%s) ulanish: %s", cfg["kind"], e)
+            return None, ("ai_connection", 502)
+    if isinstance(j, list) and j:
+        j = j[0]
     ch = (j.get("choices") or [{}])[0]
-    text = ((ch.get("message") or {}).get("content") or "").strip()
+    text = ((ch.get("message") or {}).get("content") or "")
+    if isinstance(text, list):   # ba'zi provayderlar javobni bo'laklar ro'yxati qilib beradi
+        text = "".join(x.get("text", "") for x in text if isinstance(x, dict))
     u = j.get("usage") or {}
-    return {"text": text, "model": j.get("model"), "stop": ch.get("finish_reason"),
+    return {"text": str(text).strip(), "model": j.get("model") or cfg["model"], "stop": ch.get("finish_reason"),
             "usage": {"in": u.get("prompt_tokens"), "out": u.get("completion_tokens")}}, None
+
+
+def _anthropic_fail(e):
+    import anthropic
+    if isinstance(e, anthropic.RateLimitError):
+        return ("rate_limited", 429)
+    if isinstance(e, anthropic.APIStatusError):
+        return (f"api_{e.status_code}: {str(getattr(e, 'message', '') or '')[:160]}", 502)
+    if isinstance(e, anthropic.APIConnectionError):   # APITimeoutError ham shu
+        return ("ai_connection", 502)
+    log.exception("AI (anthropic) xato")
+    return ("ai_failed", 500)
+
+
+def ai_anthropic(cfg: dict, system: str, msgs: list, max_tokens: int, timeout: float = None):
+    kw = {"model": cfg["model"], "max_tokens": max_tokens, "messages": msgs}
+    if system:
+        kw["system"] = system
+    try:
+        c = ai_client(cfg)
+        if timeout is not None:
+            c = c.with_options(timeout=float(timeout))
+        resp = c.messages.create(**kw)
+    except ImportError:
+        return None, ("pip install anthropic", 501)
+    except Exception as e:  # noqa: BLE001
+        return None, _anthropic_fail(e)
+    text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+    return {"text": text.strip(), "model": resp.model, "stop": resp.stop_reason,
+            "usage": {"in": resp.usage.input_tokens, "out": resp.usage.output_tokens}}, None
+
+
+def ai_call(cfg: dict, system: str, msgs: list, max_tokens: int, timeout: float = None):
+    """Bitta so'rov — qaysi sim bo'lishidan qat'i nazar bir xil natija: ({text, model, stop, usage}, None)."""
+    if cfg["proto"] == "anthropic":
+        return ai_anthropic(cfg, system, msgs, max_tokens, timeout)
+    return ai_openai(cfg, system, msgs, max_tokens, timeout)
+
+
+def ai_models(cfg: dict):
+    """Kalit bilan ochiladigan modellar ro'yxati — (ids, None) yoki (None, xato)."""
+    skip = re.compile(r"embed|tts|whisper|dall-e|moderation|transcri|realtime|audio|image|search|babbage|davinci|rerank|guard", re.I)
+    ids = []
+    if cfg["proto"] == "anthropic":
+        try:
+            for m in ai_client(cfg).with_options(timeout=20.0).models.list(limit=100):
+                ids.append(m.id)
+                if len(ids) >= 200:
+                    break
+        except ImportError:
+            return None, ("pip install anthropic", 501)
+        except Exception as e:  # noqa: BLE001
+            return None, _anthropic_fail(e)
+    else:
+        if cfg["kind"] == "custom" and not ai_base_ok(cfg["base"]):
+            return None, ("ai_bad_base", 400)
+        try:
+            with _oa_open(cfg, "/models", None, 20) as r:
+                j = json.loads(r.read().decode("utf-8") or "{}")
+        except urllib.error.HTTPError as e:
+            return None, _ai_fail(e.code, _oa_errmsg(e))
+        except Exception as e:  # noqa: BLE001
+            log.warning("AI modellar (%s): %s", cfg["kind"], e)
+            return None, ("ai_connection", 502)
+        for m in (j.get("data") if isinstance(j, dict) and isinstance(j.get("data"), list) else [])[:1000]:
+            mid = str((m or {}).get("id") or "") if isinstance(m, dict) else ""
+            if mid.startswith("models/"):   # Gemini «models/gemini-…» deb beradi, so'rovga esa qisqasi kerak
+                mid = mid[7:]
+            if mid and AI_MODEL_RE.match(mid) and not skip.search(mid):
+                ids.append(mid)
+    return sorted(set(ids))[:300], None
 
 
 def ai_request(body):
@@ -2435,7 +2673,8 @@ def ai():
     uid, err = current_user()
     if err:
         return err
-    if not AI_PROVIDER:
+    cfg = ai_cfg(uid)
+    if not cfg:
         return jsonify({"error": "ai_not_configured"}), 501
     if not ai_quota_ok(uid):
         return jsonify({"error": "ai_rate_limited"}), 429
@@ -2443,123 +2682,141 @@ def ai():
     if bad:
         return jsonify({"error": bad[0]}), bad[1]
     system, clean, budget, kind = prep
-    if AI_PROVIDER == "openai":
-        out, fail = ai_openai(system, clean, budget)
-        if not fail and not out.get("text") and out.get("stop") == "length":
-            # fikrlash butun byudjetni yeb qo'ydi (bo'sh javob) — bir marta kattaroq byudjet bilan
-            out, fail = ai_openai(system, clean, min(budget * 3, AI_MAX_TOKENS))
-        if fail:
-            return jsonify({"error": fail[0]}), fail[1]
-        _archive(db.record_ai_call, uid, kind, out.get("model"), (out.get("usage") or {}).get("in"), (out.get("usage") or {}).get("out"), what="arxiv ai")
-        return jsonify(out)
-    try:
-        import anthropic
-        resp = ai_client().messages.create(
-            model=AI_MODEL, max_tokens=budget,
-            system=system or None, messages=clean,
-        )
-        text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
-        _archive(db.record_ai_call, uid, kind, resp.model, resp.usage.input_tokens, resp.usage.output_tokens, what="arxiv ai")
-        return jsonify({"text": text, "model": resp.model, "stop": resp.stop_reason,
-                        "usage": {"in": resp.usage.input_tokens, "out": resp.usage.output_tokens}})
-    except ImportError:
-        return jsonify({"error": "pip install anthropic"}), 501
-    except Exception as e:  # noqa: BLE001
-        import anthropic
-        if isinstance(e, anthropic.RateLimitError):
-            return jsonify({"error": "rate_limited"}), 429
-        if isinstance(e, anthropic.APIStatusError):
-            return jsonify({"error": f"api_{e.status_code}: {getattr(e, 'message', '')[:200]}"}), 502
-        if isinstance(e, anthropic.APIConnectionError):
-            return jsonify({"error": "ai_connection"}), 502
-        log.exception("AI xato")
-        return jsonify({"error": "ai_failed"}), 500
+    out, fail = ai_call(cfg, system, clean, budget)
+    if not fail and not out.get("text") and out.get("stop") in ("length", "max_tokens"):
+        # fikrlash butun byudjetni yeb qo'ydi (bo'sh javob) — bir marta kattaroq byudjet bilan
+        out, fail = ai_call(cfg, system, clean, min(budget * 3, AI_MAX_TOKENS))
+    if fail:
+        return jsonify({"error": fail[0]}), fail[1]
+    _archive(db.record_ai_call, uid, kind, out.get("model"), (out.get("usage") or {}).get("in"), (out.get("usage") or {}).get("out"), what="arxiv ai")
+    return jsonify(out)
 
 
-def ai_openai_stream(system: str, msgs: list, max_tokens: int, timeout: float = None):
-    """OpenAI oqimi. (ochiq javob, None) yoki (None, (xato, status)).
+def ai_openai_stream(cfg: dict, system: str, msgs: list, max_tokens: int, timeout: float = None):
+    """OpenAI'ga mos oqim. (ochiq javob, None) yoki (None, (xato, status)).
     Ulanish generatorgacha ochiladi: aks holda birinchi bayt yozilgandan keyin
     xatoni oddiy JSON bilan qaytarib bo'lmasdi — mijoz yarim ochilgan oqimni
     ko'rardi va sababini bilmasdi."""
-    body = {"model": OPENAI_MODEL, "messages": ([{"role": "system", "content": system}] if system else []) + msgs,
-            "max_completion_tokens": max_tokens, "stream": True,
-            "stream_options": {"include_usage": True}}   # tokenlar hisobi oxirgi bo'lakda keladi
-    if OPENAI_REASONING in ("minimal", "low", "medium", "high") and (OPENAI_MODEL.startswith("gpt-5") or OPENAI_MODEL.startswith("o")):
-        body["reasoning_effort"] = OPENAI_REASONING
-    req = urllib.request.Request(OPENAI_BASE + "/chat/completions", data=json.dumps(body).encode("utf-8"), method="POST",
-                                 headers={"Authorization": "Bearer " + OPENAI_KEY, "Content-Type": "application/json", "User-Agent": USER_AGENT})
-    try:
-        return urllib.request.urlopen(req, timeout=timeout if timeout is not None else AI_TIMEOUT), None
-    except urllib.error.HTTPError as e:
-        raw = e.read().decode("utf-8", "replace")[:400]
+    if cfg["own"] and cfg["kind"] == "custom" and not ai_base_ok(cfg["base"]):
+        return None, ("ai_bad_base", 400)
+    body = _oa_body(cfg, system, msgs, max_tokens, stream=True)
+    for attempt in (0, 1):
         try:
-            msg = (json.loads(raw).get("error") or {}).get("message") or raw
+            return _oa_open(cfg, "/chat/completions", body, timeout if timeout is not None else AI_TIMEOUT), None
+        except urllib.error.HTTPError as e:
+            msg = _oa_errmsg(e)
+            if e.code == 400 and attempt == 0 and "reasoning_effort" in body and "reason" in msg.lower():
+                body.pop("reasoning_effort", None)
+                continue
+            log.warning("AI oqim (%s) %s: %s", cfg["kind"], e.code, msg[:200])
+            return None, _ai_fail(e.code, msg)
+        except Exception as e:  # noqa: BLE001
+            log.warning("AI oqim (%s) ulanish: %s", cfg["kind"], e)
+            return None, ("ai_connection", 502)
+    return None, ("ai_failed", 502)
+
+
+def _openai_pump(src):
+    """OpenAI oqimi → (bo'lak | {"model","usage"}) generatori."""
+    model, usage = None, {}
+    try:
+        for raw in src:
+            line = raw.decode("utf-8", "replace").strip()
+            if not line.startswith("data:"):
+                continue
+            chunk = line[5:].strip()
+            if chunk == "[DONE]":
+                break
+            try:
+                j = json.loads(chunk)
+            except ValueError:
+                continue
+            model = j.get("model") or model
+            u = j.get("usage")
+            if u:
+                usage = {"in": u.get("prompt_tokens"), "out": u.get("completion_tokens")}
+            for ch in (j.get("choices") or []):
+                d = (ch.get("delta") or {}).get("content")
+                if d:
+                    yield d
+    finally:
+        try:
+            src.close()
         except Exception:  # noqa: BLE001
-            msg = raw
-        log.warning("OpenAI oqim %s: %s", e.code, msg[:200])
-        if e.code == 429:
-            return None, ("rate_limited", 429)
-        return None, (f"api_{e.code}: {msg[:160]}", 502)
-    except Exception as e:  # noqa: BLE001
-        log.warning("OpenAI oqim ulanish: %s", e)
-        return None, ("ai_connection", 502)
+            pass
+    yield {"model": model, "usage": usage}
+
+
+def _anthropic_pump(mgr, s):
+    """Anthropic SDK oqimi → xuddi shu shakldagi generator."""
+    model, usage = None, {}
+    try:
+        for d in s.text_stream:
+            if d:
+                yield d
+        fin = s.get_final_message()
+        model, usage = fin.model, {"in": fin.usage.input_tokens, "out": fin.usage.output_tokens}
+    finally:
+        try:
+            mgr.__exit__(None, None, None)
+        except Exception:  # noqa: BLE001
+            pass
+    yield {"model": model, "usage": usage}
 
 
 @app.post("/api/ai/stream")
 def ai_stream():
     """Javobni yozilishi bilan uzatadi (SSE): `data: {"d": "…"}` bo'laklari, oxirida
     `data: {"done": true}`. Butun javobni kutish o'rniga birinchi so'zlar 2-3 soniyada
-    ekranga chiqadi — kutish sezilmaydi. Mijoz eskiroq bo'lsa yoki provayder Anthropic
-    bo'lsa 501 qaytadi va mijoz /api/ai ga qaytadi."""
+    ekranga chiqadi — kutish sezilmaydi. Ikkala sim ham oqim beradi; mijoz eskiroq
+    bo'lsa yoki AI ulanmagan bo'lsa 501 qaytadi va mijoz /api/ai ga qaytadi."""
     uid, err = current_user()
     if err:
         return err
-    if AI_PROVIDER != "openai":
-        return jsonify({"error": "stream_unsupported"}), 501
+    cfg = ai_cfg(uid)
+    if not cfg:
+        return jsonify({"error": "ai_not_configured"}), 501
     if not ai_quota_ok(uid):
         return jsonify({"error": "ai_rate_limited"}), 429
     prep, bad = ai_request(request.get_json(silent=True) or {})
     if bad:
         return jsonify({"error": bad[0]}), bad[1]
     system, clean, budget, kind = prep
-    src, fail = ai_openai_stream(system, clean, budget)
-    if fail:
-        return jsonify({"error": fail[0]}), fail[1]
+    if cfg["proto"] == "anthropic":
+        kw = {"model": cfg["model"], "max_tokens": budget, "messages": clean}
+        if system:
+            kw["system"] = system
+        try:
+            mgr = ai_client(cfg).messages.stream(**kw)
+            s = mgr.__enter__()   # ulanish shu yerda ochiladi — xato hali oddiy JSON bo'lib qaytadi
+        except ImportError:
+            return jsonify({"error": "stream_unsupported"}), 501
+        except Exception as e:  # noqa: BLE001
+            fail = _anthropic_fail(e)
+            return jsonify({"error": fail[0]}), fail[1]
+        gen = _anthropic_pump(mgr, s)
+    else:
+        src, fail = ai_openai_stream(cfg, system, clean, budget)
+        if fail:
+            return jsonify({"error": fail[0]}), fail[1]
+        gen = _openai_pump(src)
 
     def sse(obj):
         return "data: " + json.dumps(obj, ensure_ascii=False) + "\n\n"
 
     def pump():
-        model, usage, sent = None, {}, 0
+        meta, sent = {}, 0
         try:
-            for raw in src:
-                line = raw.decode("utf-8", "replace").strip()
-                if not line.startswith("data:"):
+            for x in gen:
+                if isinstance(x, dict):
+                    meta = x
                     continue
-                chunk = line[5:].strip()
-                if chunk == "[DONE]":
-                    break
-                try:
-                    j = json.loads(chunk)
-                except ValueError:
-                    continue
-                model = j.get("model") or model
-                u = j.get("usage")
-                if u:
-                    usage = {"in": u.get("prompt_tokens"), "out": u.get("completion_tokens")}
-                for ch in (j.get("choices") or []):
-                    d = (ch.get("delta") or {}).get("content")
-                    if d:
-                        sent += len(d)
-                        yield sse({"d": d})
+                sent += len(x)
+                yield sse({"d": x})
         except Exception as e:  # noqa: BLE001
-            log.warning("OpenAI oqim uzildi: %s", e)
+            log.warning("AI oqim uzildi (%s): %s", cfg["kind"], e)
             yield sse({"error": "ai_stream"})
-        finally:
-            try:
-                src.close()
-            except Exception:  # noqa: BLE001
-                pass
+        model, usage = meta.get("model"), meta.get("usage") or {}
         _archive(db.record_ai_call, uid, kind, model, usage.get("in"), usage.get("out"), what="arxiv ai")
         yield sse({"done": True, "model": model, "usage": usage, "len": sent})
 
@@ -2569,6 +2826,109 @@ def ai_stream():
                     headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"})
 
 
+# ── Sozlama: odam o'z AI'sini ulaydi / tekshiradi / uzadi ────────────────────
+# Kalit brauzerga hech qachon qaytib chiqmaydi — faqat «sk-a…9f2c» ko'rinishida.
+
+def _ai_mask(key: str) -> str:
+    return (key[:4] + "…" + key[-4:]) if len(key) >= 12 else "…"
+
+
+def _ai_form(uid: str, body: dict, need_model: bool = True):
+    """So'rovdan cfg yig'adi va tekshiradi. Kalit bo'sh bo'lsa va shu provayder allaqachon
+    ulangan bo'lsa — eskisi olinadi (modelni almashtirish uchun kalitni qayta yozish shart emas)."""
+    kind = str(body.get("kind") or "")
+    if kind not in AI_KINDS:
+        return None, ("bad_kind", 400)
+    proto, base, model = AI_KINDS[kind]
+    prev = ai_own_load(uid)
+    same = bool(prev and prev["kind"] == kind)
+    key = str(body.get("key") or "").strip()
+    if not key and same:
+        key = prev["key"]
+    if not key or len(key) > 400 or any(ch.isspace() for ch in key):
+        return None, ("bad_key", 400)
+    if kind == "custom":
+        base = str(body.get("base") or "").strip().rstrip("/")
+        if not base and same:
+            base = prev["base"]
+        if not base or len(base) > 300 or not ai_base_ok(base):
+            return None, ("bad_base", 400)
+    model = str(body.get("model") or "").strip() or (prev["model"] if same else "") or model
+    if need_model and not AI_MODEL_RE.match(model or ""):
+        return None, ("bad_model", 400)
+    return {"kind": kind, "proto": proto, "key": key, "model": model, "base": base, "own": True}, None
+
+
+def _ai_view(uid: str) -> dict:
+    own, srv = ai_own_load(uid), ai_server_cfg()
+    return {
+        "own": {"kind": own["kind"], "model": own["model"], "base": own["base"] if own["kind"] == "custom" else "",
+                "key": _ai_mask(own["key"])} if own else None,
+        # fayl bor-u, ochilmadi (buzilgan) — odam kalitni qaytadan ulashi kerak
+        "broken": (not own) and ai_own_file(uid).is_file(),
+        "server": {"kind": srv["kind"], "model": srv["model"]} if srv else None,
+        "kinds": {k: {"model": v[2], "base": v[1]} for k, v in AI_KINDS.items()},
+        "local": AI_ALLOW_LOCAL,
+    }
+
+
+@app.get("/api/me/ai")
+def me_ai_get():
+    uid, err = current_user()
+    if err:
+        return err
+    return jsonify(_ai_view(uid))
+
+
+@app.post("/api/me/ai")
+def me_ai_set():
+    """Saqlashdan OLDIN kichik sinov so'rovi: noto'g'ri kalit yoki model saqlanib,
+    keyin har tahlilda tushunarsiz xato berib yurmasin."""
+    uid, err = current_user()
+    if err:
+        return err
+    if not ai_quota_ok(uid):
+        return jsonify({"error": "ai_rate_limited"}), 429
+    cfg, bad = _ai_form(uid, request.get_json(silent=True) or {})
+    if bad:
+        return jsonify({"error": bad[0]}), bad[1]
+    out, fail = ai_call(cfg, "", [{"role": "user", "content": "Reply with one word: OK"}], 256, timeout=40)
+    if fail:
+        return jsonify({"error": fail[0]}), fail[1]
+    try:
+        ai_own_save(uid, cfg)
+    except OSError as e:
+        log.error("Shaxsiy AI saqlanmadi (%s): %s", uid, e)
+        return jsonify({"error": "save_failed"}), 500
+    _archive(db.record_ai_call, uid, "ai:test", out.get("model"), (out.get("usage") or {}).get("in"), (out.get("usage") or {}).get("out"), what="arxiv ai")
+    return jsonify({"ok": True, **_ai_view(uid)})
+
+
+@app.delete("/api/me/ai")
+def me_ai_del():
+    uid, err = current_user()
+    if err:
+        return err
+    ai_own_file(uid).unlink(missing_ok=True)
+    return jsonify({"ok": True, **_ai_view(uid)})
+
+
+@app.post("/api/me/ai/models")
+def me_ai_models():
+    uid, err = current_user()
+    if err:
+        return err
+    if not ai_quota_ok(uid):
+        return jsonify({"error": "ai_rate_limited"}), 429
+    cfg, bad = _ai_form(uid, request.get_json(silent=True) or {}, need_model=False)
+    if bad:
+        return jsonify({"error": bad[0]}), bad[1]
+    ids, fail = ai_models(cfg)
+    if fail:
+        return jsonify({"error": fail[0]}), fail[1]
+    return jsonify({"models": ids})
+
+
 # ═══════════════════════ Ovqat (rasm → kaloriya) ═══════════════════════
 # Mijoz taomni suratga oladi (≤1024 px JPEG) yoki matn bilan yozadi; biz sozlangan AI'dan qat'iy JSON
 # so'raymiz: {items:[{name,grams,kcal,p,c,f}], total:{kcal,p,c,f}, confidence, advice}. Surat faqat
@@ -2576,22 +2936,44 @@ def ai_stream():
 
 FOOD_MAX_BYTES = 1_500_000                 # data URL ichidagi rasm (dekodlangan) chegarasi
 FOOD_MAX_REQ = 3 * 1024 * 1024             # butun so'rov (base64 rasm ≈ 2 MB + matn) — JSON o'qilishidan OLDIN tekshiriladi
-FOOD_TOKENS, FOOD_TOKENS_RETRY = 1500, 4000  # javob byudjeti; fikrlovchi model (gpt-5) byudjetni yeb qo'ysa — kattarog'i bilan bir marta qayta
+# Javob byudjeti. To'liq tarkib (har qismga 20 ta raqam) 1500 ga sig'masdi; fikrlovchi model
+# (gpt-5, Opus) byudjetni yeb qo'ysa — kattarog'i bilan bir marta qayta.
+FOOD_TOKENS, FOOD_TOKENS_RETRY = 4000, 10000
 FOOD_KEEP_DAYS = 2                         # blobdagi hech bir taom ishlatmagan surat shuncha kundan keyin o'chadi (undo/bekor uchun muhlat)
 FOOD_ID_RE = re.compile(r"^fp_[0-9a-f]{12,32}$")
 FOOD_TIMEOUT = 60
 FOOD_LANG = {"uz": "Uzbek (Latin script)", "uzk": "Uzbek (Cyrillic script)", "ru": "Russian"}
+# Asosiydan tashqari ozuqa moddalari (food.js › NUTR bilan bir xil kalitlar va birliklar):
+# g — tola, shakar, to'yingan yog', tuz; mg — xolesterin, kaliy, kalsiy, temir, magniy, rux, C vitamini;
+# µg — A (RAE), D, B12, folat (DFE).
+FOOD_NUTR = ("fib", "sug", "satf", "salt", "chol", "k", "ca", "fe", "mg", "zn", "va", "vc", "vd", "b12", "fol")
+FOOD_PROC = ("whole", "mixed", "processed", "ultra")
 FOOD_SYSTEM = (
-    "You are a nutrition analyst. Estimate the meal from the photo and/or the description. "
+    "You are an expert dietitian and food-composition analyst. Most users DESCRIBE the meal in their own words "
+    "(often casual Uzbek or Russian) instead of photographing it, so read the description carefully: dish names "
+    "(including Central-Asian dishes such as osh/plov, lag'mon, manti, somsa, sho'rva, norin, chuchvara, dimlama, "
+    "shashlik, non), counts, household measures (kosa/bowl ≈ 350 g of a main dish, likopcha/plate, qoshiq/spoon, "
+    "stakan/glass ≈ 250 ml, piyola ≈ 150 ml, bo'lak/piece, dona/item), cooking method and typical local recipes "
+    "(plov is cooked with plenty of cottonseed oil and fatty meat; tea is unsweetened unless sugar is mentioned). "
+    "When the portion is not stated, assume a typical adult portion and state it in \"assumptions\".\n"
     "Reply with ONE JSON object only — no prose, no markdown, no code fences — exactly this shape:\n"
-    '{"items":[{"name":"...","grams":0,"kcal":0,"p":0,"c":0,"f":0}],'
-    '"total":{"kcal":0,"p":0,"c":0,"f":0,"fib":0,"sug":0,"salt":0},'
-    '"confidence":0.0,"advice":"..."}\n'
-    "Rules: one item per distinct food; grams = estimated portion weight; kcal and macros (p=protein, c=carbs, f=fat, "
-    "all in grams) are for that portion; total.kcal/p/c/f = sum of the items. In total also estimate fib (fibre), "
-    "sug (sugars) and salt, all in grams for the whole meal — omit a key only if you truly cannot estimate it. "
-    "confidence is 0..1; advice is ONE short sentence, plain everyday words, no numbers repeated from the table. "
-    "Item names and advice must be written in {lang}. If the input is not food, return items:[] with confidence 0 and say so in advice."
+    '{"title":"...","items":[{"name":"...","grams":0,"kcal":0,"p":0,"c":0,"f":0,"fib":0,"sug":0,"satf":0,"salt":0,'
+    '"chol":0,"k":0,"ca":0,"fe":0,"mg":0,"zn":0,"va":0,"vc":0,"vd":0,"b12":0,"fol":0}],'
+    '"score":0,"processing":"whole","confidence":0.0,"assumptions":"...","advice":"...","tips":["..."]}\n'
+    "Units: grams in g; kcal; p (protein), c (carbohydrate), f (fat), fib (fibre), sug (sugars), satf (saturated fat), "
+    "salt — all in g; chol (cholesterol), k (potassium), ca (calcium), fe (iron), mg (magnesium), zn (zinc), "
+    "vc (vitamin C) — in mg; va (vitamin A, µg RAE), vd (vitamin D, µg), b12 (vitamin B12, µg), fol (folate, µg DFE).\n"
+    "Rules: one item per distinct food or drink (split mixed dishes only when the user lists parts); each item's numbers "
+    "are for that item's portion, from standard food-composition data (USDA / McCance & Widdowson), scaled to grams. "
+    "Estimate every nutrient; use 0 only when it is truly absent. "
+    "title = short name of the whole meal (max 40 characters). "
+    "score = nutritional quality of this meal from 1 to 10 (10 = balanced whole foods rich in protein, fibre and "
+    "micronutrients; 1 = fried, sugary or ultra-processed). processing = whole | mixed | processed | ultra. "
+    "confidence = 0..1. assumptions = one short sentence on the portions/recipe you assumed (empty if nothing was assumed). "
+    "advice = one or two short sentences in plain everyday words, no numbers repeated from the table. "
+    "tips = up to 3 very short, concrete suggestions (a swap or an addition), may be empty. "
+    "All text fields must be written in {lang}. If the input is not food or drink, return items:[] with confidence 0 "
+    "and say so in advice."
 )
 FOOD_REPAIR = "Your previous reply was not valid JSON. Reply again with ONLY the JSON object in the required shape, nothing else."
 
@@ -2658,31 +3040,49 @@ def _food_num(v, hi=100000):
     return round(min(n, hi), 1)
 
 
+def _food_item(x: dict) -> dict:
+    it = {"name": str(x.get("name") or "").strip()[:80] or "?", "grams": _food_num(x.get("grams"), 5000),
+          "kcal": _food_num(x.get("kcal"), 20000), "p": _food_num(x.get("p"), 2000), "c": _food_num(x.get("c"), 2000), "f": _food_num(x.get("f"), 2000)}
+    # model bermagan modda yo'q bo'lib qoladi (nol emas: "0 g tuz" yolg'on bo'lardi)
+    for k in FOOD_NUTR:
+        if _num(x.get(k)) is not None:
+            it[k] = _food_num(x.get(k), 100000)
+    return it
+
+
 def _food_shape(j: dict) -> dict:
-    """Raqamlarni tekshiradi, yig'indini hisoblaydi (bo'lmasa yoki noto'g'ri bo'lsa)."""
-    items = []
-    for x in (j.get("items") if isinstance(j.get("items"), list) else [])[:30]:
-        if not isinstance(x, dict):
-            continue
-        items.append({"name": str(x.get("name") or "").strip()[:80] or "?", "grams": _food_num(x.get("grams"), 5000),
-                      "kcal": _food_num(x.get("kcal")), "p": _food_num(x.get("p"), 2000), "c": _food_num(x.get("c"), 2000), "f": _food_num(x.get("f"), 2000)})
+    """Raqamlarni tekshiradi. Qismlar bo'lsa jami — ularning yig'indisi: model bergan
+    «total» ba'zan qismlarga mos kelmasdi, taomni tahrirlaganda esa hisob qismlardan boradi."""
+    items = [_food_item(x) for x in (j.get("items") if isinstance(j.get("items"), list) else [])[:30] if isinstance(x, dict)]
     tot = j.get("total") if isinstance(j.get("total"), dict) else {}
-    total = {k: _food_num(tot.get(k)) for k in ("kcal", "p", "c", "f")}
-    if items and (not tot or all(total[k] == 0 for k in total)):
+    if items:
         total = {k: round(sum(i[k] for i in items), 1) for k in ("kcal", "p", "c", "f")}
-    # tola / shakar / tuz — model bermasa yo'q bo'lib qoladi (nol emas: "0 g tuz" yolg'on bo'lardi)
-    for k in ("fib", "sug", "salt"):
-        if _num(tot.get(k)) is not None:
-            total[k] = _food_num(tot.get(k), 2000)
+        for k in FOOD_NUTR:
+            if any(k in i for i in items):
+                total[k] = round(sum(i.get(k, 0) for i in items), 1)
+    else:
+        total = {k: _food_num(tot.get(k)) for k in ("kcal", "p", "c", "f")}
+        for k in FOOD_NUTR:
+            if _num(tot.get(k)) is not None:
+                total[k] = _food_num(tot.get(k), 100000)
     conf = _num(j.get("confidence"))
     conf = 0.5 if conf is None else max(0.0, min(1.0, conf if conf <= 1 else conf / 100))
-    return {"items": items, "total": total, "confidence": round(conf, 2), "advice": str(j.get("advice") or "").strip()[:600]}
+    score = _num(j.get("score"))
+    proc = str(j.get("processing") or "").strip().lower()
+    tips = j.get("tips") if isinstance(j.get("tips"), list) else []
+    return {"items": items, "total": total, "confidence": round(conf, 2),
+            "title": str(j.get("title") or "").strip()[:60],
+            "score": int(round(max(1, min(10, score)))) if score is not None and score > 0 else None,
+            "processing": proc if proc in FOOD_PROC else None,
+            "assumptions": str(j.get("assumptions") or "").strip()[:300],
+            "advice": str(j.get("advice") or "").strip()[:600],
+            "tips": [str(x).strip()[:160] for x in tips if isinstance(x, str) and x.strip()][:3]}
 
 
-def _food_ask(text: str, img):
+def _food_ask(cfg: dict, text: str, img):
     """Provayder shaklidagi user-xabar: matn + (bo'lsa) rasm. img = (bytes, mime) yoki None.
     Tizim ko'rsatmasi alohida, _food_call ga beriladi; ikkinchi urinish (JSON tuzatish) uchun chaqiruvchi suhbatni davom ettiradi."""
-    if AI_PROVIDER == "openai":
+    if cfg["proto"] == "openai":
         parts = [{"type": "text", "text": text}]
         if img:
             parts.append({"type": "image_url", "image_url": {"url": "data:%s;base64,%s" % (img[1], base64.b64encode(img[0]).decode("ascii"))}})
@@ -2694,27 +3094,21 @@ def _food_ask(text: str, img):
     return [{"role": "user", "content": parts}]
 
 
-def _food_call(system: str, msgs: list, max_tokens: int = FOOD_TOKENS):
-    """Sozlangan provayderga bitta so'rov. (out{text,model,stop,usage}, None) yoki (None, (xato, status))."""
-    if AI_PROVIDER == "openai":
-        return ai_openai(system, msgs, max_tokens, timeout=FOOD_TIMEOUT)
-    try:
-        resp = ai_client().with_options(timeout=float(FOOD_TIMEOUT)).messages.create(model=AI_MODEL, max_tokens=max_tokens, system=system, messages=msgs)
-        text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
-        return {"text": text, "model": resp.model, "stop": resp.stop_reason, "usage": {"in": resp.usage.input_tokens, "out": resp.usage.output_tokens}}, None
-    except ImportError:
-        return None, ("pip install anthropic", 501)
-    except Exception as e:  # noqa: BLE001
-        log.warning("Ovqat AI (anthropic): %s", e)
-        return None, ("ai_failed", 502)
+def _food_call(cfg: dict, system: str, msgs: list, max_tokens: int = FOOD_TOKENS):
+    """Odamning AI'siga bitta so'rov. (out{text,model,stop,usage}, None) yoki (None, (xato, status))."""
+    return ai_call(cfg, system, msgs, max_tokens, timeout=FOOD_TIMEOUT)
 
 
 @app.post("/api/food/analyze")
 def food_analyze():
+    """{text?, image?, note?, lang, ctx?, fix?, prev?} → tahlil.
+    fix + prev — tuzatish: «guruch emas, grechka edi» va avvalgi tahlil qismlari;
+    ctx — odamning kuni (qancha qoldi, maqsad): faqat maslahat uchun, raqamlarga ta'sir qilmaydi."""
     uid, err = current_user()
     if err:
         return err
-    if not AI_PROVIDER:
+    cfg = ai_cfg(uid)
+    if not cfg:
         return jsonify({"error": "ai_not_configured"}), 501
     if not ai_quota_ok(uid):
         return jsonify({"error": "ai_rate_limited"}), 429
@@ -2723,24 +3117,33 @@ def food_analyze():
     body = request.get_json(silent=True) or {}
     text = str(body.get("text") or "").strip()[:1500]
     note = str(body.get("note") or "").strip()[:500]
+    ctx = str(body.get("ctx") or "").strip()[:600]
+    fix = str(body.get("fix") or "").strip()[:500]
+    prev = [_food_item(x) for x in (body.get("prev") if isinstance(body.get("prev"), list) else [])[:30] if isinstance(x, dict)]
     lang = FOOD_LANG.get(str(body.get("lang") or "uz"), FOOD_LANG["uz"])
     img = None
     if body.get("image"):
         img = _food_decode(body.get("image"))
         if not img:
             return jsonify({"error": "bad_image"}), 400
-    if not img and not text:
+    if not img and not text and not (fix and prev):
         return jsonify({"error": "empty"}), 400
     ask = []
     if text:
-        ask.append("Meal description: " + text)
+        ask.append("Meal description (written by the user): " + text)
     if note:
         ask.append("Note (portion/brand): " + note)
+    if prev and fix:
+        ask.append("Your previous analysis of this meal (items): " + json.dumps(prev, ensure_ascii=False)
+                   + "\nThe user corrects it: " + fix
+                   + "\nRedo the whole analysis applying the correction; keep what the user did not dispute.")
     if img:
         ask.append("Analyse the attached photo.")
+    if ctx:
+        ask.append("About the user (use it only for advice and tips, never to change the numbers): " + ctx)
     system = FOOD_SYSTEM.replace("{lang}", lang)
-    msgs = _food_ask("\n".join(ask), img)
-    out, fail = _food_call(system, msgs)
+    msgs = _food_ask(cfg, "\n".join(ask), img)
+    out, fail = _food_call(cfg, system, msgs)
     if fail:
         return jsonify({"error": fail[0]}), fail[1]
     usage_in, usage_out, model = (out.get("usage") or {}).get("in"), (out.get("usage") or {}).get("out"), out.get("model")
@@ -2751,8 +3154,8 @@ def food_analyze():
             msgs2, budget = msgs, FOOD_TOKENS_RETRY
         else:
             # bir marta tuzatishni so'raymiz: avvalgi javob + "faqat JSON"
-            msgs2, budget = msgs + [{"role": "assistant", "content": str(out.get("text") or "")[:4000] or "-"}, {"role": "user", "content": FOOD_REPAIR}], FOOD_TOKENS
-        out2, fail2 = _food_call(system, msgs2, budget)
+            msgs2, budget = msgs + [{"role": "assistant", "content": str(out.get("text") or "")[:6000] or "-"}, {"role": "user", "content": FOOD_REPAIR}], FOOD_TOKENS
+        out2, fail2 = _food_call(cfg, system, msgs2, budget)
         if not fail2:
             u2 = out2.get("usage") or {}
             usage_in = (usage_in or 0) + (u2.get("in") or 0); usage_out = (usage_out or 0) + (u2.get("out") or 0)
@@ -2771,7 +3174,7 @@ def food_analyze():
         except OSError as e:
             log.warning("Ovqat surati saqlanmadi: %s", e)
             photo = None
-    res.update({"ok": True, "photo": photo})
+    res.update({"ok": True, "photo": photo, "model": model})
     return jsonify(res)
 
 
