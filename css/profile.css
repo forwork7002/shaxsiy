@@ -1,63 +1,68 @@
-/* ==== profil varag'i — Play Store hisob varag'i uslubida ==== */
+/* ==== profil — Sozlash sahifasining birinchi kartasi ====
+   2026-09-16: avatar chapda, ism va hisob o'ngda — ilgari hammasi markazda
+   ustma-ust turib kartaning yarmini egallardi. */
 .pf { display: flex; flex-direction: column; gap: 14px; }
-.pf-head { display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.pf-head { display: flex; align-items: center; gap: 14px; }
+.pf-id { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.pf-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; margin-top: 4px; font-size: 12px; color: var(--text3); }
+.pf-meta:empty { display: none; }
+.pf-sync { display: inline-flex; align-items: center; gap: 4px; color: var(--success-text); font-weight: 500; }
 
-/* avatar: <img> yoki bosh harflar; --s o'lchami (header 40, varaq 84, Sozlash 40), --h uid rangi */
-.pf-avatar { position: relative; width: 84px; height: 84px; margin-bottom: 6px; }
+/* avatar: <img> yoki bosh harflar; --s o'lchami (karta 72, ro'yxat 40), --h uid rangi */
+.pf-avatar { position: relative; flex: none; width: 72px; height: 72px; }
 .pf-av-img, .pf-av-ini { width: var(--s, 40px); height: var(--s, 40px); border-radius: 50%; flex: none; display: block; }
 .pf-av-img { object-fit: cover; background: var(--inset); border: 1px solid var(--line); }
-.pf-av-ini { display: grid; place-items: center; background: hsl(var(--h, 200) 58% 38%); color: #fff; font-family: var(--font-display);
-  font-weight: 700; font-size: calc(var(--s, 40px) * .38); letter-spacing: .02em; line-height: 1; user-select: none; }
-.pf-cam { position: absolute; right: -4px; bottom: -2px; width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 2px solid var(--bg3);
-  background: var(--btn-grad); color: var(--ink-on-light); display: grid; place-items: center; box-shadow: var(--sh-btn); transition: transform .1s, filter .15s; }
-.pf-cam::before { content: ''; position: absolute; inset: -6px; border-radius: 50%; }   @media (hover: hover) { /* 44 px bosish maydoni */
-.pf-cam:hover { filter: brightness(1.06); } }
+.pf-av-ini { display: grid; place-items: center; background: hsl(var(--h, 200) 58% 38%); color: #fff;
+  font-weight: 600; font-size: calc(var(--s, 40px) * .38); letter-spacing: .02em; line-height: 1; user-select: none; }
+.pf-cam { position: absolute; right: -4px; bottom: -2px; width: 30px; height: 30px; padding: 0; border-radius: 50%; border: 2px solid var(--bg3);
+  background: var(--btn-grad); color: var(--on-btn); display: grid; place-items: center; box-shadow: var(--sh-btn); transition: transform .1s, filter .15s; }
+.pf-cam::before { content: ''; position: absolute; inset: -7px; border-radius: 50%; }   /* 44 px bosish maydoni */
+@media (hover: hover) { .pf-cam:hover { filter: brightness(1.06); } }
 .pf-cam:active { transform: scale(.94); }
 .pf-cam:disabled { opacity: .5; cursor: progress; }
 
 /* ism — bosilsa tahrir; tahrirda inline input + Saqlash */
-.pf-name-btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; max-width: 100%; min-height: 40px; padding: 4px 12px;
-  border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text); font: inherit; }
+.pf-name-btn { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; min-height: 36px; padding: 2px 8px; margin-left: -8px;
+  border: 0; border-radius: var(--r-sm); background: transparent; color: var(--text); font: inherit; text-align: left; }
 @media (hover: hover) { button.pf-name-btn:hover { background: var(--hover); } }
 .pf-name-btn svg { color: var(--text3); flex: none; }
-.pf-name { font-family: var(--font-display); font-size: 20px; font-weight: 700; line-height: 1.2; color: var(--text); overflow-wrap: anywhere; }
+.pf-name { font-size: 20px; font-weight: 600; line-height: 1.2; color: var(--text); overflow-wrap: anywhere; }
 .pf-name.muted { color: var(--text3); font-weight: 600; }
-.pf-edit { display: flex; gap: 8px; width: 100%; max-width: 320px; margin: 2px auto; }
-.pf-edit .inp { flex: 1; text-align: center; min-height: 40px; }
+.pf-edit { display: flex; gap: 8px; width: 100%; margin: 2px 0; }
+.pf-edit .inp { flex: 1; min-width: 0; min-height: 40px; }
 .pf-sub { font-size: 13px; color: var(--text2); overflow-wrap: anywhere; }
 .pf-uid { font-size: 11px; }
-.pf-since { margin-top: 1px; }
 
 /* uch plitka: kunlar · odatlar · WHOOP */
 .pf-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .pf-stats .stat { text-align: center; padding: 10px 8px; }
-.pf-stat-text { font-size: 14px; }
+/* Aniqlik ataylab ko'tarilgan. whoop-ui.css index.html da eng oxirida
+   yuklanadi va undagi oddiy `.stat-num` (0,1,0) shu qoida bilan teng edi —
+   kechroq kelgani uchun g'olib chiqardi. Natijada WHOOP holati profilda 14px
+   o'rniga 22px bo'lib, "ulanmagan" so'zi "ulanmag…" ga kesilardi. */
+.pf-stats .pf-stat-text { font-size: 14px; }
 .pf-stats .stat-label { text-align: center; }
 
-.pf-actions { display: flex; flex-direction: column; gap: 8px; }
-.pf-actions .btn { min-height: 44px; }
-.pf-actions .pf-rm { align-self: center; min-height: 40px; padding: 0 14px; margin-top: 2px; }
-.pf-private { text-align: center; margin: 0; }
+.pf-acc { margin-top: 8px; }
+.pf-acc-list { display: flex; flex-direction: column; overflow: hidden; border-radius: var(--r); background: var(--card-bg); border: 1px solid var(--card-line); }
+.pf-acc-row { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 52px; padding: 12px 16px; border: 0; border-top: 1px solid var(--line);
+  background: transparent; color: var(--text); font: inherit; font-size: 15px; font-weight: 500; text-align: left; }
+.pf-acc-row:first-child { border-top: 0; }
+.pf-acc-row span { flex: 1; }
+.pf-acc-row svg { flex: none; color: var(--text3); }
+.pf-acc-row.danger, .pf-acc-row.danger svg { color: var(--danger-text); }
+.pf-acc-row:disabled { opacity: .5; }
+@media (hover: hover) { .pf-acc-row:hover { background: var(--hover); } }
+.pf-private { text-align: center; margin: 10px 8px 0; }
 
-
-/* saqlanish qatori — odam varaqni ochganda birinchi shuni o'qiydi */
+/* saqlanish qatori — odam Sozlashni ochganda birinchi shuni o'qiydi */
 .pf-save { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: var(--r-sm);
   background: var(--inset); border: 1px solid var(--line); font-size: 13px; color: var(--text2); }
 .pf-save svg { flex: none; }
 .pf-save span { flex: 1; }
-.pf-save.s-ok { color: var(--success); }
-.pf-save.s-ok svg { color: var(--success); }
-.pf-save.s-err { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); }
 .pf-save .btn { flex: none; }
 
 /* eski nusxani olish taklifi — faqat server aytganda ko'rinadi */
 .pf-claim { padding: 12px; border-radius: var(--r-sm); background: var(--inset); border: 1px solid var(--line); }
-.pf-claim-t { display: flex; align-items: center; gap: 7px; font-weight: 700; margin-bottom: 4px; }
+.pf-claim-t { display: flex; align-items: center; gap: 7px; font-weight: 600; margin-bottom: 4px; }
 .pf-claim-x { margin: 0 0 10px; font-size: 13px; color: var(--text2); }
-
-/* bo'y · vazn · yosh · maqsad — Sozlashga bormay shu yerda */
-.pf-facts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
-.pf-fact { background: var(--bg3); padding: 10px 12px; }
-.pf-fact-l { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text3); }
-.pf-fact-v { font-size: 16px; font-weight: 700; margin-top: 2px; overflow-wrap: anywhere; }
-.pf-unit { font-size: 12px; font-weight: 600; color: var(--text3); }

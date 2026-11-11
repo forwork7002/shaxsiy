@@ -1,0 +1,296 @@
+/* =====================================================================
+   Odat trekkeri — Vazifa bo'limining birinchi sahifasi.
+
+   Asosiy shakl — HAFTA: har ish (namoz, odat, kitob) alohida qator, har
+   qatorning ustida o'z «Du Se Ch …» harflari va yetti katak. Katak soha
+   rangida: to'lgani ✓, xirasi qoldirilgan, halqasi bugun hali ochiq.
+   Bosish maydoni butun ustun (40 px balandlik), ko'rinishi 30 px doira.
+   ===================================================================== */
+
+/* hafta o'qi — butun sahifaniki */
+.hb-weekbar { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.hb-weekbar-l { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 1px; }
+.hb-weekbar-r { font-size: 17px; font-weight: 600; letter-spacing: -.01em; color: var(--text); white-space: nowrap; }
+.hb-weekbar-s { font-size: 12px; line-height: 24px; color: var(--text3); }
+.hb-weekbar-now { min-height: 24px; padding: 0 10px; border: 0; border-radius: var(--r-pill); background: var(--accent-soft);
+  color: var(--accent-text); font: inherit; font-size: 12px; font-weight: 600; }
+.hb-chart-n { flex: none; font-size: 12px; color: var(--text3); }
+
+/* ---------- bo'limlar: NAMOZ tepada, ODATLAR ostida ----------
+   Namoz bo'limi sahifaning chetidan chetigacha yumshoq rangli tasma: ikki
+   jadval bir xil to'r bo'lgani uchun, ular qayerda ajralishi rang va
+   sarlavha bilan bir qarashda ko'rinishi kerak. Nom ustuni sticky — uning
+   foni tasma foni bilan bir xil bo'lishi shart (--hb-bg). */
+.hb-sec-h { display: flex; align-items: center; gap: 9px; padding: 0 2px 10px; }
+.hb-sec-ic { flex: none; width: 30px; height: 30px; border-radius: 10px; display: grid; place-items: center;
+  background: color-mix(in srgb, var(--c) 16%, transparent); color: var(--c); }
+.hb-sec-t { flex: 1; font-size: 17px; font-weight: 600; letter-spacing: -.01em; color: var(--text); }
+.hb-sec-n { flex: none; font-size: 13px; font-weight: 600; color: var(--text2); padding: 4px 10px; border-radius: var(--r-pill); background: var(--card2); }
+
+/* Namoz tasmasi — yumshoq yashil, sahifa chetidan chetigacha. Nom ustuni
+   sticky: uning foni tasma foni bilan aynan bir xil bo'lishi shart. */
+.hb-sec-pr { --c: var(--success); --hb-bg: color-mix(in srgb, var(--success) 5%, var(--bg));
+  margin-inline: calc(50% - 50vw); padding: 14px calc(50vw - 50%) 12px; margin-bottom: 22px;
+  background: var(--hb-bg); border-block: 1px solid color-mix(in srgb, var(--success) 20%, transparent); }
+.hb-sec-hb { --c: var(--accent); }
+@media (min-width: 760px){
+  .hb-sec-pr { margin-inline: 0; padding: 14px; border: 1px solid color-mix(in srgb, var(--success) 20%, transparent); border-radius: var(--r-lg, 20px); }
+}
+
+/* ---------- shu oy — jadvallar ostidagi karta ----------
+   Ilgari bu raqamlar jadval ustida 44px bo'lib turardi. Endi pastda,
+   namoz va odat yonma-yon: halqa · nom · ketma-ketlik · izoh. */
+.hb-sum { padding: 14px 16px 16px; }
+.hb-sum-h { font-size: 13px; font-weight: 500; color: var(--text3); margin-bottom: 12px; }
+.hb-sum-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+.hb-sum-c { display: flex; align-items: center; gap: 14px; }
+.hb-sum-c + .hb-sum-c { padding-top: 12px; border-top: 1px solid var(--line); }
+.hb-sum-c .ring-wrap { flex: none; }
+.hb-sum-c .ring-pct { font-size: 15px; font-weight: 600; color: var(--text); }
+.hb-sum-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.hb-sum-t { font-size: 15px; font-weight: 600; color: var(--text); }
+.hb-sum-st { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; font-weight: 500; color: var(--text2); }
+.hb-sum-st .ic { color: var(--warning-text); }
+.hb-sum-st.none .ic { color: var(--text4); }
+.hb-sum-x { font-size: 12px; color: var(--text3); }
+
+/* ---------- haftalik qatorlar ----------
+   Telefon: nom tepada, ostida yetti ustun (harf + katak) — ekranga sig'adi,
+   hech narsa surilmaydi. Keng ekranda nom chapda, kunlar o'ngda. */
+.hb-wlist { padding: 0; overflow: hidden; margin-bottom: 18px; }
+.hb-wk { display: grid; grid-template-columns: minmax(0, 1fr); row-gap: 6px; padding: 12px 12px 8px; }
+.hb-wk + .hb-wk { border-top: 1px solid var(--line); }
+.hb-wk-h { display: flex; align-items: center; gap: 10px; min-width: 0; padding-inline: 2px; }
+.hb-wk-h .hb-nm-t { font-size: 14px; }
+@media (min-width: 600px) {
+  .hb-wk { grid-template-columns: minmax(0, 1fr) 320px; column-gap: 16px; align-items: center; }
+}
+
+.hb-wk-fire { flex: none; display: inline-flex; align-items: center; gap: 3px; font-size: 13px; font-weight: 600; color: var(--text); }
+.hb-wk-fire .ic { color: var(--warning-text); }
+.hb-wk-fire.none { color: var(--text3); }
+.hb-wk-fire.none .ic { color: var(--text4); }
+.hb-wk-cnt { flex: none; padding: 3px 9px; border-radius: var(--r-pill); background: var(--card2); font-size: 12px; font-weight: 600; color: var(--text2); }
+.hb-wk-cnt.full { color: var(--success-text); background: color-mix(in srgb, var(--success) 14%, transparent); }
+
+.hb-wk-days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); }
+.hb-wk-col { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.hb-wk-l { min-width: 26px; padding: 0 4px; border-radius: var(--r-pill); text-align: center;
+  font-size: 11px; line-height: 17px; font-weight: 500; color: var(--text3); }
+.hb-wk-col.today .hb-wk-l { color: var(--text); font-weight: 600; background: var(--card2); }
+
+/* Katak. Doira <i> da, bog'lovchi chiziq tugmaning ::before ida — u keyingi
+   ustunning markazigacha boradi (ustunlar orasida bo'shliq yo'q) va doira
+   ostida qoladi. ✓ — mask: rangi --hb-chk, soha rangiga qarshi o'qiladigan. */
+.hb-wd { --hb-chk: #0B0C10; position: relative; display: grid; place-items: center; width: 100%; height: 40px;
+  padding: 0; border: 0; background: transparent; -webkit-tap-highlight-color: transparent; }
+[data-theme="light"] .hb-wd { --hb-chk: #fff; }
+.hb-wd i { position: relative; z-index: 1; box-sizing: border-box; width: 30px; height: 30px; border-radius: 50%;
+  transition: transform .12s ease, background-color .14s ease; }
+.hb-wd.on i { background: var(--c); }
+.hb-wd.on i::after { content: ''; position: absolute; inset: 0; margin: auto; width: 16px; height: 16px; background: var(--hb-chk);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.6 4.6L19.2 7'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.6 4.6L19.2 7'/%3E%3C/svg%3E") center / contain no-repeat; }
+.hb-wd.lr::before { content: ''; position: absolute; top: 50%; left: 50%; width: 100%; height: 3px; margin-top: -1.5px; background: var(--c); }
+.hb-wd.miss i { background: color-mix(in srgb, var(--c) 24%, transparent); }
+.hb-wd.open i { border: 2px solid var(--c); }
+.hb-wd.rest i { border: 1.5px solid var(--line3); }
+.hb-wd.fut i { border: 1.5px solid var(--line2); opacity: .55; }
+.hb-wd:active i { transform: scale(.86); }
+.hb-wd:focus-visible { outline: none; }
+.hb-wd:focus-visible i { box-shadow: 0 0 0 2px var(--card-solid), 0 0 0 4px var(--accent); }
+.hb-wd.pop i { animation: hbPop .24s cubic-bezier(.3,1.5,.5,1); }
+@media (prefers-reduced-motion: reduce) { .hb-wd i { transition: none; } .hb-wd.pop i { animation: none; } }
+
+/* soha sarlavhasi ro'yxat ichida */
+.hb-wgroup { display: flex; align-items: center; gap: 8px; padding: 12px 14px 2px; }
+.hb-wk + .hb-wgroup { border-top: 1px solid var(--line); }
+.hb-group-t { font-size: 13px; font-weight: 500; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hb-group-dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.hb-group-n { margin-left: auto; font-size: 11px; color: var(--text4); }
+
+/* Namoz ro'yxati — yashil tasma ichida, kartasiz: qator chiziqlari tasma rangida. */
+.hb-prlist { margin: 0 -2px 8px; overflow: visible; }
+.hb-prlist .hb-wk { padding-inline: 2px; }
+.hb-prlist .hb-wk + .hb-wk { border-top-color: color-mix(in srgb, var(--success) 16%, transparent); }
+.hb-wk-col .hb-dot { width: 100%; height: 40px; }
+.hb-wk-col .hb-pr::after { width: 30px; height: 30px; border-radius: 10px; }
+.hb-wk-col .hb-pr::before { width: 17px; height: 17px; }
+.hb-wk-col .hb-pr.j::before { width: 19px; height: 19px; }
+
+.hb-emoji { flex: none; width: 28px; height: 28px; border-radius: 9px; display: grid; place-items: center; font-size: 14px;
+  font-family: var(--emoji); background: color-mix(in srgb, var(--c, var(--accent)) 16%, transparent); }
+/* Plitka ichidagi belgi. Sukut — chiziqli ikonka, soha rangida; foydalanuvchi
+   o'zi emoji tanlagan bo'lsa, o'sha chiqadi va emoji shriftida chiziladi.
+   PLITKA RANGI — SOHA (o'ziga xoslik), KUNLIK NUQTALAR — HOLAT. Ilgari
+   plitkaga ham it.color berilardi va media qatorlari uchun u --warning
+   edi: yorug' temada sariq ikonka sariq fonda 1,59:1 chiqib, ko'rinmay
+   qolardi. O'lchab topildi, ko'z bilan sezilmasdi. */
+.hb-emoji .ic { color: var(--c, var(--accent)); }
+.hb-nm { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.hb-nm-t { font-size: 13px; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hb-nm-g { font-size: 11px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Namoz katagi va izohdagi namuna shu asosdan quriladi (::after — shakl, ::before — belgi). */
+.hb-dot { position: relative; flex: none; width: var(--cw, 30px); height: 30px; border: 0; background: transparent; padding: 0; }
+.hb-dot::after { content: ''; position: absolute; inset: 0; margin: auto; width: 16px; height: 16px; border-radius: 50%;
+  border: 1.5px solid var(--line3); background: transparent; transition: background .14s, border-color .14s, transform .12s; }
+
+/* Odat chizig'i — nom uchun joy: 92px da uzun nom kesilardi
+   («QURON O'…»), holbuki o'ng tomonda bo'sh joy bor edi. */
+.hb-prog .hbar { margin: 9px 0; }
+.hb-prog .hbar-label { width: 124px; font-size: 12px; font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--text2); }
+@media (max-width: 380px){ .hb-prog .hbar-label { width: 104px; } }
+
+/* yig'ma bloklarning ochilish tugmasi */
+.hb-fold { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 2px 8px; border: 0; background: transparent; color: var(--text2); font-size: 14px; font-weight: 500; text-align: left; }
+.hb-fold svg { transition: transform .18s var(--ease-out); }
+.hb-fold.open svg { transform: rotate(180deg); }
+
+/* ---------- hafta yakuni ---------- */
+.hb-rev-sum { text-align: center; }
+/* Raqam oq, chiziq ko'k: ikkisi bitta narsani aytadi, ya'ni ikkita rang
+   bilan aytishning hojati yo'q edi (ilgari biri ko'k, biri yashil edi). */
+.hb-rev-pct { font-size: 34px; font-weight: 600; letter-spacing: -.03em; color: var(--text); line-height: 1; }
+.hb-rev-lab { font-size: 12px; color: var(--text3); margin: 5px 0 12px; }
+.hb-rev-h { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.hb-rev-h .ic { color: var(--accent-text); }
+.hb-rev .ta { min-height: 70px; }
+
+
+.hb-manage { margin-top: 4px; }
+
+/* Ikkita qo'shish tugmasi yonma-yon: chapda takroriy ish, o'ngda bir martalik.
+   Yonma-yon turgani ularning farqini o'zi tushuntiradi. */
+.hb-add { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 4px 0 8px; }
+.hb-add .btn { width: 100%; }
+.hb-task-note { display: flex; align-items: flex-start; gap: 7px; font-size: 12px; color: var(--text3); line-height: 1.45; margin-top: 4px; }
+.hb-task-note .ic { flex: none; margin-top: 1px; }
+.hb-task-form .field:last-of-type { margin-bottom: 0; }
+
+/* =====================================================================
+   NAMOZ KATAKCHASI — uch holat, har biri o'z shaklida:
+     j  jamoat — to'la yashil, ichida ikki kishi
+     a  yakka  — och yashil, yashil ✓
+     q  qazo   — och sariq, sariq soat
+   Belgi — ::before dagi kichik SVG fon rasmi (mask emas: brauzer uni bir
+   marta rastrlaydi va keshlaydi), shuning uchun 200 ta katakda ham arzon.
+   Umumiy .hb-dot qoidalaridan keyin kelsin.
+   ===================================================================== */
+.hb-pr::after { width: 24px; height: 24px; border-radius: 8px; border: 1.5px solid var(--line3); background: transparent; transition: none; }
+.hb-pr::before { content: ''; position: absolute; inset: 0; margin: auto; z-index: 1; width: 15px; height: 15px;
+  background: center / contain no-repeat; display: none; pointer-events: none; }
+.hb-pr.is-set::before { display: block; }
+
+.hb-pr.j::after { border-color: transparent; background: linear-gradient(160deg, color-mix(in srgb, var(--success) 72%, #fff), var(--success)); }
+.hb-pr.j::before { width: 17px; height: 17px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='8' r='3.2'/%3E%3Cpath d='M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6'/%3E%3Ccircle cx='17' cy='9' r='2.6'/%3E%3Cpath d='M16.5 14.1c2.7.2 4.5 2.6 4.5 5.4'/%3E%3C/svg%3E"); }
+[data-theme="light"] .hb-pr.j::after { background: linear-gradient(160deg, color-mix(in srgb, var(--success) 85%, #fff), var(--success)); }
+
+.hb-pr.a::after { background: color-mix(in srgb, var(--success) 18%, transparent); border-color: color-mix(in srgb, var(--success) 75%, transparent); }
+.hb-pr.a::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234FE07F' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.6 4.6L19.2 7'/%3E%3C/svg%3E"); }
+[data-theme="light"] .hb-pr.a::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23157A3D' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.6 4.6L19.2 7'/%3E%3C/svg%3E"); }
+
+.hb-pr.q::after { background: color-mix(in srgb, var(--warning) 18%, transparent); border-color: color-mix(in srgb, var(--warning) 80%, transparent); }
+.hb-pr.q::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23F5C542' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M12 7.5V12l3 2'/%3E%3C/svg%3E"); }
+[data-theme="light"] .hb-pr.q::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238A6300' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Cpath d='M12 7.5V12l3 2'/%3E%3C/svg%3E"); }
+
+.hb-pr.x::after { border-color: var(--danger-text); }
+.hb-pr.x::before { width: 12px; height: 12px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FF7A7A' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 7l10 10M17 7L7 17'/%3E%3C/svg%3E"); }
+[data-theme="light"] .hb-pr.x::before { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23C12B2B' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M7 7l10 10M17 7L7 17'/%3E%3C/svg%3E"); }
+
+.hb-pr.fut::after { opacity: .3; }
+.hb-pr:active::after { transform: scale(.88); }
+.hb-pr.pop::after, .hb-pr.pop::before { animation: hbPop .24s cubic-bezier(.3,1.5,.5,1); }
+@keyframes hbPop { 0% { transform: scale(.7); } 100% { transform: none; } }
+@media (prefers-reduced-motion: reduce) { .hb-pr.pop::after, .hb-pr.pop::before { animation: none; } }
+.hb-pr:focus-visible { outline: none; }
+.hb-pr:focus-visible::after, .hb-pr.picking::after { box-shadow: 0 0 0 2px var(--hb-bg, var(--bg)), 0 0 0 4px var(--accent); }
+
+.hb-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 0 2px; font-size: 12px; font-weight: 500; color: var(--text2); }
+.hb-lg { display: inline-flex; align-items: center; gap: 2px; }
+.hb-lg .hb-dot { --cw: 28px; height: 28px; }
+.hb-lg-how { flex-basis: 100%; font-size: 12px; font-weight: 400; color: var(--text3); }
+
+/* ---------- tanlov oynasi ----------
+   Joyi inline transform (translate3d) bilan, ochilishi esa alohida `scale`
+   va opacity bilan — ikkalasi ham faqat kompozitorda, qayta joylashuvsiz. */
+.pp { position: fixed; left: 0; top: 0; z-index: 130; width: 292px; padding: 12px; border-radius: 22px;
+  background: var(--bg3); border: 1px solid var(--line2);
+  box-shadow: 0 20px 50px rgba(0,0,0,.45), 0 2px 10px rgba(0,0,0,.2);
+  opacity: 0; scale: .9; transform-origin: var(--ax, 50%) 100%; pointer-events: none;
+  transition: opacity .14s ease, scale .2s cubic-bezier(.3,1.35,.5,1); will-change: opacity, scale; }
+.pp.below { transform-origin: var(--ax, 50%) 0; }
+.pp.open { opacity: 1; scale: 1; pointer-events: auto; }
+[data-theme="light"] .pp { box-shadow: 0 18px 44px rgba(20,24,40,.18), 0 2px 8px rgba(20,24,40,.08); }
+.pp-h { display: flex; align-items: baseline; gap: 8px; padding: 2px 4px 10px; }
+.pp-t { font-size: 16px; font-weight: 600; color: var(--text); }
+.pp-date { margin-left: auto; font-size: 12px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pp-opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.pp-o { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; padding: 12px 4px 10px;
+  border-radius: 16px; border: 1.5px solid var(--line); background: var(--card2); color: var(--text); font: inherit;
+  transition: transform .12s ease, border-color .15s, background .15s; }
+.pp-o:active { transform: scale(.95); }
+@media (hover: hover) { .pp-o:hover { border-color: var(--pc); } }
+.pp-i { width: 44px; height: 44px; margin-bottom: 4px; border-radius: 14px; display: grid; place-items: center;
+  color: var(--pc-t); background: color-mix(in srgb, var(--pc) 18%, transparent); }
+.pp-jamaat { --pc: var(--success); --pc-t: #fff; }
+.pp-jamaat .pp-i { background: linear-gradient(160deg, color-mix(in srgb, var(--success) 72%, #fff), var(--success)); }
+.pp-alone { --pc: var(--success); --pc-t: var(--success-text); }
+.pp-qaza { --pc: var(--warning); --pc-t: var(--warning-text); }
+.pp-l { font-size: 14px; font-weight: 600; }
+.pp-d { font-size: 11px; color: var(--text3); }
+.pp-o.on { border-color: var(--pc); background: color-mix(in srgb, var(--pc) 12%, var(--card2)); }
+.pp-o.on::after { content: ''; position: absolute; top: 7px; right: 7px; width: 8px; height: 8px; border-radius: 50%; background: var(--pc); }
+.pp-o:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.pp-clear { display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; min-height: 40px; margin-top: 8px;
+  border: 0; border-radius: 12px; background: transparent; color: var(--text3); font: inherit; font-size: 13px; font-weight: 500; }
+@media (hover: hover) { .pp-clear:hover { background: var(--hover); color: var(--text2); } }
+.pp-arrow { position: absolute; left: var(--ax, 50%); bottom: -7px; width: 13px; height: 13px; margin-left: -6.5px; transform: rotate(45deg);
+  background: var(--bg3); border-right: 1px solid var(--line2); border-bottom: 1px solid var(--line2); }
+.pp.below .pp-arrow { bottom: auto; top: -7px; border: 0; border-left: 1px solid var(--line2); border-top: 1px solid var(--line2); }
+@media (prefers-reduced-motion: reduce) { .pp { transition: opacity .1s; scale: 1; } }
+
+/* tahajjud — nafl: farzlardan uzuq chiziq bilan ajraladi */
+.hb-sec-pr .hb-nafl-row { border-top: 1px dashed color-mix(in srgb, var(--success) 40%, transparent); }
+.hb-nafl-tag { margin-left: 4px; padding: 1px 6px; border-radius: var(--r-pill); font-size: 11px; font-weight: 500; vertical-align: 1px;
+  color: var(--text2); background: var(--card2); }
+
+/* =====================================================================
+   XARITA — tepadagi har ish uchun karta va kunlar to'ri (GitHub faolligi).
+   Faqat ko'rsatadi: hisob tepadagi belgilardan, belgilash tugmasi yo'q.
+   ===================================================================== */
+.hb-heat { margin-top: 18px; }
+.hb-heat .hb-sec-h { --c: var(--accent); }
+.hb-heat-seg { flex: none; margin: 0; }
+.hb-heat-seg button { min-height: 32px; padding: 4px 11px; font-size: 12px; }
+.hb-hcs { display: flex; flex-direction: column; }   /* oraliq — .card margin-bottom */
+
+/* Karta — ilovaning oddiy .card: gradient, rangli hoshiya va soya yo'q.
+   Rang faqat ikki joyda: belgi plitkasi (jadvaldagi .hb-emoji bilan bir xil)
+   va to'rning o'zi. --hc soha rangidan keladi (inline style). */
+/* content-visibility: auto (app.css .card) bu yerda o'chiriladi: ekrandan
+   tashqaridagi kartaning kengligi 0 bo'lib, canvas chizilmay qolardi va
+   aylantirib kelganda bo'sh karta ko'rinardi. Canvas o'zi arzon. */
+.hb-hc { padding: 14px 14px 16px; content-visibility: visible; contain-intrinsic-size: none; }
+.hb-hc-h { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.hb-hc-h .hb-nm-t { font-size: 14px; }
+.hb-hc-meta { flex: none; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; font-size: 12px; color: var(--text3); }
+.hb-hc-fire { display: inline-flex; align-items: center; gap: 3px; font-size: 13px; font-weight: 600; color: var(--text); }
+.hb-hc-fire .ic { color: var(--warning-text); }
+.hb-hc-fire.none { color: var(--text3); }
+.hb-hc-fire.none .ic { color: var(--text4); }
+
+/* kunlar to'ri: qatorlar hafta kunlari, ustunlar haftalar — kataklar <canvas> da.
+   Oy va hafta kuni yozuvlari HTML: ustunlar soni canvas bilan bir xil (--wk). */
+.hb-hm { --g: 3px; }
+.span-y .hb-hm { --g: 2px; }
+.span-m1 .hb-hm { --g: 6px; }
+.hb-hm-months { display: grid; grid-template-columns: repeat(var(--wk), minmax(0, 1fr)); column-gap: var(--g); height: 15px; margin: 0 0 4px 24px;
+  font-size: 11px; color: var(--text3); }
+.hb-hm-m { grid-row: 1; white-space: nowrap; }
+.hb-hm-body { display: flex; gap: 6px; }
+/* Yozuvlar mutlaq joylashadi: grid qatorlari bo'lsa, 11px matn ustunni canvas'dan
+   balandroq qilib, kartaning pastida bo'sh joy qoldirardi. */
+.hb-hm-days { position: relative; flex: none; width: 18px; font-size: 11px; line-height: 1; color: var(--text3); }
+.hb-hm-days span { position: absolute; left: 0; top: calc((var(--r) + .5) / 7 * 100%); transform: translateY(-50%); }
+.hb-hm-cv { flex: 1; min-width: 0; display: block; width: 100%; --hc-line: color-mix(in srgb, var(--text) 10%, transparent); }

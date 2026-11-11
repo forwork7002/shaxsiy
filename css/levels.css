@@ -1,0 +1,743 @@
+/* ==== daraja va nishonlar ====
+   Bu faylda ikkita narsa chiziladi: martaba belgisi (daraja raqami) va MEDAL.
+   Martaba rangi HTML dan `--c` bilan keladi (js/levels.js), medal metallari esa
+   shu yerda: bosqich nomi `data-t` da, ranglar quyidagi to'rt qatorda.
+   SVG gradient ataylab ishlatilmadi — 84 ta nishon bitta oynada chizilganda har
+   biriga ikkitadan <defs> kerak bo'lardi. CSS gradient bir marta o'qiladi. */
+
+.lv-med[data-t="bronza"] { --m1: #F3BE8B; --m2: #C77B3C; --m3: #6F3C13; }
+.lv-med[data-t="kumush"] { --m1: #F7FAFD; --m2: #B9C0C8; --m3: #6B747F; }
+.lv-med[data-t="oltin"]  { --m1: #FFEFB8; --m2: #FFC530; --m3: #9A6A05; }
+.lv-med[data-t="olmos"]  { --m1: #E6FDFF; --m2: #7FE7FF; --m3: #22778F; }
+
+/* ------------------------------------------------------------------ */
+/* MEDAL                                                               */
+/* Uch qatlam: tashqi halqa (o'ymakor chekka yoki ilgarilash yoyi),    */
+/* metall yuza, va ichkarida belgi. Olinmagani ham ko'rinadi — chekkasi */
+/* bo'ylab qancha qolgani yoy bo'lib turadi: nimaga intilish kerakligini */
+/* yashirish motivatsiyani o'ldiradi, yorqin ko'rsatish esa aldaydi.    */
+/* ------------------------------------------------------------------ */
+.lv-med { position: relative; width: var(--s, 36px); height: var(--s, 36px); flex: none;
+  display: inline-grid; place-items: center; border-radius: 50%; }
+.lv-med-ring { position: absolute; inset: 0; border-radius: 50%; }
+.lv-med-face { position: absolute; inset: 12%; border-radius: 50%; display: grid; place-items: center; overflow: hidden; }
+.lv-med-face svg { position: relative; z-index: 1; }
+
+/* --- olingan: tanga. Uch qatlam bilan chiqadi: tashqi halqa metall,
+   uning eng chekkasida MAYDA tishlar (tanganing frezalangan yoni), ichkarida
+   o'yilgan chiziq va yuza. Tishlar ataylab mayda va past kontrastli — ilgari
+   ular 6 gradusli va yorqin edi va medal tangaga emas, QUYOSHGA o'xshardi. --- */
+.lv-med.on .lv-med-ring {
+  background: linear-gradient(160deg, var(--m1) 0%, var(--m2) 42%, var(--m3) 100%);
+  box-shadow: 0 1px 5px rgba(0,0,0,.5), inset 0 0 0 1px color-mix(in srgb, var(--m3) 55%, transparent); }
+.lv-med.on .lv-med-ring::after { content: ''; position: absolute; inset: 0; border-radius: 50%; opacity: .55;
+  background: repeating-conic-gradient(from 0deg, rgba(0,0,0,.30) 0 2deg, rgba(255,255,255,.22) 2deg 4deg);
+  -webkit-mask: radial-gradient(circle, transparent 0 78%, #000 80%);
+          mask: radial-gradient(circle, transparent 0 78%, #000 80%); }
+.lv-med.on .lv-med-face {
+  background: linear-gradient(150deg, var(--m1) 0%, var(--m2) 45%, var(--m3) 100%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 6px rgba(0,0,0,.32),
+              0 0 0 1px color-mix(in srgb, var(--m3) 62%, transparent); }
+/* yorug'lik dog'i — metallni tekis rangdan ajratadigan yagona narsa */
+.lv-med.on .lv-med-face::before { content: ''; position: absolute; inset: 0; border-radius: 50%;
+  background: radial-gradient(circle at 33% 24%, rgba(255,255,255,.62), rgba(255,255,255,0) 58%); }
+/* belgi metall ustida qora siyoh: to'rt metallning to'rttasida ham o'qiladi */
+.lv-med.on { color: rgba(0,0,0,.76); }
+
+/* --- olinmagan: so'ngan disk + ilgarilash yoyi --- */
+.lv-med:not(.on) { color: var(--text4); }
+.lv-med:not(.on) .lv-med-ring {
+  background: conic-gradient(from -90deg, var(--text3) calc(var(--p, 0) * 1%), var(--track) 0); }
+.lv-med:not(.on) .lv-med-face { background: var(--bg3); box-shadow: inset 0 0 0 1px var(--line2); }
+.lv-med.secret .lv-med-q { font-size: calc(var(--s) * .34); font-weight: 700; color: var(--text4); line-height: 1; }
+
+/* --- olingan lahza: aylanib chiqadi va bir marta yaltiraydi --- */
+@keyframes lv-pop {
+  0%   { transform: scale(.4) rotate(-26deg); opacity: 0; }
+  55%  { transform: scale(1.12) rotate(6deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+@keyframes lv-shine {
+  0%, 42% { transform: translateX(-140%) rotate(18deg); }
+  100%    { transform: translateX(160%) rotate(18deg); }
+}
+.lv-med.pop { animation: lv-pop .62s var(--ease-spring) both; animation-delay: var(--d, 0ms); }
+.lv-med.pop .lv-med-face::after { content: ''; position: absolute; top: -30%; bottom: -30%; width: 42%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.75), transparent);
+  animation: lv-shine 1.5s .35s var(--ease-out) 2 both; animation-delay: calc(var(--d, 0ms) + 350ms); }
+
+/* ------------------------------------------------------------------ */
+/* MARTABA BELGISI — daraja raqami yonayotgan kvadratda                */
+/* ------------------------------------------------------------------ */
+.lv-mark { position: relative; width: 54px; height: 54px; flex: none; display: grid; place-items: center;
+  border-radius: 17px; color: var(--c, var(--text));
+  background: radial-gradient(circle at 50% 28%, color-mix(in srgb, var(--c) 22%, transparent), transparent 72%);
+  border: 2px solid color-mix(in srgb, var(--c) 55%, transparent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 7%, transparent),
+              inset 0 0 20px color-mix(in srgb, var(--c) 16%, transparent); }
+.lv-mark-n { font-size: 21px; font-weight: 700; line-height: 1; letter-spacing: -.02em; color: var(--c); }
+.lv-mark.big { width: 76px; height: 76px; border-radius: 23px; }
+.lv-mark.big .lv-mark-n { font-size: 30px; }
+
+/* ------------------------------------------------------------------ */
+/* UMUMIY QISMLAR                                                      */
+/* ------------------------------------------------------------------ */
+.lv-txt { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.lv-rank { font-size: 17px; font-weight: 700; line-height: 1.15; color: var(--c, var(--text)); }
+.lv-motto { font-size: 13px; color: var(--text3); line-height: 1.25; overflow-wrap: anywhere; }
+.lv-sub { font-size: 13px; color: var(--text2); }
+.lv-sub b { color: var(--text); font-weight: 700; }
+
+.lv-bar { display: block; height: 5px; margin: 4px 0 2px; border-radius: var(--r-pill); background: var(--track); overflow: hidden; }
+/* Chiziq rangi — MA'LUMOT: martaba chizig'i martaba rangida, nishon chizig'i
+   o'z metallida, haftalik sinov ko'k (davom etyapti) yoki yashil (bajarildi).
+   --c berilmagan joyda oq emas, yumshoq kulrang: oq «bu muhim» deb qichqiradi. */
+.lv-bar > i { display: block; height: 100%; border-radius: inherit; background: var(--c, var(--text3));
+  box-shadow: 0 0 10px color-mix(in srgb, var(--c, transparent) 55%, transparent);
+  transition: width .6s var(--ease-out); }
+
+/* ------------------------------------------------------------------ */
+/* HAFTALIK SINOV                                                      */
+/* ------------------------------------------------------------------ */
+.lv-ch { --c: var(--accent); display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--inset); }
+.lv-ch.done { --c: var(--success); }
+.lv-ch .lv-bar { grid-column: 1 / -1; margin: 2px 0 0; }
+.lv-ch-ic { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--track); color: var(--text2); }
+.lv-ch.done { border-color: color-mix(in srgb, var(--success) 38%, var(--line)); }
+.lv-ch.done .lv-ch-ic { background: color-mix(in srgb, var(--success) 20%, transparent); color: var(--success-text); }
+.lv-ch.done .lv-bar > i { background: var(--success); box-shadow: 0 0 10px var(--success-glow); }
+.lv-ch-t { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.lv-ch-h { font-size: 13px; font-weight: 500; color: var(--text3); }
+.lv-ch-x { font-size: 14px; color: var(--text); line-height: 1.25; overflow-wrap: anywhere; }
+.lv-ch-n { font-size: 16px; font-weight: 700; align-self: center; white-space: nowrap; }
+.lv-ch-n i { font-style: normal; font-size: 13px; color: var(--text3); font-weight: 600; }
+
+/* ------------------------------------------------------------------ */
+/* PROFIL KARTASIDAGI BLOK                                             */
+/* ------------------------------------------------------------------ */
+.lv { display: flex; flex-direction: column; gap: 10px; padding-top: 12px; border-top: 1px solid var(--line); }
+.lv-hero { display: flex; align-items: center; gap: 13px; width: 100%; padding: 12px; text-align: left;
+  border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--inset); color: var(--text);
+  font: inherit; transition: background .15s, border-color .15s; }
+@media (hover: hover) { .lv-hero:hover { background: var(--hover); border-color: color-mix(in srgb, var(--c) 40%, var(--line)); } }
+.lv-hero:active { transform: scale(.995); }
+.lv-hero > svg:last-child { color: var(--text3); flex: none; }
+
+.lv-strip { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.lv-strip-i { display: inline-flex; }
+.lv-more { font-size: 13px; font-weight: 700; color: var(--text3); padding: 0 2px; }
+.lv-strip .lv-count { margin-left: auto; }
+
+/* ------------------------------------------------------------------ */
+/* BUGUN SAHIFASINING TEPASIDAGI QATOR                                 */
+/* Ataylab ingichka: tayyorlik hero'si kunning asosiy raqami bo'lib     */
+/* qolishi kerak, bu qator esa faqat «qayerdaman» deb eslatadi.        */
+/* ------------------------------------------------------------------ */
+/* .card ning foni va chegarasi ATAYLAB bu yerda qayta yozilmaydi: Bugun
+   sahifasining uslubi app.css/today.css da o'zgarib turadi va bu qator o'sha
+   o'zgarishni o'zi olishi kerak. Bu yerda faqat ichki joylashuv. */
+.lv-td { display: flex; flex-direction: column; gap: 10px; }
+.lv-td-b { display: flex; align-items: center; gap: 12px; width: 100%; padding: 0; text-align: left;
+  border: 0; background: transparent; color: var(--text); font: inherit; }
+.lv-td-b > svg:last-child { color: var(--text3); flex: none; }
+.lv-td-top { display: flex; align-items: baseline; gap: 8px; }
+/* Kunning raqami — qatordagi eng katta son. Ilgari bu yerda «bugun +12» degan
+   yashil yozuv turardi va u faqat ochko QO'SHILGANDA chiqardi: kun boshida
+   qator bo'm-bo'sh edi, ya'ni bugun uchun maqsad borligi umuman bilinmasdi. */
+.lv-td-xp { margin-left: auto; white-space: nowrap; }
+.lv-td-xp b { font-size: 17px; font-weight: 700; letter-spacing: -.02em; color: var(--text); }
+.lv-td-xp i { font-style: normal; font-size: 13px; font-weight: 600; color: var(--text3); }
+.lv-td.done .lv-td-xp b { color: var(--success-text); }
+.lv-td-sub { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+/* Chiziq martaba rangida EMAS, maqsad rangida: u endi darajani emas, kunlik
+   maqsadni ko'rsatadi, va bir xil narsa ilova bo'ylab bir xil rangda bo'lishi
+   kerak (haftalik sinov ham shu ikki rangda). Martaba rangi belgida qoladi. */
+.lv-td-b .lv-bar { --c: var(--accent); }
+.lv-td.done .lv-td-b .lv-bar { --c: var(--success); }
+
+/* Bugun ekrani «jimjit va nafis» ko'rinishga o'tdi (css/today.css, 2026-09-14):
+   to'ldirilgan fon va qalin chegara o'rniga nozik ajratgich, bosh harfli mayda
+   yorliqlar oddiy yozuvga tushdi. Daraja qatori ham shunga ergashadi — aks holda
+   u tekis ekrandagi YAGONA quticha bo'lib, ko'z uni «boshqa narsa» deb o'qirdi.
+   Faqat shu ekranda: profil kartasidagi blok o'z holicha qoladi, u karta ichida. */
+[data-view="today"] .lv-ch { background: transparent; border: 0; border-top: 1px solid var(--line);
+  border-radius: 0; padding: 12px 0 0; }
+[data-view="today"] .lv-ch-ic { background: transparent; border: 1px solid var(--line2); }
+[data-view="today"] .lv-ch.done .lv-ch-ic { background: transparent;
+  border-color: color-mix(in srgb, var(--success) 45%, transparent); }
+[data-view="today"] .lv-ch-h { text-transform: none; letter-spacing: 0; font-size: 13px; font-weight: 600; }
+[data-view="today"] .lv-ch-x { font-size: 15px; }
+/* Zanjir belgisi ham shu ekranda tekislanadi — to'ldirilgan qutichalar u yerda
+   yagona bo'lib ajralib turardi. Ogohlantirish holati (risk) tegilmaydi:
+   u uslub emas, xabar. */
+[data-view="today"] .lv-streak { background: transparent; border-color: var(--line2); }
+[data-view="today"] .lv-streak.risk { background: color-mix(in srgb, var(--warning) 9%, transparent); }
+
+/* ------------------------------------------------------------------ */
+/* TO'PLAM OYNASI                                                      */
+/* ------------------------------------------------------------------ */
+.lv-sheet { display: flex; flex-direction: column; gap: 14px; }
+.lv-top { display: flex; align-items: center; gap: 14px; padding: 14px; border-radius: var(--r-sm);
+  border: 1px solid color-mix(in srgb, var(--c) 28%, var(--line));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 9%, transparent), transparent 90%), var(--inset); }
+.lv-top-t { flex: 1; min-width: 0; }
+.lv-top .lv-rank { font-size: 19px; }
+.lv-how { margin: 0; }
+.lv-total { font-size: 14px; font-weight: 700; color: var(--text2); }
+
+/* ---- bo'lim sarlavhasi (yo'l · eng yaqin) ---- */
+.lv-sec-h { font-size: 13px; font-weight: 500; 
+  color: var(--text3); margin-bottom: 8px; }
+
+/* ---- MARTABALAR YO'LI — TIK RO'YXAT ----
+   Eski yonlama rels shu yerda edi va u yerda o'nta martabadan to'rttasi
+   ko'rinardi: sirg'alish belgisi yo'q, chetdagi nom so'nish niqobi ostida
+   kesilgan, so'nish zonasining uzunligi haqida yigirma qatorlik izoh.
+   Tik ro'yxatda bu muammolarning birortasi yo'q — shakl o'zgargani bilan
+   ular yo'qoldi, sozlash bilan emas.
+
+   Chiziq har qatorning ::before i — uzluksiz ko'rinadi, chunki qatorlar
+   ustma-ust turadi. Birinchi va oxirgi qatorda yarmi kesiladi, hozirgi
+   qatorda esa PASTKI yarmi o'chadi: shu yerdan keyingisi hali o'tilmagan. */
+.lv-path { display: flex; flex-direction: column; }
+.lv-rungs { list-style: none; margin: 0; padding: 0; }
+.lv-rung { position: relative; display: grid; grid-template-columns: 32px 1fr auto;
+  align-items: center; gap: 11px; padding: 7px 8px; border-radius: var(--r-sm); }
+.lv-rung::before { content: ''; position: absolute; left: 23px; top: 0; bottom: 0; width: 2px;
+  background: var(--line2); }
+.lv-rung:first-child::before { top: 50%; }
+.lv-rung:last-child::before { bottom: 50%; }
+.lv-rung.done::before { background: color-mix(in srgb, var(--c) 50%, var(--line2)); }
+.lv-rung.now::before { bottom: 50%; background: color-mix(in srgb, var(--c) 50%, var(--line2)); }
+
+.lv-rung-d { position: relative; z-index: 1; justify-self: center; display: grid; place-items: center;
+  width: 22px; height: 22px; border-radius: 50%; background: var(--bg2);
+  border: 2px solid var(--line2); color: var(--bg); }
+.lv-rung.done .lv-rung-d { background: var(--c); border-color: var(--c); }
+/* Belgi martaba rangining ustida turadi, shuning uchun rangi FONNIKI:
+   qorong'i temada qora, yorug'ida oq — o'nta martabaning o'ntasida ham
+   o'qiladi, «Nur» ning var(--text) rangi ham qo'shilib. */
+.lv-rung.done .lv-rung-d svg { color: var(--bg); }
+.lv-rung.now .lv-rung-d { width: 32px; height: 32px; background: var(--bg2); border-color: var(--c);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--c) 15%, transparent); }
+.lv-rung.now .lv-rung-d b { font-size: 13px; font-weight: 700; color: var(--c); line-height: 1; }
+
+.lv-rung-n { font-size: 14.5px; font-weight: 600; line-height: 1.2; color: var(--text3); overflow-wrap: anywhere; }
+.lv-rung.done .lv-rung-n { color: var(--text2); }
+.lv-rung.now { background: color-mix(in srgb, var(--c) 9%, transparent); }
+.lv-rung.now .lv-rung-n { font-size: 16.5px; font-weight: 700; color: var(--c); letter-spacing: -.01em; }
+.lv-rung-l { font-size: 12px; color: var(--text4); white-space: nowrap; }
+.lv-rung.now .lv-rung-l { color: var(--text2); font-weight: 700; }
+
+/* ---- ENG YAQIN NISHONLAR ----
+   Ro'yxatning boshida turadi: odam to'plamni «endi nima?» deb ochadi, va bu
+   savolga sakson to'rtta katakni ko'zdan kechirish emas, uchta qator javob beradi. */
+.lv-near { display: flex; flex-direction: column; gap: 7px; }
+.lv-near .lv-sec-h { margin-bottom: 1px; }
+.lv-near-i { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px;
+  padding: 9px 11px; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--recess);
+  color: var(--text); font: inherit; text-align: left; }
+@media (hover: hover) { .lv-near-i:hover { background: var(--hover); } }
+.lv-near-i:active { transform: scale(.99); }
+.lv-near-i .lv-bar { grid-column: 1 / -1; margin: 3px 0 0; }
+.lv-near-t { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.lv-near-t b { font-size: 14px; font-weight: 700; line-height: 1.2; }
+.lv-near-p { font-size: 14px; font-weight: 700; color: var(--text2); align-self: center; }
+.lv-near-i[data-t="bronza"] { --c: #C77B3C; }
+.lv-near-i[data-t="kumush"] { --c: #B9C0C8; }
+.lv-near-i[data-t="oltin"]  { --c: #FFC530; }
+.lv-near-i[data-t="olmos"]  { --c: #7FE7FF; }
+
+/* ---- QAHRAMON ----
+   Bo'limning yagona kattaligi. Markazda, chunki bu yerda solishtiriladigan
+   ikkinchi narsa yo'q — bitta raqam, bitta nom, bitta chiziq.
+   Ichki tartib: BELGI → MARTABA → SHIOR → CHIZIQ → SUR'AT → KEYINGISI. */
+.lv-hero2 { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 15px;
+  padding: 24px 16px 16px; border-radius: var(--r);
+  border: 1px solid color-mix(in srgb, var(--c) 26%, var(--line));
+  background: var(--inset); }
+/* Yorug'lik dog'i belgining ortida — martaba rangi butun kartaga tarqaladi.
+   pointer-events yo'q: dog' tugmalarning ustida turadi. */
+.lv-hero2::before { content: ''; position: absolute; left: 50%; top: -96px; width: 280px; height: 280px;
+  transform: translateX(-50%); border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, color-mix(in srgb, var(--c) 24%, transparent), transparent 66%); }
+.lv-hero2-in { position: relative; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+.lv-hero2 .lv-mark.big { width: 88px; height: 88px; border-radius: 27px; }
+.lv-hero2 .lv-mark.big .lv-mark-n { font-size: 35px; }
+.lv-hero2-r { margin: 8px 0 0; font-size: 25px; font-weight: 700; line-height: 1.1;
+  letter-spacing: -.02em; color: var(--c); overflow-wrap: anywhere; }
+.lv-hero2-m { margin: 0; font-size: 14px; line-height: 1.3; color: var(--text3); overflow-wrap: anywhere; }
+
+.lv-hero2-p { position: relative; }
+/* Chiziqning BO'SH qismi keyingi martabaning rangida (--n). Yo'lning oldi
+   boshqa rangda ekani — «u yoqqa o'tish» degan gapning yozuvsiz aytilishi.
+   --n yo'q bo'lsa (eng yuqori martaba) oddiy iz qoladi. */
+.lv-hero2-p .lv-bar { height: 10px; margin: 0;
+  background: color-mix(in srgb, var(--n, transparent) 22%, var(--track)); }
+.lv-hero2-l { display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
+  margin-top: 8px; font-size: 13px; line-height: 1.3; color: var(--text2); }
+.lv-hero2-l b { color: var(--text); font-weight: 700; white-space: nowrap; }
+
+/* ---- SUR'AT ----
+   Yagona motivatsion raqam. Daraja chizig'i bir kunda deyarli qimirlamaydi
+   (32-darajada ~1,5 %), muddat esa har kuni o'zgaradi va halol qoladi:
+   yozilmagan kun uni o'zi uzaytiradi. */
+.lv-pace { position: relative; display: flex; align-items: center; gap: 4px 7px; flex-wrap: wrap;
+  font-size: 13.5px; line-height: 1.3; color: var(--text2); }
+.lv-pace svg { color: var(--warning-text); flex: none; }
+.lv-pace b { font-weight: 700; color: var(--text); white-space: nowrap; }
+.lv-pace.none { color: var(--text3); }
+.lv-pace.none svg { color: var(--text4); }
+
+/* ---- KEYINGI MARTABA ----
+   Kartaning butun enini oladi (chetga chiqadigan manfiy margin), chunki bu
+   qahramonning davomi emas, uning POYDEVORI: «shuncha ishning oxirida nima
+   bor» degan savolga javob. Rang keyingi martabaniki. */
+.lv-nextr { position: relative; display: flex; align-items: center; gap: 10px;
+  margin: 1px -16px -16px; padding: 12px 16px; border-top: 1px solid var(--line);
+  background: color-mix(in srgb, var(--n, var(--text3)) 9%, transparent); }
+.lv-nextr-d { width: 9px; height: 9px; flex: none; border-radius: 3px;
+  background: var(--n, var(--text3)); box-shadow: 0 0 12px color-mix(in srgb, var(--n, transparent) 65%, transparent); }
+.lv-nextr-t { font-size: 13.5px; line-height: 1.3; color: var(--text2); overflow-wrap: anywhere; }
+/* Martaba nomi o'z rangida, lekin YORUG' temada neon ranglar oq fonda
+   o'qilmaydi — pastdagi yorug' tema bo'limi uni qoraytiradi. */
+.lv-nextr-t b { font-weight: 700; color: var(--n, var(--text)); }
+
+/* ---- NISHON BLOKI ---- */
+.lv-meds { display: flex; flex-direction: column; gap: 15px; }
+.lv-recent { display: flex; flex-direction: column; gap: 7px; }
+.lv-recent .lv-sec-h { margin-bottom: 0; }
+.lv-allbtn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%;
+  padding: 14px 15px; border: 1px solid var(--line2); border-radius: var(--r-sm);
+  background: var(--inset); color: var(--text); font: inherit; font-size: 15px; font-weight: 700;
+  transition: background .15s, border-color .15s; }
+@media (hover: hover) { .lv-allbtn:hover { background: var(--hover); border-color: var(--line3); } }
+.lv-allbtn:active { transform: scale(.99); }
+.lv-allbtn svg { color: var(--text3); flex: none; }
+
+/* «Orqaga» to'plam oynasining TEPASIDA: pastki tugmalar qatori besh ming
+   pikselli ro'yxatning oxirida qolardi va uni hech kim topmasdi. */
+/* Balandligi 44px dan past bo'lmasin — ilova bo'ylab eng kichik bosish nuqtasi. */
+.lv-back { display: inline-flex; align-items: center; gap: 5px; align-self: flex-start; min-height: 44px;
+  padding: 10px 16px 10px 11px; border-radius: var(--r-pill); border: 1px solid var(--line2);
+  background: var(--inset); color: var(--text2); font: inherit; font-size: 14px; font-weight: 600; }
+@media (hover: hover) { .lv-back:hover { background: var(--hover); color: var(--text); } }
+.lv-back:active { transform: scale(.98); }
+.lv-back svg { flex: none; }
+
+/* ---- to'plam sanog'i ---- */
+.lv-count-row { display: flex; flex-direction: column; gap: 2px; }
+.lv-count-row .lv-bar { margin: 0; }
+
+.lv-fam { display: flex; flex-direction: column; gap: 8px; }
+.lv-fam-h { display: flex; align-items: baseline; gap: 7px; margin: 0; font-size: 15px; flex-wrap: wrap; }
+.lv-fam-h svg { color: var(--text3); align-self: center; flex: none; }
+.lv-fam-h b { font-weight: 700; }
+.lv-fam-n { font-size: 11.5px; font-weight: 700; color: var(--text3); padding: 1px 7px; border-radius: var(--r-pill);
+  background: var(--inset); border: 1px solid var(--line); align-self: center; }
+.lv-fam.full .lv-fam-n { color: var(--success-text); border-color: color-mix(in srgb, var(--success) 40%, var(--line)); }
+/* To'rt ustun: har oilaning to'rt bosqichi BITTA qatorda tursin. Uch ustunda
+   to'rtinchisi yolg'iz qolib, har oiladan keyin bo'sh joy ochilib ketardi. */
+.lv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 7px; }
+
+.lv-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 10px 4px 8px;
+  min-width: 0; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--recess);
+  color: var(--text); font: inherit; text-align: center; transition: background .15s, border-color .15s; }
+.lv-cell.on { background: var(--inset); border-color: var(--line2); }
+@media (hover: hover) { .lv-cell:hover { background: var(--hover); } }
+.lv-cell:active { transform: scale(.97); }
+.lv-cell b { font-size: 12.5px; font-weight: 700; line-height: 1.2; overflow-wrap: anywhere; }
+.lv-cell span { line-height: 1.2; overflow-wrap: anywhere; }
+
+/* ------------------------------------------------------------------ */
+/* BITTA NISHON OYNASI VA TABRIK                                       */
+/* ------------------------------------------------------------------ */
+.lv-one { display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.lv-one-t { display: flex; flex-direction: column; gap: 4px; align-items: center; width: 100%; }
+.lv-one-t b { font-size: 16px; font-weight: 700; }
+.lv-one .lv-bar { width: 100%; }
+/* Chiziq nishonning o'z metallida. Oldin u --c ni topolmay oq bo'lib qolardi
+   va oyna ichida qaysi nishon ekani rangdan bilinmasdi. */
+.lv-one[data-t="bronza"] { --c: #C77B3C; }
+.lv-one[data-t="kumush"] { --c: #B9C0C8; }
+.lv-one[data-t="oltin"]  { --c: #FFC530; }
+.lv-one[data-t="olmos"]  { --c: #7FE7FF; }
+
+/* Tabrikning boshi qahramon bilan BIR TILDA gapiradi: markazlashgan belgi,
+   martaba rangidagi yorug'lik dog'i, ostida «keyin nima» qatori. Ilgari bu
+   chapga tekislangan qator edi va daraja ko'tarilgani oddiy bildirishnomaga
+   o'xshardi — holbuki bu bo'limdagi yagona bayram. */
+.lv-cel-top { position: relative; overflow: hidden; display: flex; flex-direction: column;
+  align-items: center; gap: 3px; text-align: center; margin-bottom: 14px; padding: 20px 14px 14px;
+  border-radius: var(--r); border: 1px solid color-mix(in srgb, var(--c) 26%, var(--line));
+  background: var(--inset); }
+.lv-cel-top::before { content: ''; position: absolute; left: 50%; top: -90px; width: 260px; height: 260px;
+  transform: translateX(-50%); border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle, color-mix(in srgb, var(--c) 26%, transparent), transparent 66%); }
+.lv-cel-top > * { position: relative; }
+.lv-cel-r { margin-top: 9px; font-size: 25px; font-weight: 700; line-height: 1.1;
+  letter-spacing: -.02em; color: var(--c); overflow-wrap: anywhere; }
+/* Oddiy daraja ko'tarilishi kichikroq yozuv bilan: bayram martabaniki. */
+.lv-cel-r.sm { font-size: 17px; margin-top: 10px; }
+.lv-cel-m { margin: 0; font-size: 14px; line-height: 1.3; color: var(--text3); overflow-wrap: anywhere; }
+/* --text3, --text4 emas: tabrik kartasining foni martaba rangi bilan
+   bo'yalgan va o'sha ingichka qatlam nisbatni 4,31 ga tushirardi (o'lchandi).
+   Xuddi shu yozuv yo'l ro'yxatida --text4 da qoladi — u yerda fon toza. */
+.lv-cel-range { margin-top: 3px; font-size: 12px; color: var(--text3); }
+.lv-cel-next { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%;
+  margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--line); }
+.lv-cel-next b { font-size: 14px; font-weight: 700; color: var(--text); overflow-wrap: anywhere; }
+.lv-cel-next span { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text2); }
+.lv-cel-next svg { color: var(--warning-text); flex: none; }
+
+.lv-cel { display: flex; flex-direction: column; gap: 10px; }
+.lv-cel-m2 { display: flex; align-items: center; gap: 13px; padding: 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--line2); background: var(--inset); }
+.lv-cel-m2 b { display: block; font-size: 16px; font-weight: 700; }
+.lv-cel-m2 span { display: block; }
+
+/* ------------------------------------------------------------------ */
+/* YORUG' TEMA                                                         */
+/* Martaba ranglari qora fon uchun tanlangan (neon yashil, sariq, laym).*/
+/* Oq fonda ular MATN sifatida o'qilmaydi — 1.6:1 gacha tushadi.        */
+/* ULUSH 68 % EMAS, 44 %. 68 % bilan sariq (#FFDE00) oq fonda 2,9:1     */
+/* berardi va bu ikki sabab bilan sezilmay qolgandi: ko'z bilan u       */
+/* «to'q sariq» bo'lib ko'rinadi, o'lchagich esa color-mix() natijasini */
+/* (color(srgb …)) 0..255 deb o'qib, soxta yuqori nisbat qaytarardi.    */
+/* 44 % da eng yomon rang ham 5:1 dan yuqori (o'lchandi, 2026-09-15).   */
+/* To'ldirish va chekka o'sha-o'shaligicha qoladi, faqat matn va belgi  */
+/* qoraytiriladi: daraja rangi ma'nosini yo'qotmaydi, lekin ko'rinadi.  */
+/* Medal metallariga tegilmaydi — ular o'zi yorug' fon uchun ham to'g'ri.*/
+/* ------------------------------------------------------------------ */
+[data-theme="light"] .lv-rank,
+[data-theme="light"] .lv-mark-n,
+[data-theme="light"] .lv-cel-r,
+[data-theme="light"] .lv-hero2-r,
+[data-theme="light"] .lv-rung.now .lv-rung-n,
+[data-theme="light"] .lv-rung.now .lv-rung-d b { color: color-mix(in srgb, var(--c) 44%, #000); }
+[data-theme="light"] .lv-nextr-t b { color: color-mix(in srgb, var(--n) 44%, #000); }
+/* Chiziq MATN emas, grafika — 4,5 emas, 3:1 kerak. Lekin toza sariq
+   (#FFDE00) oq fonda 1,2:1 beradi, ya'ni to'lgan qism bo'shidan umuman
+   ajralmaydi: yorug' temada daraja chizig'i bo'm-bo'sh ko'rinardi.
+   62 % ulush rangni saqlaydi va uni ko'rinadigan qiladi. */
+[data-theme="light"] .lv-hero2-p .lv-bar > i,
+[data-theme="light"] .lv-hero .lv-bar > i,
+[data-theme="light"] .lv-top .lv-bar > i { background: color-mix(in srgb, var(--c) 62%, #000); box-shadow: none; }
+/* Yorug'lik dog'i oq fonda sariq bulutga aylanadi — yarmiga tushiriladi. */
+[data-theme="light"] .lv-hero2::before,
+[data-theme="light"] .lv-cel-top::before { background: radial-gradient(circle, color-mix(in srgb, var(--c) 13%, transparent), transparent 66%); }
+/* Yo'ldagi nuqtalar. Qorong'i temada belgi qora fonda yonayotgan rang ustida
+   turadi va yaxshi o'qiladi; oq fonda esa aksincha — yorqin yashil (#16EC06)
+   ustidagi och belgi 1,2:1 beradi, ya'ni nuqta ichida umuman hech narsa
+   ko'rinmaydi. Shuning uchun yorug' temada nuqta qoraytiriladi va belgi
+   fon rangida qoladi: o'ntala martabaning o'ntasida ham 3,9:1 dan yuqori. */
+[data-theme="light"] .lv-rung.done .lv-rung-d { background: color-mix(in srgb, var(--c) 50%, #000);
+  border-color: color-mix(in srgb, var(--c) 50%, #000); }
+[data-theme="light"] .lv-rung.now .lv-rung-d { border-color: color-mix(in srgb, var(--c) 50%, #000); }
+
+/* ------------------------------------------------------------------ */
+/* BUGUNGI MAQSAD                                                      */
+/* Bo'limdagi yagona BUGUN bajariladigan narsa, shuning uchun oynada u  */
+/* martabadan keyin darhol turadi va yagona to'ldirilgan blok bo'ladi.  */
+/* Rang tili o'sha-o'sha: ko'k — davom etyapti, yashil — bajarildi.     */
+/* ------------------------------------------------------------------ */
+.lv-day { --c: var(--accent); display: flex; flex-direction: column; gap: 10px;
+  padding: 14px; border-radius: var(--r-sm); border: 1px solid var(--line);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--c) 8%, transparent), transparent 80%), var(--inset); }
+.lv-day.done { --c: var(--success); border-color: color-mix(in srgb, var(--success) 34%, var(--line)); }
+.lv-day .lv-sec-h { margin-bottom: 0; }
+
+.lv-day-top { display: flex; align-items: center; gap: 14px; }
+/* Yoy o'zining kengligini o'zi biladi (app.css › .arc-wrap) — qisqartirmaymiz,
+   chunki katta raqam bu blokning butun mazmuni. */
+.lv-day-top .arc-wrap { flex: none; width: 150px; }
+.lv-day-side { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 7px; align-items: flex-start; }
+/* «yana 44 ochko» — MATN, shuning uchun rangi `--c` dan emas, `--accent-text`
+   dan olinadi. `--c` (toza `--accent`) yorug' temada inset fonida 3,94:1 chiqdi,
+   ya'ni 4,5 dan past — o'lchandi, ko'z bilan sezilmasdi. `--accent-text` aynan
+   shu ish uchun bor: yoy va chiziq `--c` da qolaveradi, ular grafika. */
+.lv-day-st { font-size: 15px; font-weight: 700; line-height: 1.2; color: var(--accent-text); overflow-wrap: anywhere; }
+.lv-day.done .lv-day-st { color: var(--success-text); }
+.lv-day-how { margin: 0; font-size: 12px; line-height: 1.35; color: var(--text3); overflow-wrap: anywhere; }
+.lv-day-none { margin: 0; font-size: 13px; line-height: 1.35; color: var(--text3); }
+
+/* ---- OCHKO QAYERDAN ----
+   «Bugun +47» degan raqam o'zi hech narsa o'rgatmaydi. Ro'yxat qisqa va
+   saralangan (kattadan kichikka): odam bir qarashda kunining nimadan
+   yig'ilganini ko'radi va ertaga nimani ko'paytirishni o'zi hal qiladi. */
+.lv-sec-h.sm { font-size: 11px; margin-bottom: 0; }
+.lv-srcs { list-style: none; margin: 0; padding: 0; display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 2px 14px; }
+.lv-src { display: flex; align-items: center; gap: 8px; padding: 4px 0;
+  border-bottom: 1px solid var(--line); }
+.lv-src:last-child { border-bottom: 0; }
+.lv-src-i { display: grid; place-items: center; width: 22px; height: 22px; flex: none;
+  border-radius: 50%; background: var(--track); color: var(--text3); }
+.lv-src-n { flex: 1; min-width: 0; font-size: 13px; color: var(--text2); overflow-wrap: anywhere; }
+.lv-src b { font-size: 13px; font-weight: 700; color: var(--text); white-space: nowrap; }
+
+/* ---- ZANJIR ----
+   Nishonlardagi «eng uzun» dan boshqa narsa: bu HOZIRGISI, ya'ni yo'qotish
+   mumkin bo'lgan yagona raqam. Bugun hali yozilmagan bo'lsa sariqqa o'tadi —
+   qizil emas: hali hech narsa buzilmagan, kun tugamagan. */
+/* TOR EKRANDA QISILSIN. Ilgari `flex: none` edi va ichidagi ikkala yozuv
+   ham nowrap — 320px da yorliq kartadan kengroq bo'lib chetdan chiqib
+   ketardi va «bugun hali yozi…» bo'lib kesilardi. O'ram (.lv-td-sub
+   flex-wrap) yordam bermasdi: u yorliqni YANGI QATORGA tushiradi, lekin
+   yorliqning o'zini torroq qilmaydi. Shuning uchun: qisilishga ruxsat
+   (0 1 auto + min-width 0), va ogohlantirish yozuvi BUTUNLIGICHA keyingi
+   qatorga tushsin (flex-wrap) — so'z-so'z sinsa «bugun / hali / yozilmadi»
+   bo'lib uch qatorga cho'zilardi, ya'ni kesilishdan ham xunukroq. */
+.lv-streak { display: inline-flex; align-items: center; gap: 2px 6px;
+  flex: 0 1 auto; min-width: 0; max-width: 100%; flex-wrap: wrap;
+  padding: 3px 9px; border-radius: var(--r-pill); background: var(--inset);
+  border: 1px solid var(--line); color: var(--text2); }
+.lv-streak svg { color: var(--warning-text); flex: none; }
+.lv-streak b { font-size: 12.5px; font-weight: 700; color: var(--text); white-space: nowrap; }
+.lv-streak i { font-style: normal; font-size: 11px; color: var(--text3); white-space: nowrap; }
+.lv-streak.none { color: var(--text3); }
+.lv-streak.none svg { color: var(--text4); }
+.lv-streak.none b { color: var(--text3); font-weight: 600; }
+.lv-streak.risk { border-color: color-mix(in srgb, var(--warning) 42%, var(--line));
+  background: color-mix(in srgb, var(--warning) 9%, transparent); }
+
+/* ---- OXIRGI 30 KUN ----
+   Bitta kunning ochkosi hech narsa demaydi, o'ttizta kun odatni ko'rsatadi.
+   Maqsad chizig'i (spark-target, app.css) — «qaysi kunlar yetdi» degan
+   savolga javob; yetgan kunlar yashil, qolgani ko'k, bo'sh kunlar so'ngan. */
+.lv-hist { display: flex; flex-direction: column; gap: 4px; }
+.lv-hist .lv-sec-h { margin-bottom: 2px; }
+
+/* ------------------------------------------------------------------ */
+/* TOR EKRAN                                                           */
+/* ------------------------------------------------------------------ */
+@media (max-width: 380px) {
+  .lv-mark { width: 46px; height: 46px; border-radius: 14px; }
+  .lv-mark-n { font-size: 18px; }
+  .lv-mark.big { width: 66px; height: 66px; border-radius: 20px; }
+  .lv-mark.big .lv-mark-n { font-size: 26px; }
+  .lv-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lv-hero { gap: 10px; padding: 10px; }
+  .lv-hero2 { padding: 20px 13px 13px; }
+  .lv-hero2 .lv-mark.big { width: 76px; height: 76px; border-radius: 23px; }
+  .lv-hero2 .lv-mark.big .lv-mark-n { font-size: 30px; }
+  .lv-hero2-r { font-size: 22px; }
+  .lv-cel-top { padding: 16px 11px 12px; }
+  .lv-cel-r { font-size: 22px; }
+  .lv-nextr { margin: 1px -13px -13px; padding: 11px 13px; }
+  /* «105 390 ochko» va «33-darajagacha 3 230» 320px da yonma-yon sig'maydi */
+  .lv-hero2-l { flex-direction: column; align-items: flex-start; gap: 2px; }
+  .lv-rung { gap: 9px; padding: 7px 6px; }
+  .lv-rung::before { left: 21px; }
+  /* Yoy va yonidagi matn 380px da yonma-yon sig'maydi — matn ikki harfga
+     qisqarib, «yana 36 ochko» uch qatorga bo'linib ketardi. Ustma-ust. */
+  .lv-day-top { flex-direction: column; align-items: stretch; gap: 10px; }
+  .lv-day-top .arc-wrap { width: 100%; }
+  .lv-day-side { align-items: center; text-align: center; }
+  .lv-srcs { grid-template-columns: 1fr; }
+}
+
+/* ================================================================== */
+/* 2026-09-17 — «QAYERDAMAN → NIMA QILAY» TUZILISHI                     */
+/* Oyna o'n qavatdan to'rtga tushdi. Pastdagi qoidalar yuqoridagilarning */
+/* ustidan yozmaydi, yangi shakllarni qo'shadi; `.lv-hero2-l` bundan      */
+/* mustasno — u endi uch ustunli (joriy daraja · jami · keyingisi).      */
+/* ================================================================== */
+
+/* ---- DARAJA HALQASI ---- */
+.lv-ring { position: relative; display: inline-grid; place-items: center; flex: none;
+  width: var(--sz, 132px); height: var(--sz, 132px); color: var(--c, var(--text)); }
+.lv-ring svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.lv-ring-t { fill: none; stroke: var(--track); stroke-width: 9; }
+.lv-ring-f { fill: none; stroke: var(--c, var(--accent)); stroke-width: 9; stroke-linecap: round;
+  stroke-dasharray: 326.73; stroke-dashoffset: var(--off, 326.73);
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--c, transparent) 60%, transparent));
+  animation: lv-ring-in 1.1s var(--ease-out) both; }
+@keyframes lv-ring-in { from { stroke-dashoffset: 326.73; } }
+/* Halqaning ichki doirasi — raqam yorug'lik dog'ida turadi */
+.lv-ring::before { content: ''; position: absolute; inset: 17%; border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--c) 20%, transparent), transparent 75%); }
+.lv-ring-n { position: relative; display: flex; flex-direction: column; align-items: center; line-height: 1; }
+/* Raqam har doim asosiy matn rangida, martaba rangi — soyasida. Ilk martaba
+   «Niyat» kulrang, va yangi odam aynan shu darajalarda: raqam uning rangida
+   bo'lsa tabrik xira ko'rinardi. */
+.lv-ring-n b { font-size: calc(var(--sz, 132px) * .33); font-weight: 700; letter-spacing: -.03em; color: var(--text);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--c, transparent) 70%, transparent); }
+.lv-ring-n i { margin-top: 3px; font-style: normal; font-size: 12px; font-weight: 600; color: var(--text3); }
+.lv-ring-n b.bump { animation: lv-bump .5s var(--ease-spring); }
+@keyframes lv-bump { 40% { transform: scale(1.22); } }
+
+.lv-hero2-in .lv-streak { margin-top: 8px; }
+.lv-hero2 { gap: 14px; }
+.lv-hero2-r { margin-top: 6px; }
+
+/* ---- QOLGAN OCHKO — oynaning eng katta yozuvi ---- */
+.lv-left { position: relative; display: flex; flex-direction: column; align-items: center; gap: 2px; text-align: center; }
+.lv-left b { font-size: 34px; font-weight: 700; line-height: 1.05; letter-spacing: -.03em; color: var(--text); }
+.lv-left span { font-size: 14px; color: var(--text2); overflow-wrap: anywhere; }
+
+.lv-hero2-l { display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 10px; }
+.lv-hero2-l > b { justify-self: center; font-size: 12.5px; font-weight: 600; color: var(--text3); }
+.lv-hero2-l > span { font-size: 13px; font-weight: 700; color: var(--text2); min-width: 1ch; }
+
+/* ---- O'NTA MARTABA — o'nta bo'lak ---- */
+.lv-ranks { position: relative; display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+.lv-ranks i { position: relative; display: block; height: 6px; border-radius: 99px; overflow: hidden;
+  background: var(--track); }
+.lv-ranks i::after { content: ''; position: absolute; inset: 0 auto 0 0; width: var(--f, 0%);
+  border-radius: inherit; background: var(--c); }
+.lv-ranks i.done::after { opacity: .55; }
+.lv-ranks i.now { box-shadow: 0 0 0 2px color-mix(in srgb, var(--c) 35%, transparent); }
+
+/* ---- NIMA QILAY ---- */
+.lv-todo { display: flex; flex-direction: column; gap: 10px; padding: 16px 14px 14px;
+  border-radius: var(--r); border: 1px solid var(--line); background: var(--inset); }
+.lv-todo-h h4 { margin: 0; font-size: 17px; font-weight: 700; line-height: 1.2; letter-spacing: -.01em; color: var(--text); }
+.lv-todo-h p { margin: 3px 0 0; font-size: 13.5px; color: var(--text2); }
+.lv-acts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lv-act { position: relative; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 11px;
+  width: 100%; min-height: 54px; padding: 9px 12px; text-align: left; overflow: hidden;
+  border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--recess);
+  color: var(--text); font: inherit; transition: background .15s, border-color .15s, transform .1s; }
+@media (hover: hover) { .lv-act:hover { background: var(--hover); border-color: var(--line2); } }
+.lv-act:active { transform: scale(.985); }
+.lv-act-i { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent-text); }
+.lv-act-t { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.lv-act-t b { font-size: 14.5px; font-weight: 600; line-height: 1.25; overflow-wrap: anywhere; }
+.lv-act-t span { font-size: 12.5px; color: var(--text3); line-height: 1.25; overflow-wrap: anywhere; }
+/* Ochko — qatorning «mukofoti», shuning uchun alohida rangda va kapsulada */
+.lv-act-x { padding: 4px 10px; border-radius: var(--r-pill); font-size: 14px; font-weight: 700; white-space: nowrap;
+  color: var(--warning-text); background: color-mix(in srgb, var(--warning) 13%, transparent); }
+.lv-act-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: transparent; }
+.lv-act-bar i { display: block; height: 100%; background: var(--accent); border-radius: 0 3px 3px 0; }
+.lv-act.done .lv-act-i { background: color-mix(in srgb, var(--success) 18%, transparent); color: var(--success-text); }
+.lv-act.done .lv-act-x { color: var(--success-text); background: color-mix(in srgb, var(--success) 13%, transparent); }
+
+.lv-got { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding-top: 2px; }
+.lv-got-h { width: 100%; font-size: 12.5px; color: var(--text3); }
+.lv-chip { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: var(--r-pill);
+  font-size: 12.5px; color: var(--text2); background: color-mix(in srgb, var(--success) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--success) 28%, transparent); }
+.lv-chip svg { color: var(--success-text); flex: none; }
+.lv-chip b { font-weight: 700; color: var(--success-text); }
+
+.lv-eta { display: flex; align-items: flex-start; gap: 7px; margin: 2px 0 0; padding: 10px 12px;
+  border-radius: var(--r-sm); background: color-mix(in srgb, var(--warning) 8%, transparent);
+  font-size: 13.5px; line-height: 1.35; color: var(--text); }
+.lv-eta svg { flex: none; margin-top: 1px; color: var(--warning-text); }
+
+/* ---- YIG'ILADIGAN BO'LIMLAR ---- */
+.lv-folds { display: flex; flex-direction: column; gap: 8px; }
+.lv-fold { border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--recess); }
+.lv-fold > summary { display: flex; align-items: center; gap: 8px; min-height: 50px; padding: 0 14px;
+  list-style: none; cursor: pointer; font-size: 15px; font-weight: 600; color: var(--text); }
+.lv-fold > summary::-webkit-details-marker { display: none; }
+.lv-fold > summary > span:first-child { flex: 1; min-width: 0; }
+.lv-fold > summary svg { flex: none; color: var(--text3); transition: transform .2s; }
+.lv-fold[open] > summary svg { transform: rotate(180deg); }
+.lv-fold-x { font-size: 13px; font-weight: 600; color: var(--text3); }
+.lv-fold-b { padding: 0 12px 12px; display: flex; flex-direction: column; gap: 10px; }
+.lv-fold.sm { border: 0; background: transparent; }
+.lv-fold.sm > summary { min-height: 44px; padding: 0 4px; font-size: 14px; color: var(--accent-text); }
+.lv-fold.sm > summary svg { color: var(--accent-text); }
+.lv-fold.sm .lv-acts { margin-top: 2px; }
+
+.lv-xpt { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.lv-xpt li { display: grid; grid-template-columns: auto auto 1fr; align-items: center; gap: 8px;
+  padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+.lv-xpt li:last-child { border-bottom: 0; }
+.lv-xpt b { font-weight: 600; color: var(--text); white-space: nowrap; }
+.lv-xpt li > span.num { justify-self: end; text-align: right; color: var(--text2); overflow-wrap: anywhere; }
+
+/* ================================================================== */
+/* TABRIK QATLAMI                                                      */
+/* D.modal emas, o'z qatlami: fon tekshiruvidan chiqadi va ochiq oynaning */
+/* ichiga tegmasligi kerak. Karta pastdan ko'tariladi, halqa to'ladi,    */
+/* raqam sanaydi, konfetti ikki chetdan otiladi.                        */
+/* ================================================================== */
+.lv-cx { position: fixed; inset: 0; z-index: 450; display: flex; align-items: center; justify-content: center;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  overflow-y: auto; overscroll-behavior: contain;
+  background: radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--c) 22%, rgba(0,0,0,.72)), rgba(0,0,0,.84) 70%);
+  -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  opacity: 0; transition: opacity .24s ease; }
+.lv-cx.show { opacity: 1; }
+.lv-cx-cv { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2; }
+.lv-cx-card { position: relative; z-index: 1; width: 100%; max-width: 400px; margin: auto;
+  display: flex; flex-direction: column; gap: 12px; padding: 22px 18px 18px; text-align: center;
+  border-radius: var(--r-lg); background: var(--bg3); border: 1px solid color-mix(in srgb, var(--c) 34%, var(--line2));
+  box-shadow: 0 30px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.03), 0 0 60px color-mix(in srgb, var(--c) 22%, transparent);
+  transform: translateY(40px) scale(.94); transition: transform .5s var(--ease-spring); }
+.lv-cx.show .lv-cx-card { transform: none; }
+.lv-cx-kick { font-size: 14px; font-weight: 600; color: var(--warning-text); }
+.lv-cx-title { margin: -4px 0 0; font-size: 26px; font-weight: 700; line-height: 1.15; letter-spacing: -.02em; color: var(--text); }
+.lv-cx-btns { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+
+.lv-cx .lv-cel-top { margin: 0; padding: 18px 12px 16px; }
+.lv-cel-glow { position: absolute; left: 50%; top: 20px; width: 240px; height: 240px; margin-left: -120px;
+  border-radius: 50%; pointer-events: none; opacity: 0;
+  background: repeating-conic-gradient(from 0deg, color-mix(in srgb, var(--c) 16%, transparent) 0 6deg, transparent 6deg 30deg);
+  -webkit-mask: radial-gradient(circle, transparent 22%, #000 30%, transparent 62%); mask: radial-gradient(circle, transparent 22%, #000 30%, transparent 62%); }
+.lv-cx .lv-cel-glow { animation: lv-rays 12s linear infinite, lv-fade-in .8s .2s ease forwards; }
+.lv-cx.rank .lv-cel-glow { width: 280px; height: 280px; margin-left: -140px; top: 0; }
+.lv-cel-top > .lv-ring, .lv-cel-top > b, .lv-cel-top > p, .lv-cel-top > span:not(.lv-cel-glow) { z-index: 1; }
+@keyframes lv-rays { to { transform: rotate(360deg); } }
+@keyframes lv-fade-in { to { opacity: 1; } }
+.lv-ring.cel { --sz: 138px; }
+.lv-cx .lv-ring.cel { animation: lv-pop .7s var(--ease-spring) both; }
+.lv-cx .lv-ring.cel .lv-ring-f { animation-duration: 1.4s; animation-delay: .25s; }
+.lv-cel-badge { display: inline-flex; align-items: center; gap: 5px; margin-top: 12px; padding: 4px 11px;
+  border-radius: var(--r-pill); font-size: 12.5px; font-weight: 700; color: var(--c);
+  background: color-mix(in srgb, var(--c) 15%, transparent); border: 1px solid color-mix(in srgb, var(--c) 40%, transparent); }
+.lv-cel-badge + .lv-cel-r { margin-top: 5px; }
+.lv-cx .lv-cel-r, .lv-cx .lv-cel-m, .lv-cx .lv-cel-range, .lv-cx .lv-cel-badge { animation: lv-rise .5s var(--ease-out) both; animation-delay: .55s; }
+@keyframes lv-rise { from { opacity: 0; transform: translateY(8px); } }
+
+.lv-cel-next { align-items: stretch; text-align: left; }
+.lv-cel-next > * { align-self: center; text-align: center; }
+.lv-cel-lab { font-size: 12.5px; color: var(--text3); }
+.lv-cel-pace { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--text2); }
+.lv-cel-acts { list-style: none; margin: 6px 0 0; padding: 0; align-self: stretch; text-align: left;
+  display: flex; flex-direction: column; gap: 4px; }
+.lv-cel-acts li { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 9px;
+  padding: 7px 10px; border-radius: var(--r-xs); background: var(--inset); font-size: 13.5px; color: var(--text); }
+.lv-cel-acts li > span:nth-child(2) { min-width: 0; overflow-wrap: anywhere; }
+.lv-cel-acts b { font-weight: 700; color: var(--warning-text); white-space: nowrap; }
+.lv-cx .lv-cel-next { margin-top: 0; animation: lv-rise .5s var(--ease-out) both; animation-delay: .8s; }
+.lv-cx .lv-cel { text-align: left; }
+.lv-cx.medal .lv-cel-m2 { flex-direction: column; text-align: center; border: 0; background: transparent; padding: 6px 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .lv-cx .lv-cel-glow { animation: none; opacity: .6; }
+}
+
+/* ---- yorug' tema ---- */
+[data-theme="light"] .lv-ring-n b { text-shadow: none; }
+[data-theme="light"] .lv-cel-badge { color: color-mix(in srgb, var(--c) 44%, #000); }
+[data-theme="light"] .lv-ring-f { stroke: color-mix(in srgb, var(--c) 70%, #000); filter: none; }
+[data-theme="light"] .lv-ranks i::after { background: color-mix(in srgb, var(--c) 70%, #000); }
+[data-theme="light"] .lv-cx-card { box-shadow: 0 30px 80px rgba(0,0,0,.35); }
+/* sariq kapsula ustida --warning-text 4,25:1 berdi (o'lchandi) — qoraytiriladi */
+[data-theme="light"] .lv-act-x,
+[data-theme="light"] .lv-cel-acts b { color: color-mix(in srgb, var(--warning-text) 78%, #000); }
+[data-theme="light"] .lv-chip b,
+[data-theme="light"] .lv-chip svg,
+[data-theme="light"] .lv-act.done .lv-act-x { color: color-mix(in srgb, var(--success-text) 80%, #000); }
+
+/* ---- tor ekran ---- */
+@media (max-width: 380px) {
+  .lv-ring { --sz: 116px; }
+  .lv-ring.cel { --sz: 120px; }
+  .lv-left b { font-size: 30px; }
+  .lv-todo { padding: 14px 11px 12px; }
+  .lv-act { gap: 9px; padding: 8px 10px; }
+  .lv-act-i { width: 30px; height: 30px; }
+  .lv-cx { padding-left: 10px; padding-right: 10px; }
+  .lv-cx-card { padding: 18px 13px 14px; }
+  .lv-cx-title { font-size: 23px; }
+  .lv-xpt li { grid-template-columns: auto 1fr; }
+  .lv-xpt li > span.num { grid-column: 1 / -1; justify-self: start; text-align: left; }
+}

@@ -7,7 +7,7 @@ Nima qiladi:
   • Har bir foydalanuvchi uchun data/<id>.json  (+ kunlik zaxira nusxalar data/backups/)
   • Profil: data/<id>.who.json (ism, email, provayder, sana) + data/<id>.avatar (surat) — /api/me, /api/me/avatar
   • WHOOP OAuth — tokenlar SERVERDA saqlanadi, brauzerga chiqmaydi; /api/whoop/data proksi
-  • AI (Nova) — Anthropic API ga proksi, kalit faqat serverda
+  • Yusa AI — Anthropic API ga proksi, kalit faqat serverda
   • Statik fayllarni (index.html, app.css, js/, css/) tarqatadi
 
 Env (start.sh):
@@ -15,8 +15,9 @@ Env (start.sh):
   MA_USERS           Ism:parol[:uid][:telegram_id],... — har kim o'z hisobi; telegram_id o'sha odamni
                      Telegram ichida ham shu uid'ga bog'laydi. Yozilgach MA_PASSCODE e'tiborsiz.
   MA_REGISTER        "0" bo'lsa kirish oynasidagi «Hisob ochish» yopiladi (default: ochiq — har kim
-                     o'ziga hisob ochadi, hisoblar data/users.json da, parollar xeshlangan)
+                     email + parol bilan o'ziga hisob ochadi, hisoblar data/users.json da, xeshlangan)
   MA_INVITE          taklif kodi: berilsa hisob ochishda shu kod so'raladi (bo'sh = kodsiz)
+  MA_MAX_USERS       hisoblarning umumiy soni (default: 200) — oshsa yangi hisob ochilmaydi
   MA_GOOGLE_INVITE   "0" bo'lsa Google bilan yangi profil ochishda taklif kodi so'ralmaydi
                      (default: so'raladi, MA_INVITE qo'yilgan va MA_ALLOWED_EMAILS bo'sh bo'lsa)
   GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET   Google bilan kirish; MA_ALLOWED_EMAILS berilsa faqat
@@ -42,16 +43,20 @@ import logging
 import os
 import re
 import secrets
+import shutil
+import tempfile
 import threading
 import time
+import zipfile
 import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
-from flask import Flask, request, jsonify, send_from_directory, redirect, Response
+from flask import Flask, request, jsonify, send_from_directory, redirect, Response, stream_with_context, send_file, after_this_request
 
+import vault   # AES-256-GCM: data/ dagi har bir fayl va arxiv ustunlari (kalit — data/.enckey)
 import db   # SQLite arxiv: kunlik faktlar, WHOOP yozuvlari, chatlar — hech qachon qirqilmaydi
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
@@ -92,8 +97,10 @@ def _parse_users(raw: str):
     return out
 USERS = _parse_users(os.environ.get("MA_USERS", ""))
 
-# O'zi ro'yxatdan o'tganlar: data/users.json — {"ism_kichik": {name, uid, salt, hash, iter, createdAt}}.
-# Parol hech qachon ochiq saqlanmaydi (PBKDF2-SHA256). uid tasodifiy — ismdan topib bo'lmaydi.
+# O'zi ro'yxatdan o'tganlar: data/users.json — {"email": {email, name, uid, salt, hash, iter, createdAt}}.
+# Parol hech qachon ochiq saqlanmaydi (PBKDF2-SHA256). uid tasodifiy — emaildan topib bo'lmaydi.
+# Kalit — kichik harfli email (2026-09-10 dan; undan oldin ochilgan hisoblarning kaliti ism edi,
+# ular ism bilan kiraveradi).
 REGISTER_ON = os.environ.get("MA_REGISTER", "1") != "0"
 INVITE = os.environ.get("MA_INVITE", "").strip()
 # Taklif kodi qo'yilgan bo'lsa Google eshigi ham shu kodni so'raydi — lekin faqat YANGI profil
@@ -102,40 +109,45 @@ INVITE = os.environ.get("MA_INVITE", "").strip()
 # (2026-09-09 tekshiruvida topildi). Eski holat kerak bo'lsa: MA_GOOGLE_INVITE=0.
 GOOGLE_INVITE = os.environ.get("MA_GOOGLE_INVITE", "1") != "0"
 USERS_FILE = DATA_DIR / "users.json"
-RESERVED_NAMES = {"me", "dev", "admin", "root", "system", "whoop", "nova", "google"}
 PW_ITER = 200_000
-NAME_MIN, NAME_MAX, PASS_MIN = 2, 40, 6
+# Parol eng kami 8 belgi: taklif kodi olib tashlangach eshik internetga ochiq, 6 kamlik qiladi.
+NAME_MAX, PASS_MIN, EMAIL_MAX = 40, 8, 190
+# Hisoblarning umumiy soni — bot ro'yxatdan o'tib serverni to'ldirib tashlamasin. Oshsa yangi
+# hisob ochilmaydi (kirish va Google davom etadi); MA_MAX_USERS bilan ko'tariladi.
+try:
+    MAX_USERS = max(1, int(os.environ.get("MA_MAX_USERS", "200")))
+except ValueError:
+    MAX_USERS = 200
 
 
 def _reg_load() -> dict:
     try:
-        d = json.loads(USERS_FILE.read_text(encoding="utf-8"))
+        d = json.loads(vault.read_text(USERS_FILE))
         return d if isinstance(d, dict) else {}
     except FileNotFoundError:
         return {}
+    except vault.VaultError:
+        raise   # kalit xatosi — fayl buzilmagan: uni «corrupt» deb chetga olib, bo'sh ro'yxat bilan ustidan yozmaymiz
     except Exception as e:  # noqa: BLE001
+        # Buzilgan faylni {} deb qaytarsak, keyingi yozuv uni butunlay
+        # almashtiradi va hamma hisob yo'qoladi. Shuning uchun nusxa olib
+        # qo'yamiz va yozishni to'xtatamiz.
         log.error("users.json o'qilmadi: %s", e)
+        try:
+            bad = USERS_FILE.with_name(f"users.corrupt-{datetime.now(TZ).strftime('%Y%m%d-%H%M%S')}.json")
+            USERS_FILE.replace(bad)
+            log.error("buzilgan users.json saqlandi: %s", bad.name)
+        except OSError:
+            pass
         return {}
 
 
 def _reg_save(d: dict):
-    _atomic_write(USERS_FILE, json.dumps(d, ensure_ascii=False, indent=1))
+    _atomic_write(USERS_FILE, vault.seal_text(json.dumps(d, ensure_ascii=False, indent=1)))
 
 
 def _pw_hash(pw: str, salt: str, it: int = PW_ITER) -> str:
     return hashlib.pbkdf2_hmac("sha256", pw.encode("utf-8"), bytes.fromhex(salt), it).hex()
-
-
-def _clean_name(raw) -> str:
-    """Ism: harf/raqam/bo'sh joy/'-_. — ortiqcha bo'sh joylar yig'iladi. Yaroqsiz bo'lsa ''."""
-    name = " ".join(str(raw or "").split())
-    if not (NAME_MIN <= len(name) <= NAME_MAX):
-        return ""
-    if any(not (c.isalnum() or c in " '’-_.") for c in name):
-        return ""
-    if not any(c.isalpha() for c in name):
-        return ""
-    return name
 
 
 def _clean_display(raw) -> str:
@@ -146,21 +158,73 @@ def _clean_display(raw) -> str:
     return "" if any(not (c.isalnum() or c in " '’ʼʻ‘-.") for c in name) else name
 
 
-def _name_taken(name: str) -> bool:
-    key = name.casefold()
-    if key in RESERVED_NAMES:
-        return True
-    for u in USERS:
-        if u["name"].casefold() == key or u["uid"].casefold() == key:
-            return True
-    return key in _reg_load()
+def _clean_email(raw) -> str:
+    """Email → kichik harfli tozalangan qiymat, yaroqsiz bo'lsa ''. Xat yuborilmaydi, shuning uchun
+    tekshiruv shakl darajasida: bitta @, ikkala tomonda ham belgi, domenda nuqta, bo'sh joysiz."""
+    e = " ".join(str(raw or "").split()).lower()
+    if not (5 <= len(e) <= EMAIL_MAX) or e.count("@") != 1 or " " in e:
+        return ""
+    local, _, dom = e.partition("@")
+    if not (1 <= len(local) <= 64) or not dom or "." not in dom:
+        return ""
+    if any(part == "" for part in dom.split(".")) or len(dom.rsplit(".", 1)[-1]) < 2:
+        return ""
+    if local.startswith(".") or local.endswith(".") or ".." in local:
+        return ""
+    ok = set("abcdefghijklmnopqrstuvwxyz0123456789.!#$%&'*+/=?^_`{|}~-")
+    if any(c not in ok for c in local) or any(c not in ok for c in dom.replace(".", "")):
+        return ""
+    return e
+
+
+def _name_from_email(email: str) -> str:
+    """Boshlang'ich ko'rsatiladigan ism: email'ning @ gacha qismi. Profilda o'zgartiriladi."""
+    local = email.split("@")[0][:NAME_MAX]
+    name = _clean_display(local) or _clean_display("".join(c if (c.isalnum() or c in " -.") else " " for c in local)) or local
+    return name[:1].upper() + name[1:]   # email kichik harfli — ism bosh harf bilan chiroyliroq
+
+
+def _uid_by_email(email: str):
+    """Shu email bilan ochilgan hisob: avval users.json (parol), keyin who.json (Google). Yo'q bo'lsa None."""
+    rec = _reg_load().get(email)
+    if isinstance(rec, dict) and rec.get("uid"):
+        return rec["uid"]
+    for f in DATA_DIR.glob("*.who.json"):
+        try:
+            d = json.loads(vault.read_text(f))
+        except Exception:  # noqa: BLE001 — buzilgan fayl kirishni to'smasin
+            continue
+        if isinstance(d, dict) and str(d.get("email") or "").strip().lower() == email:
+            return f.name[:-len(".who.json")]
+    return None
+
+
+def _reg_link_google(email: str):
+    """Google shu emailni tasdiqladi → parol bilan ochilgan o'sha hisob shu odamniki: uid qaytadi va
+    paroli o'chadi. Birov sizning emailingiz bilan sizdan oldin hisob ochib qo'ygan bo'lsa, Google
+    bilan kirganingizdan keyin u o'sha paroli bilan kira olmaydi."""
+    with _lock:
+        reg = _reg_load()
+        rec = reg.get(email)
+        if not isinstance(rec, dict) or not rec.get("uid"):
+            return None
+        had = bool(rec.get("hash") or rec.get("salt"))
+        rec.pop("hash", None)
+        rec.pop("salt", None)
+        if had:
+            rec["provider"] = "google"
+            rec["linkedAt"] = datetime.now(TZ).isoformat()
+            reg[email] = rec
+            _reg_save(reg)
+            log.info("Google bog'landi: %s (%s) — eski parol o'chirildi", email, rec["uid"])
+        return rec["uid"]
 
 
 def _reg_check(name: str, pw: str):
     """Ro'yxatdagi odam → uid yoki None. Vaqt jihatidan doimiy taqqoslash."""
     rec = _reg_load().get((name or "").casefold())
-    if not rec:
-        return None
+    if not rec or not rec.get("hash") or not rec.get("salt"):
+        return None   # Google'ga bog'langan hisobning paroli yo'q — bu eshik u uchun yopiq
     ok = hmac.compare_digest(_pw_hash(pw, rec["salt"], int(rec.get("iter") or PW_ITER)), rec["hash"])
     return rec["uid"] if ok else None
 
@@ -195,32 +259,51 @@ AI_MODEL = os.environ.get("AI_MODEL", "claude-opus-5")
 OPENAI_KEY = os.environ.get("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-5")
 OPENAI_BASE = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
-# gpt-5 oilasi "fikrlash" tokenlarini ham shu byudjetdan sarflaydi: maslahat ilovasi uchun past
-# daraja yetadi — tezroq, arzonroq, javob uchun ko'proq joy qoladi (minimal|low|medium|high).
-OPENAI_REASONING = os.environ.get("OPENAI_REASONING", "low").strip().lower()
+# gpt-5 oilasi "fikrlash" tokenlarini ham shu byudjetdan sarflaydi va ular vaqt yeydi.
+# "low" da bitta bo'lim tahliliga 1800 token ketardi, ulardan atigi ~250 tasi ekranga
+# chiqardi — qolgani ko'rinmas fikrlash edi, foydalanuvchi esa 30-60 soniya kutardi.
+# Bizning javoblarimiz qisqa ("bitta raqam + bitta gap"), shuning uchun "minimal" yetadi
+# (minimal|low|medium|high — kerak bo'lsa .env dagi OPENAI_REASONING bilan ko'tariladi).
+OPENAI_REASONING = os.environ.get("OPENAI_REASONING", "minimal").strip().lower()
 AI_MIN_TOKENS, AI_MAX_TOKENS = 800, 8000
 AI_PROVIDER = (os.environ.get("AI_PROVIDER") or ("openai" if OPENAI_KEY else "anthropic" if AI_KEY else "")).lower()
 if AI_PROVIDER == "openai" and not OPENAI_KEY:
     log.error("AI_PROVIDER=openai, lekin OPENAI_API_KEY bo'sh — AI o'chirilgan"); AI_PROVIDER = ""
 if AI_PROVIDER == "anthropic" and not AI_KEY:
     log.error("AI_PROVIDER=anthropic, lekin AI_API_KEY bo'sh — AI o'chirilgan"); AI_PROVIDER = ""
-BACKUP_KEEP = 30
-
 app = Flask(__name__, static_folder=None)
 _lock = threading.Lock()
+
+
+@contextlib.contextmanager
+def _file_lock(name: str):
+    """Jarayonlar orasidagi qulf. gunicorn -w 2 bilan ishlaydi, ya'ni
+    threading.Lock() ikkita ishchini bir-biridan himoya qilmaydi: ikkalasi
+    bir vaqtda «o'qi → eskirganmi tekshir → yoz» qilsa, biri ikkinchisining
+    yozuvini ko'rmasdan ustidan yozadi. flock buni to'xtatadi.
+    Xuddi shu usul .fails.json uchun allaqachon ishlatilgan."""
+    lf = DATA_DIR / f".lock.{name}"
+    fh = None
+    try:
+        fh = open(lf, "a+")
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            os.chmod(lf, 0o600)
+        except OSError:
+            pass
+        yield
+    except OSError as e:
+        log.warning("qulf ochilmadi (%s): %s — xotiradagi qulf bilan davom etamiz", name, e)
+        yield
+    finally:
+        if fh is not None:
+            try:
+                fcntl.flock(fh, fcntl.LOCK_UN)
+            except OSError:
+                pass
+            fh.close()
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 (DATA_DIR / "backups").mkdir(exist_ok=True)
-
-
-def _private(p: Path) -> Path:
-    """Faylni faqat ilova foydalanuvchisiga ochiq qoldiradi (0600). Serverdagi boshqa lokal
-    foydalanuvchi holat blobini, WHOOP tokenini yoki emailni o'qimasin — ilgari bu fayllar
-    umask bo'yicha 0644 bo'lardi (2026-09-09 tekshiruvida topildi)."""
-    try:
-        os.chmod(p, 0o600)
-    except OSError:
-        pass
-    return p
 
 
 _TMP_TAG = f"{os.getpid()}"
@@ -229,13 +312,9 @@ _TMP_TAG = f"{os.getpid()}"
 def _atomic_write(p: Path, data, mode: int = 0o600) -> None:
     """Faylni butunligicha almashtiradi. data — str yoki bytes.
 
-    Ilgari har bir yozuv joyi vaqtinchalik faylga QAT'IY nom berardi (`me.tmp`).
-    Ikkita gunicorn ishchisi bitta foydalanuvchini bir vaqtda saqlaganda ikkalasi
-    ayni shu faylga yozardi va birinchisining rename'i ikkinchisining yarim
-    yozilgan faylini asosiy fayl qilib qo'yardi — ya'ni odamning butun tarixi
-    buzilardi. Endi nom noyob (jarayon + tasodifiy), yozilgani diskka majburlanadi
-    (fsync), so'ng bitta atomar rename.
-    """
+    Vaqtinchalik nom noyob (jarayon + tasodifiy), yozilgani fsync bilan diskka
+    majburlanadi, so'ng bitta atomar rename. Ilgari nom qat'iy edi, shuning uchun
+    ikkita ishchi bir-birining yarim yozilgan faylini nashr qilib yuborardi."""
     tmp = p.with_name(f"{p.name}.{_TMP_TAG}.{secrets.token_hex(5)}.tmp")
     binary = isinstance(data, (bytes, bytearray))
     try:
@@ -248,6 +327,17 @@ def _atomic_write(p: Path, data, mode: int = 0o600) -> None:
         except OSError:
             pass
         os.replace(tmp, p)
+        # Papkaning o'zini ham diskka tushiramiz: fsync(fayl) MAZMUNNI kafolatlaydi,
+        # NOMNI esa yo'q. Papka yozuvi keshda qolsa, elektr uzilganda fayl eski nomi
+        # bilan qolishi — ya'ni almashtirish umuman bo'lmagani — mumkin.
+        try:
+            dfd = os.open(str(p.parent), os.O_RDONLY)
+            try:
+                os.fsync(dfd)
+            finally:
+                os.close(dfd)
+        except OSError:
+            pass
     except BaseException:
         try:
             tmp.unlink(missing_ok=True)
@@ -256,39 +346,15 @@ def _atomic_write(p: Path, data, mode: int = 0o600) -> None:
         raise
 
 
-@contextlib.contextmanager
-def _file_lock(name: str):
-    """Ikkita gunicorn ishchisini ketma-ketlashtiradi.
-
-    threading.Lock bu yerda yetmaydi: u faqat bitta jarayon ichida ishlaydi, ishchilar
-    esa alohida jarayon. Aynan shu sabab .fails.json allaqachon flock ga o'tgan edi —
-    foydalanuvchi ma'lumoti va users.json esa o'tmay qolgan. Qulf olinmasa ish
-    to'xtamaydi: ogohlantirish yozilib, avvalgidek davom etadi."""
-    safe = "".join(c for c in str(name) if c.isalnum() or c in "-_.")[:60] or "x"
-    fd = None
+def _private(p: Path) -> Path:
+    """Faylni faqat ilova foydalanuvchisiga ochiq qoldiradi (0600). Serverdagi boshqa lokal
+    foydalanuvchi holat blobini, WHOOP tokenini yoki emailni o'qimasin — ilgari bu fayllar
+    umask bo'yicha 0644 bo'lardi (2026-09-09 tekshiruvida topildi)."""
     try:
-        fd = os.open(DATA_DIR / f".lock.{safe}", os.O_RDWR | os.O_CREAT, 0o600)
-        fcntl.flock(fd, fcntl.LOCK_EX)
-    except OSError as e:  # noqa: BLE001
-        log.warning("qulf olinmadi (%s): %s — ketma-ketlashtirilmasdan davom etamiz", safe, e)
-        if fd is not None:
-            try:
-                os.close(fd)
-            except OSError:
-                pass
-            fd = None
-    try:
-        yield
-    finally:
-        if fd is not None:
-            try:
-                fcntl.flock(fd, fcntl.LOCK_UN)
-            except OSError:
-                pass
-            try:
-                os.close(fd)
-            except OSError:
-                pass
+        os.chmod(p, 0o600)
+    except OSError:
+        pass
+    return p
 
 
 def _lock_data_dir():
@@ -308,10 +374,19 @@ def _lock_data_dir():
 
 
 _lock_data_dir()
-try:
-    db.init(DATA_DIR)
-except Exception as e:  # noqa: BLE001 — arxivsiz ham ilova ishlayveradi
-    log.exception("Arxiv (dash.db) ochilmadi: %s", e)
+# Shifrlash. Kalit yo'q/boshqa bo'lsa VaultError — ilova ATAYLAB ishga tushmaydi: kalitsiz ishlasa
+# har bir fayl «buzilgan» ko'rinib, mijozning bo'sh holati bilan ustidan yozilardi.
+# Qulf ostida: ikkinchi gunicorn ishchisi birinchisi ko'chirib bo'lguncha kutadi.
+with _file_lock("vault"):
+    vault.init(DATA_DIR)
+    vault.seal_tree(DATA_DIR, log=log)          # eski ochiq fayllar joyida shifrlanadi (bir marta)
+    try:
+        db.init(DATA_DIR)
+        db.seal_all()                           # arxiv ustunlari (bir marta; keyin no-op)
+    except vault.VaultError:
+        raise
+    except Exception as e:  # noqa: BLE001 — arxivsiz ham ilova ishlayveradi
+        log.exception("Arxiv (dash.db) ochilmadi: %s", e)
 
 
 def _archive(fn, *a, what="arxiv"):
@@ -457,8 +532,8 @@ def too_many(what: str, limit: int, window: int = 900, ip: str = None) -> bool:
 
 @app.post("/api/login")
 def login():
-    """Ism + parol (MA_USERS yoki data/users.json) yoki ismsiz — egasining umumiy paroli (MA_PASSCODE).
-    Telegram ichida kerak emas."""
+    """Email + parol (data/users.json), eski hisoblar uchun ism + parol (MA_USERS ham), yoki
+    ikkalasi ham bo'sh — egasining umumiy paroli (MA_PASSCODE). Telegram ichida kerak emas."""
     if not (USERS or PASSCODE or REGISTER_ON or USERS_FILE.exists()):
         return jsonify({"error": "no_passcode"}), 501
     # 0.4 s kechikishning o'zi kamlik qildi: so'rovlarni yonma-yon yuborib bo'lardi
@@ -467,9 +542,12 @@ def login():
     body = request.get_json(silent=True) or {}
     time.sleep(0.4)  # parolni terib topishga qarshi sekinlashtirish
     pw = str(body.get("pass") or "")[:200]
-    name = " ".join(str(body.get("user") or "").split())
+    email = _clean_email(body.get("email") or body.get("user"))
+    name = "" if email else " ".join(str(body.get("user") or "").split())
     uid = None
-    if name:
+    if email:
+        uid = _reg_check(email, pw)
+    elif name:   # 2026-09-10 dan oldin ochilgan hisoblar: kalit ism edi
         for u in USERS:
             if u["name"].casefold() == name.casefold() and hmac.compare_digest(pw, u["pass"]):
                 uid = u["uid"]
@@ -480,7 +558,7 @@ def login():
         uid = "me"   # eski bir kishilik rejim — MA_USERS yozilgach bu eshik yopiladi
     if not uid:
         note_fail("login")
-        log.warning("Noto'g'ri parol (%s): %s", name or "-", client_ip())
+        log.warning("Noto'g'ri parol (%s): %s", email or name or "-", client_ip())
         return jsonify({"error": "bad_pass"}), 401
     who_touch(uid, lastLogin=datetime.now(TZ).isoformat())
     _archive(db.touch_user, uid, display_name(uid), None, "password", what="arxiv user")
@@ -489,7 +567,8 @@ def login():
 
 @app.post("/api/register")
 def register():
-    """Yangi hisob: ism + parol (+ taklif kodi, MA_INVITE bo'lsa). Darhol kiritib qo'yadi."""
+    """Yangi hisob: email + parol (+ taklif kodi, MA_INVITE qo'yilgan bo'lsa). Darhol kiritib qo'yadi.
+    Email'ga xat yuborilmaydi — u kirish nomi; tasdiqlangan email faqat Google eshigidan keladi."""
     if not REGISTER_ON:
         return jsonify({"error": "closed"}), 403
     # Cheklov taklif kodi tekshiruvidan OLDIN: ilgari teskari edi va kodni cheksiz terib
@@ -501,30 +580,34 @@ def register():
     if INVITE and not hmac.compare_digest(str(body.get("invite") or "").strip(), INVITE):
         note_fail("invite")
         return jsonify({"error": "bad_invite"}), 403
-    name = _clean_name(body.get("user"))
-    if not name:
-        return jsonify({"error": "bad_name"}), 400
+    email = _clean_email(body.get("email") or body.get("user"))
+    if not email:
+        return jsonify({"error": "bad_email"}), 400
     pw, pw2 = str(body.get("pass") or ""), str(body.get("pass2") or "")
     if len(pw) < PASS_MIN or len(pw) > 200:
         return jsonify({"error": "weak_pass"}), 400
     if "pass2" in body and pw != pw2:
         return jsonify({"error": "mismatch"}), 400
+    name = _name_from_email(email)
     with _lock:
-        if _name_taken(name):
-            return jsonify({"error": "name_taken"}), 409
+        if _uid_by_email(email):
+            return jsonify({"error": "email_taken"}), 409
         reg = _reg_load()
+        if len(reg) >= MAX_USERS:
+            log.error("Hisoblar chegarasi to'ldi (%d) — yangi hisob ochilmadi", MAX_USERS)
+            return jsonify({"error": "full"}), 403
         uid = "u_" + secrets.token_hex(6)
         while uid in {u["uid"] for u in USERS} or any(r.get("uid") == uid for r in reg.values()):
             uid = "u_" + secrets.token_hex(6)
         salt, ts = secrets.token_hex(16), datetime.now(TZ).isoformat()
-        reg[name.casefold()] = {"name": name, "uid": uid, "salt": salt, "hash": _pw_hash(pw, salt),
-                                "iter": PW_ITER, "createdAt": ts}
+        reg[email] = {"email": email, "name": name, "uid": uid, "salt": salt, "hash": _pw_hash(pw, salt),
+                      "iter": PW_ITER, "createdAt": ts}
         _reg_save(reg)
-        who_touch(uid, name=name, provider="password", createdAt=ts, lastLogin=ts)
+        who_touch(uid, name=name, email=email, provider="password", createdAt=ts, lastLogin=ts)
     note_fail("reg")   # muvaffaqiyatli hisob ham sanaladi: bir manzildan soatiga 5 ta
-    log.info("Yangi hisob: %s (%s)", name, uid)
-    _archive(db.touch_user, uid, name, None, "register", what="arxiv user")
-    return _set_session(jsonify({"ok": True, "uid": uid, "name": name}), uid)
+    log.info("Yangi hisob: %s (%s)", email, uid)
+    _archive(db.touch_user, uid, name, email, "register", what="arxiv user")
+    return _set_session(jsonify({"ok": True, "uid": uid, "name": name, "email": email}), uid)
 
 
 @app.get("/api/me")
@@ -534,6 +617,40 @@ def me():
     if err:
         return err
     return jsonify(me_json(uid))
+
+
+@app.post("/api/me/password")
+def me_password():
+    """Parolni o'zgartirish: eski parol + yangi parol. Faqat email/parol bilan ochilgan hisob uchun —
+    Google'ga bog'langanda va egasining hisobida users.json da xesh yo'q. Xat yuborilmagani uchun
+    «parolni unutdim» yo'q: unutgan odam Google bilan kiradi yoki egasi set-register.sh bilan yangilaydi."""
+    uid, err = current_user()
+    if err:
+        return err
+    if too_many("pw", 8, 900):
+        return jsonify({"error": "too_many"}), 429
+    body = request.get_json(silent=True) or {}
+    time.sleep(0.4)
+    old, new = str(body.get("old") or "")[:200], str(body.get("new") or "")
+    with _lock:
+        reg = _reg_load()
+        key = next((k for k, r in reg.items() if isinstance(r, dict) and r.get("uid") == uid), None)
+        rec = reg.get(key) if key else None
+        if not rec or not rec.get("hash") or not rec.get("salt"):
+            return jsonify({"error": "not_password"}), 400
+        if not hmac.compare_digest(_pw_hash(old, rec["salt"], int(rec.get("iter") or PW_ITER)), rec["hash"]):
+            note_fail("pw")
+            log.warning("Parol o'zgartirish: eski parol noto'g'ri (%s)", uid)
+            return jsonify({"error": "bad_pass"}), 401
+        if len(new) < PASS_MIN or len(new) > 200:
+            return jsonify({"error": "weak_pass"}), 400
+        salt = secrets.token_hex(16)
+        rec.update(salt=salt, hash=_pw_hash(new, salt), iter=PW_ITER,
+                   passwordAt=datetime.now(TZ).isoformat())
+        reg[key] = rec
+        _reg_save(reg)
+    log.info("Parol o'zgardi: %s", uid)
+    return jsonify({"ok": True})
 
 
 @app.post("/api/me")
@@ -558,7 +675,7 @@ def me_avatar():
     f = avatar_file(uid)
     if not f.is_file():
         return jsonify({"error": "not_found"}), 404
-    raw = f.read_bytes()
+    raw = vault.read_bytes(f)
     etag = f'"{int(f.stat().st_mtime)}"'
     if etag in request.headers.get("If-None-Match", ""):
         r = Response(status=304)
@@ -633,7 +750,7 @@ def me_adopt():
         if not old.is_file():
             return jsonify({"error": "nothing"}), 404
         try:
-            data = json.loads(old.read_text(encoding="utf-8"))
+            data = json.loads(vault.read_text(old))
         except Exception as e:  # noqa: BLE001
             log.error("me.json o'qilmadi: %s", e)
             return jsonify({"error": "unreadable"}), 500
@@ -728,6 +845,11 @@ def google_callback():
         return _page("Bu Google hisobiga ruxsat berilmagan", f"<b>{html.escape(email or '?')}</b> ruxsat ro'yxatida yo'q — "
                      "egasi qo'shishi kerak.", 403)
     uid = "g_" + hashlib.sha256(str(info["sub"]).encode()).hexdigest()[:20]
+    # Shu email parol bilan ochilgan bo'lsa — o'sha hisob shu odamniki: ma'lumotlari joyida qoladi,
+    # eski paroli esa o'chadi (birov emailingiz bilan oldindan hisob ochib qo'ygan bo'lishi mumkin).
+    linked = _reg_link_google(email)
+    if linked and linked != uid:
+        uid = linked
     is_new = not who_file(uid).exists() and not user_file(uid).exists()
     if is_new and GOOGLE_INVITE and INVITE and not ALLOWED_EMAILS and flag != "1":
         log.warning("Google: yangi profil kodsiz rad etildi (%s)", email)
@@ -805,7 +927,19 @@ def _secret() -> bytes:
                 os.chmod(f, 0o600)
             except OSError:
                 pass
-        _SECRET_CACHE = f.read_text(encoding="utf-8").strip().encode()
+        raw = f.read_text(encoding="utf-8").strip()
+        # Qirqilgan yoki bo'sh fayl KALIT EMAS. Uni qabul qilsak, imzo qisqa
+        # kalit bilan tekshiriladi va begona odam istalgan uid uchun cookie
+        # yasab, o'sha odamning ma'lumotini yozib yuborishi mumkin edi.
+        if len(raw) < 32:
+            log.error("data/.secret buzilgan (%d belgi) — yangisi yozildi, sessiyalar bekor bo'ladi", len(raw))
+            raw = secrets.token_hex(32)
+            f.write_text(raw, encoding="utf-8")
+            try:
+                os.chmod(f, 0o600)
+            except OSError:
+                pass
+        _SECRET_CACHE = raw.encode()
     except OSError as e:
         # fayl yozib bo'lmadi — vaqtinchalik tasodifiy kalit: qayta ishga tushganda sessiyalar
         # bekor bo'ladi, lekin hech kim uni taxmin qila olmaydi
@@ -835,18 +969,19 @@ def display_name(uid: str) -> str:
 def who_load(uid: str) -> dict:
     """data/<uid>.who.json → dict; yo'q yoki buzilgan bo'lsa {}."""
     try:
-        d = json.loads(who_file(uid).read_text(encoding="utf-8"))
+        d = json.loads(vault.read_text(who_file(uid)))
         return d if isinstance(d, dict) else {}
     except FileNotFoundError:
         return {}
+    except vault.VaultError:
+        raise   # {} qaytarsak who_touch email/provayderni o'chirib ustidan yozardi
     except Exception as e:  # noqa: BLE001
         log.warning("%s o'qilmadi: %s", who_file(uid).name, e)
         return {}
 
 
 def who_save(uid: str, who: dict):
-    f = who_file(uid)
-    _atomic_write(f, json.dumps(who, ensure_ascii=False))   # ichida email bor
+    _atomic_write(who_file(uid), vault.seal_text(json.dumps(who, ensure_ascii=False)))   # ichida email bor
 
 
 def who_touch(uid: str, **fields):
@@ -914,7 +1049,7 @@ def _avatar_write(uid: str, raw: bytes) -> int:
     """Atomar yozadi (tmp + replace); mtime (soniya) = versiya, oldingisidan albatta katta (ETag / ?v= uchun)."""
     f = avatar_file(uid)
     prev = int(f.stat().st_mtime) if f.is_file() else 0
-    _atomic_write(f, raw)
+    _atomic_write(f, vault.seal(raw))
     if int(f.stat().st_mtime) <= prev:
         os.utime(f, (prev + 1, prev + 1))
     return int(f.stat().st_mtime)
@@ -945,37 +1080,35 @@ def google_picture_fetch(uid: str, url: str) -> bool:
 
 # ═══════════════════════ Ma'lumot ═══════════════════════
 
-def user_file(uid: str) -> Path:
+def _safe_uid(uid: str) -> str:
+    """Fayl nomiga yaraydigan uid. Ikki xil uid bitta faylga tushmasligi uchun
+    qirqilganda oxiriga xesh qo'shiladi."""
     safe = "".join(c for c in uid if c.isalnum() or c in "-_")[:40] or "user"
-    return DATA_DIR / f"{safe}.json"
+    if safe != uid:
+        safe = safe[:31] + "-" + hashlib.sha256(uid.encode()).hexdigest()[:8]
+    return safe
 
 
-# Holatdagi HAMMA yozuv turi. Ilgari ro'yxat qisqa edi (logs/habits/tasks/goals/notes va
-# to'rtta ichki joy) — ya'ni ma'lumoti asosan namoz, sog'liq yoki sanoqlardan iborat odam
-# uchun "bo'sh nusxa ustidan yozma" himoyasi UMUMAN ishlamasdi: uning bor tarixi bo'sh
-# holat bilan o'chib ketishi mumkin edi.
-_TOP_STORES = ("logs", "habits", "tasks", "goals", "notes", "counts", "gratitude",
-               "prayers", "dhikr", "fasting", "health", "learn", "reviews")
-_SUB_STORES = (("finance", "tx"), ("finance", "accounts"), ("finance", "subs"), ("finance", "wishlist"),
-               ("food", "logs"), ("nova", "threads"), ("caffeine", "logs"), ("stack", "items"),
-               ("gym", "logs"), ("gym", "days"), ("gym", "exercises"),
-               ("whoop", "days"), ("whoop", "workouts"), ("ai", "log"))
+def user_file(uid: str) -> Path:
+    return DATA_DIR / f"{_safe_uid(uid)}.json"
 
 
 def _has_content(d) -> bool:
     """Ichida odamning yozuvlari bormi. Bo'sh nusxa to'liq nusxa ustidan yozilmasligi shunga qarab hal bo'ladi."""
     if not isinstance(d, dict):
         return False
-    for key in _TOP_STORES:
+    # Ro'yxat: faqat odat/vazifa emas. Namoz, zikr, ro'za, sog'liq va kitob
+    # yozuvlari ham odamning mehnati — ularsiz blob «bo'sh» deb hisoblanib,
+    # yillar davomida yig'ilgan namoz qaydi jimgina yozib ketilardi.
+    for key in ("logs", "habits", "tasks", "goals", "notes", "prayers", "dhikr",
+                "fasting", "health", "counts", "gratitude", "media", "mediaLogs", "weekly"):
         if d.get(key):
             return True
-    for key, sub in _SUB_STORES:
+    for key, sub in (("finance", "tx"), ("food", "logs"), ("yusa", "threads"),
+                     ("caffeine", "logs"), ("whoop", "days")):
         box = d.get(key)
         if isinstance(box, dict) and box.get(sub):
             return True
-    prof = d.get("profile")
-    if isinstance(prof, dict) and (prof.get("name") or prof.get("weightKg") or prof.get("heightCm")):
-        return True
     return False
 
 
@@ -989,26 +1122,47 @@ def _claimable(uid: str) -> bool:
     if not f.is_file():
         return True
     try:
-        return not _has_content(json.loads(f.read_text(encoding="utf-8")))
+        return not _has_content(json.loads(vault.read_text(f)))
     except Exception:  # noqa: BLE001
         return False
+
+
+def _rename_nova(d):
+    """Murabbiyning nomi «Nova» edi — 2026-09-10 dan hamma joyda «Yusa». Eski
+    nusxalarda suhbatlar hali `nova` kalitida yotibdi; o'qiganda ko'chirib olamiz,
+    keyingi saqlashda fayl ham yangi nom bilan yoziladi."""
+    if isinstance(d, dict) and "nova" in d:
+        old = d.pop("nova")
+        if not d.get("yusa"):
+            d["yusa"] = old
+    return d
 
 
 def load_data(uid: str) -> dict:
     f = user_file(uid)
     if not f.exists():
         # eski bitta-foydalanuvchi data.json bo'lsa — ko'chirib olamiz
+        # FAQAT egasiga. Ilgari shart yo'q edi: kimning fayli hali yaratilmagan
+        # bo'lsa, birinchi so'ragan odam eski data.json ni — ya'ni egasining butun
+        # hayot ma'lumotini — o'z hisobiga olib ketardi. Hisob ochish ochiq
+        # turgani uchun bu begona odam ham bo'lishi mumkin edi.
+        # Hozir serverda data.json yo'q, lekin zaxiradan tiklashda qaytib keladi.
         legacy = DATA_DIR / "data.json"
-        if legacy.exists() and not any(DATA_DIR.glob("*.json.migrated")):
+        if uid == "me" and legacy.exists() and not any(DATA_DIR.glob("*.json.migrated")):
             try:
-                d = json.loads(legacy.read_text(encoding="utf-8"))
+                d = json.loads(vault.read_text(legacy))
                 legacy.rename(legacy.with_suffix(".json.migrated"))
-                return d
+                return _rename_nova(d)
             except Exception as e:  # noqa: BLE001
                 log.error("legacy data.json o'qilmadi: %s", e)
         return {}
     try:
-        return json.loads(f.read_text(encoding="utf-8"))
+        return _rename_nova(json.loads(vault.read_text(f)))
+    except vault.VaultError as e:
+        # Kalit mos emas yoki shifr buzilgan. Faylni «corrupt» deb chetga olib {} qaytarsak,
+        # mijoz o'z holatini yuborib ustidan yozardi. Shuning uchun xato — so'rov 500 bilan tugaydi.
+        log.error("%s ochilmadi (shifr): %s", f.name, e)
+        raise
     except Exception as e:  # noqa: BLE001
         # buzilgan faylni ustidan yozmaymiz — nusxasini saqlab bo'sh qaytaramiz
         bad = f.with_name(f"{f.stem}.corrupt.{int(time.time())}.json")
@@ -1020,21 +1174,28 @@ def load_data(uid: str) -> dict:
         return {}
 
 
+def _write_atomic(f: Path, text):
+    """_atomic_write ning eski nomi — bitta amalga oshirish qolishi uchun shunga yo'naltiriladi.
+
+    Ikkitasi yonma-yon turganda ular ajralib ketadi: biri noyob vaqtinchalik nom
+    ishlatardi (ikki ishchi bir-birining yarim faylini nashr qilmasin), ikkinchisi
+    papkani fsync qilardi (nom ham diskka tushsin). Endi ikkalasi ham bir joyda.
+    """
+    _atomic_write(f, text)
+
+
 def save_data(uid: str, d: dict):
     f = user_file(uid)
-    body = json.dumps(d, ensure_ascii=False, separators=(",", ":"))
-    _atomic_write(f, body)
-    # Kunlik zaxira. Bu ham atomar bo'lishi shart: ilgari `if not b.exists()` ostida
-    # to'g'ridan-to'g'ri yozilardi, ya'ni yozuv yarmida uzilish bo'lsa o'sha kunning
-    # YAGONA tiklash nusxasi qirqilgan holda qolardi — va fayl mavjud bo'lgani uchun
-    # boshqa hech qachon qayta yozilmasdi.
+    _write_atomic(f, vault.seal_text(json.dumps(d, ensure_ascii=False, separators=(",", ":"))))
+    # Kunlik zaxira. Siyraklashtirish avlodlar bo'yicha (db.prune_generational):
+    # 14 kun har kuni · 8 hafta haftasiga · 24 oy oyiga · keyin yiliga bitta, abadiy.
+    # Ilgari «oxirgi 30 tasi» edi — ya'ni bir oydan eski holatga qaytib bo'lmasdi.
     today = datetime.now(TZ).strftime("%Y-%m-%d")
     b = DATA_DIR / "backups" / f"{f.stem}-{today}.json"
     if not b.exists():
-        _atomic_write(b, body)
-        olds = sorted((DATA_DIR / "backups").glob(f"{f.stem}-*.json"))
-        for old in olds[:-BACKUP_KEEP]:
-            old.unlink(missing_ok=True)
+        _write_atomic(b, vault.seal_text(json.dumps(d, ensure_ascii=False)))
+        _archive(db.prune_generational, list((DATA_DIR / "backups").glob(f"{f.stem}-*.json")),
+                 what="zaxira siyraklashtirish")
 
 
 def whoop_file(uid: str) -> Path:
@@ -1044,9 +1205,9 @@ def whoop_file(uid: str) -> Path:
 def whoop_save(uid: str, tok: dict):
     """WHOOP tokenlari — faqat serverda va faqat ilova o'qiy oladigan qilib (0600).
 
-    Ilgari fayl joyida qayta yozilardi: yozuv yarmida uzilish bo'lsa token butunlay
-    o'qib bo'lmas holga kelardi va WHOOP uzilib qolardi (qayta ulash kerak bo'lardi)."""
-    _atomic_write(whoop_file(uid), json.dumps(tok))
+    Ilgari fayl joyida qayta yozilardi: yozuv yarmida uzilish bo'lsa token
+    o'qib bo'lmas holga kelardi va WHOOP butunlay uzilib qolardi."""
+    _atomic_write(whoop_file(uid), vault.seal_text(json.dumps(tok)))
 
 
 def whoop_tokens(uid: str):
@@ -1054,7 +1215,9 @@ def whoop_tokens(uid: str):
     if not f.exists():
         return None
     try:
-        return json.loads(f.read_text(encoding="utf-8"))
+        return json.loads(vault.read_text(f))
+    except vault.VaultError:
+        raise   # None — «ulanmagan» degani; qayta ulash tokenni boshqa kalit bilan ustidan yozardi
     except Exception:  # noqa: BLE001
         return None
 
@@ -1077,6 +1240,61 @@ def get_data():
         return jsonify(d)
 
 
+PROFILE_CORE = ("heightCm", "weightKg", "birthYear", "age")
+LOSS_MIN, LOSS_SHARE = 20, 0.15     # shuncha yozuv birdan yo'qolsa — oldingi holat abadiy qotiriladi
+
+
+def _empty(v) -> bool:
+    return v is None or v == "" or v == [] or v == {}
+
+
+def _protect(stored: dict, incoming: dict) -> list:
+    """Ilova qanday o'zgarmasin, ma'lumot yo'qolmasin — server tomondagi oxirgi to'siq.
+
+    Mijoz butun holatni yuboradi va ilgari u ko'r-ko'rona qabul qilinardi. Ilovadagi bitta
+    xato (yoki keshda qolgan eski versiya) shu yo'l bilan hisobdagi narsani o'chirib yuborardi.
+    Bu yerda faqat HECH QACHON ataylab o'chirilmaydigan narsalar tiklanadi:
+      · yuqori darajadagi bo'lim (masalan yangi versiyadagi bo'lim — eski ilova uni bilmaydi
+        va yubormaydi);
+      · settings / profile ichidagi kalit (kalitning o'zi yo'qolishi — doim xato);
+      · settings.onboarded — bir marta o'tilgan tanishuv;
+      · profilning asosiy raqamlari HAMMASI birdan bo'sh kelsa (yangi qurilma xatosi belgisi;
+        bitta maydonni tozalash esa odamning o'z ishi — unga tegilmaydi).
+    Odat, vazifa, kunlik belgi kabi odam o'zi o'chiradigan narsalarga bu yerda tegilmaydi —
+    ular uchun post_data katta yo'qotishdan oldingi holatni abadiy nusxa qilib qo'yadi.
+    Qaytaradi: nima tiklangani (log uchun)."""
+    fixed = []
+    if not isinstance(stored, dict) or not stored:
+        return fixed
+    for k, v in stored.items():
+        if k not in incoming and not _empty(v):
+            incoming[k] = v
+            fixed.append(k)
+    for sec in ("settings", "profile"):
+        st, inc = stored.get(sec), incoming.get(sec)
+        if not isinstance(st, dict):
+            continue
+        if not isinstance(inc, dict):
+            incoming[sec] = st
+            fixed.append(sec)
+            continue
+        for k, v in st.items():
+            if k not in inc:
+                inc[k] = v
+                fixed.append(f"{sec}.{k}")
+    st_s, in_s = stored.get("settings") or {}, incoming.get("settings") or {}
+    if isinstance(st_s, dict) and isinstance(in_s, dict) and st_s.get("onboarded") is True and in_s.get("onboarded") is not True:
+        in_s["onboarded"] = True
+        fixed.append("settings.onboarded")
+    st_p, in_p = stored.get("profile") or {}, incoming.get("profile") or {}
+    if isinstance(st_p, dict) and isinstance(in_p, dict)             and all(_empty(in_p.get(k)) for k in PROFILE_CORE) and any(not _empty(st_p.get(k)) for k in PROFILE_CORE):
+        for k in PROFILE_CORE + ("name", "sex", "activity", "goal"):
+            if not _empty(st_p.get(k)) and (k in PROFILE_CORE or _empty(in_p.get(k))):
+                in_p[k] = st_p[k]
+        fixed.append("profile.core")
+    return fixed
+
+
 @app.post("/api/data")
 def post_data():
     """To'liq holatni saqlaydi (frontend butun state yuboradi). Oxirgi yozuv g'olib."""
@@ -1088,10 +1306,10 @@ def post_data():
         return jsonify({"error": "bad_payload"}), 400
     if request.content_length and request.content_length > 25 * 1024 * 1024:
         return jsonify({"error": "too_large"}), 413
-    # _lock faqat shu jarayon ichidagi oqimlarni ushlaydi; ikkita gunicorn ishchisi
-    # bir-birini ko'rmaydi. O'qi-o'zgartir-yoz butunligicha fayl qulfi ostida bo'lishi kerak,
-    # aks holda ikkita qurilmadan bir vaqtda kelgan saqlash bir-birini yo'q qiladi.
-    with _lock, _file_lock("data." + uid):
+    _rename_nova(incoming)          # keshdan ishlayotgan eski mijoz hali `nova` yuborishi mumkin
+    # Ikki qulf: _lock bitta jarayon ichidagi oqimlar uchun, _file_lock esa
+    # gunicorn ishchilari orasida. Ikkalasi ham kerak.
+    with _lock, _file_lock("data-" + _safe_uid(uid)):
         stored = load_data(uid)
         s_up = int((stored.get("meta") or {}).get("updatedAt") or 0)
         i_up = int((incoming.get("meta") or {}).get("updatedAt") or 0)
@@ -1104,6 +1322,21 @@ def post_data():
         if _has_content(stored) and not _has_content(incoming) and request.args.get("replace") != "1":
             log.warning("bo'sh holat rad etildi (%s) — serverdagi nusxa saqlanib qoldi", uid)
             return jsonify({"ok": False, "error": "empty_overwrite", "updated": s_up, "data": stored}), 409
+        replace = request.args.get("replace") == "1"
+        if not replace:
+            fixed = _protect(stored, incoming)
+            if fixed:
+                log.warning("saqlashda yo'qolayotgan ma'lumot tiklandi (%s): %s", uid, ", ".join(fixed[:12]))
+        if _has_content(stored):
+            before, after = db.summarize(stored)["records"], db.summarize(incoming)["records"]
+            lost = before - after
+            # Import / tozalash (replace) yoki birdan ko'p yozuv yo'qolishi — oldingi holat ABADIY
+            # nusxa bo'lib qoladi: compact() uni o'chirmaydi, ustiga hech narsa yozilmaydi.
+            if replace or (lost >= LOSS_MIN and lost >= before * LOSS_SHARE):
+                note = "replace" if replace else f"loss:{lost}"
+                _archive(db.record_state_version, uid, stored, None, True, note, what="oldingi holatni qotirish")
+                if not replace:
+                    log.warning("katta yo'qotish (%s): %d → %d yozuv — oldingi holat qotirildi", uid, before, after)
         incoming.setdefault("meta", {})["serverUpdated"] = datetime.now(TZ).isoformat()
         save_data(uid, incoming)
     # arxiv: kunlik faktlar + blob versiyasi (xato bo'lsa saqlash baribir muvaffaqiyatli)
@@ -1115,9 +1348,169 @@ def post_data():
 
 @app.get("/api/health")
 def health():
-    return jsonify({"ok": True, "time": datetime.now(TZ).isoformat(), "dev": DEV,
-                    "whoop": bool(WHOOP_ID and WHOOP_SECRET), "ai": bool(AI_PROVIDER), "aiProvider": AI_PROVIDER or None,
-                    "telegram": bool(BOT_TOKEN), "users": len(USERS)})
+    """Ochiq holat. Ma'lumot bo'limi (disk, hajm, hisoblar soni) faqat kirgan odamga
+    yoki serverning o'zidan (deploy skriptlari) ko'rinadi — ochiq internetga emas."""
+    out = {"ok": True, "time": datetime.now(TZ).isoformat(), "dev": DEV,
+           "whoop": bool(WHOOP_ID and WHOOP_SECRET), "ai": bool(AI_PROVIDER), "aiProvider": AI_PROVIDER or None,
+           # qaysi model va qanday fikrlash darajasi ishlayotgani — .env ni ochmasdan tekshirish uchun
+           "aiModel": (OPENAI_MODEL if AI_PROVIDER == "openai" else AI_MODEL) if AI_PROVIDER else None,
+           "aiReasoning": OPENAI_REASONING if AI_PROVIDER == "openai" else None,
+           "telegram": bool(BOT_TOKEN), "users": len(USERS)}
+    _, err = current_user()
+    if not err or client_ip() == "127.0.0.1":
+        out["data"] = _data_health()
+    return jsonify(out)
+
+
+OFFSITE_FILE = DATA_DIR / ".offsite"      # deploy/pull-backup.* muvaffaqiyatli tortgandan keyin yozadi
+MAINT_FILE = DATA_DIR / ".maint.json"     # kunlik xizmat natijasi: butunlik, siqish, nusxa
+OFFSITE_WARN_DAYS = 7                     # tashqi nusxa shundan eskirsa — ilovada qizil chiziq
+DISK_WARN_MB = 500
+
+
+def _read_json(f: Path, default=None):
+    try:
+        return json.loads(f.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return default
+
+
+def _age_days(iso: str):
+    d = _parse_dt(iso)
+    if not d:
+        return None
+    return max(0, int((datetime.now(TZ) - d).total_seconds() // 86400))
+
+
+def _parse_dt(s):
+    try:
+        d = datetime.fromisoformat(str(s).replace("Z", "+00:00"))
+        return d if d.tzinfo else d.replace(tzinfo=TZ)
+    except (TypeError, ValueError):
+        return None
+
+
+def _data_health() -> dict:
+    """Ma'lumot sog'ligi — bitta so'rov bilan: nusxalar, tashqi nusxa, disk, bazaning butunligi.
+
+    Zaxira jimgina to'xtaganini kimdir sezishi kerak. Eng xavflisi — SERVERDAN TASHQARIDAGI
+    nusxa: serverdagi hamma narsa bitta diskda yotadi, ya'ni droplet yo'qolsa ular ham yo'qoladi.
+    Shuning uchun «offsite» alohida ko'rsatiladi va 7 kundan oshsa ogohlantirish qaytariladi.
+    """
+    out, warn = {}, []
+    try:
+        files = [f for f in DATA_DIR.glob("*.json") if not f.name.endswith((".who.json", ".whoop.json"))
+                 and f.name not in ("users.json",)]
+        out["states"] = len(files)
+        out["bytes"] = sum(f.stat().st_size for f in DATA_DIR.rglob("*") if f.is_file())
+    except OSError:
+        pass
+    # Sana nom bo'yicha emas, SANA bo'yicha olinadi: fayl nomi <uid>-KUN.json
+    # ko'rinishida va alifbo tartibi eng yangi kunni bermaydi.
+    def _days(pat: str) -> list:
+        days = []
+        for f in (DATA_DIR / "backups").glob(pat):
+            m = re.search(r"(\d{4}-\d{2}-\d{2})", f.name)
+            if m:
+                days.append(m.group(1))
+        return sorted(days)
+
+    try:
+        js = _days("*-*.json")
+        out["backups"] = len(js)
+        out["lastBackup"] = js[-1] if js else None
+        out["firstBackup"] = js[0] if js else None
+    except OSError:
+        out["backups"], out["lastBackup"], out["firstBackup"] = 0, None, None
+    try:
+        dbs = _days("dash-*.db*")
+        out["lastDbBackup"] = dbs[-1] if dbs else None
+        out["dbBackups"] = len(dbs)
+    except OSError:
+        out["lastDbBackup"], out["dbBackups"] = None, 0
+    try:
+        st = os.statvfs(str(DATA_DIR))
+        out["diskFreeMb"] = int(st.f_bavail * st.f_frsize / 1048576)
+        total = st.f_blocks * st.f_frsize
+        out["diskUsedPct"] = int(100 - (st.f_bavail * st.f_frsize * 100 / total)) if total else None
+    except OSError:
+        pass
+    # ── serverdan tashqaridagi nusxa ──
+    try:
+        at = OFFSITE_FILE.read_text(encoding="utf-8").strip() if OFFSITE_FILE.exists() else ""
+    except OSError:
+        at = ""
+    out["offsite"] = {"at": at or None, "ageDays": _age_days(at) if at else None}
+    # ── kunlik xizmat: butunlik tekshiruvi ──
+    m = _read_json(MAINT_FILE, {}) or {}
+    out["integrity"] = m.get("integrity")
+    out["maintAt"] = m.get("at")
+    out["vacuumAt"] = m.get("vacuumAt")
+    try:
+        out["db"] = db.stats()
+    except Exception as e:  # noqa: BLE001 — sog'liq paneli hech qachon xato bermasin
+        out["db"] = {"error": str(e)}
+    try:
+        ts = vault.tree_status(DATA_DIR)
+        out["vault"] = {"alg": "AES-256-GCM", "kid": vault.kid(), "sealed": ts["sealed"], "plain": ts["plain"],
+                        "db": bool(db._sealed), "failed": len((vault.report or {}).get("failed") or [])}
+    except Exception as e:  # noqa: BLE001
+        out["vault"] = {"error": str(e)}
+    # ── ogohlantirishlar (mijoz shu kalitlar bo'yicha chizadi) ──
+    today = datetime.now(TZ).strftime("%Y-%m-%d")
+    off = out["offsite"]["ageDays"]
+    if off is None or off > OFFSITE_WARN_DAYS:
+        warn.append("offsite")
+    if out.get("lastDbBackup") and out["lastDbBackup"] < (datetime.now(TZ) - timedelta(days=2)).strftime("%Y-%m-%d"):
+        warn.append("backup")
+    if not out.get("lastDbBackup"):
+        warn.append("backup")
+    if (out.get("diskFreeMb") or 10 ** 9) < DISK_WARN_MB:
+        warn.append("disk")
+    if out.get("integrity") and out["integrity"] != "ok":
+        warn.append("integrity")
+    v = out.get("vault") or {}
+    if v.get("error") or v.get("plain") or not v.get("db"):
+        warn.append("vault")      # shifrlanmay qolgan fayl yoki arxiv — keyingi ishga tushishda yopiladi
+    if out.get("lastBackup") and out["lastBackup"] < today and out.get("states"):
+        pass      # bugun hali hech kim saqlamagan bo'lishi mumkin — bu nosozlik emas
+    out["warn"] = warn
+    return out
+
+
+@app.get("/api/versions")
+def list_versions():
+    """Tiklash nuqtalari — ilovadagi «Oldingi holatga qaytish» ro'yxati."""
+    uid, err = current_user()
+    if err:
+        return err
+    return jsonify(_archive(db.versions, uid, 80, what="versiyalar") or [])
+
+
+@app.post("/api/versions/<int:vid>/restore")
+def restore_version(vid):
+    """Tanlangan nusxaga qaytish. Hozirgi holat avval ABADIY nusxa bo'lib qoladi —
+    ya'ni tiklashning o'zi ham hech narsani yo'qotmaydi va uni ham orqaga qaytarsa bo'ladi."""
+    uid, err = current_user()
+    if err:
+        return err
+    blob = _archive(db.version, uid, vid, what="versiya o'qish")
+    if not isinstance(blob, dict) or "meta" not in blob:
+        return jsonify({"error": "not_found"}), 404
+    with _lock, _file_lock("data-" + _safe_uid(uid)):
+        stored = load_data(uid)
+        if _has_content(stored):
+            db.record_state_version(uid, stored, None, True, "restore")
+        blob = _rename_nova(blob)
+        meta = blob.setdefault("meta", {})
+        meta["updatedAt"] = int(time.time() * 1000)
+        meta["serverUpdated"] = datetime.now(TZ).isoformat()
+        meta["owner"] = uid
+        save_data(uid, blob)
+    _archive(db.archive_state, uid, blob, what="arxiv faktlar")
+    _archive(db.record_state_version, uid, blob, what="arxiv versiya")
+    log.info("tiklandi (%s): versiya %s", uid, vid)
+    return jsonify({"ok": True, "data": blob})
 
 
 @app.get("/api/backups")
@@ -1142,158 +1535,95 @@ def get_backup(name):
     f = DATA_DIR / "backups" / name
     if not f.exists():
         return jsonify({"error": "not_found"}), 404
-    return Response(f.read_text(encoding="utf-8"), mimetype="application/json")
+    return Response(vault.read_text(f), mimetype="application/json")
 
 
-# ═══════════════════════ API: tarix (arxivdan o'qish) ═══════════════════════
-#
-# Tarix (History) bo'limi faqat shu yerdan o'qiydi — blob emas, dash.db. Hammasi joriy
-# foydalanuvchi bo'yicha; oraliq 400 kundan uzun bo'lsa qirqiladi; from/to bo'lmasa — oxirgi 31 kun.
+EXPORT_README = """Shaxsiy Dashboard — to'liq eksport
+=====================================
 
-def _hist_range(default_days: int = 31):
-    """(frm, to, err) — so'rovdagi from/to. Noto'g'ri sana (2026-02-30, 0001-01-05 ham) → 400.
-    400 kundan uzun oraliqni db._clamp_range qirqadi (bitta qoida, bitta joyda)."""
-    to = (request.args.get("to") or "").strip() or datetime.now(TZ).strftime("%Y-%m-%d")
-    frm = (request.args.get("from") or "").strip()
+Bu arxivda sizning hisobingizdagi HAMMA narsa bor. U hech qanday dasturga bog'liq emas:
+ichidagi fayllar oddiy JSON va JPG — ularni yuz yildan keyin ham ochib o'qish mumkin.
+
+  holat.json     Ilovadagi joriy holat: odatlar, vazifalar, maqsadlar, moliya, sozlamalar.
+                 Shu faylni ilovaga qaytarib yuklash mumkin (Sozlash → Ma'lumot → JSON import).
+
+  arxiv.json     O'TMISH — ilova hech qachon o'chirmaydigan yozuvlar:
+                   days    har bir kun bo'yicha faktlar (sog'liq, odatlar, namoz, ovqat,
+                           moliya, zikr, ro'za, izohlar). O'chirilgan yozuv ham qoladi —
+                           unda "goneAt" sanasi turadi.
+                   whoop   WHOOP'dan kelgan barcha yozuvlar (tiklanish, uyqu, sikl, mashg'ulot).
+                   chats   Yusa AI bilan suhbatlar, to'liq matni bilan.
+                   cards   AI tahlil kartalari.
+
+  profil.json    Ism, e-mail, qaysi usul bilan kirilgani, hisob ochilgan sana.
+
+  rasmlar/       Profil surati va ovqat suratlari (ular hech qachon holat faylining
+                 ichiga kirmaydi — shuning uchun alohida turibdi).
+
+Sanalar Toshkent vaqtida (+05:00). Kun kaliti — YYYY-MM-DD.
+"""
+
+
+@app.get("/api/export/full")
+def export_full():
+    """Butun hisobning bitta ZIP fayli: holat + arxiv + profil + suratlar.
+
+    Nega kerak: «ma'lumotim umrbod saqlanadimi?» degan savolning eng halol javobi —
+    ma'lumot shu ilovadan tashqarida ham o'qiladigan bo'lishi. Bu yerdan chiqqan
+    arxivda hech qanday maxfiy kalit yo'q (parol xeshi, sessiya kaliti, WHOOP tokenlari
+    kirmaydi), ya'ni uni xotirjam saqlash mumkin.
+    """
+    uid, err = current_user()
+    if err:
+        return err
+    want_photos = request.args.get("photos") != "0"
+    # Yarim qolgan eski eksportlar (uzilgan yuklab olish, Windows'da band fayl) diskda yig'ilmasin
+    for old in DATA_DIR.glob("export-*.zip"):
+        try:
+            if time.time() - old.stat().st_mtime > 3600:
+                old.unlink(missing_ok=True)
+        except OSError:
+            pass
+    tmp = tempfile.NamedTemporaryFile(prefix="export-", suffix=".zip", dir=str(DATA_DIR), delete=False)
+    tmp.close()
+    path = Path(tmp.name)
+    _private(path)
     try:
-        if not db.DAY_RE.match(to):
-            raise ValueError(to)
-        b = datetime.strptime(to, "%Y-%m-%d")
-        if not frm:
-            frm = (b - timedelta(days=default_days - 1)).strftime("%Y-%m-%d")
-        if not db.DAY_RE.match(frm):
-            raise ValueError(frm)
-        a = datetime.strptime(frm, "%Y-%m-%d")
-        if a > b:
-            raise ValueError("from > to")
-    except (ValueError, OverflowError):
-        return None, None, (jsonify({"error": "bad_range"}), 400)
-    frm, to = db._clamp_range(frm, to)
-    return frm, to, None
+        with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED, compresslevel=6) as z:
+            z.writestr("O'QING.txt", EXPORT_README)
+            z.writestr("holat.json", json.dumps(load_data(uid), ensure_ascii=False, indent=1))
+            z.writestr("arxiv.json", json.dumps(db.export_all(uid), ensure_ascii=False, indent=1))
+            who = who_load(uid)
+            z.writestr("profil.json", json.dumps({
+                "uid": uid, "name": who.get("name"), "email": who.get("email"),
+                "provider": who.get("provider"), "createdAt": who.get("createdAt"),
+                "lastLogin": who.get("lastLogin"), "exportedAt": datetime.now(TZ).isoformat(timespec="seconds"),
+            }, ensure_ascii=False, indent=1))
+            av = avatar_file(uid)
+            if av.exists():
+                z.writestr("rasmlar/avatar.jpg", vault.read_bytes(av))
+            if want_photos:
+                d = user_file(uid).with_name(user_file(uid).stem + ".food")
+                if d.is_dir():
+                    for p in sorted(d.glob("*.jpg")):
+                        z.writestr(f"rasmlar/ovqat/{p.name}", vault.read_bytes(p))
+    except Exception as e:  # noqa: BLE001
+        path.unlink(missing_ok=True)
+        log.exception("to'liq eksport: %s", e)
+        return jsonify({"error": "export_failed"}), 500
 
+    @after_this_request
+    def _cleanup(resp):
+        # Fayl yuborilgach o'chadi. Xato bo'lsa ham qolib ketmasin: DATA_DIR da
+        # kimsasiz export-*.zip yig'ilib diskni yeb qo'yardi.
+        try:
+            path.unlink(missing_ok=True)
+        except OSError:
+            pass
+        return resp
 
-@app.get("/api/history/range")
-def history_range():
-    uid, err = current_user()
-    if err:
-        return err
-    return jsonify(db.range(uid))
-
-
-@app.get("/api/history/days")
-def history_days():
-    uid, err = current_user()
-    if err:
-        return err
-    frm, to, bad = _hist_range()
-    if bad:
-        return bad
-    return jsonify({"from": frm, "to": to, "days": db.days(uid, frm, to)})
-
-
-@app.get("/api/history/whoop")
-def history_whoop():
-    uid, err = current_user()
-    if err:
-        return err
-    frm, to, bad = _hist_range()
-    if bad:
-        return bad
-    out = db.whoop(uid, frm, to)
-    out.update({"from": frm, "to": to})
-    return jsonify(out)
-
-
-@app.get("/api/history/months")
-def history_months():
-    uid, err = current_user()
-    if err:
-        return err
-    y = (request.args.get("year") or "").strip() or datetime.now(TZ).strftime("%Y")
-    if not (y.isdigit() and 1970 <= int(y) <= 2100):
-        return jsonify({"error": "bad_year"}), 400
-    return jsonify({"year": int(y), "months": db.months(uid, int(y))})
-
-
-@app.get("/api/history/chats")
-def history_chats():
-    uid, err = current_user()
-    if err:
-        return err
-    q = (request.args.get("q") or "").strip()[:200]
-    return jsonify({"threads": db.chats(uid, q, request.args.get("limit") or 50, request.args.get("before") or None)})
-
-
-@app.get("/api/history/chats/<thread_id>")
-def history_chat(thread_id):
-    uid, err = current_user()
-    if err:
-        return err
-    t = db.chat(uid, thread_id[:80])
-    if not t:
-        return jsonify({"error": "not_found"}), 404
-    return jsonify(t)
-
-
-@app.get("/api/history/cards")
-def history_cards():
-    uid, err = current_user()
-    if err:
-        return err
-    frm, to, bad = _hist_range()
-    if bad:
-        return bad
-    section = (request.args.get("section") or "").strip()[:40]
-    return jsonify({"from": frm, "to": to, "cards": db.cards(uid, section, frm, to, request.args.get("limit"))})
-
-
-@app.get("/api/history/versions")
-def history_versions():
-    uid, err = current_user()
-    if err:
-        return err
-    return jsonify({"versions": db.versions(uid)})
-
-
-@app.get("/api/history/versions/<int:vid>")
-def history_version(vid):
-    uid, err = current_user()
-    if err:
-        return err
-    d = db.version(uid, vid)
-    if d is None:
-        return jsonify({"error": "not_found"}), 404
-    return jsonify(d)
-
-
-@app.post("/api/history/restore-thread")
-def history_restore_thread():
-    """Arxivdagi chatni blobning nova.threads ro'yxatiga qaytaradi (bo'lmasa qo'shadi)."""
-    uid, err = current_user()
-    if err:
-        return err
-    body = request.get_json(silent=True) or {}
-    tid = str(body.get("id") or "").strip()[:80]
-    if not tid:
-        return jsonify({"error": "id required"}), 400
-    th = db.restore_thread(uid, tid)
-    if not th:
-        return jsonify({"error": "not_found"}), 404
-    with _lock:
-        d = load_data(uid)
-        if not isinstance(d, dict):
-            d = {}
-        nova = d.get("nova") if isinstance(d.get("nova"), dict) else {}
-        threads = nova.get("threads") if isinstance(nova.get("threads"), list) else []
-        if not any(isinstance(x, dict) and x.get("id") == tid for x in threads):
-            threads.append(th)
-            nova["threads"] = threads
-            d["nova"] = nova
-            d.setdefault("meta", {})["updatedAt"] = int(time.time() * 1000)   # mijoz keyingi pull'da yangisini oladi
-            d["meta"]["serverUpdated"] = datetime.now(TZ).isoformat()
-            save_data(uid, d)
-            _archive(db.archive_state, uid, d, what="arxiv faktlar")
-    return jsonify({"ok": True, "thread": th})
+    name = f"dash-toliq-{datetime.now(TZ).strftime('%Y-%m-%d')}.zip"
+    return send_file(str(path), mimetype="application/zip", as_attachment=True, download_name=name)
 
 
 # ═══════════════════════ WHOOP ═══════════════════════
@@ -1362,7 +1692,16 @@ def whoop_login():
         "client_id": WHOOP_ID, "redirect_uri": base_url() + "/api/whoop/callback",
         "response_type": "code", "scope": WHOOP_SCOPES, "state": state,
     })
-    return redirect(f"{WHOOP_AUTH}?{q}")
+    r = redirect(f"{WHOOP_AUTH}?{q}")
+    # Oqimni boshlagan brauzer uni tugatsin. Ilgari state faqat imzolangan edi:
+    # muddati yo'q va hech narsaga bog'lanmagan, ya'ni sizib ketgan bitta satr
+    # bilan boshqa odam o'z WHOOP hisobini SIZNING uid'ingizga ulab qo'yishi
+    # mumkin edi — tokenlar almashadi, dashboard begona biometrikani ko'rsatadi.
+    # Google oqimida bu g_st cookie'si bilan hal qilingan; shu naqsh.
+    # max_age=600 ayni paytda muddat vazifasini ham bajaradi.
+    r.set_cookie("w_st", nonce, max_age=600, httponly=True, samesite="Lax",
+                 secure=request.headers.get("X-Forwarded-Proto", "") == "https")
+    return r
 
 
 @app.get("/api/whoop/callback")
@@ -1376,6 +1715,12 @@ def whoop_callback():
         return "state noto'g'ri", 400
     if not hmac.compare_digest(sig, sign(uid + nonce)):
         return "state imzosi noto'g'ri", 400
+    # Imzo yetarli emas: u faqat «bu satrni biz yozganmiz» deydi, «shu brauzer
+    # boshlagan» demaydi. w_st cookie'si aynan shuni tekshiradi va 10 daqiqadan
+    # keyin o'zi o'chadi, ya'ni eski state ishlamay qoladi.
+    if not hmac.compare_digest(request.cookies.get("w_st", ""), nonce):
+        return ("Ulanish shu brauzerda boshlanmagan yoki 10 daqiqadan oshib ketdi. "
+                "Ilovaga qaytib, Sog'liq bo'limidan qaytadan «Ulash»ni bosing."), 400
     status, tok = http_json(WHOOP_TOKEN, {
         "grant_type": "authorization_code", "code": code,
         "redirect_uri": base_url() + "/api/whoop/callback",
@@ -1394,7 +1739,9 @@ def whoop_callback():
         )
     tok["expires_at"] = time.time() + int(tok.get("expires_in", 3600)) - 60
     whoop_save(uid, tok)
-    return redirect("/#health")
+    r = redirect("/#health")
+    r.delete_cookie("w_st")
+    return r
 
 
 def whoop_access(uid: str):
@@ -1441,7 +1788,8 @@ def whoop_data():
     if err:
         return err
     path = request.args.get("path", "")
-    if not path.startswith("/") or ".." in path:
+    # "%2e%2e" ham ".." — WHOOP tomonida yo'ldan chiqib ketmasin (urllib buni ochmaydi)
+    if not path.startswith("/") or ".." in path or "%2e" in path.lower():
         return jsonify({"error": "path required"}), 400
     token = whoop_access(uid)
     if not token:
@@ -1664,7 +2012,7 @@ def _snap_read(uid: str):
     if hit and hit[0] == m:
         return hit[1]
     try:
-        snap = json.loads(f.read_text(encoding="utf-8"))
+        snap = json.loads(vault.read_text(f))
     except Exception:  # noqa: BLE001
         return None
     _wh_mem[uid] = (m, snap)
@@ -1673,7 +2021,7 @@ def _snap_read(uid: str):
 
 def _snap_write(uid: str, snap: dict):
     f = whoop_cache_file(uid)
-    _atomic_write(f, json.dumps(snap, ensure_ascii=False, separators=(",", ":")))   # sog'liq ko'rsatkichlari
+    _atomic_write(f, vault.seal_text(json.dumps(snap, ensure_ascii=False, separators=(",", ":"))))   # sog'liq ko'rsatkichlari
     _wh_mem[uid] = (f.stat().st_mtime, snap)
 
 
@@ -1803,15 +2151,9 @@ def _wh_loop():
                 time.sleep(30)   # boshqa jarayon tortmoqda; u o'lsa qulf bo'shaydi
                 continue
             log.info("WHOOP fon yangilash boshlandi (pid %s)", os.getpid())
-            maint_day = None
             while True:
                 now = time.time()
-                # kunlik arxiv xizmati — faqat flock egasida, kuniga bir marta
-                today = datetime.now(TZ).strftime("%Y-%m-%d")
-                if today != maint_day:
-                    maint_day = today
-                    _archive(db.compact, what="arxiv compact")
-                    _archive(db.backup_db, DATA_DIR, what="arxiv backup")
+                _maint_tick()
                 for uid in _wh_uids():
                     try:
                         _wh_tick(uid, now)
@@ -1822,6 +2164,82 @@ def _wh_loop():
         except Exception as e:  # noqa: BLE001
             log.exception("WHOOP loop: %s", e)
             time.sleep(15)
+
+
+_maint_day = None
+
+
+def _maint_tick():
+    """Kunlik xizmat: butunlik → siqish → nusxa → (oyiga bir marta) VACUUM. Kuniga bir marta.
+
+    Ilgari bu WHOOP oqimining ichida edi — ya'ni WHOOP kalitlari bo'lmasa yoki
+    poller o'chirilgan bo'lsa, ARXIV NUSXASI HAM olinmay qolardi va buni hech
+    kim sezmasdi. Endi u alohida oqimda va WHOOP'ga bog'liq emas.
+
+    Tartib muhim: avval butunlik tekshiriladi. Baza buzilgan bo'lsa undan nusxa
+    OLINMAYDI — aks holda buzuq nusxa sog'ining ustiga chiqib, bir necha kunda
+    hamma nusxa yaroqsiz bo'lib qoladi. Natija .maint.json ga yoziladi va
+    /api/health orqali ilovadagi «Ma'lumot sog'ligi» panelida ko'rinadi.
+    """
+    global _maint_day
+    now = datetime.now(TZ)
+    today = now.strftime("%Y-%m-%d")
+    if today == _maint_day:
+        return
+    _maint_day = today
+    prev = _read_json(MAINT_FILE, {}) or {}
+    rec = {"at": now.isoformat(timespec="seconds"), "integrity": None, "compact": None,
+           "backup": None, "vacuumAt": prev.get("vacuumAt"), "vacuumFreed": prev.get("vacuumFreed")}
+    rec["integrity"] = _archive(db.integrity, what="arxiv butunlik") or "tekshirilmadi"
+    if rec["integrity"] != "ok":
+        log.error("ARXIV BUTUNLIGI: %s — nusxa OLINMADI, eski nusxalar saqlanib qoldi", rec["integrity"])
+    else:
+        rec["compact"] = _archive(db.compact, what="arxiv compact")
+        b = _archive(db.backup_db, DATA_DIR, what="arxiv backup")
+        rec["backup"] = Path(b).name if b else None
+        last_vac = _parse_dt(prev.get("vacuumAt"))
+        if not last_vac or (now - last_vac).days >= db.VACUUM_DAYS:
+            freed = _archive(db.vacuum, what="arxiv vacuum")
+            if freed is not None:
+                rec["vacuumAt"], rec["vacuumFreed"] = now.isoformat(timespec="seconds"), freed
+                log.info("VACUUM: %.1f MB bo'shadi", freed / 1048576)
+    try:
+        _write_atomic(MAINT_FILE, json.dumps(rec, ensure_ascii=False))
+    except OSError as e:
+        log.error("xizmat natijasi yozilmadi: %s", e)
+    # Disk to'lib borayotgan bo'lsa buni jurnalda ko'rinadigan qilamiz: to'lgan diskda
+    # yozuv umuman bajarilmaydi, ya'ni bu ma'lumot yo'qolishining eng qisqa yo'li.
+    try:
+        st = os.statvfs(str(DATA_DIR))
+        free_mb = int(st.f_bavail * st.f_frsize / 1048576)
+        if free_mb < DISK_WARN_MB:
+            log.error("DISK KAMAYDI: %d MB qoldi — zaxiralar va yozuv xavf ostida", free_mb)
+    except OSError:
+        pass
+
+
+def _maint_loop():
+    """Faqat bitta jarayon bajaradi (flock), soatiga bir marta tekshiradi."""
+    lock = DATA_DIR / ".lock.maint"
+    while True:
+        try:
+            with open(lock, "a+") as fh:
+                try:
+                    fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except OSError:
+                    time.sleep(600)      # boshqa ishchi bajaryapti
+                    continue
+                while True:
+                    _maint_tick()
+                    time.sleep(3600)
+        except Exception as e:  # noqa: BLE001
+            log.exception("kunlik xizmat: %s", e)
+            time.sleep(300)
+
+
+def _maint_start():
+    t = threading.Thread(target=_maint_loop, name="maint", daemon=True)
+    t.start()
 
 
 def _whoop_poll_start():
@@ -1846,8 +2264,19 @@ def whoop_snapshot():
         r = jsonify({"connected": True, "pending": True})
         r.headers["Cache-Control"] = "no-store"
         return r
-    etag = '"%s-%s"' % (snap.get("updatedAt", 0), snap.get("fetchedAt", 0) // 60000)
-    if request.headers.get("If-None-Match") == etag:
+    # ETag ma'lumotning o'ziga bog'lansin. Ilgari u fetchedAt // 60000 ni o'z ichiga
+    # olardi — u har POLL da yangilanadi, ya'ni tag har daqiqa o'zgarardi va 304 yo'li
+    # hech qachon ishlamasdi: mijoz har daqiqada butun snapshot'ni qayta olardi.
+    # snap["updatedAt"] esa faqat ma'lumot o'zgarganda yoziladi (_wh_tick: if changed),
+    # shuning uchun u to'g'ri versiya belgisi.
+    # fetchedAt butunlay olib tashlanmadi: mijozdagi freshness() 3 daqiqadan keyin
+    # "eskirgan" deb belgilaydi, shuning uchun 2 daqiqalik qadam bilan qoldiramiz —
+    # ko'rsatkich yolg'on gapirmaydi, to'liq javob esa soatiga 60 tadan 30 taga tushadi.
+    etag = '"%s-%s"' % (snap.get("updatedAt", 0), snap.get("fetchedAt", 0) // 120000)
+    # nginx: gzip_proxied any + gzip_min_length 512 — bu javob siqiladi va nginx
+    # ETag ga W/ prefiksini qo'shadi ("abc" -> W/"abc"). Shuning uchun == emas, in.
+    # (api.py dagi avatar yo'li buni allaqachon to'g'ri qiladi.)
+    if etag in request.headers.get("If-None-Match", ""):
         return Response(status=304, headers={"ETag": etag, "Cache-Control": "no-cache"})
     out = dict(snap)
     out["connected"] = True
@@ -1901,28 +2330,26 @@ def whoop_webhook():
     return jsonify({"ok": True})
 
 
+_maint_start()
 _whoop_poll_start()
 
 
-# ═══════════════════════ AI (Nova) ═══════════════════════
+# ═══════════════════════ Yusa AI ═══════════════════════
 
-# Tashqi AI so'rovining eng uzun muddati. gunicorn --timeout 120 dan ANCHA past
-# bo'lishi shart: ilgari OpenAI tomoni ham aynan 120 edi va so'rov chegaraga
-# yetganda ishchi o'rtada o'ldirilardi.
+# Tashqi AI so'rovining eng uzun muddati. gunicorn --timeout dan ANCHA past
+# bo'lishi shart, aks holda ishchi so'rov o'rtasida o'ldiriladi.
 AI_TIMEOUT = int(os.environ.get("MA_AI_TIMEOUT", "60"))
 
-# Bitta hisob uchun soatiga nechta AI so'rovi. Kalit egasiniki — telefon
-# cho'ntakda turib qayta-qayta so'rov yuborsa yoki sahifa halqaga tushsa,
-# hisob egasining puli ketardi. 0 — cheklov yo'q.
+# Bitta hisob uchun soatiga nechta AI so'rovi. 0 — cheklov yo'q.
 AI_HOURLY_MAX = int(os.environ.get("MA_AI_HOURLY", "80"))
 
 
-def ai_budget_ok(uid: str) -> bool:
+def ai_quota_ok(uid: str) -> bool:
     """Shu hisob oxirgi soatda chegaradan oshdimi. Hisob .fails.json da,
-    flock ostida — ya'ni ikkala gunicorn ishchisi bitta sanoqni ko'radi."""
+    flock ostida — ikkala gunicorn ishchisi bitta sanoqni ko'radi."""
     if AI_HOURLY_MAX <= 0:
         return True
-    n = _fails_count(f"ai|{uid}", 3600, add=True)
+    n = _fails_count(f"aiq|{uid}", 3600, add=True)
     if n > AI_HOURLY_MAX:
         log.warning("AI soatlik chegarasi oshdi (%s): %d", uid, n)
         return False
@@ -1936,10 +2363,20 @@ def ai_client():
     global _ai_client
     if _ai_client is None:
         import anthropic  # lazily — kutubxona bo'lmasa server baribir ishlaydi
-        # timeout va max_retries ataylab past: SDK sukut bo'yicha ikki marta qayta
-        # uriniladi (90 s × 3 = 270 s) va bu gunicorn chegarasidan ancha oshib ketardi.
+        # max_retries ataylab past: SDK sukut bo'yicha ikki marta qayta uriniladi
+        # (90 s × 3 = 270 s) va bu gunicorn chegarasidan ikki barobar oshardi.
         _ai_client = anthropic.Anthropic(api_key=AI_KEY, timeout=float(AI_TIMEOUT), max_retries=1)
     return _ai_client
+
+
+def ai_budget(v) -> int:
+    """Mijoz so'ragan token byudjeti — chegara ichida. Ilgari Anthropic tarmog'ida umuman
+    cheklanmasdi (max_tokens=1000000 → keraksiz xarajat) va raqam bo'lmasa 500 qaytarardi."""
+    try:
+        n = int(v or 2048)
+    except (TypeError, ValueError):
+        n = 2048
+    return max(AI_MIN_TOKENS, min(n, AI_MAX_TOKENS))
 
 
 def ai_openai(system: str, msgs: list, max_tokens: int, timeout: float = None):
@@ -1950,12 +2387,10 @@ def ai_openai(system: str, msgs: list, max_tokens: int, timeout: float = None):
             "max_completion_tokens": max_tokens}
     if OPENAI_REASONING in ("minimal", "low", "medium", "high") and (OPENAI_MODEL.startswith("gpt-5") or OPENAI_MODEL.startswith("o")):
         body["reasoning_effort"] = OPENAI_REASONING   # faqat fikrlaydigan modellar qabul qiladi
-    if timeout is None:
-        timeout = AI_TIMEOUT
     req = urllib.request.Request(OPENAI_BASE + "/chat/completions", data=json.dumps(body).encode("utf-8"), method="POST",
                                  headers={"Authorization": "Bearer " + OPENAI_KEY, "Content-Type": "application/json", "User-Agent": USER_AGENT})
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as r:
+        with urllib.request.urlopen(req, timeout=timeout if timeout is not None else AI_TIMEOUT) as r:
             j = json.loads(r.read().decode("utf-8") or "{}")
     except urllib.error.HTTPError as e:
         raw = e.read().decode("utf-8", "replace")[:400]
@@ -1977,20 +2412,12 @@ def ai_openai(system: str, msgs: list, max_tokens: int, timeout: float = None):
             "usage": {"in": u.get("prompt_tokens"), "out": u.get("completion_tokens")}}, None
 
 
-@app.post("/api/ai")
-def ai():
-    uid, err = current_user()
-    if err:
-        return err
-    if not AI_PROVIDER:
-        return jsonify({"error": "ai_not_configured"}), 501
-    if not ai_budget_ok(uid):
-        return jsonify({"error": "ai_rate_limited"}), 429
-    body = request.get_json(silent=True) or {}
+def ai_request(body):
+    """Mijoz so'rovini tozalaydi. ((system, messages, budget, kind), None) yoki (None, (xato, status))."""
     msgs = body.get("messages")
     system = str(body.get("system") or "")[:16000]
     if not isinstance(msgs, list) or not msgs:
-        return jsonify({"error": "messages required"}), 400
+        return None, ("messages required", 400)
     clean = []
     for m in msgs[-24:]:
         role = m.get("role") if isinstance(m, dict) else None
@@ -1998,10 +2425,25 @@ def ai():
         if role in ("user", "assistant") and isinstance(content, str) and content.strip():
             clean.append({"role": role, "content": content[:12000]})
     if not clean or clean[0]["role"] != "user":
-        return jsonify({"error": "first message must be user"}), 400
+        return None, ("first message must be user", 400)
     kind = str(body.get("kind") or "chat")[:40]   # chat | card:<section> — faqat hisob uchun
+    return (system, clean, ai_budget(body.get("max_tokens")), kind), None
+
+
+@app.post("/api/ai")
+def ai():
+    uid, err = current_user()
+    if err:
+        return err
+    if not AI_PROVIDER:
+        return jsonify({"error": "ai_not_configured"}), 501
+    if not ai_quota_ok(uid):
+        return jsonify({"error": "ai_rate_limited"}), 429
+    prep, bad = ai_request(request.get_json(silent=True) or {})
+    if bad:
+        return jsonify({"error": bad[0]}), bad[1]
+    system, clean, budget, kind = prep
     if AI_PROVIDER == "openai":
-        budget = max(AI_MIN_TOKENS, min(int(body.get("max_tokens") or 2048), AI_MAX_TOKENS))
         out, fail = ai_openai(system, clean, budget)
         if not fail and not out.get("text") and out.get("stop") == "length":
             # fikrlash butun byudjetni yeb qo'ydi (bo'sh javob) — bir marta kattaroq byudjet bilan
@@ -2013,7 +2455,7 @@ def ai():
     try:
         import anthropic
         resp = ai_client().messages.create(
-            model=AI_MODEL, max_tokens=int(body.get("max_tokens") or 2048),
+            model=AI_MODEL, max_tokens=budget,
             system=system or None, messages=clean,
         )
         text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
@@ -2032,6 +2474,99 @@ def ai():
             return jsonify({"error": "ai_connection"}), 502
         log.exception("AI xato")
         return jsonify({"error": "ai_failed"}), 500
+
+
+def ai_openai_stream(system: str, msgs: list, max_tokens: int, timeout: float = None):
+    """OpenAI oqimi. (ochiq javob, None) yoki (None, (xato, status)).
+    Ulanish generatorgacha ochiladi: aks holda birinchi bayt yozilgandan keyin
+    xatoni oddiy JSON bilan qaytarib bo'lmasdi — mijoz yarim ochilgan oqimni
+    ko'rardi va sababini bilmasdi."""
+    body = {"model": OPENAI_MODEL, "messages": ([{"role": "system", "content": system}] if system else []) + msgs,
+            "max_completion_tokens": max_tokens, "stream": True,
+            "stream_options": {"include_usage": True}}   # tokenlar hisobi oxirgi bo'lakda keladi
+    if OPENAI_REASONING in ("minimal", "low", "medium", "high") and (OPENAI_MODEL.startswith("gpt-5") or OPENAI_MODEL.startswith("o")):
+        body["reasoning_effort"] = OPENAI_REASONING
+    req = urllib.request.Request(OPENAI_BASE + "/chat/completions", data=json.dumps(body).encode("utf-8"), method="POST",
+                                 headers={"Authorization": "Bearer " + OPENAI_KEY, "Content-Type": "application/json", "User-Agent": USER_AGENT})
+    try:
+        return urllib.request.urlopen(req, timeout=timeout if timeout is not None else AI_TIMEOUT), None
+    except urllib.error.HTTPError as e:
+        raw = e.read().decode("utf-8", "replace")[:400]
+        try:
+            msg = (json.loads(raw).get("error") or {}).get("message") or raw
+        except Exception:  # noqa: BLE001
+            msg = raw
+        log.warning("OpenAI oqim %s: %s", e.code, msg[:200])
+        if e.code == 429:
+            return None, ("rate_limited", 429)
+        return None, (f"api_{e.code}: {msg[:160]}", 502)
+    except Exception as e:  # noqa: BLE001
+        log.warning("OpenAI oqim ulanish: %s", e)
+        return None, ("ai_connection", 502)
+
+
+@app.post("/api/ai/stream")
+def ai_stream():
+    """Javobni yozilishi bilan uzatadi (SSE): `data: {"d": "…"}` bo'laklari, oxirida
+    `data: {"done": true}`. Butun javobni kutish o'rniga birinchi so'zlar 2-3 soniyada
+    ekranga chiqadi — kutish sezilmaydi. Mijoz eskiroq bo'lsa yoki provayder Anthropic
+    bo'lsa 501 qaytadi va mijoz /api/ai ga qaytadi."""
+    uid, err = current_user()
+    if err:
+        return err
+    if AI_PROVIDER != "openai":
+        return jsonify({"error": "stream_unsupported"}), 501
+    if not ai_quota_ok(uid):
+        return jsonify({"error": "ai_rate_limited"}), 429
+    prep, bad = ai_request(request.get_json(silent=True) or {})
+    if bad:
+        return jsonify({"error": bad[0]}), bad[1]
+    system, clean, budget, kind = prep
+    src, fail = ai_openai_stream(system, clean, budget)
+    if fail:
+        return jsonify({"error": fail[0]}), fail[1]
+
+    def sse(obj):
+        return "data: " + json.dumps(obj, ensure_ascii=False) + "\n\n"
+
+    def pump():
+        model, usage, sent = None, {}, 0
+        try:
+            for raw in src:
+                line = raw.decode("utf-8", "replace").strip()
+                if not line.startswith("data:"):
+                    continue
+                chunk = line[5:].strip()
+                if chunk == "[DONE]":
+                    break
+                try:
+                    j = json.loads(chunk)
+                except ValueError:
+                    continue
+                model = j.get("model") or model
+                u = j.get("usage")
+                if u:
+                    usage = {"in": u.get("prompt_tokens"), "out": u.get("completion_tokens")}
+                for ch in (j.get("choices") or []):
+                    d = (ch.get("delta") or {}).get("content")
+                    if d:
+                        sent += len(d)
+                        yield sse({"d": d})
+        except Exception as e:  # noqa: BLE001
+            log.warning("OpenAI oqim uzildi: %s", e)
+            yield sse({"error": "ai_stream"})
+        finally:
+            try:
+                src.close()
+            except Exception:  # noqa: BLE001
+                pass
+        _archive(db.record_ai_call, uid, kind, model, usage.get("in"), usage.get("out"), what="arxiv ai")
+        yield sse({"done": True, "model": model, "usage": usage, "len": sent})
+
+    return Response(stream_with_context(pump()), mimetype="text/event-stream",
+                    # X-Accel-Buffering: nginx buferini o'chiradi — busiz bo'laklar
+                    # to'planib, oqimning butun ma'nosi yo'qolardi.
+                    headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"})
 
 
 # ═══════════════════════ Ovqat (rasm → kaloriya) ═══════════════════════
@@ -2181,7 +2716,7 @@ def food_analyze():
         return err
     if not AI_PROVIDER:
         return jsonify({"error": "ai_not_configured"}), 501
-    if not ai_budget_ok(uid):
+    if not ai_quota_ok(uid):
         return jsonify({"error": "ai_rate_limited"}), 429
     if request.content_length and request.content_length > FOOD_MAX_REQ:
         return jsonify({"error": "too_large"}), 413
@@ -2232,7 +2767,7 @@ def food_analyze():
         photo = "fp_" + secrets.token_hex(8)
         f = food_dir(uid) / (photo + ".jpg")
         try:
-            _atomic_write(f, img[0])
+            _atomic_write(f, vault.seal(img[0]))
         except OSError as e:
             log.warning("Ovqat surati saqlanmadi: %s", e)
             photo = None
@@ -2251,7 +2786,7 @@ def food_photo(pid):
     f = food_dir(uid) / (pid + ".jpg")
     if not f.is_file():
         return jsonify({"error": "not_found"}), 404
-    raw = f.read_bytes()
+    raw = vault.read_bytes(f)
     mime = "image/png" if raw[:8] == b"\x89PNG\r\n\x1a\n" else "image/jpeg"
     r = Response(raw, mimetype=mime)
     r.headers["Cache-Control"] = "private, max-age=86400"
@@ -2318,13 +2853,60 @@ def index():
 
 # Faqat ilova qobig'i beriladi. Ilgari faqat "data/" prefiksi tekshirilardi — /./data/.secret, /.env, /db.py
 # kabi yo'llar o'tib ketardi (2026-09-09 da topildi). Endi ro'yxatda yo'q narsa — 404, nuqtali segment ham.
-STATIC_OK = re.compile(r"^(index\.html|app\.css|sw\.js|manifest\.json|css/[\w-]+\.css|js/[\w-]+\.js|icons/[\w-]+\.(?:svg|png|ico|webp))$")
+STATIC_OK = re.compile(r"^(index\.html|app\.css|sw\.js|manifest\.json|css/[\w-]+\.css|js/[\w-]+\.js|fonts/[\w-]+\.woff2|icons/[\w-]+\.(?:svg|png|ico|webp))$")
 
 
 @app.get("/index.html")
 def index_html():
     """PWA start_url — bayroq shu yerda ham kerak, aks holda o'rnatilgan ilova serversiz ishlaydi."""
     return index()
+
+
+# ─── Ikkinchi qobiq: /yangi/ ───────────────────────────────────────────
+# Yangi ko'rinish eskisining yonida turadi. Ikkalasi bitta /api ga, ya'ni bitta
+# ma'lumotga murojaat qiladi — solishtirish ma'noli bo'lishi uchun shu shart.
+# Fayllari alohida papkada (yangi/), shuning uchun service worker ham alohida
+# (scope /yangi/) va bir-birining keshini bosmaydi. Papka bo'lmasa — 404, ya'ni
+# eski server bu yo'lni bilmagandek ishlayveradi.
+PREVIEW_DIR = STATIC_DIR / "yangi"
+
+
+def _shell(base: Path):
+    """index.html ni DASH_SERVER bayrog'i bilan beradi."""
+    try:
+        html = (base / "index.html").read_text(encoding="utf-8")
+        html = html.replace("</head>", "<script>window.DASH_SERVER=true;</script>\n</head>", 1)
+        r = Response(html, mimetype="text/html")
+    except OSError:
+        return jsonify({"error": "not_found"}), 404
+    r.headers["Cache-Control"] = "no-cache"
+    return r
+
+
+@app.get("/yangi/")
+@app.get("/yangi/index.html")
+def preview_index():
+    return _shell(PREVIEW_DIR)
+
+
+@app.get("/yangi")
+def preview_index_slash():
+    return redirect("/yangi/", code=302)
+
+
+@app.get("/yangi/<path:fname>")
+def preview_static(fname):
+    if not STATIC_OK.match(fname):
+        return jsonify({"error": "not_found"}), 404
+    p = PREVIEW_DIR / fname
+    if not p.is_file() or PREVIEW_DIR.resolve() not in p.resolve().parents:
+        return jsonify({"error": "not_found"}), 404
+    r = send_from_directory(PREVIEW_DIR, fname)
+    if fname.endswith((".js", ".css", ".html", "sw.js", "manifest.json")):
+        r.headers["Cache-Control"] = "no-cache"
+    elif fname.endswith(".woff2"):
+        r.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    return r
 
 
 @app.get("/<path:fname>")
@@ -2337,19 +2919,21 @@ def static_file(fname):
     r = send_from_directory(STATIC_DIR, fname)
     if fname.endswith((".js", ".css", ".html", "sw.js", "manifest.json")):
         r.headers["Cache-Control"] = "no-cache"
+    elif fname.endswith(".woff2"):
+        # Shrift fayli nomi o'zgarmasa mazmuni ham o'zgarmaydi — bir yil keshda tursin.
+        r.headers["Cache-Control"] = "public, max-age=31536000, immutable"
     return r
 
 
-# CSP: hamma kod o'zimizdan; shrift Google Fonts'dan; rasm data:/blob: (ovqat surati, avatar);
-# tashqi so'rov faqat api.anthropic.com (Nova BYOK — kalit qurilmada). 'unsafe-inline' hozircha
+# CSP: hamma narsa o'zimizdan — shrift ham endi shu serverda (fonts/onest-*.woff2), shuning uchun
+# Google Fonts manzillari ro'yxatdan olib tashlandi. Rasm data:/blob: (ovqat surati, avatar);
+# tashqi so'rov faqat api.anthropic.com (Yusa AI BYOK — kalit qurilmada). 'unsafe-inline' hozircha
 # kerak: index.html ichida inline <script>/<style> bor. frame-ancestors — clickjacking'ga qarshi.
 CSP = ("default-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; "
        "object-src 'none'; img-src 'self' data: blob:; media-src 'self' blob:; "
-       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; "
+       "style-src 'self' 'unsafe-inline'; font-src 'self'; "
        "script-src 'self' 'unsafe-inline'; "
-       # sw.js shriftlarni offline uchun keshlaydi — fetch() connect-src'ga bo'ysunadi, shuning uchun
-       # fonts.* shu yerda ham bo'lishi shart, aks holda shriftlar umuman yuklanmaydi
-       "connect-src 'self' https://api.anthropic.com https://fonts.googleapis.com https://fonts.gstatic.com")
+       "connect-src 'self' https://api.anthropic.com")
 
 
 @app.after_request

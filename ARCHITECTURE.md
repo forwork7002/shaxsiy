@@ -5,7 +5,7 @@ One vanilla app. No build step, no framework. Files:
 ```
 app/
   index.html        shell: <head> tokens, nav, #view container, modal/toast roots, <script> tags in order
-  app.css           design system (dark default + light theme) + every module's CSS section
+  app.css           dizayn tizimi — «ko'mir qobiq» (tokenlar, karta/plitka/qator/boshqaruv/panel); ustidan yozuvchi qatlam YO'Q (whoop-ui.css 2026-09-15 da o'chirildi)
   js/core.js        store, dates, i18n runtime, router, UI kit, icons, charts, undo, sync, migration
   js/i18n.js        string tables: uz (Latin), uzk (Cyrillic), ru
   js/prayer.js      prayer-time engine + hijri calendar (pure functions, no DOM)
@@ -16,19 +16,19 @@ app/
   js/finance.js     Молия: ikki bo'lim — «Oy» (bugun sarflasa bo'ladigan summa, tez yozuv, kategoriyalar, yozuvlar) · «Hisob» (qoldiqlar + doimiy to'lovlar)
   js/ai.js          shared AI analysis engine — D.ai.card(section) insight cards
   js/whoop.js       WHOOP snapshot client, per-day store, trends, readiness, workouts, bioAge; Соғлиқ sahifalarini shu modul chizadi
-  js/profile.js     account sheet (D.profile): avatar (photo → /api/me/avatar, or initials), display name, provider/e-mail, stats, export, logout — opened from the header avatar button
-  js/nova.js        AI mentor chat (uses D.ai.ask)
-  js/settings.js    Созлаш: general (profile incl. birth year / goal / WHOOP Age) · habits · food targets · prayer · finance · data
-  js/history.js     Тарих: read-only archive browser over /api/history/* (month grid · year · chats · cards)
+  js/profile.js     profil kartasi (D.profile.cardHtml): avatar (photo → /api/me/avatar, or initials), display name, provider/e-mail, saqlanish belgisi, daraja, stats; D.profile.accountHtml — sahifa oxiridagi parol · rasm · chiqish. Sarlavhadagi avatar Sozlashni ochadi
+  js/levels.js      daraja va nishonlar (D.levels): ochko holatdan hisoblanadi, `S.awards` faqat «qachon berildi» ni saqlaydi; profil kartasidagi blok + to'plam oynasi; oyna tartibi: halqa + qolgan ochko → «Keyingi darajaga qanday yetasiz» (D.levels.todo — bugun har amal yana qancha ochko beradi, qator bosilsa o'sha sahifa) → haftalik sinov → nishonlar → yig'ilgan bo'limlar; yangi daraja/nishon — o'z qatlamidagi tabrik (konfetti, sanash), band oynani kutadi; `awards.level` = eng yuqori tabriklangan daraja, pastga tushmaydi
+  js/settings.js    Созлаш: profil kartasi, ostida yig'iladigan bo'limlar (D.ui.collapsed['set.<id>']) — tana · ilova va vaqt · ovqat me'yorlari · odatlar · kategoriyalar · ma'lumot va zaxira; har biri yopiq holda sarlavhasida xulosa aytadi
   js/onboard.js     first-entry wizard (D.onboard): name → sex → birth year → height → weight → activity → goal → WHOOP
   js/app.js         boot
   sw.js manifest.json
-  api.py            Flask: accounts (register/login/Google), per-uid /api/data, per-uid WHOOP OAuth+poller, /api/ai proxy, /api/food/*, /api/history/*
-  db.py             SQLite archive data/dash.db (WAL): day_facts / whoop_records / chat_threads+messages / ai_cards / ai_calls / state_versions — written on every save + WHOOP poll, never pruned
+  api.py            Flask: accounts (register/login/Google), per-uid /api/data, per-uid WHOOP OAuth+poller, /api/ai proxy, /api/food/*
+  db.py             SQLite archive data/dash.db (WAL): day_facts / whoop_records / chat_threads+messages / ai_cards / ai_calls / state_versions — written on every save + WHOOP poll, never pruned. FAQAT YOZILADI: o'qish uchun HTTP yo'l yo'q (2026-09-15 da olib tashlandi) — `db.version()` / `db.export_all()` yoki to'g'ridan-to'g'ri SQL
+  vault.py          shifrlash (AES-256-GCM): data/ dagi har bir fayl va dash.db mazmun ustunlari; kalit data/.enckey; CLI status/seal/unseal/cat — «Shifrlash» bo'limiga qarang
   legacy.py         one-off import of the old Шахсий export (Python port of D.migrateOld + existing-wins merge); deploy/import-legacy.sh runs it on the server
 ```
 
-Script order in index.html: core.js → i18n.js → prayer.js → ai.js → whoop.js → profile.js → today · tasks · health · finance · ibodat · nova → food.js → settings.js → history.js → onboard.js → app.js.
+Script order in index.html: core.js → i18n.js → prayer.js → ai.js → whoop.js → profile.js → today.js → health.js → ibodat.js → food.js → onboard.js → yusa-orb.js → app.js (finance · tasks · books · habits · yusa · settings kechiktirilib yuklanadi, levels.js — kutubxona sifatida).
 `ai.js`, `whoop.js` and `profile.js` are libraries, not views: they register no `D.view` and must load before the views that call them
 (`profile.js` reads the WHOOP profile name and is called by settings.js and app.js).
 `food.js` loads before `settings.js` (the food targets tab calls `D.food.recalcTargets`); `onboard.js` loads last so every view and `D.food` exist when it decides to open.
@@ -50,7 +50,7 @@ Suv faqat Бугун sahifasida yuritiladi; vazn WHOOP `body.weight_kilogram` da
 Data safety: `defaultState` / `normalize` / `D.merge` keep the `gym`, `learn`, `caffeine`, `stack`, `reviews` keys so old blobs and the archive stay intact — nothing in the UI reads them
 (Tarix still shows archived stack/caffeine facts on a past day's sheet, read-only).
 
-Bottom bar = the first four `primary` views by order: today 10 · health 20 · food 25 · prayer 40; everything else (finance, tasks, nova, history, settings) sits in «Yana».
+Bottom bar = `TABS` in core.js — beshta yorliq: today · prayer · health · finance · tasks (o'rtadagisi `MID`, ko'rinishi boshqacha, bosilishi bir xil). Yon panel (≥960px) `nav !== false` bo'lgan hamma bo'limni ko'rsatadi.
 
 ## Conventions (every module follows these)
 
@@ -61,7 +61,7 @@ Bottom bar = the first four `primary` views by order: today 10 · health 20 · f
    - `render()` returns an **HTML string** for the view. `mount()` runs after the HTML is in the DOM (bind sliders, start timers). `unmount()` clears timers.
    - Nav label comes from i18n key `nav.<id>`.
 3. **No inline `onclick`.** Use `data-act="name"` (+ any `data-*` params). Register handlers with
-   `D.act.name = (el, ev) => {...}`. Core delegates `click`, `change`, `input` (act on `data-act`, `data-change`, `data-input`) and `keydown` Enter on inputs with `data-enter="actName"`.
+   `D.act.name = (el, ev) => {...}`. Core delegates `click`, `change`, `input` (act on `data-act`, `data-change`, `data-input`) and `keydown` Enter on inputs with `data-enter="actName"`. Enter without `data-enter`: inside a modal/sheet it moves to the next field (a number field only to the next number field), on the last one clicks the primary button; on a page it blurs (change → save, keyboard closes). Number fields blur after their `data-enter` action too. `enterkeyhint` is set automatically. Decimal fields use `type="text" inputmode="decimal"` (type=number rejects «74,5»).
 4. **Mutate → `D.save()` → `D.rerender()`.** `D.save()` is debounced (localStorage immediately, server 700ms). `D.rerender()` re-renders only the active view and restores scroll. **Never rerender on text `input` events** — mutate + save only (focus must survive). For live numbers use `D.patch(id, html)`.
 5. **Escape everything** user-entered with `D.esc()`. Never put user text into attributes without `esc`.
 6. **Dates**: only `D.dayKey()`, `D.today()`, `D.addDays(key,n)`, `D.fmtDate(key,'short'|'long'|'weekday')`, `D.monthKey(key)`. Keys are `YYYY-MM-DD` computed in `S.settings.tz` (default Asia/Tashkent) with `S.settings.dayStart` hour boundary (default 0 → midnight). String comparison of keys is date comparison.
@@ -69,7 +69,7 @@ Bottom bar = the first four `primary` views by order: today 10 · health 20 · f
 8. **Deletion** → `D.remove(list, id, {label})` pushes an undo entry and shows a toast with «Bekor qilish». Habit-with-history deletion uses `D.confirm()` (promise → boolean). No native `confirm()/alert()`.
 9. **i18n**: all UI text via `D.t('key')` or `D.t('key', {n:3})`. Modules register their own keys with
    `D.i18n.add({ uz:{...}, uzk:{...}, ru:{...} })` at top of the IIFE. Key style: `today.title`, `tasks.empty`. Plural helper `D.t('x.count', {n})` where the string uses `{n}`.
-10. **CSS**: class prefix per module (`td-`, `tk-`, `hl-`, `wh-`, `pf-`, `fd-`, `fin-`, `ib-`, `nv-`, `set-`, `hs-`, `ob-`). Use tokens, never raw colors. Reuse the kit classes below before inventing new ones. Module CSS lives in `css/<module>.css` (linked from index.html and listed in sw.js SHELL); `app.css` holds the design system.
+10. **CSS**: class prefix per module (`td-`, `tk-`, `hl-`, `wh-`, `pf-`, `fd-`, `fin-`, `ib-`, `nv-`, `set-`, `hs-`, `ob-`). Use tokens, never raw colors. Reuse the kit classes below before inventing new ones. Module CSS lives in `css/<module>.css` (linked from index.html and listed in sw.js SHELL); `app.css` holds the design system. Yorliqlar oddiy jumla registrida — `text-transform: uppercase` va 800 vazn taqiqlangan (`tests/test_css_rules.js` qo'riqlaydi).
 11. **Numbers**: `D.fmtNum(n)`, `D.fmtMoney(n)` (uses `S.settings.currency`), `D.fmtPct`. Mono font for numbers: class `num`.
 12. **Never throw from render** — wrap risky parts; core catches and shows an error card for that view.
 
@@ -94,14 +94,15 @@ D.profileAge()              // age from profile.birthYear (self-updating), else 
 D.fmtNum(n[,dec])  D.fmtMoney(n)  D.fmtPct(x)  D.fmtTime(h,m)  D.fmtSigned(v[,dec])
 D.fmtHm(hours[,{sign}])  D.fmtMsH(ms)   // aniq davomiylik: «7 soat 32 daqiqa» — kasr soat hech qayerda ko'rsatilmaydi
 D.fmtMsS(ms)                            // soniyagacha: «12 daq 34 s» — puls zonalari va mashg'ulot davomiyligi
-D.toast(msg, {undo?:fn, ms?})  D.confirm({title,text,ok,danger}) → Promise<bool>
+D.toast(msg, {undo?:fn, ms?})  D.confirm({title,text,ok,danger}) → Promise<bool>  D.prompt({title,placeholder,value,ok,type:'number'|'password'}) → Promise<string|null>
 D.modal({title, body, actions:[{label,act,primary,danger}], onOpen})  D.closeModal()
 D.sheet(html)               // bottom sheet (mobile) / modal (desktop)
 D.remove(arr, id, {label})  // splice + undo toast
 D.undo.push({label, undo:fn})
 D.ic(name, size?)           // icon svg string (see icons list)
 D.chart.ring({pct, size, stroke, color, label, sub})       // svg string
-D.chart.bars({values, labels, color, height, target})
+D.chart.bars({values, labels, color, height, target})   // CSS ustunlar (.barc) — SVG emas:
+                           //   preserveAspectRatio="none" rx burchaklarni eniga cho'zib yuborardi
 D.chart.spark({values, color, height, fill})
 D.chart.heat({days, valueFn, cols})                        // heatmap
 D.chart.donut({parts:[{v,color,label}], size})
@@ -120,7 +121,8 @@ D.api(path, opts)           // fetch (same-origin session cookie), JSON
 D.serverEnabled()           // true when served by api.py (window.DASH_SERVER) or ?server=1
 D.me                        // {uid, name, email, provider:'google'|'password'|'owner'|'env'|null, avatar:mtime|null, since} from /api/me; null until known / after logout
 D.meRefresh()               // raw fetch of /api/me (a 401 must NOT open the login window) → sets D.me, D.device.uid/name, emits 'me:changed'; awaited inside D.pull() before 'pull:ok'
-D.profile.open()            // account sheet (js/profile.js); D.profile.avatarHtml(px, cls) img-or-initials, D.profile.initials(name), D.profile.hue(uid)
+D.profile.cardHtml() / .accountHtml()   // Sozlash sahifasi (js/profile.js); D.profile.avatarHtml(px, cls) img-or-initials, D.profile.initials(name), D.profile.hue(uid)
+D.prayerLog.get(k, p) / .set(k, p, 'alone'|'jamaat'|'qaza'|null)   // namoz holati (ibodat.js) — Trekkerdagi namoz jadvali shu orqali yozadi, namoz nomli odat ham belgilanadi
 D.auth.ask() / D.auth.logout()  // login window (polls /api/me while open: visibility, focus, pageshow, every 5 s ≤ 10 min — a Google flow finished elsewhere lets it through); logout clears localStorage + D.me and reloads
 D.emit(name, data) D.on(name, fn)   // simple event bus ('state:changed', 'view:changed', 'day:changed', 'habit:toggled' {habit,day,on} — today.js mirrors prayer habits into S.prayers, 'pull:ok' — a D.pull() that read the server copy; D.pulled stays true after the first)
 D.theme.set('dark'|'light'|'auto')
@@ -141,7 +143,7 @@ D.ai.enoughData(section)  D.ai.isFresh(section)  D.ai.md(text)
 ```
 Sections: `today`, `health`, `sleep`, `strain`, `food`, `finance`, `prayer` — one coach card per page
 (the old `age` section was folded into `health`; `hs.sec.age` stays so archived cards still render a label)
-(`history.js` SECTIONS mirrors this list for the Tarix «Kartalar» filter). Add one by extending `SECTIONS`, `QUESTION`,
+(Tarix ekrani 2026-09-10 da o'chirilgan, ya'ni bu ro'yxatni endi faqat `ai.js` o'qiydi). Add one by extending `SECTIONS`, `QUESTION`,
 the `sectionLines()` builder and the three `ai.hint.<section>` strings.
 
 ## WHOOP (js/whoop.js)
@@ -155,12 +157,13 @@ D.whoop.fillSleep()      // writes health[date].sleep (archive/Tarix read it; no
 D.whoop.workoutsOn(key)  D.whoop.workoutRows(key, {empty:false})   // Today's WHOOP workouts card + Health › strain
 D.whoop.bioAge()         // {est, chrono, delta, inputs:[{k,v,effect}]} | null — transparent 30-day estimate
 D.whoop.energy()         // {tdee, bmr, source:'measured'|'estimated', days, kg, cm, age, approx} | null
-                         //   ilovadagi YAGONA energiya manbai — Ovqat me'yori ham, Sog'liq sahifasi ham shundan.
-                         //   `measured`: so'nggi 28 kun ichida >= 10 ta WHOOP sikli bo'lsa, ularning qirqilgan
-                         //   o'rtachasi (past/yuqori 10 % tashlanadi). Bugun kirmaydi — sikl tugamagan.
-                         //   `estimated`: Mifflin-St Jeor x ACT_F[activity], ACT_F = [1.2,1.375,1.55,1.725,1.9,2.05].
-                         //   Yosh D.profileAge() dan. Vazn: profil -> WHOOP body -> so'nggi 60 kun health.weight.
-D.whoop.tdee()           // energy().tdee | null (eski chaqiruvlar uchun ingichka qobiq)
+                         //   Ilovadagi YAGONA energiya manbai — Ovqat me'yori ham, Sog'liq sahifasi ham shundan.
+                         //   `measured`: so'nggi 28 kunda >= 10 ta WHOOP sikli (>= 800 kkal) bo'lsa, ularning
+                         //   qirqilgan o'rtachasi — past/yuqori 10 % tashlanadi. Bugun kirmaydi: sikl tugamagan.
+                         //   `estimated`: Mifflin-St Jeor × D.activityFactor. Bo'y/yosh bo'lmasa 170 sm / 30 yosh
+                         //   o'rniga qo'yiladi va `approx: true` bo'ladi — me'yor butunlay yo'qolgandan yaxshi.
+                         //   Vazn: profil → WHOOP body → so'nggi 60 kun health.weight. Yosh — D.profileAge().
+D.whoop.tdee()           // energy().tdee | null
 
 // Соғлиқ sahifalari — health.js faqat shularni yig'adi:
 D.whoop.hero(key)        // recovery ring + verdict + strain gauge + plain-language notes
@@ -186,10 +189,13 @@ Masofa metrda, puls zonalari aniq davomiylikda.
 D.food.tile(dayKey)        // Today tile HTML ('' when nothing to show) → D.go('food')
 D.food.dayTotals(dayKey)   // {kcal,p,c,f} | null
 D.food.targets()           // {kcal,p,c,f,auto}
-D.food.recalcTargets()     // D.whoop.energy() -> TDEE; maqsad TDEE ning ulushi (lose −20 % [−700..−250],
-                           //   gain +12 % [+200..+500]), me'yor BMR dan past tushmaydi; oqsil lose 2,0 / keep 1,6 /
-                           //   gain 1,8 g/kg, yog' 25 %, uglevod qolgani. `targets()` manbani ham qaytaradi
-                           //   (`source`, `days`, `tdee`) — Созлаш → Овқат shuni ko'rsatadi.
+D.food.recalcTargets()     // Energiya D.whoop.energy() dan. Maqsad — TDEE ning ulushi: lose −20 %
+                           //   (−700…−250 oralig'ida), gain +12 % (+200…+500); me'yor BMR dan past
+                           //   tushmaydi. Oqsil lose 2,0 / keep 1,6 / gain 1,8 g/kg (qoida bitta
+                           //   joyda — food.js dagi GOAL jadvali, fillTargets ham shuni o'qiydi),
+                           //   yog' 25 %, uglevod qolgani. `D.food.targets()` manbani ham qaytaradi:
+                           //   `source` ('measured'|'estimated'), `days`, `tdee`, `bmr` — Созлаш →
+                           //   Овқат shuni yozib ko'rsatadi.
 ```
 Settings → Ovqat edits `S.food.targets`; a manual value sets `auto=false`, the «Avto» switch recalculates. Profile edits
 (height, weight, birth year, sex, activity, goal) call `recalcTargets()` while `auto` is on.
@@ -200,11 +206,164 @@ Trigger at boot: `D.serverEnabled() && S.settings.onboarded !== true && !(S.prof
 Full-screen steps in the auth-gate style; finish → `profile.*`, `food.targets.auto = true`, `settings.onboarded = true`, `D.save()`.
 Everything it asks is editable later in Settings → Profil.
 
+## Daraja va nishonlar (js/levels.js)
+
+```js
+D.levels.info()      // {xp, level, have, need, pct, next, max, rank, st}
+D.levels.day()       // BUGUN: {xp, goal, left, done, pct, cur, todayActive, src:[{id,ic,n}]}
+D.levels.history(n)  // [{k, xp}] — oxirgi n kun, eskidan yangiga (grafik uchun)
+D.levels.medals()    // [{id, fam, need, cur, done, got, on, pct, tier, ic}]
+D.levels.week()      // shu haftaning sinovi: {id, need, cur, pct, done, daysLeft}
+D.levels.cardHtml()  // Sozlash › profil kartasi ichidagi blok (profile.js chaqiradi)
+D.levels.tile()      // Bugun sahifasining tepasidagi qator (today.js chaqiradi)
+D.levels.open()      // to'liq to'plam — pastki oyna
+D.levels.check()     // yangi nishon/daraja bo'lsa: S.awards ga yozadi va tabriklaydi
+```
+
+**Uchta ufq, uchta maqsad.** Daraja yillar bilan o'lchanadi, nishon oylar bilan —
+ikkalasi ham bugun ertalab hech narsa demaydi. Shuning uchun **kunlik maqsad**
+bor: `day().goal` = oxirgi 28 kunning yozuvli kunlari **medianasi**, 60…300
+oralig'ida, o'nlikka yaxlitlangan. O'rtacha emas (bitta 400 ochkolik kun
+o'rtachani ko'tarib qolgan hamma kunni «yetmadi» qilardi) va **bugun hisobga
+kirmaydi** (maqsad kun davomida siljisa unga yetib bo'lmasdi). Tarix 5 kundan
+oz bo'lsa — 100. Yonida **hozirgi zanjir** (`day().cur`, `D.streak`) turadi —
+nishonlardagi «eng uzun» dan boshqa narsa: yo'qotish mumkin bo'lgan yagona
+raqam, va bugun hali yozilmagan bo'lsa sariq ogohlantirish chiqadi.
+
+**Ochko manbasi ham yoziladi** (`day().src`, `SRC` jadvali): «bugun +47» degan
+raqam o'zi hech narsa o'rgatmaydi. Faqat JAMI va BUGUNGI taqsimot saqlanadi —
+har kunga manbalar jadvali 600 kunda o'n mingta yozuv bo'lardi va o'tgan
+kunning taqsimotini hech kim so'ramaydi.
+
+**Hech narsa sanalmaydi — hammasi qayta hisoblanadi.** Ochko ham, nishon sharti ham
+har safar `D.S` dan hisoblab chiqiladi (`collect()`, ~600 kunga 5 ms, `state:changed`
+gacha keshlanadi). `S.awards` da faqat **qaysi nishon qachon berilgani** yotadi. Sabab
+bitta: saqlangan hisoblagich ikki qurilma birlashganda qo'shilib ketardi, hisoblangan
+son esa har doim ma'lumotning o'ziga teng. Odam belgini olib tashlasa ochko kamayadi —
+bu to'g'ri. **Berilgan nishon esa qaytarib olinmaydi:** `got` dan hech narsa o'chmaydi,
+`D.merge` da esa erta sana yutadi (0 = «tizim yoqilgunga qadar», har qanday sanadan erta).
+
+**Daraja** 1..50, narxi `3.6·n^2.95` (bir kunlik realistik hosil 100–250 ochko):
+1 oy ≈ 9, 1 yil ≈ 23, 5 yil ≈ 40, 10 yil ≈ 50. Har besh daraja — **martaba**
+(Niyat · Qadam · Odat · Intizom · Sabr · Matonat · Barqarorlik · Mahorat · Kamolot · Nur),
+rangi sovuqdan issiqqa o'sadi, oxirgisi `var(--text)` (qattiq oq yorug' temada ko'rinmasdi).
+
+**Ochko manbalari** har birida kunlik chegara bilan (`XP` jadvali): odat belgisi 10 (kuniga ≤ 80),
+namoz jamoat 12 / yakka 8 / qazo 3 (+20 besh vaqt to'liq bo'lsa), zikr har 33 tasiga 2 (≤ 30),
+ro'za 40, vazifa 6 (≤ 36), maqsad 120, kitob kuni 12, ovqat kuni 10, WHOOP kuni 6,
+mashg'ulot 12 (≤ 24), suv me'yori 6, kundalik 6, shukr 5 (≤ 15), moliya kuni 5,
+hafta yakuni 25, **mukammal kun +50**, **bajarilgan haftalik sinov +80**. Chegaralar
+shuning uchun: ularsiz bitta bo'limni «sog'ib» daraja olish mumkin bo'lardi va daraja
+hayotni emas, bitta ekranni ko'rsatardi.
+
+**Nishonlar** — 23 oila + 4 sirli, jami 93 ta bosqich (bronza · kumush · oltin · olmos).
+`id` = oila nomi + son (`kun365`, `namoz1000`) va u **hech qachon o'zgartirilmaydi**:
+`S.awards.got` ichida yozilgan. Yangi nishon qo'shish = `FAMS` ga bosqich qo'shish +
+`lv.f.*` / `lv.d.*` uchta tilda; o'lchov yangi bo'lsa `collect()` dagi `st` ga maydon
+va `FIELD` ga qator.
+
+Ikkita oila 2026-09-15 da qo'shildi: **Kuchli kun** (bir kunda ≥ 100 ochko — kunlik
+maqsadning nishondagi aksi, lekin **qat'iy** chegara bilan: o'zgaruvchan maqsaddan
+nishon berilsa, yomon oydan keyin maqsad pasayib nishon osonlashardi, ya'ni tizim
+o'zini aldardi) va **Tetiklik** (WHOOP tayyorligi ≥ 67 — ilovaning asosiy raqami shu
+paytgacha nishonlarda umuman yo'q edi; yagona oila, u ishlab emas **tiklanib** olinadi,
+shuning uchun ochko bermaydi).
+
+**Sirli nishonlar** (`secret: true`) — Sahar (30 kun ketma-ket bomdod jamoat bilan),
+To'liq oy (12 ta bir kun ham qoldirilmagan oy), Qaytish (30 kundan uzoq tanaffusdan
+keyin yana 30 kun), Ramazon (hijriy 9-oyda ≥ 27 kun ro'za, `D.hijri` dan — 29 emas
+27, chunki hijriy sana taqvim manbasiga va `hijriOffset` ga bog'liq va bir kunga
+siljisa nishon bir yil kechikardi). Sharti olinmagunicha ko'rsatilmaydi, to'plamda «?»
+bo'lib turadi. «Qaytish» ataylab bor: uzoq tanaffusdan qaytgan odam jazolanmasin,
+aksincha — aynan shu uchun nishon olsin.
+
+**Medal grafikasi butunlay CSS da** (`css/levels.css` › `.lv-med`): o'ymakor chekka
+`repeating-conic-gradient`, metall yuza `linear-gradient`, yorug'lik dog'i, qora siyoh
+belgi. SVG gradient ishlatilmadi — 84 ta nishon bitta oynada chizilganda har biriga
+ikkitadan `<defs>` kerak bo'lardi. Olinmagan medalning chekkasi — ilgarilash yoyi
+(`conic-gradient`, `--p` foizi HTML dan). Tabrikda `.pop` sinfi medalni aylantirib
+chiqaradi va bir marta yaltiratadi; `prefers-reduced-motion` app.css da to'xtatadi.
+
+**Haftalik sinov** — hafta kalitidan tanlanadi (`weekPick`), hech qayerda saqlanmaydi.
+Shu sabab o'tgan haftalarniki ham orqaga qarab aniq bilinadi va ikki qurilma
+birlashganda ziddiyat chiqmaydi. Bajarilgani `sinov` nishon oilasiga va +80 ochkoga
+aylanadi.
+
+**Jadval SANALI** (`WEEKLY_SETS`, har biri `{from, list}`; `weekPick` hafta kaliti
+`from` dan katta bo'lgan oxirgi ro'yxatni oladi). Ilgari bu yerda «yangi sinovni faqat
+jadval oxiriga qo'shing» degan qoida turardi va u **noto'g'ri edi**: `weekPick` hafta
+kalitini xeshlab `h % WEEKLY.length` qiladi, ya'ni ro'yxat uzunligi o'zgarishi bilan
+**qoldiq ham o'zgaradi** va o'tgan hamma haftaning sinovi almashadi — odam bajarib
+qo'ygan sinovi «bajarilmagan» bo'lib, `sinov` nishoni va +80 ochko orqaga ketardi.
+Oxiriga qo'shish buni to'xtatmaydi: `37 % 10 = 7`, lekin `37 % 15 = 7` emas.
+Endi har hafta o'z davridagi ro'yxatdan o'qiydi va tarix umuman o'zgarmaydi.
+**Yangi sinov qo'shish** = yangi ro'yxat + `from` si **kelasi hafta** bo'lgan yangi
+qator; eski qatorlarga hech qachon tegilmaydi. `WEEKLY` eksporti — eng oxirgi ro'yxat
+(hamma sinovning birlashmasi), tashqi o'quvchilar va testlar uchun.
+Hozir: `WEEKLY_1` 10 ta (2026-W38 gacha), `WEEKLY_2` 15 ta (2026-W39 dan; yangilari —
+`xp` (haftada 900 ochko, yagona universal sinov), `full5`, `media`, `thanks`, `money`).
+
+**Birinchi ishga tushirish.** `awards.init` false bo'lsa hamma bajarilgan shart jimgina
+`got[id] = 0` bilan yoziladi va bitta umumiy oyna ko'rsatiladi — aks holda 600 kunlik
+tarixi bor odam bir vaqtda 28 ta tabrik olardi. Keyingi nishonlar bittalab tabriklanadi.
+`check()` **`D.pulled` dan oldin ishlamaydi**: bo'sh holat ustida «birinchi ishga tushirish»
+qilib qo'yilsa, odam butun tarixini nishonsiz ko'rardi va uni qaytarib bo'lmasdi.
+
+**To'plam oynasining tartibi** javob beradigan savollar bo'yicha: martaba (qayerdaman) →
+**bugungi maqsad + ochko qayerdan** (bugun nima qilaman) → haftalik sinov (shu hafta nima) →
+**martabalar yo'li** (nima oldinda) → **eng yaqin uchta nishon** (endi nima) →
+**oxirgi 30 kun** (qanday ketyapman) → 39/93 (qancha yig'ildi) → oilalar → tushuntirish.
+Bugungi maqsad ataylab ikkinchi: u yagona **bugun** bajariladigan narsa, qolgani esa
+oylar va yillar bilan o'lchanadi. Tushuntirish oxirida: u ma'lumotnoma, birinchi
+o'qiladigan narsa emas.
+
+**Eng yaqin nishonlar — har oiladan bittadan.** Saralash faqat foiz bo'yicha bo'lsa bitta
+oilaning ikki bosqichi («100 kun» va «365 kun») yonma-yon tushardi, chunki ikkalasi bitta
+o'lchovdan oziqlanadi — uchta qatordan ikkitasi bir xil narsani aytardi. Lentada bu
+allaqachon shunday edi, ro'yxatda esa yo'q edi.
+
+**Rang = ma'lumot, bu yerda ham:** martaba chizig'i martaba rangida, nishon chizig'i o'z
+metallida, haftalik sinov ko'k (davom etyapti) yoki yashil (bajarildi). `--c` berilmagan
+joyda chiziq **oq emas**, `--text3` — oq ekranda hech narsadan farq qilmay «bu muhim» deb
+qichqiradi. Yorug' temada martaba ranglari MATN sifatida qoraytiriladi (laym oq fonda
+1.31:1 — o'qib bo'lmaydi); to'ldirish va medal metallari o'zgarmaydi.
+
+**Qayerda ko'rinadi:** Sozlash › profil kartasi ichida (`cardHtml`) va Бугун sahifasining
+tepasida, hafta chizig'idan keyin (`tile`, today.js `render()`). Bugun qatori ataylab
+ingichka va ataylab tayyorlik hero'sidan oldin — hero kunning asosiy raqami bo'lib
+qolishi kerak. Faqat bugungi kunda chiziladi: o'tgan kunni ochganda «bugun +N ochko»
+yolg'on bo'lardi.
+
+Bugun qatoridagi **chiziq — daraja emas, kunlik maqsad**. Daraja chizig'i u yerda
+deyarli qimirlamasdi (20-darajada bir kun 1 % ham surmaydi), ya'ni har kuni bir xil
+ko'rinardi va odam uni ko'rishdan to'xtagandi; kunlik maqsad esa har kuni noldan
+to'ladi. Daraja yo'qolgani yo'q — raqam belgida, martaba nomi yonida, to'liq hisobi
+oynada. Chiziq rangi ham shu sababdan maqsad rangida (ko'k/yashil), martaba rangida
+emas: bir xil narsa ilova bo'ylab bir xil rangda bo'lishi kerak.
+
+Yuklanishi: birinchi ekranga kerak emas, shuning uchun `core.js` dagi `LAZY_LIBS` orqali
+bo'sh vaqtda keladi (kechiktirilgan bo'limlar navbatidan keyin) va kelgach o'zi bir marta
+`check()` qiladi hamda Бугун ochiq bo'lsa uni qayta chizadi. CSS prefiksi `lv-`, amallar
+`lvOpen` / `lvMedal` / `lvOpenFromModal`.
+Bugun ekranidagi qator `[data-view="today"]` ichida tekislanadi (fon va chegara yo'q, faqat
+ajratgich): o'sha ekran «jimjit va nafis» ko'rinishga o'tgan, va to'ldirilgan quticha u yerda
+yagona bo'lib ajralib turardi.
+
+Sinov: `node tests/test_levels.js` (130 ta tekshiruv, haqiqiy `core.js` bilan).
+Ular orasida eng muhimi — **jadval sanali bo'lgani uchun o'tgan 60 haftaning sinovi
+o'zgarmasligi**: bu aynan odam yig'ganini yo'qotadigan xato edi.
+Ko'rinish brauzerda tekshiriladi — Chrome CDP orqali headless, 412px, 600 kunlik sun'iy holat
+bilan: qorong'i va yorug' tema, tabrik, bo'sh holat, WCAG kontrasti, kesilish va gorizontal
+sirg'alish. Uchta ko'rinish nuqsoni (tishlar, panjara, lenta) va yorug' temadagi kontrast
+xatosi aynan shu bilan topilgan — kod o'qib topilmasdi.
+
 ## Kit classes (app.css)
 
 Layout: `.page`, `.section`, `.section-title`, `.grid2`, `.grid3`, `.row`, `.stack`
 Card: `.card`, `.card-head`, `.eyebrow`, `.kpi`, `.kpi-num`, `.kpi-total`, `.kpi-label`, `.card.all-done`
 Tiles: `.stat-grid`, `.stat`, `.stat-num`, `.stat-label`, `.zone.z-good|z-warn|z-bad`
+Plitka (2×2): `.tiles` > `button.card.tile` > `.tile-head` (`.tile-lab` + `.ic`) · `.tile-state(.good|.warn|.bad|.sleep|.dim)` · `.tile-glow` | `.tile-arc` · `.tile-big` > `small` (js/today.js `tile()`)
+Qobiq: `.nav` (4 yorliq) + `#fab` (Tana; core.js `renderNav` belgisini va `.on` holatini yangilaydi); holat so'zi `.c-state(.good|.warn|.bad|.sleep|.dim)`; belgi doirasi `.ico`
 List: `.list`, `.li` (row), `.li.done`, `.chk` (custom checkbox `<input type=checkbox class=chk>`), `.li-text`, `.li-meta`, `.li-del`, `.empty`
 Chips: `.pill`, `.pill.on`, `.tag` (+ `style="--c:var(--ruh)"`), `.streak`
 Controls: `.seg` > `button.on`, `.inp`, `.sel`, `.ta`, `.btn` (primary), `.btn.ghost`, `.btn.danger`, `.btn.sm`, `.btn.icon`, `.dashed`, `.slider`, `.stepper`, `.emoji-row`
@@ -212,7 +371,7 @@ Progress: `.bar` > `.bar-fill`, `.segbar` > `.seg-on`, `.ring-wrap`
 Typography: `.num` (mono tabular), `.muted`, `.small`, `.title`
 Misc: `.hm` heatmap, `.spark`, `.tabs` (sub-nav pills, horizontally scrollable)
 
-Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --info --accent --glass --inset --line --line2 --focus --r --r-sm --r-lg --sh --ruh --aql --qalb --tana --boshqa --aralash --font --mono`.
+Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --info --accent --accent-text --accent-soft --accent-glow --card-bg --card2 --track --glass --inset --line --line2 --focus --r --r-sm --r-lg --r-tile --nav-h --sh --ruh --aql --qalb --tana --boshqa --aralash --font --mono`. Ko'k (`--accent`) faqat to'ldirish; ko'k matn — `--accent-text`.
 
 ## Data model (`D.S`, persisted as localStorage `dash.v2` and server `/api/data`)
 
@@ -231,7 +390,9 @@ Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --
  counts:{ 'YYYY-MM-DD':{habitId:n} },           // quantified habits
  notes:{ 'YYYY-MM-DD':text },
  gratitude:[ {id,date,text} ],
- tasks:[ {id,text,date,done,doneAt,priority:1|2|3,createdAt,goalId} ],
+ tasks:[ {id,text,date,done,doneAt,priority:1|2|3,createdAt,goalId,
+          // ixtiyoriy — 2026-09-14 dan oldingi yozuvlarda umuman yo'q, o'quvchi ularsiz ham ishlashi shart
+          time?:'HH:MM', note?:string, sub?:[{id,text,done}], repeat?:{unit:'d'|'w'|'m'|'y',n:1..99} } ],
  goals:[ {id,text,dir:'shaxsiy'|'oilaviy'|'ish'|'moliyaviy',priority,year,done,doneAt} ],
  prayers:{ 'YYYY-MM-DD':{ bomdod:null|'jamaat'|'alone'|'qaza'|'missed', peshin, asr, shom, xufton } },
  dhikr:{ 'YYYY-MM-DD':{ total:n, sessions:[{name,n,ts}] } },
@@ -252,10 +413,26 @@ Tokens: `--bg --bg2 --bg3 --text --text2 --text3 --success --warning --danger --
  nova:{ threads:[{id,ts,messages:[{role,content,ts}]}] },
  whoop:{ connected:false, lastSync, cache:{}, days:{ 'YYYY-MM-DD':{recovery,hrv,rhr,spo2,skin,sleepH,sleepPerf,sleepEff,sleepCons,resp,stages,bedTs,wakeTs,strain,kcal,hrAvg,hrMax} }, workouts:[{id,k,start,end,sport,strain,kcal,hrAvg,hrMax,meters,mins}], body:{heightCm,weightKg,maxHr} },
  ai:{ cards:{ '<section>':{day,text,ts} }, log:[{section,day,text,ts}] }
+ awards:{ got:{ '<medalId>': 'YYYY-MM-DD' | 0 }, level:n, init:bool }   // nishonlar — js/levels.js; 0 = tizim yoqilgunga qadar olingan
 }
 ```
 
 Device-only (never synced): localStorage `dash.ui` (active view, sub-tabs, filters, viewDate) and `dash.device` (whoop tokens if client-side, nova key if BYOK).
+
+### Vazifa yozuvining ikkita o'zgarmas qoidasi
+
+`levels.js` ochkoni vazifadan **faqat `done` va `doneAt` orqali** hisoblaydi, shuning uchun:
+
+1. **`done` — «odam bajardim dedi»**, boshqa hech narsa emas. Quyi vazifalar (`sub`) to'liq
+   belgilangani uni `true` qilmaydi, va bitta vazifa — bitta vazifa: quyi vazifalar alohida
+   sanalmaydi, aks holda «100 ta vazifa» nishonini beshta haqiqiy ish bilan olish mumkin bo'lardi.
+2. **`doneAt` — ms belgisi** (`Date.now()`), sana satri emas. `levels.js` uni `new Date(+ts)` bilan
+   o'qiydi: satr bo'lsa `NaN` chiqadi va ochko jimgina noto'g'ri kunga yoziladi, xato berilmaydi.
+
+Takrorlanuvchi vazifa bajarilganda joriysi bajarilgan bo'lib **qoladi** (ya'ni ochkosini oladi) va
+keyingi sana bilan **yangi yozuv** tug'iladi — `tasks.js › spawnRepeat`. `db.py › _facts_of` kunlik
+arxivga faqat `id,text,date,doneAt,priority,goalId` ni yozadi; ixtiyoriy maydonlar to'liq holicha
+foydalanuvchi blobida va `state_versions` da saqlanadi, ya'ni tiklashda yo'qolmaydi.
 
 ## Old-data migration (core.js `D.migrateOld(json)`)
 
@@ -272,7 +449,8 @@ Prayer habits (names ПЕШИН/АСР/ШОМ/БОМДОД/ХУФТОН) stay as
 ## Backend contract (api.py)
 
 - `GET /api/data` → full state; `POST /api/data` body = full state (server merges per top-level key using `meta.updatedAt`; returns `{ok, updated}`)
-- `GET /api/health`
+- `GET /api/health` → config flags, always public. The `data` block (states, bytes, backups, `lastBackup`, `lastDbBackup`, `offsite:{at,ageDays}`, `integrity`, `maintAt`, `vacuumAt`, `diskFreeMb`, `db:` row counts, `warn:[]`) is added only for a signed-in session or a request from `127.0.0.1` (deploy scripts) — an open URL must not report disk size and account counts.
+- `GET /api/export/full[?photos=0]` → ZIP: `holat.json` (live state) · `arxiv.json` (`db.export_all` — every day fact, WHOOP record, chat and card, including `goneAt`/`deletedAt` ones, no 400-day cap) · `profil.json` (no password hash) · `rasmlar/` (avatar + food photos) · `O'QING.txt`. Built in a temp file under `data/`, streamed, then removed; stale `export-*.zip` older than an hour are swept on the next call. The one answer to "does my data outlive this app".
 - `GET /api/me` → `{uid, name, email, provider, avatar, since}` (401 `{error:'auth_failed', passcode:true}` when signed out); `POST /api/me {name}` → display name (who.json only, the login name is untouched; 400 `bad_name`)
 - `GET /api/me/avatar` → image bytes (private, ETag = mtime, 304, 404 `not_found`); `POST /api/me/avatar {image: dataURL|base64}` ≤ 1.5 MB JPEG/PNG/WebP (413 `too_large`, 400 `bad_image`) → `{ok, avatar:mtime}`; `DELETE` → `{ok}` and a later Google login does not bring the Google picture back
 - `GET /api/whoop/login` → redirect to WHOOP; `GET /api/whoop/callback` → stores tokens server-side keyed by uid → redirect `/#health`
@@ -281,16 +459,166 @@ Prayer habits (names ПЕШИН/АСР/ШОМ/БОМДОД/ХУФТОН) stay as
 - `POST /api/food/analyze` `{image?: dataURL jpeg/png ≤ 1.5 MB, text?, note?, lang}` → `{ok, items:[{name,grams,kcal,p,c,f}], total:{kcal,p,c,f}, confidence, advice, photo:id|null}`; errors `ai_not_configured` 501, `bad_image` 400, `ai_failed` 502. `GET /api/food/photo/<id>` → image/jpeg (auth, per-uid `data/<uid>.food/`).
 - All routes require a signed-in session (name+password, Google) unless `MA_DEV=1`.
 
-### History archive (`/api/history/*`, read by js/history.js only — never by other modules)
-Server-side SQLite archive (`db.py`) filled from every state save and WHOOP poll; the client never keeps it in `D.S`.
-All per-uid, `from`/`to` are day keys, ranges capped at 400 days, default = last 31 days.
-The blob is the whole state: a fact that disappears from it (habit un-ticked, note cleared) gets `day_facts.gone_at` and drops out of every reader; it comes back untouched when the blob has it again. No cross-request hash cache — each `archive_state` reads the live hashes from the DB, so two gunicorn workers see each other's writes. Day keys use Tashkent time with `dayStart = 0`.
-- `GET /api/history/range` → `{first, last, days, whoopFirst, threads}`
-- `GET /api/history/days?from&to` → `{days:{ 'YYYY-MM-DD': {health, habits:[habitId], counts:{id:n}, prayers, note, gratitude:[{id,text}|text], food:[{id,ts,name,grams,kcal,p,c,f}] (no photos), stack:{itemId:ts}, caffeine:[{name,mg,ts}], tasks:[{id,text}|text]} }}`
-- `GET /api/history/whoop?from&to` → `{recovery:[{ts,recovery,hrv,rhr}], sleep:[{start,end,nap,sleepH,sleepPerf}], cycle:[{start,end,strain,kcal}], workout:[{id,start,end,sport,strain,kcal,mins}]}` — raw server records; the client keys days exactly like `whoop.js`: recovery → `ts`, sleep → `end`, cycle → `start + 12h`, workout → `start` (all through `D.dayKey`); `whoop_records.day_hint` is filed by the same rule (`db.whoop_day`), so a cycle that starts before midnight lands on its waking day.
-- `GET /api/history/months?year=YYYY` → `{months:{ 'YYYY-MM': {days, habitPct, sleepH, recovery, strain, kcal, kcalEaten, workouts, weightStart, weightEnd, notes} }}` — `kcal` = WHOOP burn, `kcalEaten` = logged meals, both daily averages
-- `GET /api/history/chats?q&limit&before` → `{threads:[{id,ts,title,count,deleted}]}`; `GET /api/history/chats/<id>` → `{id,ts,title,messages:[{idx,ts,role,content}]}`
-- `GET /api/history/cards?section&from&to&limit` → `{cards:[{section,day,ts,text}]}` — newest first, at most 2000 (`db.CARDS_MAX`)
-- `POST /api/history/restore-thread {id}` → `{ok, thread?:{id,ts,messages}}` — re-inserts the thread into the blob; the client also adds it to `D.S.nova.threads` locally and opens Nova on it.
-- `GET /api/history/versions` → `{versions:[{id,savedAt,size}]}`, `GET /api/history/versions/<id>` → the blob.
-Client conventions: responses cached in module memory keyed by uid+url (ranges touching today expire after 2 min); skeleton while loading, offline card with retry on error; selector state in `D.ui.filters.hist = {y, m}`; sub-tabs `D.ui.sub.history` ∈ month|year|chats|cards; CSS prefix `hs-`, actions `hs*`.
+### Arxiv (`db.py`, `data/dash.db`) — faqat yoziladi
+Har bir saqlashda va WHOOP so'rovida to'ldiriladi; mijoz uni `D.S` da saqlamaydi. Blob — butun holat:
+undan yo'qolgan fakt (odat belgisi olindi, izoh o'chdi) `day_facts.gone_at` oladi va blob uni qaytarsa,
+o'zi qayta tiriladi. Kun kaliti Toshkent vaqti, `dayStart = 0`.
+
+**2026-09-15:** `/api/history/*` yo'llari va `db.py` dagi o'quvchilar (`range/days/whoop/months/chats/cards/versions/restore_thread`)
+olib tashlandi — Tarix ekrani 2026-09-10 da o'chirilgandan beri ularni hech kim chaqirmasdi. Arxivning o'zi
+va yozuvchilari (`archive_state`, `archive_facts`, `record_whoop`, `record_ai_call`) joyida: ma'lumot to'planishda davom etadi.
+Qaytarib olish yo'llari: `db.version(uid, vid)` (holat nusxalari), `db.export_all(uid)` (`GET /api/export` shuni beradi)
+va `sqlite3 data/dash.db`. Yana ekran kerak bo'lsa — o'quvchilarni git tarixidan qaytarish mumkin (`git log -S`).
+
+## Durability — the account has to outlive the app
+
+The question this section answers: *if someone opens an account today, is their data still whole in twenty years?*
+
+**Where the truth lives.** Three layers, each with a different job:
+1. `data/<uid>.json` — the live blob, source of truth for *editing*. Written with `_write_atomic`: write → `fsync` → `replace` → `fsync` the directory. A power cut can leave the old file or the new one, never half of either.
+2. `data/dash.db` — source of truth for the *past*. Nothing in the app deletes from it; a disappeared fact gets `gone_at`, a deleted chat gets `deleted_at`. The only exception is `state_versions` sparsening.
+3. `data/backups/` — daily copies of both.
+
+**Size.** Measured 2026-09-14: `state_versions` was 72 % of the database (49 rows, 49 KB each) while the entire real archive — 587 days of facts, WHOOP records and chats — was 0.2 MB. So blob snapshots are stored zlib-compressed (`ZMAGIC = b"DZ1"`, ~8×) and `_loads` reads compressed and plain rows alike, which makes the change reversible and old databases readable without migration. `compact()` squeezes leftover plain rows in batches of 40 — never all at once, because the droplet has 458 MB of RAM.
+
+**Retention is generational** (`db.prune_generational`, used for `dash-*.db.gz` and for each `<uid>-*.json`):
+14 days daily · 8 weeks weekly · 24 months monthly · then **one per year, forever**. A 2026 copy is still there in 2046, and the file count stays under ~70. The old rule ("keep the last 14/30") made any mistake older than two weeks unrecoverable.
+
+**A backup is verified before it replaces anything.** `backup_db` copies via the SQLite backup API, runs `quick_check` and a row count on the *copy*, gzips it, and only then prunes. `_maint_tick` runs `db.integrity()` first: if the database is corrupt **no copy is taken at all**, so a corrupt database cannot overwrite the healthy history. `VACUUM` runs every 30 days. The result is written to `data/.maint.json` and surfaces in `/api/health`.
+
+**The real risk is the single disk.** Everything above still lives on one droplet volume. The only protection is a copy taken off the server:
+`deploy/pull-backup.ps1` (Windows, scheduled daily by `deploy/schedule-backup.ps1`) or `deploy/pull-backup.sh`. Both verify the archive (`tar -tzf` walks the whole gzip stream), apply the same generational rule locally, and write `data/.offsite` on the server. `/api/health` reports its age and Созлаш → Ma'lumot turns the row red past 7 days — because a backup that quietly stopped is the same as no backup.
+Session key (`.secret`) and WHOOP tokens are deliberately excluded: restoring means everyone signs in again, and no long-lived credential sits in a backup archive.
+The encryption key (`.enckey`) is excluded too — see «Shifrlash» below: its copy lives next to the archives on the PC (`KALIT-dash-enckey.txt`), never inside one.
+
+**Portability.** `GET /api/export/full` hands the user a ZIP of plain JSON and JPEG with a README in Uzbek. No part of it needs this app to be readable.
+
+Guarded by `tests/test_durability.py` (39 checks): round-trip through compression, old plain rows still readable, 20-year generational retention, corrupt database refused, deleted records present in the export, health warnings appearing and clearing.
+
+## Shifrlash — disk yoki zaxira begona qo'lga tushsa (2026-09-18)
+
+`vault.py`, AES-256-GCM. Kalit — `data/.enckey` (`dashkey1:<base64>`, 0600) yoki `MA_ENC_KEY`.
+Belgisi (`kid`) — `data/.vault.json`; u zaxiraga kiradi, kalit esa YO'Q.
+
+**Nima yopiladi.** `data/` dagi har bir fayl: `<uid>.json`, `backups/*.json`, `backups/dash-*.db.gz` (butunligicha),
+`users.json`, `*.who.json`, `*.whoop.json`, `*.whoop.cache.json`, `*.avatar`, `*.food/*.jpg`, `.corrupt`/`.migrated` nusxalar.
+`dash.db` — mazmun ustunlari (`db.SEALED_COLS`): kunlik faktlar, holat nusxalari, WHOOP, suhbatlar, kartalar, ism/email.
+Ochiq qoladi: `uid`, kun, tur, vaqt belgilari, hajm (kim va qachon, lekin nima emas); xizmat fayllari
+(`.secret`, `.maint.json`, `.fails.json`, `.offsite`, qulflar — `vault.PLAIN_*`). Arxiv xeshlari kalitli (`vault.mac`):
+oddiy SHA1 bir kunlik namoz holati kabi kichik qiymatni sanab topishga imkon berardi. `secure_delete=ON` + ko'chirishdan
+keyin `VACUUM` — eski ochiq matn bo'sh sahifalarda qolmaydi.
+
+**Nimadan himoya qilmaydi.** Ishlab turgan serverga root bo'lib kirgan odam: kalit ham o'sha diskda (ilova AI, WHOOP va eksport
+uchun ma'lumotni o'qishi shart). Brauzerdagi `localStorage` (`dash.v2`) ham ochiq — u qurilmaning o'zida.
+
+**Format.** `DENC1 · kid(8) · nonce(12) · shifr+teg(16)`, sarlavha AAD. Magic'siz baytlar — eski ochiq ma'lumot, shundoq
+qaytadi: shuning uchun yangilanish ko'chirishsiz ham o'qiydi. Fayllar tasodifiy nonce bilan; baza ustunlari `det=True`
+(nonce = HMAC(matn)) — `json IS NOT excluded.json` kabi SQL solishtirishlari shifr ustida ishlashi uchun.
+
+**Ko'chirish.** `api.py` ishga tushganda `.lock.vault` ostida: `vault.seal_tree` (har fayl: shifrla → qayta ochib asl bilan
+solishtir → atomar almashtir, mtime va ruxsat saqlanadi) va `db.seal_all` (bitta tranzaksiya, xeshlar qayta hisoblanadi,
+`vault_meta.sealed` belgisi). Ikkalasi ham takror chaqirilsa — no-op. Hech bir fayl yoki qator o'chirilmaydi.
+Haqiqiy zaxirada tekshirilgan (2026-09-17 nusxasi): 68 fayl va 1528 ta ustun, eksport va holat nusxalari aynan bir xil.
+
+**Kalit yo'qolsa — ma'lumot ham yo'q.** Shuning uchun ilova ataylab qattiq:
+- kalit yo'q, lekin `.vault.json` yoki shifrlangan fayl bor → yangi kalit YARATILMAYDI, ilova ishga tushmaydi;
+- kalit boshqa (`kid` mos emas) → ishga tushmaydi;
+- bitta fayl ochilmasa `VaultError` — `load_data`/`_reg_load`/`who_load`/`whoop_tokens` uni «buzilgan fayl, bo'sh holat» deb
+  yutmaydi (aks holda mijoz bo'sh holat bilan ustidan yozardi).
+
+**Operatsiyalar.**
+- Kalit nusxasi (bir marta, keyin qog'oz/parol menejeriga ham): `./deploy/enc-key.sh root@IP get` → `~/dash-zaxira/KALIT-dash-enckey.txt`.
+  `pull-backup.*` nusxa yo'q bo'lsa har safar eslatadi.
+- Yangi serverga tiklash: avval `enc-key.sh … put <fayl>` (mavjud kalit ustidan yozmaydi, `kid` ni tekshiradi), keyin `restore-backup.sh`
+  (u ham `kid` ni solishtiradi).
+- Zaxirani kompyuterda o'qish: `python vault.py cat data/<uid>.json --key KALIT-dash-enckey.txt`; `.db.gz` → `cat` + `gunzip`.
+- Holat: `enc-key.sh … status` yoki `/api/health` → `data.vault`, Созлаш → «Shifrlash» qatori; ochiq fayl qolsa `warn: ["vault"]`.
+- **Orqaga qaytish** (shifrlashdan oldingi kodga): `systemctl stop shaxsiy; sudo -u shaxsiy .venv/bin/python3 vault.py unseal data` —
+  hamma fayl va ustun baytma-bayt ochiq holiga qaytadi. Eski kod shifrlangan faylni «buzilgan» deb chetga olardi — unsealsiz qaytarmang.
+- `cryptography` paketi majburiy: `push.sh` qayta ishga tushirishdan oldin `pip install -r requirements.txt` qiladi.
+
+Guarded by `tests/test_durability.py` → «Shifrlash» bo'limlari (diskda ochiq matn yo'q, ko'chirish, unseal, noto'g'ri kalit).
+
+## Verifying a deploy — "200" is not "works"
+
+Written after v98 (2026-09-15) shipped a live TypeError that every check passed.
+
+**What happened.** A dead-code sweep (`d3b6b99`) removed `D.icons = P` from
+`core.js` as unreferenced. Independently, the icon work (`507c446`) had
+`settings.js:732` read `D.icons[c.icon]` unguarded. **Both commits were
+correct on their own; the break only existed once they were merged.** The
+deploy was verified by requesting every path in `sw.js` and confirming each
+returned `200` — and it did. The file existed. The *link between two files*
+was broken, and an HTTP status code cannot see that.
+
+**Why the sweep was not careless.** `d3b6b99` grepped the tree it could see
+and `D.icons` genuinely had no readers in it. The reader arrived in `507c446`
+— written **two minutes and forty-four seconds later on a parallel branch**,
+both diverging from `0aa4811`. Neither commit could see the other; the defect
+was created by the merge, not by either author. So: *before deleting an
+export as dead, grep every branch on `origin`, not just your working folder.*
+`git grep <symbol> $(git for-each-ref --format='%(refname)' refs/remotes)`.
+In a repository where several sessions commit within the same minute, "no
+references" is a statement about one moment in one branch.
+
+**And it never looked like an error.** `settings.js:1086` wraps each card in
+`safe()`, which catches, logs and returns `''`. So the throw produced no
+banner, no crash, no visibly broken layout — the "Moliya kategoriyalari" card
+simply was not there. A screenshot looks fine unless you already know what
+should have been in it. Expect silent disappearance, not a stack trace.
+
+The same blind spot had already let v96 and v97 ship without `js/install.js`:
+the 49 stale files all answered `200` perfectly well.
+
+**Three checks, three different questions. Run all three.**
+
+1. **Can the service worker install?** Request every path cached by `sw.js`.
+   One `404` aborts the whole install and the browser silently stays on the
+   previous version — no error anywhere. Note the list is in *three* places:
+   `ASSETS` (42), `FONTS` (4), and the shell line (`'./'`, `'./index.html'`,
+   `'./manifest.json'`, `'./icons/icon.svg'`). 50 paths, not 46 — and the
+   shell four are what make the app open offline at all.
+2. **Is the content the intended content?** Pull the shipped files back off
+   the server and diff them against the deployed commit byte for byte.
+   Normalise CRLF first. Expect exactly one difference: `index.html`, and
+   only on the `?v=` lines, which `push.sh` rewrites. Anything else is
+   unexplained until you explain it.
+
+   **Every file in the comparison tree must come from the server — not one
+   of them from the working folder.** Filling gaps locally (`app.css`,
+   `fonts/`, `icons/`) mixes a half-edited file from another session into
+   what you are calling "live", and the method then reports a defect it
+   created itself. That happened on 2026-09-15: a missing "Namozlar" label
+   was reported as a live regression when the real cause was an `app.css`
+   being edited in the folder at that moment. A false positive that looks
+   convincing is worse than no check at all.
+
+       ssh … "cd /opt/shaxsiy && tar cz js css fonts icons app.css \
+              index.html sw.js manifest.json" | tar xz -C <dir>
+3. **Does it run?** Checks 1 and 2 are both static, and neither could have
+   caught the `D.icons` break: the file was present *and* byte-identical to
+   the commit that contained the bug. Only executing the code finds a broken
+   link between two files, and this is the check worth the most.
+
+   Open the app in a real browser and visit the screens the release touched,
+   with the console open. When the app needs a login you do not have, there
+   is a cheap substitute: pull the shipped files off the server, render the
+   same module against the same seed data under both the live copy and the
+   deployed commit, and compare the resulting DOM (`--dump-dom`). That is how
+   this bug was caught — live produced 0 category rows, `HEAD` produced 2.
+   Count what should be on the screen; do not judge by eye.
+
+**Deploy from a clean checkout, never from the working folder.** `push.sh`
+sends the folder, so anything half-written — by you or by another session
+sharing the directory — ships too. `git clone --no-hardlinks` the repo to a
+temp path, `checkout` the commit, run `push.sh` from there: only committed
+work goes out, and nobody is pressured into a premature commit. One cost to
+know: with no `.git` alongside it, `push.sh`'s own uncommitted-file guard
+passes silently, so check `git rev-list --count HEAD..origin/<branch>` → `0`
+by hand before pushing.
+
+## Data safety (never lose data)
+- Server `POST /api/data` runs `_protect(stored, incoming)`: top-level sections, settings/profile keys, `settings.onboarded` and an all-empty profile core are restored from the stored copy (a buggy or stale client cannot drop them). User-deletable things (habits, tasks, day marks) are not blocked.
+- A drop of ≥20 records and ≥15% (or any `?replace=1`) pins the previous state in `state_versions` (`pinned=1`, `note`): never overwritten, never compacted. A shrinking blob never overwrites the last version either.
+- `GET /api/versions` (summaries) and `POST /api/versions/<id>/restore` (current state is pinned first) back Settings › Data › «Oldingi holatga qaytish».
+- Plus: daily generational JSON backups, day_facts archive (soft delete), daily DB backup + integrity check, offsite pull. Tests: `tests/test_durability.py`.

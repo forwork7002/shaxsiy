@@ -17,17 +17,17 @@ shaxsiy/  (bu repoda fayllar ildizda)
   js/core.js                         — yadro: saqlash, sanalar, i18n, router, UI kit, sync, migratsiya
   js/i18n.js  js/prayer.js           — matnlar; namoz vaqtlari + hijriy
   js/ai.js  js/whoop.js              — kutubxonalar: AI kartalar (D.ai), WHOOP (D.whoop) — view emas
-  js/today.js health.js food.js ibodat.js        — pastki panel: Bugun · Sog'liq · Ovqat · Ibodat
-  js/finance.js tasks.js nova.js history.js settings.js — «Yana»: Moliya · Vazifa · Nova · Tarix · Sozlamalar
+  js/today.js health.js food.js ibodat.js        — Asosiy · Sog'liq(Ovqat) · Ibodat
+  js/finance.js tasks.js habits.js books.js levels.js yusa.js settings.js — Moliya · Vazifa (Odat · Kitob · Maqsad) · daraja · Yusa AI · Sozlash
   js/onboard.js                      — birinchi kirish: ism, jins, tug'ilgan yil, bo'y, vazn, faollik, maqsad, WHOOP
   js/app.js  sw.js  manifest.json    — ishga tushirish, PWA
   api.py  db.py  legacy.py  requirements.txt  start.sh .env.example — server
   ARCHITECTURE.md                    — kod qoidalari (yangi bo'lim qo'shish uchun)
 ```
 
-Olib tashlangan (2026-09): `gym` (Sport jurnali — WHOOP mashg'ulotlari o'rnini bosdi), `learn` (Ta'lim), `stats`
-(oy/yil statistikasi Tarixda), Sog'liq ichidagi «Kofein» va «Stack». Eski ma'lumot blob va arxivda saqlanib
-qoladi (`core.js` kalitlarni tashlamaydi), lekin interfeysda o'qilmaydi.
+Olib tashlangan (2026-09): `gym` (Sport jurnali — WHOOP mashg'ulotlari o'rnini bosdi), `learn` (Ta'lim), `stats`,
+Tarix ekrani (2026-09-10) va uning `/api/history/*` yo'llari (2026-09-15), Sog'liq ichidagi «Kofein» va «Stack».
+Eski ma'lumot blob va arxivda saqlanib qoladi (`core.js` kalitlarni tashlamaydi), lekin interfeysda o'qilmaydi.
 
 ## Ishga tushirish
 
@@ -40,8 +40,58 @@ cp .env.example .env   # MA_USERS / MA_PASSCODE, Google, WHOOP, AI kalitlari
 ```
 Nginx/Caddy orqali HTTPS bilan chiqaring. Lokal test: `.env` da `MA_DEV=1` → `http://127.0.0.1:8081/?server=1`.
 
-Ma'lumot `data/<uid>.json` da, kunlik zaxiralar `data/backups/` da (30 kun), arxiv `data/dash.db` (SQLite),
+Ma'lumot `data/<uid>.json` da, kunlik zaxiralar `data/backups/` da, arxiv `data/dash.db` (SQLite),
 ovqat rasmlari `data/<uid>.food/`. Eski `data/data.json` bo'lsa birinchi so'rovda ko'chiriladi.
+
+## Ma'lumot saqlanishi
+
+Hisob ochgan odamning ma'lumoti yillar o'tsa ham butun qolishi kerak. Shuning uchun:
+
+**Serverda, o'z-o'zidan.** Har kuni: bazaning butunligi tekshiriladi (`PRAGMA quick_check`) → arxiv
+siqiladi → nusxa olinadi va nusxaning o'zi ochib tekshiriladi → oyiga bir marta `VACUUM`.
+Baza buzilgan bo'lsa **nusxa umuman olinmaydi**, ya'ni buzuq nusxa sog'ining ustiga chiqmaydi.
+Nusxalar avlodlarga ajratiladi: 14 kun har kuni · 8 hafta haftasiga bitta · 24 oy oyiga bitta ·
+undan narisi **yiliga bitta va abadiy**.
+
+**Serverdan tashqariga — bu eng muhimi.** Yuqoridagilarning hammasi bitta diskda yotadi.
+Droplet yo'qolsa hammasi birga ketadi. Shuning uchun nusxani tashqariga chiqarish kerak:
+
+```powershell
+.\deploy\schedule-backup.ps1     # bir marta: har kuni 21:00 da o'zi tortadi
+.\deploy\pull-backup.ps1         # yoki qo'lda, istalgan vaqtda
+```
+```bash
+./deploy/pull-backup.sh root@SERVER_IP ~/dash-zaxira    # Linux/Mac
+```
+Ikkalasi ham arxivni ochib tekshiradi, lokal nusxalarni ham avlodlarga ajratadi va serverga
+`data/.offsite` belgisini yozadi. **Sozlash → Ma'lumot → «Ma'lumot sog'ligi»** o'sha belgining
+yoshini ko'rsatadi va 7 kundan oshsa qizil chiziq chiqaradi — jimgina to'xtagan zaxira
+zaxira emas. Tiklash: `./deploy/restore-backup.sh root@SERVER_IP <fayl.tgz>`.
+
+**Zaxirani tiklab ko'rish — oyiga bir marta.** Nusxa olinayotgani zaxira borligini anglatmaydi;
+zaxira faqat undan tiklanganda isbotlanadi:
+```bash
+./deploy/verify-backup.sh root@SERVER_IP ~/dash-zaxira/dash-....tgz
+```
+Jonli ma'lumotga tegmaydi: arxivni serverning `/tmp` ida ochadi, har bir odamning blobi
+o'qilishini, `dash.db` ning `integrity_check` dan o'tishini, siqilgan holat nusxalari
+ochilishini tekshiradi va nusxa jonli serverdan qancha orqada qolganini aytadi.
+
+**Ilovadan tashqariga.** Sozlash → Ma'lumot → **To'liq eksport (ZIP)**: holat, butun arxiv
+(o'chirilgan yozuvlar ham), profil va suratlar — hammasi oddiy JSON va JPG. Bu faylni o'qish
+uchun shu ilova kerak emas.
+
+**Parolni unutgan bo'lsa.** Ilovada parol almashtirish uchun eskisi so'raladi, ya'ni unutilgan
+parol hisobni butunlay qulflab qo'yardi. Egasi tiklab beradi:
+```bash
+./deploy/reset-password.sh root@SERVER_IP --list          # qaysi hisoblar bor
+./deploy/reset-password.sh root@SERVER_IP ali@example.com # yangi parol — stdin orqali
+```
+Xesh serverda, ilovaning o'z qoidasi bilan hisoblanadi (PBKDF2-SHA256, takrorlar soni
+`api.py` dagi `PW_ITER` dan o'qiladi), `uid` va ism o'zgarmaydi — ma'lumot hisobda qoladi.
+Yozilgandan keyin `/api/login` orqali haqiqatda kirib ko'riladi. Ochiq sessiyalarga tegmaydi.
+
+Sinov: `.venv/bin/python tests/test_durability.py` (43 ta tekshiruv).
 
 ## WHOOP
 developer.whoop.com → ilova → Redirect URI `https://sizning-domen/api/whoop/callback` → `.env` ga `WHOOP_CLIENT_ID/SECRET`.

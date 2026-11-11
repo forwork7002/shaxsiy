@@ -15,7 +15,6 @@
 (function () {
   'use strict';
   const esc = D.esc, t = D.t;
-  const AUTO_MS = 30 * 60 * 1000;   // avtomatik yangilash oralig'i
   const KEEP_DAYS = 180;            // kunlik yozuvlar tarixi
   const KEEP_WORKOUTS = 60;
 
@@ -29,7 +28,6 @@
       'wh.range': 'Davr', 'wh.kcal': 'kkal', 'wh.hrAvg': "o'rt. puls", 'wh.dur': 'davomiylik',
       'wh.body': 'Tana', 'wh.height': "Bo'y", 'wh.weight': 'Vazn', 'wh.maxHr': 'Maks. puls',
       'wh.i.need': 'kerak {h}', 'wh.i.target': 'me’yor {m}', 'wh.i.base': 'odatda {b}',
-      'wh.i.vsBase': '30 kunlik odatingiz **{b}%** edi — bugun **{n}**',
       'wh.i.sleepOk': 'Uyqu yetarli — kerakli **{need}**ni qopladingiz',
       'wh.i.sleepShort': 'Uyqu **{h}** kam — kerak edi {need}',
       'wh.i.hrvUp': 'HRV odatdagidan **{p}%** yuqori (odatda {b} ms) — tana tetik',
@@ -50,7 +48,6 @@
       'wh.range': 'Давр', 'wh.kcal': 'ккал', 'wh.hrAvg': 'ўрт. пулс', 'wh.dur': 'давомийлик',
       'wh.body': 'Тана', 'wh.height': 'Бўй', 'wh.weight': 'Вазн', 'wh.maxHr': 'Макс. пулс',
       'wh.i.need': 'керак {h}', 'wh.i.target': 'меъёр {m}', 'wh.i.base': 'одатда {b}',
-      'wh.i.vsBase': '30 кунлик одатингиз **{b}%** эди — бугун **{n}**',
       'wh.i.sleepOk': 'Уйқу етарли — керакли **{need}**ни қопладингиз',
       'wh.i.sleepShort': 'Уйқу **{h}** кам — керак эди {need}',
       'wh.i.hrvUp': 'HRV одатдагидан **{p}%** юқори (одатда {b} мс) — тана тетик',
@@ -71,7 +68,6 @@
       'wh.range': 'Период', 'wh.kcal': 'ккал', 'wh.hrAvg': 'ср. пульс', 'wh.dur': 'длительность',
       'wh.body': 'Тело', 'wh.height': 'Рост', 'wh.weight': 'Вес', 'wh.maxHr': 'Макс. пульс',
       'wh.i.need': 'нужно {h}', 'wh.i.target': 'норма {m}', 'wh.i.base': 'обычно {b}',
-      'wh.i.vsBase': 'ваша норма за 30 дн. — **{b}%**, сегодня **{n}**',
       'wh.i.sleepOk': 'Сна достаточно — вы закрыли норму **{need}**',
       'wh.i.sleepShort': 'Сна меньше на **{h}** — нужно было {need}',
       'wh.i.hrvUp': 'HRV выше обычного на **{p}%** (обычно {b} мс) — тело свежее',
@@ -99,7 +95,7 @@
       'wh.sl.none': 'Bu kecha uchun uyqu yozuvi yo‘q', 'wh.sl.stagesTitle': 'Uyqu bosqichlari', 'wh.sl.light': 'yengil', 'wh.sl.deep': 'chuqur', 'wh.sl.rem': 'REM',
       'wh.sl.consHint': 'Har kuni bir xil vaqtda yotish izchillikni ko‘taradi', 'wh.sl.effHint': 'Yotoqdagi vaqtning qanchasi uyquga ketgani',
       'wh.st.today': 'Bugungi yuk', 'wh.st.none': 'Bugun hali zo‘riqish o‘lchanmadi', 'wh.st.14': 'Zo‘riqish, 14 kun', 'wh.st.legend': 'ustun rangi — o‘sha kungi tiklanish',
-      'wh.st.target': 'bugungi me‘yor {m}', 'wh.st.room': 'yana {n} gacha joy bor', 'wh.st.over': 'me‘yordan {n} yuqori', 'wh.st.kcal': '{k} kkal sarflandi', 'wh.st.tdee': 'taxminiy kunlik me‘yor {t}',
+      'wh.st.target': 'bugungi me‘yor {m}', 'wh.st.room': 'yana {n} gacha joy bor', 'wh.st.over': 'me‘yordan {n} yuqori', 'wh.st.kcal': '{k} kkal sarflandi', 'wh.st.tdee': 'taxminiy kunlik me‘yor {t}', 'wh.st.tdeeM': 'kunlik me‘yoringiz {t}',
       'wh.zones': 'Puls zonalari', 'wh.z.0': 'tinch', 'wh.z.1': 'yengil', 'wh.z.2': 'o‘rtacha', 'wh.z.3': 'kuchli', 'wh.z.4': 'og‘ir', 'wh.z.5': 'maksimal',
       'wh.wo.today': 'Bugungi mashg‘ulotlar', 'wh.wo.none': 'Bugun WHOOP mashg‘ulot yozmagan', 'wh.wo.min': '{n} daqiqa',
       'wh.disconnect': 'Uzish', 'wh.connect': 'WHOOP’ni ulash', 'wh.intro': 'Soatingizdagi tiklanish, uyqu, zo‘riqish va mashg‘ulotlar shu yerga o‘zi keladi — har daqiqa.',
@@ -117,7 +113,7 @@
       'wh.sl.none': 'Бу кеча учун уйқу ёзуви йўқ', 'wh.sl.stagesTitle': 'Уйқу босқичлари', 'wh.sl.light': 'енгил', 'wh.sl.deep': 'чуқур', 'wh.sl.rem': 'REM',
       'wh.sl.consHint': 'Ҳар куни бир хил вақтда ётиш изчилликни кўтаради', 'wh.sl.effHint': 'Ётоқдаги вақтнинг қанчаси уйқуга кетгани',
       'wh.st.today': 'Бугунги юк', 'wh.st.none': 'Бугун ҳали зўриқиш ўлчанмади', 'wh.st.14': 'Зўриқиш, 14 кун', 'wh.st.legend': 'устун ранги — ўша кунги тикланиш',
-      'wh.st.target': 'бугунги меъёр {m}', 'wh.st.room': 'яна {n} гача жой бор', 'wh.st.over': 'меъёрдан {n} юқори', 'wh.st.kcal': '{k} ккал сарфланди', 'wh.st.tdee': 'тахминий кунлик меъёр {t}',
+      'wh.st.target': 'бугунги меъёр {m}', 'wh.st.room': 'яна {n} гача жой бор', 'wh.st.over': 'меъёрдан {n} юқори', 'wh.st.kcal': '{k} ккал сарфланди', 'wh.st.tdee': 'тахминий кунлик меъёр {t}', 'wh.st.tdeeM': 'кунлик меъёрингиз {t}',
       'wh.zones': 'Пульс зоналари', 'wh.z.0': 'тинч', 'wh.z.1': 'енгил', 'wh.z.2': 'ўртача', 'wh.z.3': 'кучли', 'wh.z.4': 'оғир', 'wh.z.5': 'максимал',
       'wh.wo.today': 'Бугунги машғулотлар', 'wh.wo.none': 'Бугун WHOOP машғулот ёзмаган', 'wh.wo.min': '{n} дақиқа',
       'wh.disconnect': 'Узиш', 'wh.connect': 'WHOOP’ни улаш', 'wh.intro': 'Соатингиздаги тикланиш, уйқу, зўриқиш ва машғулотлар шу ерга ўзи келади — ҳар дақиқа.',
@@ -135,7 +131,7 @@
       'wh.sl.none': 'За эту ночь записи сна нет', 'wh.sl.stagesTitle': 'Фазы сна', 'wh.sl.light': 'лёгкий', 'wh.sl.deep': 'глубокий', 'wh.sl.rem': 'REM',
       'wh.sl.consHint': 'Ложиться в одно и то же время — главное для регулярности', 'wh.sl.effHint': 'Какая часть времени в постели ушла на сон',
       'wh.st.today': 'Нагрузка сегодня', 'wh.st.none': 'Сегодня нагрузка ещё не измерена', 'wh.st.14': 'Нагрузка, 14 дней', 'wh.st.legend': 'цвет столбца — восстановление в тот день',
-      'wh.st.target': 'норма на сегодня {m}', 'wh.st.room': 'есть запас до {n}', 'wh.st.over': 'выше нормы на {n}', 'wh.st.kcal': 'потрачено {k} ккал', 'wh.st.tdee': 'примерная дневная норма {t}',
+      'wh.st.target': 'норма на сегодня {m}', 'wh.st.room': 'есть запас до {n}', 'wh.st.over': 'выше нормы на {n}', 'wh.st.kcal': 'потрачено {k} ккал', 'wh.st.tdee': 'примерная дневная норма {t}', 'wh.st.tdeeM': 'ваша дневная норма {t}',
       'wh.zones': 'Пульсовые зоны', 'wh.z.0': 'покой', 'wh.z.1': 'лёгкая', 'wh.z.2': 'средняя', 'wh.z.3': 'высокая', 'wh.z.4': 'тяжёлая', 'wh.z.5': 'максимум',
       'wh.wo.today': 'Тренировки сегодня', 'wh.wo.none': 'WHOOP не записал тренировок сегодня', 'wh.wo.min': '{n} мин',
       'wh.disconnect': 'Отключить', 'wh.connect': 'Подключить WHOOP', 'wh.intro': 'Восстановление, сон, нагрузка и тренировки с часов приходят сюда сами — каждую минуту.',
@@ -187,7 +183,7 @@
       'wh.bd.title': 'Tana', 'wh.bd.bmi': 'Tana massasi indeksi', 'wh.bd.weightTrend': 'Vazn, 90 kun',
       'wh.bd.fromWhoop': 'WHOOP profilidan', 'wh.bd.noWeight': "Vazn WHOOP ilovasida ko'rsatilmagan",
       'wh.bd.bmi.under': 'Kam vazn', 'wh.bd.bmi.normal': 'Normal', 'wh.bd.bmi.over': 'Ortiqcha vazn', 'wh.bd.bmi.obese': 'Semizlik',
-      'wh.bd.entries': 'yozuv',
+      'wh.bd.entries': 'yozuv', 'wh.bd.why': 'Nimaga shunday?',
     },
     uzk: {
       'wh.vt.title': 'Бугунги ўлчовлар', 'wh.vt.sub': '30 кунлик шахсий меъёрингизга нисбатан',
@@ -198,7 +194,7 @@
       'wh.bd.title': 'Тана', 'wh.bd.bmi': 'Тана массаси индекси', 'wh.bd.weightTrend': 'Вазн, 90 кун',
       'wh.bd.fromWhoop': 'WHOOP профилидан', 'wh.bd.noWeight': 'Вазн WHOOP иловасида кўрсатилмаган',
       'wh.bd.bmi.under': 'Кам вазн', 'wh.bd.bmi.normal': 'Нормал', 'wh.bd.bmi.over': 'Ортиқча вазн', 'wh.bd.bmi.obese': 'Семизлик',
-      'wh.bd.entries': 'ёзув',
+      'wh.bd.entries': 'ёзув', 'wh.bd.why': 'Нимага шундай?',
     },
     ru: {
       'wh.vt.title': 'Показатели за день', 'wh.vt.sub': 'относительно вашей нормы за 30 дней',
@@ -209,7 +205,7 @@
       'wh.bd.title': 'Тело', 'wh.bd.bmi': 'Индекс массы тела', 'wh.bd.weightTrend': 'Вес, 90 дней',
       'wh.bd.fromWhoop': 'из профиля WHOOP', 'wh.bd.noWeight': 'Вес не указан в приложении WHOOP',
       'wh.bd.bmi.under': 'Дефицит веса', 'wh.bd.bmi.normal': 'Норма', 'wh.bd.bmi.over': 'Избыток веса', 'wh.bd.bmi.obese': 'Ожирение',
-      'wh.bd.entries': 'записей',
+      'wh.bd.entries': 'записей', 'wh.bd.why': 'Почему так?',
     },
   });
 
@@ -314,7 +310,7 @@
     const h = {};
     if (D.tg && D.tg.initData) h['X-Telegram-Init-Data'] = D.tg.initData;
     if (etag) h['If-None-Match'] = etag;
-    const r = await fetch('/api/whoop/snapshot', { credentials: 'same-origin', headers: h, cache: 'no-store' });
+    const r = await D.fetchTimed('/api/whoop/snapshot', { credentials: 'same-origin', headers: h, cache: 'no-store' }, 15000);
     if (r.status === 304) return { same: true };
     if (r.status === 401) { const j = await r.json().catch(() => null); if (j && j.passcode && D.auth) { if (await D.auth.ask()) return fetchSnapshot(); } return null; }
     if (!r.ok) return null;
@@ -343,9 +339,14 @@
         return false;
       }
       pendingTries = 0;
+      const wasConnected = W().connected;
       const changed = applySnapshot(snap);
       // the server owns this data; persist locally without bumping updatedAt (no push, no 409 churn)
-      D.saveQuiet();
+      // Faqat o'zgarganda. Ilgari bu shartsiz edi: WHOOP hech narsa yangilamagan
+      // kunda ham har daqiqada butun blob JSON.stringify qilinib localStorage ga
+      // qayta yozilardi — telefonda bu sezilarli va doimiy yuk.
+      // wasConnected: ma'lumot bir xil bo'lsa ham, ulanish holati o'zgargan bo'lsa saqlaymiz.
+      if (changed || !wasConnected) D.saveQuiet();
       D.emit('whoop:updated', { changed });
       if ((changed || opts.force) && LIVE_VIEWS.has(D.current()) && quiet()) D.rerender();
       return changed;
@@ -363,7 +364,7 @@
     syncing = true;
     try {
       const w = W(), was = w.snapAt || 0, wasFetched = w.fetchedAt || 0;
-      await D.api('/api/whoop/refresh', { method: 'POST', body: '{}' });
+      await D.api('/api/whoop/refresh', { method: 'POST', body: '{}', timeout: 60000 });   // server WHOOP'dan tortadi — sekinroq
       for (let i = 0; i < 6; i++) {
         await new Promise((r) => setTimeout(r, 2500));
         await D.whoop.poll({ force: i === 5 });
@@ -403,6 +404,9 @@
   D.whoop.workoutsOn = (k) => W().workouts.filter((x) => x.k === k);
   D.whoop.workoutDays = (n) => { const set = new Set(); for (const x of W().workouts) if (x.k) set.add(x.k); return D.lastDays(n || 28).filter((k) => set.has(k)); };
   /** Minutes in each of WHOOP's six HR zones (0 = below 50% max) for one workout. */
+  /** Mashg'ulot puls zonalari daqiqada — xom millisekundlar S.whoop.workouts[].zones da.
+   *  Ekran uchun D.fmtMsS aniqroq; bu esa AI so'rovi va qisqa ro'yxatlar uchun. */
+  D.whoop.zoneMins = (x) => (x && Array.isArray(x.zones) ? x.zones.map((ms) => Math.round((+ms || 0) / 60000)) : null);
   D.whoop.has = () => Object.keys(W().days).length > 0;
   D.whoop.trend = (field, n) => {
     const days = W().days;
@@ -453,23 +457,21 @@
   };
   /** Mifflin–St Jeor BMR × activity, used only when WHOOP has no calorie figure. */
   /* ------------------------------------------------------------------ */
-  /* Energiya — butun ilovada bitta manba (Ovqat me'yori ham shundan).   */
+  /* Energiya — ilovadagi yagona manba (Ovqat me'yori ham shu yerdan).   */
   /*                                                                     */
-  /* O'lchangan sarf taxminiy formuladan ustun turadi: WHOOP har kuni    */
-  /* to'liq siklning kaloriyasini beradi, shuning uchun yetarli kun      */
+  /* O'lchangan sarf taxmindan ustun turadi. WHOOP har kuni to'liq       */
+  /* siklning kaloriyasini beradi; so'nggi 28 kunda kamida 10 kun        */
   /* to'plansa TDEE o'sha kunlarning qirqilgan o'rtachasi bo'ladi — eng  */
   /* past va eng yuqori 10 % tashlanadi, kasal kun yoki marafon          */
-  /* o'rtachani buzmasin. Bugun hisobga kirmaydi: sikl hali tugamagan,   */
-  /* uning kaloriyasi to'liq emas va o'rtachani pastga tortadi.          */
-  /* Ma'lumot yetmasa — Mifflin-St Jeor x faollik.                       */
+  /* o'rtachani buzmasin. Bugun kirmaydi: sikl tugamagan, kaloriyasi     */
+  /* to'liq emas va o'rtachani pastga tortadi.                           */
   /*                                                                     */
-  /* Faollik jadvali ilovada bitta. Ilgari food.js [1.2 … 2.1] va        */
-  /* whoop.js [1.2 … 1.725] ikki xil jadval ishlatardi: bir xil profil   */
-  /* uchun Ovqat 2 800 kkal, Sog'liq 2 370 kkal ko'rsatardi.             */
-  /* Yosh ham D.profileAge() dan — p.age onboardingda bir marta yozilgan */
-  /* surat, keyingi yili bir yilga eskiradi (ARCHITECTURE: yagona qoida).*/
+  /* Yetmasa — Mifflin-St Jeor x D.activityFactor, avvalgidek. Farqi     */
+  /* shuki, bo'y yoki yosh bo'lmasa baho endi butunlay o'chib qolmaydi:  */
+  /* 170 sm / 30 yosh o'rniga qo'yiladi va natija `approx: true` bilan   */
+  /* belgilanadi. Ovqat bo'limi me'yorsiz qolgandan ko'ra taxminiy       */
+  /* me'yor bergani yaxshi, faqat taxminligi aytilsin.                   */
   /* ------------------------------------------------------------------ */
-  const ACT_F = [1.2, 1.375, 1.55, 1.725, 1.9, 2.05];
   const TDEE_WINDOW = 28;     // necha kunlik oynaga qaraymiz
   const TDEE_MIN_DAYS = 10;   // o'lchangan qiymatga o'tish uchun eng kam kun
   const TDEE_FLOOR = 800;     // bundan past sikl — taqilmagan kun, hisobga olinmaydi
@@ -480,7 +482,7 @@
     const core = a.length - 2 * k >= 3 ? a.slice(k, a.length - k) : a;
     return D.avg(core);
   }
-  /** Vazn: profil → WHOOP tanasi → so'nggi 60 kun ichidagi oxirgi o'lchov. */
+  /** Vazn: profil -> WHOOP tanasi -> so'nggi 60 kun ichidagi oxirgi o'lchov. */
   function bodyKg() {
     const p = D.S.profile || {};
     if (num(p.weightKg) !== null) return +p.weightKg;
@@ -510,8 +512,7 @@
       return { tdee: Math.round(trimmedMean(vals)), bmr, source: 'measured', days: vals.length, kg, cm, age, approx: false };
     }
     if (kg === null) return null;
-    const f = ACT_F[D.clamp(Math.round(num(p.activity) ?? 3), 0, 5)];
-    return { tdee: Math.round(bmr * f), bmr, source: 'estimated', days: vals.length, kg, cm, age, approx: !cm || age === null };
+    return { tdee: Math.round(bmr * D.activityFactor(p.activity)), bmr, source: 'estimated', days: vals.length, kg, cm, age, approx: !cm || age === null };
   };
   D.whoop.tdee = () => { const e = D.whoop.energy(); return e ? e.tdee : null; };
 
@@ -540,8 +541,8 @@
         o.load = o.strainGap > 3 ? 'over' : o.strainGap < -4 ? 'under' : 'ok';
       }
     }
-    // energiya: kunning WHOOP sarfi o'z me'yoriga nisbatan — o'lchangan
-    // manbada me'yor aynan shu odamning 28 kunlik o'rtacha sarfi bo'ladi
+    // energiya: kunning sarfi o'z me'yoriga nisbatan. `measured` manbada
+    // me'yor aynan shu odamning 28 kunlik o'rtacha sarfi, taxmin emas.
     const en = D.whoop.energy();
     if (o.kcal !== null && en && en.tdee) { o.tdee = en.tdee; o.tdeeSource = en.source; o.kcalDelta = o.kcal - en.tdee; }
     return o;
@@ -633,7 +634,6 @@
   };
   const fmtHm = (h, opts) => D.fmtHm(h, opts);
   const fmtMs = (ms) => D.fmtMsH(ms);
-  const n1 = (v, d = 1) => (v == null || isNaN(+v) ? '—' : D.fmtNum(+v, d));
   const strip = (h) => h.replace(/^<p>/, '').replace(/<\/p>$/, '');
   const md = (txt) => (D.ai ? strip(D.ai.md(txt)) : esc(txt));
 
@@ -655,20 +655,15 @@
     key = key || D.today();
     const i = D.whoop.dayInsight(key) || { key };
     const live = key === D.today() ? D.whoop.live() : null;
-    const strain = live ? live.strain : i.strain, kcal = live ? live.kcal : i.kcal;
+    const strain = live ? live.strain : i.strain;
     const hasRec = i.recovery != null;
     const z = hasRec ? zRec(i.recovery) : '';
-    const ring = D.chart.ring({ pct: hasRec ? i.recovery : 0, size: 112, stroke: 10, color: hasRec ? recColor(z) : 'var(--line3)', label: hasRec ? i.recovery + '%' : '—', sub: t('wh.recovery') });
+    const ring = D.chart.ring({ pct: hasRec ? i.recovery : 0, size: 112, stroke: 14, color: hasRec ? recColor(z) : 'var(--line3)', label: hasRec ? i.recovery + '%' : '—', sub: t('wh.recovery') });
     const verdict = hasRec ? t(z === 'good' ? 'wh.ready.high' : z === 'warn' ? 'wh.ready.mid' : 'wh.ready.low') : t('hl.wh.noData');
-    const sub = i.recDelta !== undefined ? md(t('wh.i.vsBase', { n: D.fmtSigned(i.recDelta, 1), b: D.fmtNum(i.recBase, 1) })) : (w.days[key] && w.days[key].calibrating ? esc(t('wh.calibrating')) : '');
+    // me'yorga nisbatan farq pastdagi jadvalda bor — bu yerda faqat kalibrlash ogohlantirishi
+    const sub = w.days[key] && w.days[key].calibrating ? esc(t('wh.calibrating')) : '';
     const target = i.strainTarget || null;
     const load = strain != null && target ? (strain - target > 3 ? 'over' : strain - target < -4 ? 'under' : 'ok') : '';
-    const gColor = load === 'over' ? 'var(--danger-text)' : load === 'ok' ? 'var(--success)' : 'var(--sec, var(--success))';
-    const strainRow = strain != null ? `<div class="wh-strain ${live ? 'live' : ''}">
-        <div class="wh-strain-head"><span class="wh-strain-lab">${esc(t('wh.strainLive'))}${live ? `<em>${esc(t('wh.live'))}</em>` : ''}</span><span class="wh-strain-val num">${D.fmtNum(strain, 1)}</span></div>
-        ${gauge(strain, target || 21, 21, gColor)}
-        <div class="wh-strain-foot">${target ? `<span>${esc(t('wh.st.target', { m: D.fmtNum(target, 1) }))}</span>` : ''}${kcal != null ? `<span>${esc(t('wh.st.kcal', { k: D.fmtNum(kcal) }))}</span>` : ''}${live && live.hrAvg ? `<span>${esc(t('wh.hr'))} <b class="num">${live.hrAvg}</b>${live.hrMax ? `, ${esc(t('wh.hrMaxShort'))} <b class="num">${live.hrMax}</b>` : ''}</span>` : ''}</div>
-      </div>` : `<div class="wh-strain"><div class="small muted">${esc(t('wh.st.none'))}</div></div>`;
     const rows = [];
     if (i.gapH !== null && i.gapH !== undefined) { const good = i.gapH >= -0.5; rows.push({ good, txt: t(good ? 'wh.i.sleepOk' : 'wh.i.sleepShort', { h: fmtHm(Math.abs(i.gapH)), need: fmtHm(i.needH) }) }); }
     if (i.hrvPct !== undefined && Math.abs(i.hrvPct) >= 8) rows.push({ good: i.hrvPct > 0, txt: t(i.hrvPct > 0 ? 'wh.i.hrvUp' : 'wh.i.hrvDown', { p: D.fmtNum(Math.abs(i.hrvPct), 1), b: D.fmtNum(i.hrvBase, 1) }) });
@@ -680,7 +675,7 @@
     return `<div class="hero wh-hero">
       <div class="wh-hero-top"><span class="wh-brand">${D.ic('bolt', 12)} WHOOP${key !== D.today() ? ` <span class="num">${esc(D.fmtDate(key, 'dm'))}</span>` : ''}</span>${key === D.today() ? freshHtml() : ''}</div>
       <div class="hero-main wh-hero-main">${ring}<div class="hero-body"><div class="hero-title">${esc(verdict)}</div>${sub ? `<div class="hero-sub">${sub}</div>` : ''}</div></div>
-      ${strainRow}${notes}${err}
+      ${notes}${err}
     </div>`;
   };
 
@@ -692,7 +687,9 @@
     const order = ['deep', 'rem', 'light', 'awake'];
     const bar = order.map((k) => `<i style="width:${(((+st[k] || 0) / tot) * 100).toFixed(1)}%;background:${STAGE_C[k]}"></i>`).join('');
     // har bosqich yonida aniq vaqti va kechadagi ulushi
-    const legs = order.map((k) => `<span class="wh-stg"><i style="background:${STAGE_C[k]}"></i><b class="num">${fmtMs(st[k])}</b>${esc(t(k === 'awake' ? 'wh.sl.awake' : 'wh.sl.' + k))} <span class="num muted">${D.fmtNum(((+st[k] || 0) / tot) * 100, 1)}%</span></span>`).join('');
+    // nom va ulush bitta bo'lak: alohida qolsa qator qayerda uzilishi tasodifga
+    // bog'liq bo'lardi va to'rt katakning har biri boshqacha ko'chardi
+    const legs = order.map((k) => `<span class="wh-stg"><i style="background:${STAGE_C[k]}"></i><b class="num">${fmtMs(st[k])}</b><em>${esc(t(k === 'awake' ? 'wh.sl.awake' : 'wh.sl.' + k))} <span class="num muted">${D.fmtNum(((+st[k] || 0) / tot) * 100, 1)}%</span></em></span>`).join('');
     return `<div class="wh-stages">${bar}</div><div class="wh-stg-row">${legs}</div>`;
   }
 
@@ -712,8 +709,6 @@
     { f: 'resp', lab: 'wh.vt.resp', unit: 'wh.vt.respUnit', dec: 1, dir: 'flat' },
     { f: 'spo2', lab: 'SpO₂', plain: true, unit: '%', dec: 1, dir: 'up' },
     { f: 'skin', lab: 'wh.vt.skin', unit: '°C', dec: 1, dir: 'flat' },
-    { f: 'strain', lab: 'wh.strain', dec: 1, dir: 'flat' },
-    { f: 'kcal', lab: 'wh.vt.kcalLab', unit: 'wh.kcal', dec: 0, refDec: 0, dir: 'flat' },
   ];
   const unitOf = (u) => (!u ? '' : u.indexOf('wh.') === 0 || u.indexOf('unit.') === 0 ? t(u) : u);
 
@@ -735,7 +730,9 @@
       let refCell = '<span class="muted">—</span>', deltaCell = '<span class="muted">—</span>';
       if (ref !== null) {
         const rd = v.refDec === undefined ? Math.max(v.dec, 1) : v.refDec;
-        refCell = `<span class="num muted">${v.time ? fmtHm(ref) : D.fmtNum(ref, rd)}</span>${refNote ? `<em>${esc(refNote)}</em>` : ''}`;
+        // izoh («kerak edi») shu katakning ichida turadi — tashqarida qolsa jadvalning
+        // beshinchi ustuni bo'lib qolar va uyqu qatorini boshqalardan siljitardi
+        refCell = `<span class="num muted">${v.time ? fmtHm(ref) : D.fmtNum(ref, rd)}${refNote ? `<em>${esc(refNote)}</em>` : ''}</span>`;
         const diff = val - ref;
         const shown = v.pct ? (ref ? (diff / ref) * 100 : null) : diff;
         if (shown !== null) {
@@ -776,9 +773,9 @@
       ${d.stages ? `<div class="mt">${stagesHtml(d.stages)}</div>` : ''}
     </div>`;
     const ringRow = (d.sleepPerf != null || d.sleepEff != null || d.sleepCons != null) ? `<div class="card"><div class="wh-rings">
-        ${d.sleepPerf != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepPerf, size: 84, stroke: 7, color: recColor(d.sleepPerf >= 85 ? 'good' : d.sleepPerf >= 70 ? 'warn' : 'bad'), glow: false })}<span>${esc(t('wh.sl.perf'))}</span></div>` : ''}
-        ${d.sleepEff != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepEff, size: 84, stroke: 7, color: 'var(--info)', glow: false })}<span>${esc(t('wh.sl.eff'))}</span></div>` : ''}
-        ${d.sleepCons != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepCons, size: 84, stroke: 7, color: 'var(--violet)', glow: false })}<span>${esc(t('wh.sl.cons'))}</span></div>` : ''}
+        ${d.sleepPerf != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepPerf, size: 84, stroke: 9, color: recColor(d.sleepPerf >= 85 ? 'good' : d.sleepPerf >= 70 ? 'warn' : 'bad'), glow: false })}<span>${esc(t('wh.sl.perf'))}</span></div>` : ''}
+        ${d.sleepEff != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepEff, size: 84, stroke: 9, color: 'var(--info)', glow: false })}<span>${esc(t('wh.sl.eff'))}</span></div>` : ''}
+        ${d.sleepCons != null ? `<div class="wh-ring">${D.chart.ring({ pct: d.sleepCons, size: 84, stroke: 9, color: 'var(--violet)', glow: false })}<span>${esc(t('wh.sl.cons'))}</span></div>` : ''}
       </div><div class="help mt-s">${esc(d.sleepCons != null && d.sleepCons < 60 ? t('wh.sl.consHint') : t('wh.sl.effHint'))}</div></div>` : '';
     // 14 nights: what you got, with what you needed as the target line
     const days = D.lastDays(14, key);
@@ -826,13 +823,14 @@
     const target = i.strainTarget || null;
     const load = strain != null && target ? (strain - target > 3 ? 'over' : strain - target < -4 ? 'under' : 'ok') : '';
     const gColor = load === 'over' ? 'var(--danger-text)' : load === 'ok' ? 'var(--success)' : 'var(--sec, var(--success))';
-    const tdee = D.whoop.tdee();
+    const en = D.whoop.energy();
+    const tdee = en ? en.tdee : null, tdeeKey = en && en.source === 'measured' ? 'wh.st.tdeeM' : 'wh.st.tdee';
     const top = strain == null ? `<div class="card"><div class="empty">${esc(t('wh.st.none'))}</div></div>` : `<div class="card wh-st">
       <div class="wh-sl-top"><div><div class="wh-sl-big num">${D.fmtNum(strain, 1)}</div><div class="small muted">${esc(t('wh.st.today'))}${live ? ` · <span class="wh-live-tag">${esc(t('wh.live'))}</span>` : ''}</div></div>
         ${live && live.since ? `<div class="wh-sl-when num">${esc(t('wh.sinceStart', { t: hm(live.since) }))}</div>` : ''}</div>
       <div class="mt-s">${gauge(strain, target || 21, 21, gColor)}</div>
       <div class="wh-sl-meta">${target ? `<span>${esc(t('wh.st.target', { m: D.fmtNum(target, 1) }))}</span>` : ''}${target && load === 'under' ? `<span class="good">${esc(t('wh.st.room', { n: D.fmtNum(target, 1) }))}</span>` : ''}${target && load === 'over' ? `<span class="bad">${esc(t('wh.st.over', { n: D.fmtNum(strain - target, 1) }))}</span>` : ''}</div>
-      <div class="wh-sl-meta">${kcal != null ? `<span>${esc(t('wh.st.kcal', { k: D.fmtNum(kcal) }))}</span>` : ''}${tdee ? `<span>${esc(t('wh.st.tdee', { t: D.fmtNum(tdee) }))}</span>` : ''}${(live || {}).hrAvg || i.hrAvg ? `<span>${esc(t('wh.hr'))} <b class="num">${(live || {}).hrAvg || i.hrAvg}</b>${(live || {}).hrMax || i.hrMax ? `, ${esc(t('wh.hrMaxShort'))} <b class="num">${(live || {}).hrMax || i.hrMax}</b>` : ''}</span>` : ''}</div>
+      <div class="wh-sl-meta">${kcal != null ? `<span>${esc(t('wh.st.kcal', { k: D.fmtNum(kcal) }))}</span>` : ''}${tdee ? `<span>${esc(t(tdeeKey, { t: D.fmtNum(tdee) }))}</span>` : ''}${(live || {}).hrAvg || i.hrAvg ? `<span>${esc(t('wh.hr'))} <b class="num">${(live || {}).hrAvg || i.hrAvg}</b>${(live || {}).hrMax || i.hrMax ? `, ${esc(t('wh.hrMaxShort'))} <b class="num">${(live || {}).hrMax || i.hrMax}</b>` : ''}</span>` : ''}</div>
     </div>`;
     const wos = `<div class="card"><div class="card-head"><div class="title">${D.ic('dumbbell', 16)} ${esc(t('wh.wo.today'))}</div></div>${D.whoop.workoutRows(key)}</div>`;
     // 14 days of strain, each bar coloured by that day's recovery
@@ -927,8 +925,12 @@
       const dl = est.delta, z = dl <= -1 ? 'good' : dl >= 1 ? 'bad' : 'warn';
       const verdict = Math.abs(dl) < 0.5 ? t('wh.bd.same') : dl < 0 ? t('wh.bd.younger', { n: D.fmtNum(Math.abs(dl), 1) }) : t('wh.bd.older', { n: D.fmtNum(dl, 1) });
       const rows = est.inputs.map((i) => `<div class="wh-body-in"><span>${esc(t('wh.bd.f.' + i.k))}</span><b class="num">${D.fmtNum(i.v, 1)}${i.unit ? `<small>${esc(i.unit)}</small>` : ''}</b><span class="num muted">${D.fmtNum(i.ref, 1)}</span><b class="num ${i.effect < 0 ? 'good' : i.effect > 0 ? 'bad' : 'muted'}">${D.fmtSigned(i.effect, 1)}</b></div>`).join('');
+      // taxminning o'zi ko'rinib turadi; uni nima harakatlantirgani — so'ralganda
+      const open = !!D.ui.collapsed.whBioWhy;
       estBody = `<div class="wh-body-est"><div class="wh-body-num num ${z}">${D.fmtNum(est.est, 1)}</div><div class="grow"><div class="wh-body-verdict">${esc(verdict)}</div><div class="small muted">${esc(t('wh.bd.chrono', { n: est.chrono }))} · ${esc(t('wh.days', { n: est.days }))}</div></div></div>
-        <div class="wh-body-ins"><div class="wh-body-in head"><span>${esc(t('wh.bd.inputs'))}</span><b></b><span>${esc(t('wh.bd.ref'))}</span><b>${esc(t('wh.bd.effect'))}</b></div>${rows}</div>`;
+        <button class="wh-bd-why" data-act="whBioWhy" aria-expanded="${open}"><span>${esc(t('wh.bd.why'))}</span>${D.ic('chevD', 15)}</button>
+        ${open ? `<div class="wh-body-ins"><div class="wh-body-in head"><span>${esc(t('wh.bd.inputs'))}</span><b></b><span>${esc(t('wh.bd.ref'))}</span><b>${esc(t('wh.bd.effect'))}</b></div>${rows}</div>
+          <div class="help mt-s">${esc(t('wh.bd.caveat'))}</div>` : ''}`;
     }
     const typed = wa !== null || pa !== null;
     const ageCard = `<div class="card wh-body-estcard"><div class="card-head"><div class="title">${D.ic('bolt', 16)} ${esc(t('wh.bd.age'))}</div>
@@ -937,10 +939,11 @@
         <div class="wh-body-stat"><b class="num">${wa !== null ? D.fmtNum(wa, 1) : '—'}</b><span>${esc(t('wh.bd.whoopAge'))}</span></div>
         <div class="wh-body-stat"><b class="num">${pa !== null ? D.fmtNum(pa, 2) : '—'}</b><span>${esc(t('wh.bd.pace'))}</span></div>
       </div>` : `<div class="help">${esc(t('wh.bd.fromApp'))} · ${link}</div>`}
-      <div class="wh-bd-sep">${esc(t('wh.bd.est'))}</div>${estBody}<div class="help mt-s">${esc(t('wh.bd.caveat'))}</div></div>`;
+      <div class="wh-bd-sep">${esc(t('wh.bd.est'))}</div>${estBody}</div>`;
 
     return bodyCard + ageCard;
   };
+  D.act.whBioWhy = () => { D.ui.collapsed.whBioWhy = !D.ui.collapsed.whBioWhy; D.saveUi(); D.rerender(); };
   D.whoop.bodyPanel = D.whoop.bodyCard;   // eski nom
 
   /* ------------------------------------------------------------------ */
@@ -949,9 +952,7 @@
   const FIELDS = [
     { f: 'recovery', c: 'var(--success)', unit: '%', dec: 1 },
     { f: 'sleepH', c: 'var(--info)', time: true },
-    { f: 'strain', c: 'var(--accent)', dec: 1 },
     { f: 'hrv', c: 'var(--violet)', unit: 'ms', dec: 1 },
-    { f: 'rhr', c: 'var(--warning)', unit: 'bpm', dec: 1 },
   ];
   const RANGES = [14, 30, 90];
   D.act.whRange = (el) => { D.ui.filters.whRange = +el.dataset.n; D.saveUi(); D.rerender(); };

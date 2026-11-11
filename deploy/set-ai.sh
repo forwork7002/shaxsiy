@@ -32,7 +32,7 @@ modelvar = "OPENAI_MODEL" if prov == "openai" else "AI_MODEL"
 want = {"AI_PROVIDER": prov, keyvar: key}
 if model: want[modelvar] = model
 out = []
-for line in (f.read_text() if f.exists() else "").splitlines():
+for line in f.read_text().splitlines():
     k = line.split("=", 1)[0]
     if k in want: line = k + "=" + want.pop(k)
     out.append(line)
@@ -45,4 +45,4 @@ curl -s http://127.0.0.1:8081/api/health; echo
 EOS
 )
 printf '%s\n%s\n%s\n' "$PROV" "$KEY" "$MODEL" | remote_bash "$HOST" "$REMOTE"
-echo "✓ AI yoqildi — «Tahlil qil» va Nova endi shu provayder bilan ishlaydi."
+echo "✓ AI yoqildi — «Tahlil qil» va Yusa AI endi shu provayder bilan ishlaydi."

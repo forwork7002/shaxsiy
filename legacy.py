@@ -25,6 +25,8 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+import vault   # data/ dagi fayllar shifrlangan — o'qish va yozish shu orqali
+
 VERSION = 2
 TZ = timezone(timedelta(hours=5))  # Toshkent — yangi holatning default tz'i
 SPHERE_IDS = ['ruh', 'aql', 'qalb', 'tana', 'boshqa', 'aralash']
@@ -62,7 +64,7 @@ def default_state() -> dict:
         'gym': {'gyms': [], 'days': [], 'exercises': [], 'logs': {}, 'done': {}, 'split': {'names': [], 'anchor': None}},
         'finance': {'tx': [], 'cats': [], 'budgets': {}, 'accounts': [], 'subs': [], 'snapshots': [], 'wishlist': []},
         'learn': [], 'reviews': [],
-        'nova': {'threads': []},
+        'yusa': {'threads': []},
         'ai': {'cards': {}, 'log': []},
         'whoop': {'connected': False, 'lastSync': None, 'cache': {}, 'days': {}, 'workouts': [], 'body': {}},
     }
@@ -252,7 +254,7 @@ def _union_by_id(a, b) -> list:
 
 def _empty_blob(b) -> bool:
     return not isinstance(b, dict) or not b or not any(
-        b.get(k) for k in ID_LISTS + DATE_MAPS + ['finance', 'gym', 'nova', 'caffeine', 'stack'])
+        b.get(k) for k in ID_LISTS + DATE_MAPS + ['finance', 'gym', 'yusa', 'caffeine', 'stack'])
 
 
 def merge_into(existing, migrated) -> dict:
@@ -313,19 +315,20 @@ def counts(b) -> dict:
 
 def write_blob(f: Path, blob: dict):
     tmp = f.with_suffix('.tmp')
-    tmp.write_text(json.dumps(blob, ensure_ascii=False, separators=(',', ':')), encoding='utf-8')
+    tmp.write_bytes(vault.seal_text(json.dumps(blob, ensure_ascii=False, separators=(',', ':'))))
     tmp.replace(f)
 
 
 def run_import(data_dir, uid: str, old_path, dry_run=False, out=print) -> dict:
     data_dir = Path(data_dir)
-    old = json.loads(Path(old_path).read_text(encoding='utf-8'))
+    vault.init(data_dir, create=False)
+    old = json.loads(vault.read_text(old_path))
     if not is_old_format(old):
         raise SystemExit(f'{old_path}: eski Шахсий formati emas (habits[].nom kutilgan edi)')
     f = user_file(data_dir, uid)
     existing = {}
     if f.exists():
-        existing = json.loads(f.read_text(encoding='utf-8'))
+        existing = json.loads(vault.read_text(f))
     before = counts(existing)
     merged = merge_into(existing, migrate_old(old))
     after = counts(merged)

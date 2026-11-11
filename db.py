@@ -3,7 +3,7 @@
 Arxiv — SQLite (data/dash.db).
 
 Mijoz butun holatni bitta JSON blob sifatida saqlaydi (data/<uid>.json). O'sha blob tahrir uchun
-haqiqat manbai; bu fayl esa O'TMISH uchun haqiqat manbai: har saqlashdan kunlik faktlar, Nova
+haqiqat manbai; bu fayl esa O'TMISH uchun haqiqat manbai: har saqlashdan kunlik faktlar, Yusa AI
 chatlari, AI kartalari; har WHOOP tortishidan normallashgan yozuvlar (snapshot 120 kunga
 qirqilsa ham bu yerda abadiy qoladi). Ilova mantig'i bu yerdan hech narsani o'chirmaydi —
 faqat deleted_at (chatlar) / gone_at (kunlik faktlar) belgisi qo'yiladi (state_versions ni
@@ -16,32 +16,64 @@ ming kichik qator) — ikki ishchi bir-birining yozganini ko'radi.
 
 Kun kaliti: Toshkent (+05:00), dayStart=0 — arxiv invarianti. Mijoz D.dayKey settings.dayStart ni
 hisobga oladi; dayStart>0 bo'lsa tungi kofe/vazifa Bugun va Tarixda boshqa kunga tushishi mumkin.
+
+Hajm (2026-09-14 o'lchovi): bazaning 72% i — state_versions, ya'ni butun blobning har 10
+daqiqadagi nusxasi (o'rtacha 49 KB). Haqiqiy arxiv — 587 kunlik faktlar, WHOOP va suhbatlar —
+bor-yo'g'i 0.2 MB. Shuning uchun blob nusxalari zlib bilan siqib saqlanadi (~8 barobar):
+o'nlab yildan keyin ham baza yuzlab emas, o'nlab megabayt bo'lib qoladi. Siqilgan qator BLOB,
+siqilmagani TEXT — _loads ikkalasini ham o'qiydi, ya'ni eski baza o'zgartirishsiz ochiladi.
+
+Shifrlash (vault.py, 2026-09-18): mazmun ustunlari — day_facts.json, state_versions.json,
+whoop_records.json, chat_messages.content, chat_threads.title, ai_cards.text, users.name/email —
+AES-GCM bilan BLOB bo'lib yoziladi (det=True: bir xil matn → bir xil shifr, SQL dagi
+«json IS NOT excluded.json» solishtirishlari shundoq ishlayveradi). Ochiq qoladi: uid, kun, tur,
+vaqt belgilari, hajm — ya'ni «kim, qachon», lekin «nima» emas. Xeshlar kalitli (vault.mac).
+Eski ochiq qatorlar ham o'qiladi; seal_all() ularni bir marta yopadi va vault_meta ga belgi qo'yadi.
 """
+import gzip
 import hashlib
 import json
 import logging
 import os
 import re
+import shutil
 import sqlite3
+import zlib
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+
+import vault
 
 log = logging.getLogger("db")
 
 TZ = timezone(timedelta(hours=5))  # Toshkent — api.py bilan bir xil
-SCHEMA_VERSION = 2            # 2: day_facts.gone_at, chat_threads.hash
-MAX_RANGE_DAYS = 400
+SCHEMA_VERSION = 3            # 2: day_facts.gone_at, chat_threads.hash · 3: state_versions.json zlib bilan siqiladi
 VERSION_GAP_S = 600           # 10 daqiqa ichidagi saqlashlar bitta versiyaga yoziladi
 KEEP_ALL_DAYS, KEEP_DAILY_DAYS = 7, 400
-BACKUP_KEEP = 14
+# Zaxira avlodlari: 14 kun — har kuni, 8 hafta — haftasiga bitta, 24 oy — oyiga bitta,
+# undan narisi — YILIGA BITTA VA ABADIY. Ya'ni 2040 yilda ham 2026 ning nusxasi turadi.
+KEEP_DAILY_B, KEEP_WEEKLY_B, KEEP_MONTHLY_B = 14, 8, 24
+VACUUM_DAYS = 30              # oyiga bir marta: compact o'chirgan joy diskka qaytariladi
+COUNT_TABLES = ("day_facts", "state_versions", "whoop_records", "chat_messages", "ai_cards")   # nusxa to'liqligi shular bo'yicha
+ZMAGIC = b"DZ1"               # siqilgan blob boshi (zlib) — oddiy matndan ajratib turadi
 DAY_RE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
-FACT_KINDS = ("health", "habits", "counts", "prayers", "note", "gratitude", "stack", "caffeine", "tasks", "food")
 FOOD_MEAL_KEYS = ("id", "ts", "name", "grams", "kcal", "p", "c", "f", "photo", "items", "note", "src")   # surat baytlari hech qachon emas
 WHOOP_TS_KEY = {"cycle": "start", "recovery": "ts", "sleep": "end", "workout": "start"}   # _wh_merge bilan bir xil
 WHOOP_DAY_SHIFT_H = {"cycle": 12}   # mijoz (whoop.js/history.js) sikl kunini start+12h dan oladi — day_hint ham shunday
 
 _brange = range              # quyida range() nomli so'rov aniqlanadi
 _path: Path = None
+_sealed = False               # vault_meta.sealed bor — xeshlar kalitli (vault.mac), ochiq SHA1 emas
+# Shifrlanadigan ustunlar: (jadval, kalit ustunlari, mazmun ustunlari). seal_all shu ro'yxat bo'yicha yuradi.
+SEALED_COLS = (
+    ("day_facts", ("uid", "day", "kind"), ("json",)),
+    ("whoop_records", ("uid", "kind", "id"), ("json",)),
+    ("chat_threads", ("uid", "id"), ("title",)),
+    ("chat_messages", ("uid", "thread_id", "idx"), ("content",)),
+    ("ai_cards", ("uid", "section", "day", "ts"), ("text",)),
+    ("users", ("uid",), ("name", "email")),
+    ("state_versions", ("id",), ("json",)),
+)
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users(
@@ -74,9 +106,13 @@ CREATE TABLE IF NOT EXISTS ai_calls(
   id INTEGER PRIMARY KEY AUTOINCREMENT, uid TEXT NOT NULL, ts TEXT NOT NULL, kind TEXT, model TEXT,
   tokens_in INTEGER, tokens_out INTEGER);
 CREATE INDEX IF NOT EXISTS ix_calls_uid_ts ON ai_calls(uid, ts);
+CREATE TABLE IF NOT EXISTS vault_meta(k TEXT PRIMARY KEY, v TEXT);
 """
 # eski bazaga qo'shiladigan ustunlar (jadval, ustun, e'lon) — CREATE TABLE IF NOT EXISTS ularni qo'shmaydi
-MIGRATE_COLS = (("day_facts", "gone_at", "TEXT"), ("chat_threads", "hash", "TEXT"))
+# state_versions.pinned: «o'zgarishdan oldingi» nusxa — ustiga yozilmaydi va compact() uni hech qachon o'chirmaydi.
+# note: nima uchun qotirilgan (katta yo'qotish, tiklash, import) — tiklash ro'yxatida ko'rinadi.
+MIGRATE_COLS = (("day_facts", "gone_at", "TEXT"), ("chat_threads", "hash", "TEXT"),
+                ("state_versions", "pinned", "INTEGER DEFAULT 0"), ("state_versions", "note", "TEXT"))
 
 
 # ═══════════════════════ umumiy ═══════════════════════
@@ -130,7 +166,41 @@ def _dumps(v) -> str:
 
 
 def _hash(s: str) -> str:
-    return hashlib.sha1(s.encode("utf-8")).hexdigest()
+    return vault.mac(s) if _sealed else hashlib.sha1(s.encode("utf-8")).hexdigest()
+
+
+def _enc(s):
+    """Matn ustuni → shifr (BLOB). None/bo'sh qator o'zicha qoladi."""
+    if s is None or s == "":
+        return s
+    return vault.seal_text(str(s), det=True)
+
+
+def _dec(v):
+    """Shifrlangan yoki eski ochiq ustun → matn."""
+    if isinstance(v, (bytes, bytearray, memoryview)):
+        b = vault.unseal(v)
+        return b if b[:3] == ZMAGIC else b.decode("utf-8", "replace")
+    return v
+
+
+def _zpack(js: str) -> bytes:
+    """Blob nusxasini siqadi va shifrlaydi. Natija BLOB — typeof(json)='blob' shundan bilinadi."""
+    return vault.seal(ZMAGIC + zlib.compress(js.encode("utf-8"), 6), det=True)
+
+
+def _zunpack(v):
+    """Siqilgan/shifrlangan yoki oddiy qiymat → matn. Eski (siqilmagan, ochiq) qatorlar shundoq o'qiladi."""
+    if isinstance(v, (bytes, bytearray, memoryview)):
+        b = vault.unseal(v)
+        if b[:3] == ZMAGIC:
+            try:
+                return zlib.decompress(b[3:]).decode("utf-8")
+            except (zlib.error, UnicodeDecodeError) as e:
+                log.error("siqilgan nusxa ochilmadi: %s", e)
+                return None
+        return b.decode("utf-8", "replace")
+    return v
 
 
 def _conn() -> sqlite3.Connection:
@@ -139,14 +209,25 @@ def _conn() -> sqlite3.Connection:
     c = sqlite3.connect(str(_path), timeout=10, isolation_level=None)   # tranzaksiyalarni o'zimiz boshqaramiz
     c.row_factory = sqlite3.Row
     c.execute("PRAGMA synchronous=NORMAL")
+    c.execute("PRAGMA secure_delete=ON")   # o'chirilgan/almashtirilgan sahifa nollanadi — eski ochiq matn diskda qolmasin
     return c
 
 
+def _sealed_flag(c) -> bool:
+    try:
+        r = c.execute("SELECT v FROM vault_meta WHERE k='sealed'").fetchone()
+    except sqlite3.Error:
+        return False
+    return bool(r and r[0])
+
+
 def init(data_dir: Path) -> Path:
-    """Sxemani yaratadi (takror chaqirish xavfsiz; ikki ishchi bir vaqtda chaqirsa ham)."""
-    global _path
+    """Sxemani yaratadi (takror chaqirish xavfsiz; ikki ishchi bir vaqtda chaqirsa ham).
+    Shifrlash kaliti yuklanmagan bo'lsa — shu papkadan yuklanadi (vault.init)."""
+    global _path, _sealed
     data_dir = Path(data_dir)
     data_dir.mkdir(parents=True, exist_ok=True)
+    vault.init(data_dir)
     (data_dir / "backups").mkdir(exist_ok=True)
     _path = data_dir / "dash.db"
     c = _conn()
@@ -162,6 +243,7 @@ def init(data_dir: Path) -> Path:
         if c.execute("PRAGMA user_version").fetchone()[0] < SCHEMA_VERSION:
             c.execute(f"PRAGMA user_version={SCHEMA_VERSION}")
         c.execute("COMMIT")
+        _sealed = _sealed_flag(c)
     except Exception:
         try:
             c.execute("ROLLBACK")
@@ -176,14 +258,6 @@ def init(data_dir: Path) -> Path:
 
 def _valid_day(k) -> bool:
     return isinstance(k, str) and bool(DAY_RE.match(k))
-
-
-def _clamp_range(frm: str, to: str):
-    """(frm, to) — 400 kundan uzun oraliq boshidan qirqiladi."""
-    a, b = _parse_iso(frm), _parse_iso(to)
-    if a and b and (b - a).days >= MAX_RANGE_DAYS:
-        frm = (b - timedelta(days=MAX_RANGE_DAYS - 1)).strftime("%Y-%m-%d")
-    return frm, to
 
 
 # ═══════════════════════ yozuvchilar ═══════════════════════
@@ -241,6 +315,32 @@ def _facts_of(blob: dict) -> dict:
             tasks.setdefault(day, []).append({k: x.get(k) for k in ("id", "text", "date", "doneAt", "priority", "goalId")})
     for day, v in tasks.items():
         put(day, "tasks", v)
+    # dhikr va fasting — kun-xarita, prayers bilan bir xil naqsh
+    for day, v in g("dhikr", dict).items():
+        if isinstance(v, dict):
+            put(day, "dhikr", v)
+    for day, v in g("fasting", dict).items():
+        if isinstance(v, dict):
+            put(day, "fasting", v)
+    # moliya: finance.tx[] — har yozuvda o'z sanasi bor
+    fin = blob.get("finance") if isinstance(blob.get("finance"), dict) else {}
+    fintx = {}
+    for x in (fin.get("tx") if isinstance(fin.get("tx"), list) else []):
+        if not isinstance(x, dict) or not _valid_day(x.get("date")):
+            continue
+        fintx.setdefault(x["date"], []).append({k: x.get(k) for k in ("id", "type", "amount", "cat", "note", "accountId")})
+    for day, v in fintx.items():
+        put(day, "finance", v)
+    # maqsadlar: tasks bilan bir xil — bajarilgan kuni bo'yicha
+    goals = {}
+    for x in g("goals", list):
+        if not isinstance(x, dict) or not x.get("done"):
+            continue
+        day = day_of_ms(x["doneAt"]) if x.get("doneAt") else None
+        if _valid_day(day):
+            goals.setdefault(day, []).append({k: x.get(k) for k in ("id", "text", "dir", "priority", "year", "doneAt")})
+    for day, v in goals.items():
+        put(day, "goals", v)
     # ovqat: food.logs[kun] = [taom]; surat faqat id sifatida qoladi (data: URL bo'lsa tashlab yuboriladi)
     food = blob.get("food") if isinstance(blob.get("food"), dict) else {}
     for day, v in (food.get("logs") if isinstance(food.get("logs"), dict) else {}).items():
@@ -280,7 +380,7 @@ def _existing(c, uid: str) -> dict:
 
 
 def archive_state(uid: str, blob: dict, now=None) -> dict:
-    """Blobdan kunlik faktlar, Nova chatlari va AI kartalarini arxivga yozadi. Bitta tranzaksiya.
+    """Blobdan kunlik faktlar, Yusa AI chatlari va AI kartalarini arxivga yozadi. Bitta tranzaksiya.
     Faqat xeshi o'zgargan qatorlar yoziladi. Qaytaradi: nechta qator yozildi."""
     if not isinstance(blob, dict):
         return {}
@@ -298,7 +398,7 @@ def archive_state(uid: str, blob: dict, now=None) -> dict:
             h = _hash(js)
             if cache.get((day, kind)) == h:
                 continue
-            rows.append((uid, day, kind, js, h, ts))
+            rows.append((uid, day, kind, _enc(js), h, ts))
         if rows:
             # xesh teng va tirik qator qayta yozilmaydi (updated_at o'zgarmaydi)
             c.executemany(
@@ -311,9 +411,9 @@ def archive_state(uid: str, blob: dict, now=None) -> dict:
         if gone_f:
             c.executemany("UPDATE day_facts SET gone_at=? WHERE uid=? AND day=? AND kind=? AND gone_at IS NULL", gone_f)
             st["gone"] = len(gone_f)
-        # ── Nova chatlari ──
-        nova = blob.get("nova") if isinstance(blob.get("nova"), dict) else {}
-        threads = [t for t in (nova.get("threads") if isinstance(nova.get("threads"), list) else []) if isinstance(t, dict) and t.get("id")]
+        # ── Yusa AI chatlari ──
+        yusa = blob.get("yusa") if isinstance(blob.get("yusa"), dict) else {}
+        threads = [t for t in (yusa.get("threads") if isinstance(yusa.get("threads"), list) else []) if isinstance(t, dict) and t.get("id")]
         present = []
         for th in threads:
             tid = str(th["id"])
@@ -324,8 +424,8 @@ def archive_state(uid: str, blob: dict, now=None) -> dict:
                 continue
             c.execute("INSERT INTO chat_threads(uid,id,ts,title,deleted_at,hash) VALUES(?,?,?,?,NULL,?) "
                       "ON CONFLICT(uid,id) DO UPDATE SET ts=excluded.ts, title=excluded.title, deleted_at=NULL, hash=excluded.hash",
-                      (uid, tid, int(th.get("ts") or 0), _thread_title(th), h))
-            msgs = [(uid, tid, i, int(m.get("ts") or 0), str(m.get("role") or ""), str(m.get("content") or ""))
+                      (uid, tid, int(th.get("ts") or 0), _enc(_thread_title(th)), h))
+            msgs = [(uid, tid, i, int(m.get("ts") or 0), str(m.get("role") or ""), _enc(str(m.get("content") or "")))
                     for i, m in enumerate(th.get("messages") or []) if isinstance(m, dict)]
             c.executemany("INSERT INTO chat_messages(uid,thread_id,idx,ts,role,content) VALUES(?,?,?,?,?,?) "
                           "ON CONFLICT(uid,thread_id,idx) DO UPDATE SET ts=excluded.ts, role=excluded.role, content=excluded.content "
@@ -343,10 +443,10 @@ def archive_state(uid: str, blob: dict, now=None) -> dict:
         cards = []
         for x in (ai.get("log") if isinstance(ai.get("log"), list) else []):
             if isinstance(x, dict) and x.get("section") and _valid_day(x.get("day")) and x.get("text"):
-                cards.append((uid, str(x["section"]), x["day"], int(x.get("ts") or 0), str(x["text"])))
+                cards.append((uid, str(x["section"]), x["day"], int(x.get("ts") or 0), _enc(str(x["text"]))))
         for sec, x in (ai.get("cards") if isinstance(ai.get("cards"), dict) else {}).items():
             if isinstance(x, dict) and _valid_day(x.get("day")) and x.get("text"):
-                cards.append((uid, str(sec), x["day"], int(x.get("ts") or 0), str(x["text"])))
+                cards.append((uid, str(sec), x["day"], int(x.get("ts") or 0), _enc(str(x["text"]))))
         if cards:
             cur = c.executemany("INSERT OR IGNORE INTO ai_cards(uid,section,day,ts,text) VALUES(?,?,?,?,?)", cards)
             st["cards"] = cur.rowcount if cur.rowcount and cur.rowcount > 0 else 0
@@ -364,30 +464,43 @@ def archive_state(uid: str, blob: dict, now=None) -> dict:
     return st
 
 
-def record_state_version(uid: str, blob: dict, now=None) -> int:
+def record_state_version(uid: str, blob: dict, now=None, pin: bool = False, note: str = None) -> int:
     """Blob nusxasi. Oxirgi versiyadan 10 daqiqa o'tgan yoki kun almashgan bo'lsa — yangi qator,
-    aks holda eng yangisi ustidan yoziladi. Qaytaradi: qator id."""
+    aks holda eng yangisi ustidan yoziladi. Qaytaradi: qator id.
+
+    Ustiga YOZILMAYDI (yangi qator ochiladi), agar:
+      · pin=True — o'zgarishdan oldingi holat ataylab qotirilmoqda;
+      · oxirgi qator qotirilgan bo'lsa;
+      · yangi nusxa oxirgisidan sezilarli kichik bo'lsa (≥10%) — ya'ni nimadir o'chgan.
+        Ilgari 10 daqiqa ichida yaxshi nusxa yomoni bilan almashib ketardi."""
     if not isinstance(blob, dict):
         return 0
     n = now if isinstance(now, datetime) else datetime.now(TZ)
     ts = _now_iso(n)
     js = json.dumps(blob, ensure_ascii=False, separators=(",", ":"))
     h = _hash(js)
+    z = _zpack(js)          # bazaga siqilgan holda tushadi; size — HAQIQIY (siqilmagan) hajm
     c = _conn()
     try:
         c.execute("BEGIN IMMEDIATE")
-        last = c.execute("SELECT id, saved_at FROM state_versions WHERE uid=? ORDER BY saved_at DESC, id DESC LIMIT 1", (uid,)).fetchone()
+        if pin:
+            # aynan shu holat allaqachon qotirilgan bo'lsa — ikkinchi marta yozmaymiz (baza shishmasin)
+            same = c.execute("SELECT id FROM state_versions WHERE uid=? AND pinned=1 AND hash=? LIMIT 1", (uid, h)).fetchone()
+            if same:
+                c.execute("COMMIT")
+                return same["id"]
+        last = c.execute("SELECT id, saved_at, size, pinned FROM state_versions WHERE uid=? ORDER BY saved_at DESC, id DESC LIMIT 1", (uid,)).fetchone()
         fresh = True
-        if last:
+        if last and not pin and not last["pinned"] and len(js) >= int(last["size"] or 0) * 0.9:
             prev = _parse_iso(last["saved_at"])
             if prev and (n - prev).total_seconds() < VERSION_GAP_S and prev.astimezone(TZ).strftime("%Y-%m-%d") == n.astimezone(TZ).strftime("%Y-%m-%d"):
                 fresh = False
         if fresh:
-            vid = c.execute("INSERT INTO state_versions(uid,saved_at,hash,size,json) VALUES(?,?,?,?,?)",
-                            (uid, ts, h, len(js), js)).lastrowid
+            vid = c.execute("INSERT INTO state_versions(uid,saved_at,hash,size,json,pinned,note) VALUES(?,?,?,?,?,?,?)",
+                            (uid, ts, h, len(js), z, 1 if pin else 0, note)).lastrowid
         else:
             vid = last["id"]
-            c.execute("UPDATE state_versions SET saved_at=?, hash=?, size=?, json=? WHERE id=?", (ts, h, len(js), js, vid))
+            c.execute("UPDATE state_versions SET saved_at=?, hash=?, size=?, json=? WHERE id=?", (ts, h, len(js), z, vid))
         c.execute("COMMIT")
         return vid
     except Exception:
@@ -406,9 +519,11 @@ def compact(now=None) -> int:
     n = now if isinstance(now, datetime) else datetime.now(TZ)
     c = _conn()
     try:
-        rows = c.execute("SELECT id, uid, saved_at FROM state_versions ORDER BY uid, saved_at DESC, id DESC").fetchall()
+        rows = c.execute("SELECT id, uid, saved_at, pinned FROM state_versions ORDER BY uid, saved_at DESC, id DESC").fetchall()
         keep, drop = {}, []
         for r in rows:
+            if r["pinned"]:
+                continue      # qotirilgan nusxa abadiy qoladi
             d = _parse_iso(r["saved_at"])
             if not d:
                 continue
@@ -425,13 +540,193 @@ def compact(now=None) -> int:
             c.execute("BEGIN IMMEDIATE")
             c.executemany("DELETE FROM state_versions WHERE id=?", drop)
             c.execute("COMMIT")
+        n_zip = _squeeze(c)
+        if drop or n_zip:
             try:
                 c.execute("PRAGMA wal_checkpoint(TRUNCATE)")
             except sqlite3.Error:
                 pass
+        if n_zip:
+            log.info("arxiv: %d ta eski nusxa siqildi", n_zip)
         return len(drop)
     finally:
         c.close()
+
+
+def _squeeze(c, batch: int = 40) -> int:
+    """Siqilmagan (TEXT) blob nusxalarini zlib'ga o'tkazadi — bir marta, kichik to'plamlar bilan.
+
+    Nega to'plam bilan: bitta so'rovda hammasini o'qish yillar davomida yig'ilgan yuzlab
+    50 KB lik qatorni bir vaqtda xotiraga olardi. Server 458 MB — bunga yo'l qo'yib bo'lmaydi.
+    """
+    done = 0
+    while True:
+        rows = c.execute("SELECT id, json FROM state_versions WHERE typeof(json)='text' LIMIT ?", (batch,)).fetchall()
+        if not rows:
+            return done
+        pack = []
+        for r in rows:
+            js = r["json"]
+            # yaroqsiz bo'lsa ham tegmaymiz: siqish ma'lumotni tekshirish joyi emas
+            pack.append((_zpack(js) if isinstance(js, str) else js, r["id"]))
+        c.execute("BEGIN IMMEDIATE")
+        c.executemany("UPDATE state_versions SET json=? WHERE id=?", pack)
+        c.execute("COMMIT")
+        done += len(rows)
+        if len(rows) < batch:
+            return done
+
+
+def seal_status() -> dict:
+    """Har jadvalda nechta mazmun qiymati shifrlangan / ochiq — vault.py status uchun."""
+    c = _conn()
+    try:
+        out = {"sealed": _sealed_flag(c), "kid": vault.kid(), "tables": {}}
+        for table, _, cols in SEALED_COLS:
+            for col in cols:
+                n_all = c.execute(f"SELECT COUNT(*) FROM {table} WHERE {col} IS NOT NULL AND {col} != ''").fetchone()[0]   # noqa: S608
+                n_enc = c.execute(f"SELECT COUNT(*) FROM {table} WHERE substr({col},1,5)=?", (vault.MAGIC,)).fetchone()[0]   # noqa: S608
+                out["tables"][f"{table}.{col}"] = {"sealed": n_enc, "plain": n_all - n_enc}
+        return out
+    finally:
+        c.close()
+
+
+def _reseal_val(table: str, v, undo: bool):
+    """Bitta ustun qiymati → yangi holati (shifrlangan yoki ochiq)."""
+    if v is None or v == "":
+        return v
+    if table == "state_versions":
+        if undo:
+            return vault.unseal(v) if isinstance(v, (bytes, bytearray, memoryview)) else v
+        if isinstance(v, str):
+            return _zpack(v)
+        return vault.seal(vault.unseal(v), det=True)
+    plain = _dec(v)
+    return plain if undo else _enc(plain)
+
+
+def seal_all(undo: bool = False, batch: int = 20) -> int:
+    """Arxivdagi hamma mazmun ustunini shifrlaydi (undo=True — ochadi) va xeshlarni kalitli
+    (yoki qaytib oddiy SHA1) qilib qayta hisoblaydi. BITTA tranzaksiya: yarmida uzilsa baza
+    eski holicha qoladi. Keyin VACUUM — eski ochiq matn bo'sh sahifalarda qolib ketmasin.
+
+    Hech bir qator o'chirilmaydi: faqat UPDATE. Qaytaradi: nechta qator o'zgardi."""
+    global _sealed
+    c = _conn()
+    n = 0
+    try:
+        if _sealed_flag(c) != undo:
+            _sealed = not undo
+            return 0
+        c.execute("BEGIN IMMEDIATE")
+        _sealed = not undo          # _hash endi yangi rejimda hisoblaydi
+        for table, keys, cols in SEALED_COLS:
+            has_hash = table in ("day_facts", "state_versions", "chat_threads")
+            sel = ", ".join(("rowid AS _r",) + cols + (("hash",) if has_hash else ()))
+            last = -1
+            while True:
+                rows = c.execute(f"SELECT {sel} FROM {table} WHERE rowid > ? ORDER BY rowid LIMIT ?",   # noqa: S608
+                                 (last, batch)).fetchall()
+                if not rows:
+                    break
+                for r in rows:
+                    last = r["_r"]
+                    new = {col: _reseal_val(table, r[col], undo) for col in cols}
+                    if table == "day_facts" and r["json"] is not None:
+                        new["hash"] = _hash(_dec(r["json"]))
+                    elif table == "state_versions" and r["json"] is not None:
+                        js = _zunpack(r["json"])
+                        new["hash"] = _hash(js) if js is not None else r["hash"]
+                    elif table == "chat_threads":
+                        new["hash"] = None    # butun suhbatning xeshi — keyingi saqlashda qayta yoziladi
+                    if all(new[k] == r[k] for k in new):
+                        continue
+                    sets = ", ".join(f"{k}=?" for k in new)
+                    c.execute(f"UPDATE {table} SET {sets} WHERE rowid=?", (*new.values(), last))   # noqa: S608
+                    n += 1
+                if len(rows) < batch:
+                    break
+        if undo:
+            c.execute("DELETE FROM vault_meta WHERE k='sealed'")
+        else:
+            c.execute("INSERT INTO vault_meta(k,v) VALUES('sealed',?) ON CONFLICT(k) DO UPDATE SET v=excluded.v",
+                      (vault.kid(),))
+        c.execute("COMMIT")
+    except Exception:
+        _sealed = undo
+        try:
+            c.execute("ROLLBACK")
+        except sqlite3.Error:
+            pass
+        raise
+    finally:
+        c.close()
+    try:
+        vacuum()
+        c = _conn()
+        try:
+            c.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        finally:
+            c.close()
+    except sqlite3.Error as e:
+        log.warning("seal_all: VACUUM bo'lmadi (%s) — keyingi oylik VACUUM tozalaydi", e)
+    log.info("arxiv: %d ta qator %s", n, "ochildi" if undo else "shifrlandi")
+    return n
+
+
+def integrity(quick: bool = True) -> str:
+    """Bazaning butunligi. 'ok' — hammasi joyida; boshqa har qanday matn — nosozlik tavsifi.
+
+    Nega kerak: SQLite jimgina buziladi. Agar buni hech kim tekshirmasa, buzilgan baza
+    kunlar davomida zaxiraga ko'chib boradi va oxir-oqibat HAMMA nusxa buzuq bo'lib qoladi.
+    Shuning uchun nusxa olishdan oldin tekshiriladi — buzuq baza eski, sog' nusxani o'chirmaydi.
+    """
+    c = _conn()
+    try:
+        row = c.execute("PRAGMA quick_check" if quick else "PRAGMA integrity_check").fetchone()
+        res = (row[0] if row else "") or ""
+        if res != "ok":
+            return res
+        fk = c.execute("PRAGMA foreign_key_check").fetchall()
+        return "ok" if not fk else f"foreign_key_check: {len(fk)} ta nomuvofiqlik"
+    except sqlite3.Error as e:
+        return f"sqlite: {e}"
+    finally:
+        c.close()
+
+
+def vacuum() -> int:
+    """VACUUM — compact o'chirgan sahifalarni diskka qaytaradi. Qaytaradi: qancha bayt bo'shadi."""
+    before = _path.stat().st_size if _path and _path.exists() else 0
+    c = _conn()
+    try:
+        c.execute("VACUUM")
+    finally:
+        c.close()
+    after = _path.stat().st_size if _path and _path.exists() else 0
+    return max(0, before - after)
+
+
+def stats() -> dict:
+    """Arxivning bir qarashdagi holati — «Ma'lumot sog'ligi» paneli uchun."""
+    out = {"bytes": 0, "rows": {}, "users": 0, "first": None, "last": None, "compressed": 0, "plain": 0}
+    c = _conn()
+    try:
+        out["bytes"] = c.execute("PRAGMA page_count").fetchone()[0] * c.execute("PRAGMA page_size").fetchone()[0]
+        for t in ("state_versions", "day_facts", "whoop_records", "chat_threads", "chat_messages", "ai_cards", "ai_calls"):
+            out["rows"][t] = c.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]     # noqa: S608 — jadval nomi shu ro'yxatdan
+        out["users"] = c.execute("SELECT COUNT(*) FROM users").fetchone()[0]
+        r = c.execute("SELECT MIN(day) a, MAX(day) b FROM day_facts WHERE gone_at IS NULL").fetchone()
+        out["first"], out["last"] = r["a"], r["b"]
+        out["compressed"] = c.execute("SELECT COUNT(*) FROM state_versions WHERE typeof(json)='blob'").fetchone()[0]
+        out["plain"] = c.execute("SELECT COUNT(*) FROM state_versions WHERE typeof(json)='text'").fetchone()[0]
+        out["schema"] = c.execute("PRAGMA user_version").fetchone()[0]
+    except sqlite3.Error as e:
+        out["error"] = str(e)
+    finally:
+        c.close()
+    return out
 
 
 def record_whoop(uid: str, kind: str, records: list, now=None) -> int:
@@ -445,7 +740,7 @@ def record_whoop(uid: str, kind: str, records: list, now=None) -> int:
         if not isinstance(r, dict) or r.get("id") is None:
             continue
         rts = str(r.get(ts_key) or "")
-        rows.append((uid, kind, str(r["id"]), rts, whoop_day(kind, r) or "", _dumps(r), ts))
+        rows.append((uid, kind, str(r["id"]), rts, whoop_day(kind, r) or "", _enc(_dumps(r)), ts))
     if not rows:
         return 0
     c = _conn()
@@ -492,216 +787,228 @@ def touch_user(uid: str, name=None, email=None, provider=None, now=None):
         c.execute("INSERT INTO users(uid,name,email,provider,created_at,last_seen) VALUES(?,?,?,?,?,?) "
                   "ON CONFLICT(uid) DO UPDATE SET name=COALESCE(excluded.name, users.name), email=COALESCE(excluded.email, users.email), "
                   "provider=COALESCE(excluded.provider, users.provider), last_seen=excluded.last_seen",
-                  (uid, name, email, provider, ts, ts))
+                  (uid, _enc(name), _enc(email), provider, ts, ts))
         c.execute("COMMIT")
     finally:
         c.close()
 
 
+def _dated(files) -> list:
+    """[(sana, fayl)] — nomidagi YYYY-MM-DD bo'yicha, eng yangisi birinchi.
+    Bir kunning ichida: .gz birinchi (yangi format), keyin mtime bo'yicha."""
+    out = []
+    for p in files:
+        m = re.search(r"(\d{4}-\d{2}-\d{2})", p.name)
+        if not m:
+            continue
+        try:
+            d = datetime.strptime(m.group(1), "%Y-%m-%d").date()
+        except ValueError:
+            continue
+        try:
+            mt = p.stat().st_mtime
+        except OSError:
+            mt = 0
+        out.append((d, p.name.endswith(".gz"), mt, p))
+    out.sort(key=lambda x: (x[0], x[1], x[2]), reverse=True)
+    return [(x[0], x[3]) for x in out]
+
+
+def prune_generational(files, now=None) -> int:
+    """Kunlik nusxalarni avlodlarga ajratib siyraklashtiradi va ortiqchasini o'chiradi.
+
+        14 kun  → har kuni
+        8 hafta → haftasiga bitta
+        24 oy   → oyiga bitta
+        undan narisi → YILIGA BITTA, ABADIY
+
+    Nega shunday: «oxirgi 14 tasini qoldirish» qoidasi ikki hafta oldingi xatoni topib
+    bo'lmaydigan qiladi — o'sha paytdagi nusxa allaqachon o'chgan bo'ladi. Bu qoida esa
+    o'nlab yil orqaga qarash imkonini beradi va o'rniga juda oz joy oladi: yiliga bitta
+    nusxa 20 yilda ham 20 ta fayl.
+    """
+    n = (now if isinstance(now, datetime) else datetime.now(TZ)).date()
+    keep, drop = set(), []
+    for d, p in _dated(files):
+        age = (n - d).days
+        if age < KEEP_DAILY_B:
+            bucket = ("d", d.isoformat())
+        elif age < KEEP_DAILY_B + 7 * KEEP_WEEKLY_B:
+            y, w, _ = d.isocalendar()
+            bucket = ("w", y, w)
+        elif age < 31 * KEEP_MONTHLY_B:
+            bucket = ("m", d.year, d.month)
+        else:
+            bucket = ("y", d.year)
+        if bucket in keep:
+            drop.append(p)
+        else:
+            keep.add(bucket)
+    for p in drop:
+        p.unlink(missing_ok=True)
+    return len(drop)
+
+
+def _verify_copy(p: Path, want: dict = None) -> str:
+    """Olingan nusxa ochiladimi, butunmi va BARCHA qatorlar yetib kelganmi. 'ok' yoki nosozlik matni.
+
+    Tekshirilmagan zaxira — zaxira emas: u faqat tiklash kuni yaroqsizligi ma'lum bo'ladi.
+    `want` — nusxa olishdan oldin manbadagi qator sonlari. Nusxa undan kam bo'lsa, u chala.
+    Ko'p bo'lishi mumkin (nusxa olinayotganda kimdir saqlagan) — bu xato emas.
+    Bo'sh bazaning bo'sh nusxasi ham to'g'ri: yangi serverda hali hech kim hech narsa yozmagan.
+    """
+    try:
+        c = sqlite3.connect(f"file:{p}?mode=ro", uri=True, timeout=10)
+    except sqlite3.Error as e:
+        return f"ochilmadi: {e}"
+    try:
+        row = c.execute("PRAGMA quick_check").fetchone()
+        if not row or row[0] != "ok":
+            return f"quick_check: {row[0] if row else '—'}"
+        for t, n_src in (want or {}).items():
+            n = c.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0]     # noqa: S608 — jadval nomi COUNT_TABLES dan
+            if n < n_src:
+                return f"{t}: nusxada {n} qator, bazada {n_src} edi"
+        return "ok"
+    except sqlite3.Error as e:
+        return f"o'qilmadi: {e}"
+    finally:
+        c.close()
+
+
+def _seal_file(p: Path):
+    """Zaxira fayli butunligicha shifrlanadi: ichidagi uid/kun/vaqt ham ko'rinmasin.
+    O'qish: vault.read_bytes(p) → gzip.decompress (yoki: python3 vault.py cat <fayl> --data data)."""
+    b = p.read_bytes()
+    s = vault.seal(b)
+    if vault.unseal(s) != b:
+        raise vault.VaultError(f"{p.name}: shifr tekshiruvdan o'tmadi")
+    with open(p, "wb") as fh:
+        fh.write(s)
+        fh.flush()
+        os.fsync(fh.fileno())
+
+
 def backup_db(data_dir: Path, now=None) -> Path:
-    """sqlite backup API → backups/dash-YYYY-MM-DD.db; eng yangi 14 tasi qoladi."""
+    """Kunlik arxiv nusxasi → backups/dash-YYYY-MM-DD.db.gz (gzip, keyin vault bilan shifrlangan).
+
+    Tartib: sqlite backup API bilan nusxa olinadi → nusxa TEKSHIRILADI → gzip qilinadi →
+    shundan keyingina eski nusxalar siyraklashtiriladi. Tekshiruvdan o'tmasa xato otiladi
+    va eski nusxalarga TEGILMAYDI — sog' nusxa buzuq nusxa uchun qurbon bo'lmaydi.
+    """
     d = Path(data_dir) / "backups"
     d.mkdir(parents=True, exist_ok=True)
     n = now if isinstance(now, datetime) else datetime.now(TZ)
-    dst = d / f"dash-{n.strftime('%Y-%m-%d')}.db"
-    tmp = dst.with_suffix(".tmp")
+    day = n.strftime("%Y-%m-%d")
+    dst = d / f"dash-{day}.db.gz"
+    raw = d / f"dash-{day}.db.part"
+    tmp = d / f"dash-{day}.db.gz.part"
+    raw.unlink(missing_ok=True)
     src = _conn()
     try:
-        out = sqlite3.connect(str(tmp))
+        # Nusxa olishdan OLDINGI qator sonlari — nusxa chala chiqmaganini shu bilan tekshiramiz
+        want = {t: src.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in COUNT_TABLES}   # noqa: S608
+        out = sqlite3.connect(str(raw))
         try:
             src.backup(out)
         finally:
             out.close()
+    finally:
+        src.close()
+    try:
+        bad = _verify_copy(raw, want)
+        if bad != "ok":
+            raise sqlite3.DatabaseError(f"zaxira nusxasi tekshiruvdan o'tmadi ({bad})")
+        with open(raw, "rb") as fin, gzip.open(tmp, "wb", compresslevel=6) as fout:
+            shutil.copyfileobj(fin, fout, 1024 * 256)
+        _seal_file(tmp)
         tmp.replace(dst)
         _chmod_private(dst)
     finally:
-        src.close()
-    for old in sorted(d.glob("dash-*.db"))[:-BACKUP_KEEP]:
-        old.unlink(missing_ok=True)
+        # -wal/-shm ni ham o'chiramiz: nusxa WAL rejimida bo'lgani uchun _verify_copy uni
+        # faqat-o'qish qilib ochadi va yopilganda SQLite o'sha yordamchi fayllarni
+        # O'CHIRA OLMAYDI (yozish huquqi yo'q). Ular 644 bilan qolib ketardi.
+        for p in (raw, Path(str(raw) + "-wal"), Path(str(raw) + "-shm"), tmp):
+            p.unlink(missing_ok=True)
+    # eski formatdagi (siqilmagan) nusxalar: shu kunnikisi ortiqcha, qolganlari siqiladi
+    (d / f"dash-{day}.db").unlink(missing_ok=True)
+    for old in sorted(d.glob("dash-*.db")):
+        try:
+            with open(old, "rb") as fin, gzip.open(str(old) + ".gz.part", "wb", compresslevel=6) as fout:
+                shutil.copyfileobj(fin, fout, 1024 * 256)
+            _seal_file(Path(str(old) + ".gz.part"))
+            os.replace(str(old) + ".gz.part", str(old) + ".gz")
+            _chmod_private(Path(str(old) + ".gz"))
+            old.unlink(missing_ok=True)
+        except OSError as e:
+            log.error("eski nusxa siqilmadi (%s): %s", old.name, e)
+            Path(str(old) + ".gz.part").unlink(missing_ok=True)
+    prune_generational(list(d.glob("dash-*.db.gz")) + list(d.glob("dash-*.db")), n)
+    # Nusxalarda hamma odamning butun hayoti bor. Zaxiradan tiklangan yoki qo'lda
+    # ko'chirilgan fayl bo'sh ruxsat bilan kelib qolishi mumkin — har kuni tekshiramiz.
+    for p in d.glob("dash-*.db.gz"):
+        try:
+            if p.stat().st_mode & 0o077:
+                _chmod_private(p)
+        except OSError:
+            pass
     return dst
 
 
 # ═══════════════════════ tarix so'rovlari ═══════════════════════
 
 def _loads(s):
+    """Har qanday saqlangan JSON ustuni → obyekt. Siqilgan blob (BLOB, DZ1) ham shu yerda ochiladi,
+    ya'ni har bir o'quvchi (version, days, whoop…) o'zgartirishsiz ishlayveradi."""
+    s = _zunpack(s)
     try:
         return json.loads(s) if s is not None else None
     except (TypeError, ValueError):
         return None
 
 
-def range(uid: str) -> dict:   # noqa: A001 — spec nomi
+def versions(uid: str, limit: int = 60) -> list:
+    """Tiklash nuqtalari: eng yangisidan. Har biriga qisqa xulosa (necha kun, odat, vazifa...) —
+    odam qaysi nusxaga qaytayotganini ko'rib tanlasin."""
     c = _conn()
     try:
-        r = c.execute("SELECT MIN(day) AS first, MAX(day) AS last, COUNT(DISTINCT day) AS days FROM day_facts WHERE uid=? AND gone_at IS NULL", (uid,)).fetchone()
-        w = c.execute("SELECT MIN(day_hint) AS first FROM whoop_records WHERE uid=? AND day_hint<>''", (uid,)).fetchone()
-        t = c.execute("SELECT COUNT(*) AS n FROM chat_threads WHERE uid=?", (uid,)).fetchone()
-        return {"first": r["first"], "last": r["last"], "days": r["days"] or 0, "whoopFirst": w["first"], "threads": t["n"] or 0}
-    finally:
-        c.close()
-
-
-def days(uid: str, frm: str, to: str) -> dict:
-    frm, to = _clamp_range(frm, to)
-    out = {}
-    c = _conn()
-    try:
-        for r in c.execute("SELECT day, kind, json FROM day_facts WHERE uid=? AND day BETWEEN ? AND ? AND gone_at IS NULL ORDER BY day", (uid, frm, to)):
-            out.setdefault(r["day"], {})[r["kind"]] = _loads(r["json"])
+        out = []
+        for r in c.execute("SELECT id, saved_at, size, pinned, note, json FROM state_versions WHERE uid=? "
+                           "ORDER BY saved_at DESC, id DESC LIMIT ?", (uid, int(limit))):
+            b = _loads(r["json"]) or {}
+            out.append({"id": r["id"], "savedAt": r["saved_at"], "size": r["size"], "pinned": bool(r["pinned"]),
+                        "note": r["note"], "summary": summarize(b)})
         return out
     finally:
         c.close()
 
 
-def whoop(uid: str, frm: str, to: str) -> dict:
-    frm, to = _clamp_range(frm, to)
-    out = {k: [] for k in WHOOP_TS_KEY}
-    c = _conn()
-    try:
-        for r in c.execute("SELECT kind, json FROM whoop_records WHERE uid=? AND day_hint BETWEEN ? AND ? ORDER BY ts DESC", (uid, frm, to)):
-            if r["kind"] in out:
-                out[r["kind"]].append(_loads(r["json"]))
-        return out
-    finally:
-        c.close()
+def _n(v) -> int:
+    return len(v) if isinstance(v, (list, dict)) else 0
 
 
-def _avg(xs):
-    xs = [float(x) for x in xs if isinstance(x, (int, float)) and not isinstance(x, bool)]
-    return round(sum(xs) / len(xs), 1) if xs else None
-
-
-def months(uid: str, year: int) -> dict:
-    """Yil bo'yicha oylik yig'indilar: {YYYY-MM: {days, habitPct, sleepH, recovery, strain, kcal, kcalEaten,
-    workouts, weightStart, weightEnd, notes}}. Barcha 12 oy qaytadi (bo'sh oy — days:0)."""
-    y = int(year)
-    frm, to = f"{y:04d}-01-01", f"{y:04d}-12-31"
-    m = {f"{y:04d}-{i:02d}": {"days": 0, "habitPct": None, "sleepH": None, "recovery": None, "strain": None, "kcal": None, "kcalEaten": None,
-                              "workouts": 0, "weightStart": None, "weightEnd": None, "notes": 0} for i in _brange(1, 13)}
-    acc = {k: {"days": set(), "habits": [], "ids": set(), "sleep": [], "rec": [], "strain": [], "kcal": [], "eaten": [], "w": [], "weights": []} for k in m}
-    c = _conn()
-    try:
-        for r in c.execute("SELECT day, kind, json FROM day_facts WHERE uid=? AND day BETWEEN ? AND ? AND gone_at IS NULL ORDER BY day", (uid, frm, to)):
-            mk = r["day"][:7]
-            if mk not in acc:
-                continue
-            a = acc[mk]
-            a["days"].add(r["day"])
-            v = _loads(r["json"])
-            if r["kind"] == "habits" and isinstance(v, list):
-                a["habits"].append(len(v))
-                a["ids"].update(str(x) for x in v)
-            elif r["kind"] == "health" and isinstance(v, dict):
-                if isinstance(v.get("weight"), (int, float)):
-                    a["weights"].append((r["day"], float(v["weight"])))
-            elif r["kind"] == "note":
-                m[mk]["notes"] += 1
-            elif r["kind"] == "food" and isinstance(v, list):
-                a["eaten"].append(sum(float(x.get("kcal") or 0) for x in v if isinstance(x, dict) and isinstance(x.get("kcal"), (int, float))))
-        for r in c.execute("SELECT kind, day_hint, json FROM whoop_records WHERE uid=? AND day_hint BETWEEN ? AND ?", (uid, frm, to)):
-            mk = r["day_hint"][:7]
-            if mk not in acc:
-                continue
-            a, v = acc[mk], _loads(r["json"]) or {}
-            if r["kind"] == "sleep" and not v.get("nap"):
-                a["sleep"].append(v.get("sleepH"))
-            elif r["kind"] == "recovery":
-                a["rec"].append(v.get("recovery"))
-            elif r["kind"] == "cycle":
-                a["strain"].append(v.get("strain")); a["kcal"].append(v.get("kcal"))
-            elif r["kind"] == "workout":
-                a["w"].append(v.get("id"))
-    finally:
-        c.close()
-    for mk, a in acc.items():
-        o = m[mk]
-        o["days"] = len(a["days"])
-        if a["habits"]:
-            # maxraj — shu oyda kamida bir marta belgilangan odatlar soni (odatlar ro'yxati arxivda yo'q)
-            den = max(1, len(a["ids"]))
-            o["habitPct"] = round(100 * sum(a["habits"]) / (den * len(a["habits"])))
-        o["sleepH"] = _avg(a["sleep"]); o["recovery"] = _avg(a["rec"]); o["strain"] = _avg(a["strain"]); o["kcal"] = _avg(a["kcal"])
-        o["kcalEaten"] = _avg(a["eaten"])
-        o["workouts"] = len(a["w"])
-        if a["weights"]:
-            ws = sorted(a["weights"])
-            o["weightStart"], o["weightEnd"] = ws[0][1], ws[-1][1]
-    return m
-
-
-def chats(uid: str, q: str = "", limit: int = 50, before=None) -> list:
-    """Arxivdagi chatlar (o'chirilganlari ham), yangisi birinchi. q — sarlavha va xabar matni bo'yicha."""
-    try:
-        limit = max(1, min(200, int(limit or 50)))
-    except (TypeError, ValueError):
-        limit = 50
-    sql = ("SELECT t.id, t.ts, t.title, t.deleted_at, (SELECT COUNT(*) FROM chat_messages m WHERE m.uid=t.uid AND m.thread_id=t.id) AS cnt "
-           "FROM chat_threads t WHERE t.uid=?")
-    args = [uid]
-    if q:
-        like = "%" + q.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_") + "%"
-        sql += (" AND (t.title LIKE ? ESCAPE '\\' OR EXISTS(SELECT 1 FROM chat_messages m WHERE m.uid=t.uid AND m.thread_id=t.id "
-                "AND m.content LIKE ? ESCAPE '\\'))")
-        args += [like, like]
-    try:
-        b = int(before) if before not in (None, "") else None
-    except (TypeError, ValueError):
-        b = None          # noto'g'ri kursor — e'tiborsiz (SQL ga ? qo'shilmaydi)
-    if b is not None:
-        sql += " AND t.ts < ?"
-        args.append(b)
-    sql += " ORDER BY t.ts DESC LIMIT ?"
-    args.append(limit)
-    c = _conn()
-    try:
-        return [{"id": r["id"], "ts": r["ts"], "title": r["title"], "count": r["cnt"], "deleted": r["deleted_at"] is not None}
-                for r in c.execute(sql, args)]
-    finally:
-        c.close()
-
-
-def chat(uid: str, thread_id: str):
-    c = _conn()
-    try:
-        t = c.execute("SELECT id, ts, title, deleted_at FROM chat_threads WHERE uid=? AND id=?", (uid, str(thread_id))).fetchone()
-        if not t:
-            return None
-        msgs = [{"idx": r["idx"], "ts": r["ts"], "role": r["role"], "content": r["content"]}
-                for r in c.execute("SELECT idx, ts, role, content FROM chat_messages WHERE uid=? AND thread_id=? ORDER BY idx", (uid, str(thread_id)))]
-        return {"id": t["id"], "ts": t["ts"], "title": t["title"], "deleted": t["deleted_at"] is not None, "messages": msgs}
-    finally:
-        c.close()
-
-
-CARDS_MAX = 2000              # bitta so'rovdagi kartalar chegarasi (yangilari birinchi)
-
-
-def cards(uid: str, section: str, frm: str, to: str, limit: int = CARDS_MAX) -> list:
-    frm, to = _clamp_range(frm, to)
-    try:
-        limit = max(1, min(CARDS_MAX, int(limit or CARDS_MAX)))
-    except (TypeError, ValueError):
-        limit = CARDS_MAX
-    sql, args = "SELECT section, day, ts, text FROM ai_cards WHERE uid=? AND day BETWEEN ? AND ?", [uid, frm, to]
-    if section:
-        sql += " AND section=?"
-        args.append(section)
-    sql += " ORDER BY day DESC, ts DESC LIMIT ?"
-    args.append(limit)
-    c = _conn()
-    try:
-        return [dict(r) for r in c.execute(sql, args)]
-    finally:
-        c.close()
-
-
-def versions(uid: str) -> list:
-    c = _conn()
-    try:
-        return [{"id": r["id"], "savedAt": r["saved_at"], "size": r["size"]}
-                for r in c.execute("SELECT id, saved_at, size FROM state_versions WHERE uid=? ORDER BY saved_at DESC, id DESC", (uid,))]
-    finally:
-        c.close()
+def summarize(b: dict) -> dict:
+    """Blobdagi yozuvlar soni — tiklash ro'yxati va yo'qotishni aniqlash uchun bitta o'lchov."""
+    if not isinstance(b, dict):
+        return {"days": 0, "habits": 0, "tasks": 0, "tx": 0, "meals": 0, "records": 0}
+    days = set()
+    for k in ("logs", "counts", "notes", "health", "prayers", "dhikr", "fasting", "mediaLogs"):
+        if isinstance(b.get(k), dict):
+            days.update(d for d in b[k] if DAY_RE.match(str(d)))
+    fin = b.get("finance") if isinstance(b.get("finance"), dict) else {}
+    food = b.get("food") if isinstance(b.get("food"), dict) else {}
+    meals = sum(_n(v) for v in (food.get("logs") or {}).values()) if isinstance(food.get("logs"), dict) else 0
+    out = {"days": len(days), "habits": _n(b.get("habits")), "tasks": _n(b.get("tasks")), "tx": _n(fin.get("tx")), "meals": meals}
+    rec = 0
+    for k in ("logs", "counts", "notes", "health", "prayers", "dhikr", "fasting", "mediaLogs", "weekly"):
+        rec += _n(b.get(k))
+    for k in ("habits", "tasks", "goals", "gratitude", "media", "learn", "reviews"):
+        rec += _n(b.get(k))
+    rec += _n(fin.get("tx")) + _n(fin.get("accounts")) + _n(fin.get("subs")) + meals
+    yusa = b.get("yusa") if isinstance(b.get("yusa"), dict) else {}
+    rec += _n(yusa.get("threads"))
+    out["records"] = rec
+    return out
 
 
 def version(uid: str, vid) -> dict:
@@ -717,10 +1024,40 @@ def version(uid: str, vid) -> dict:
         c.close()
 
 
-def restore_thread(uid: str, thread_id: str):
-    """Arxivdagi chat → blob nova.threads ko'rinishida ({id, ts, messages:[{role,content,ts}]})."""
-    t = chat(uid, thread_id)
-    if not t:
-        return None
-    return {"id": t["id"], "ts": t["ts"] or 0,
-            "messages": [{"role": m["role"], "content": m["content"], "ts": m["ts"] or 0} for m in t["messages"]]}
+def export_all(uid: str) -> dict:
+    """Bitta odamning arxividagi HAMMA narsa — chegarasiz (400 kunlik cheklov bu yerda yo'q).
+
+    Nega bor: ilova bir kun yo'qolishi mumkin, ma'lumot esa qolishi kerak. Bu yerdan
+    chiqqan JSON hech qanday dasturga bog'liq emas — uni istalgan vaqtda, istalgan
+    vosita bilan o'qish mumkin. O'chirilgan yozuvlar ham chiqadi (goneAt / deletedAt
+    belgisi bilan): nima bo'lgani ham tarixning bir qismi.
+    """
+    out = {"uid": uid, "exportedAt": _now_iso(), "schema": SCHEMA_VERSION,
+           "days": {}, "whoop": {k: [] for k in WHOOP_TS_KEY}, "chats": [], "cards": [], "aiCalls": 0}
+    c = _conn()
+    try:
+        for r in c.execute("SELECT day, kind, json, updated_at, gone_at FROM day_facts WHERE uid=? ORDER BY day", (uid,)):
+            rec = {"value": _loads(r["json"]), "updatedAt": r["updated_at"]}
+            if r["gone_at"]:
+                rec["goneAt"] = r["gone_at"]
+            out["days"].setdefault(r["day"], {})[r["kind"]] = rec
+        for r in c.execute("SELECT kind, id, ts, day_hint, json FROM whoop_records WHERE uid=? ORDER BY ts", (uid,)):
+            if r["kind"] in out["whoop"]:
+                out["whoop"][r["kind"]].append({"id": r["id"], "ts": r["ts"], "day": r["day_hint"], "value": _loads(r["json"])})
+        for t in c.execute("SELECT id, ts, title, deleted_at FROM chat_threads WHERE uid=? ORDER BY ts", (uid,)):
+            msgs = [{"idx": m["idx"], "ts": m["ts"], "role": m["role"], "content": _dec(m["content"])}
+                    for m in c.execute("SELECT idx, ts, role, content FROM chat_messages WHERE uid=? AND thread_id=? ORDER BY idx", (uid, t["id"]))]
+            th = {"id": t["id"], "ts": t["ts"], "title": _dec(t["title"]), "messages": msgs}
+            if t["deleted_at"]:
+                th["deletedAt"] = t["deleted_at"]
+            out["chats"].append(th)
+        out["cards"] = [{"section": r["section"], "day": r["day"], "ts": r["ts"], "text": _dec(r["text"])}
+                        for r in c.execute("SELECT section, day, ts, text FROM ai_cards WHERE uid=? ORDER BY day, ts", (uid,))]
+        out["aiCalls"] = c.execute("SELECT COUNT(*) FROM ai_calls WHERE uid=?", (uid,)).fetchone()[0]
+        r = c.execute("SELECT MIN(day) a, MAX(day) b, COUNT(DISTINCT day) n FROM day_facts WHERE uid=?", (uid,)).fetchone()
+        out["range"] = {"first": r["a"], "last": r["b"], "days": r["n"] or 0}
+        return out
+    finally:
+        c.close()
+
+

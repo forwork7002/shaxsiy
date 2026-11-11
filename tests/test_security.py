@@ -71,7 +71,7 @@ check("https ustida HSTS bor",
 
 # ── 3. Kirmasdan hech narsa ko'rinmaydi ─────────────────────────────────────────
 print("\nRuxsat")
-for path in ("/api/data", "/api/me", "/api/history/days", "/api/history/versions", "/api/backups",
+for path in ("/api/data", "/api/me", "/api/backups",
              "/api/whoop/snapshot", "/api/whoop/status", "/api/food/photo/fp_0123456789abcdef"):
     check(f"{path} → 401", c.get(path).status_code == 401)
 

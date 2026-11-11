@@ -10,85 +10,81 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Shaxsiy · Dashboard</title>
 <link rel="manifest" href="manifest.json">
+<!-- O'rnatish hodisasini eng boshida ushlaymiz: brauzer uni bir marta beradi, install.js esa oxirida yuklanadi -->
+<script>addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__bip=e;dispatchEvent(new Event('dash:bip'));});</script>
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Quicksand:wght@500;600;700&display=swap"></noscript>
-<link rel="stylesheet" href="app.css">
-<link rel="stylesheet" href="css/sections.css">
-<link rel="stylesheet" href="css/ai.css">
-<link rel="stylesheet" href="css/whoop.css">
-<link rel="stylesheet" href="css/profile.css">
-<link rel="stylesheet" href="css/today.css">
-<link rel="stylesheet" href="css/tasks.css">
-<link rel="stylesheet" href="css/health.css">
-<link rel="stylesheet" href="css/finance.css">
-<link rel="stylesheet" href="css/ibodat.css">
-<link rel="stylesheet" href="css/nova.css">
-<link rel="stylesheet" href="css/food.css">
-<link rel="stylesheet" href="css/settings.css">
-<link rel="stylesheet" href="css/history.css">
-<link rel="stylesheet" href="css/onboard.css">
+<!-- Oldindan yuklash faqat AMALDA chiziladigan oila uchun. --font Mulish ga
+     o'tgach bu yerda Plex qolib ketgan edi: ikkita fayl har ochilishda majburan
+     yuklanardi-yu, hech qachon ishlatilmasdi. preload ni brauzer «lbatta kerak»
+     deb tushunadi, ya'ni uni kechiktirmaydi ham — birinchi ochilish shuncha
+     sekinlashardi. Eski woff2 fayllari fonts/ da qoldi: keshida eski versiyani
+     ushlab turgan qurilma ularni hali so'rashi mumkin. -->
+<link rel="preload" as="font" type="font/woff2" href="fonts/mulish-cyrillic.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="fonts/mulish-latin.woff2" crossorigin>
+<link rel="stylesheet" href="css/fonts.css?v=v134">
+<link rel="stylesheet" href="app.css?v=v134">
+<link rel="stylesheet" href="css/sections.css?v=v134">
+<link rel="stylesheet" href="css/ai.css?v=v134">
+<link rel="stylesheet" href="css/whoop.css?v=v134">
+<link rel="stylesheet" href="css/profile.css?v=v134">
+<link rel="stylesheet" href="css/today.css?v=v134">
+<link rel="stylesheet" href="css/tasks.css?v=v134">
+<link rel="stylesheet" href="css/books.css?v=v134">
+<link rel="stylesheet" href="css/habits.css?v=v134">
+<link rel="stylesheet" href="css/health.css?v=v134">
+<link rel="stylesheet" href="css/finance.css?v=v134">
+<link rel="stylesheet" href="css/ibodat.css?v=v134">
+<link rel="stylesheet" href="css/yusa.css?v=v134">
+<link rel="stylesheet" href="css/food.css?v=v134">
+<link rel="stylesheet" href="css/settings.css?v=v134">
+<link rel="stylesheet" href="css/onboard.css?v=v134">
+<link rel="stylesheet" href="css/yusa-orb.css?v=v134">
+<link rel="stylesheet" href="css/levels.css?v=v134">
+<link rel="stylesheet" href="css/install.css?v=v134">
+<script>window.DASH_SERVER=true;</script>
 </head>
 <body>
 <div class="app">
   <aside class="side" id="sideWrap">
-    <div class="side-brand"><h1 class="dash-title" id="sideTitle">Shaxsiy</h1><div class="small muted" id="sideDate"></div></div>
+    <div class="side-brand"><h1 class="dash-title" id="sideTitle">Shaxsiy</h1></div>
     <nav id="side" aria-label="Sections"></nav>
   </aside>
   <div class="main">
-    <header class="header" id="header">
-      <div class="h-top">
-        <div class="h-id">
-          <h1 class="dash-title" id="hTitle">Shaxsiy</h1>
-          <div class="h-meta"><span id="hDate"></span><i class="h-sep"></i><span class="h-hijri" id="hHijri"></span></div>
-        </div>
-        <div class="h-actions">
-          <button class="h-btn" data-act="openSearch" aria-label="Search" title="Ctrl+K"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
-          <button class="h-btn" data-act="toggleTheme" aria-label="Theme" id="themeBtn"><svg class="ic" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/></svg></button>
-          <button class="h-btn h-avatar" id="hAvatar" data-act="openProfile" aria-label="Profil" hidden></button>
-        </div>
-      </div>
-      <div class="h-bar">
-        <button class="h-prayer" id="hPrayer" data-act="go" data-view="prayer" data-sub="times" hidden></button>
-        <span class="sync" id="sync" hidden><span class="sync-dot" id="syncDot"></span><span class="sync-txt" id="syncTxt"></span></span>
-      </div>
-    </header>
+    <header class="top" id="top"></header>
     <main class="page" id="view" aria-live="polite"></main>
   </div>
 </div>
 
-<div class="more" id="more"></div>
 <nav class="nav" id="nav" aria-label="Main tabs"></nav>
+<!-- Tana — kapsuladan tashqarida, alohida ko'k doira. Bu tugma emas, yorliq:
+     bosilishi boshqalarniki bilan bir xil (data-act="go"). core.js renderNav
+     belgisini va faol holatini yangilaydi. -->
+<button class="fab" id="fab" data-act="go" data-view="health" aria-label="Tana"></button>
+<div class="sheet-bg" id="sheetBg"></div>
+<div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
 
 <div class="modal-bg" id="modalBg"></div>
 <div class="toast" id="toast" role="status"></div>
-<div class="palette" id="palette">
-  <div class="pal">
-    <input class="inp" id="paletteInp" data-input="palInput" placeholder="Qidirish… (Ctrl+K)" autocomplete="off">
-    <div class="pal-res" id="paletteRes"></div>
-  </div>
-</div>
-
-<script defer src="js/core.js"></script>
-<script defer src="js/i18n.js"></script>
-<script defer src="js/prayer.js"></script>
-<script defer src="js/ai.js"></script>
-<script defer src="js/whoop.js"></script>
-<script defer src="js/profile.js"></script>
-<script defer src="js/today.js"></script>
-<script defer src="js/tasks.js"></script>
-<script defer src="js/health.js"></script>
-<script defer src="js/finance.js"></script>
-<script defer src="js/ibodat.js"></script>
-<script defer src="js/nova.js"></script>
-<script defer src="js/food.js"></script>
-<script defer src="js/settings.js"></script>
-<script defer src="js/history.js"></script>
-<script defer src="js/onboard.js"></script>
-<script defer src="js/app.js"></script>
+<!-- Bu yerda atigi ettita fayl bor. Qolgani birinchi ekranga umuman tegmaydi:
+     core.js ularni stub sifatida ro'yxatga oladi (Moliya, Vazifa, Yusa AI, Sozlash,
+     Sog'liq, Ibodat) yoki oddiy fayl sifatida biladi (ai, profile, onboard, yusa-orb), va
+     birinchi render'dan keyin bo'sh vaqtda bittalab yuklaydi. O'lchandi: birinchi chizishga
+     kerak bo'lgan JS 485 KB dan tushdi. Bu yerga yangi <script> qo'shishdan oldin o'ylang —
+     u har ochilishda hammaning telefonida o'qiladi. -->
+<script defer src="js/core.js?v=v134"></script>
+<script defer src="js/i18n.js?v=v134"></script>
+<script defer src="js/prayer.js?v=v134"></script>
+<script defer src="js/ai.js?v=v134"></script>
+<script defer src="js/whoop.js?v=v134"></script>
+<script defer src="js/profile.js?v=v134"></script>
+<script defer src="js/today.js?v=v134"></script>
+<script defer src="js/health.js?v=v134"></script>
+<script defer src="js/ibodat.js?v=v134"></script>
+<script defer src="js/food.js?v=v134"></script>
+<script defer src="js/onboard.js?v=v134"></script>
+<script defer src="js/yusa-orb.js?v=v134"></script>
+<script defer src="js/app.js?v=v134"></script>
+<script defer src="js/install.js?v=v134"></script>
 </body>
 </html>
