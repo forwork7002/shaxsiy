@@ -90,3 +90,5 @@ Hammasini birga:
   o'rtacha, 7 kunlik karta va uning Bugun sahifasidagi joyi (30 ta tekshiruv)
 - `test_steps.py` — server: `_n_cycle` `step_count` ni o'qishi, eski snapshotda
   bir marta 25 sikl qayta tortilishi, keyin yana 3 tadan (11 ta tekshiruv)
+- `test_whoop_reauth.py` — WHOOP refresh token rad etilsa: ketma-ket 3 raddan keyin «o'lik»,
+  qayta yuborilmaydi, ilova «qayta ulang» ko'rsatadi; 5xx'da 5 daqiqa kutish (17 ta tekshiruv)

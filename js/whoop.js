@@ -56,7 +56,7 @@
       'wh.sl.none': 'Bu kecha uchun uyqu yozuvi yo‘q', 'wh.sl.stagesTitle': 'Uyqu bosqichlari',
       'wh.st.none': 'Bugun hali zo‘riqish o‘lchanmadi',
       'wh.wo.today': 'Bugungi mashg‘ulotlar', 'wh.wo.none': 'Bugun WHOOP mashg‘ulot yozmagan',
-      'wh.disconnect': 'Uzish', 'wh.connect': 'WHOOP’ni ulash', 'wh.intro': 'Soatingizdagi tiklanish, uyqu, zo‘riqish va mashg‘ulotlar shu yerga o‘zi keladi — har daqiqa.',
+      'wh.disconnect': 'Uzish', 'wh.connect': 'WHOOP’ni ulash', 'wh.reauth': 'WHOOP ulanishi uzildi — WHOOP ruxsatni qabul qilmayapti. «WHOOP’ni ulash» tugmasini bosib, qaytadan kiring.', 'wh.intro': 'Soatingizdagi tiklanish, uyqu, zo‘riqish va mashg‘ulotlar shu yerga o‘zi keladi — har daqiqa.',
       'wh.needServer': 'Bu qurilmada server yo‘q — WHOOP faqat jonli saytda ishlaydi', 'wh.pending': 'WHOOP’dan birinchi ma’lumot olinmoqda…',
     },
     uzk: {
@@ -69,7 +69,7 @@
       'wh.sl.none': 'Бу кеча учун уйқу ёзуви йўқ', 'wh.sl.stagesTitle': 'Уйқу босқичлари',
       'wh.st.none': 'Бугун ҳали зўриқиш ўлчанмади',
       'wh.wo.today': 'Бугунги машғулотлар', 'wh.wo.none': 'Бугун WHOOP машғулот ёзмаган',
-      'wh.disconnect': 'Узиш', 'wh.connect': 'WHOOP’ни улаш', 'wh.intro': 'Соатингиздаги тикланиш, уйқу, зўриқиш ва машғулотлар шу ерга ўзи келади — ҳар дақиқа.',
+      'wh.disconnect': 'Узиш', 'wh.connect': 'WHOOP’ни улаш', 'wh.reauth': 'WHOOP уланиши узилди — WHOOP рухсатни қабул қилмаяпти. «WHOOP’ни улаш» тугмасини босиб, қайтадан киринг.', 'wh.intro': 'Соатингиздаги тикланиш, уйқу, зўриқиш ва машғулотлар шу ерга ўзи келади — ҳар дақиқа.',
       'wh.needServer': 'Бу қурилмада сервер йўқ — WHOOP фақат жонли сайтда ишлайди', 'wh.pending': 'WHOOP’дан биринчи маълумот олинмоқда…',
     },
     ru: {
@@ -82,7 +82,7 @@
       'wh.sl.none': 'За эту ночь записи сна нет', 'wh.sl.stagesTitle': 'Фазы сна',
       'wh.st.none': 'Сегодня нагрузка ещё не измерена',
       'wh.wo.today': 'Тренировки сегодня', 'wh.wo.none': 'WHOOP не записал тренировок сегодня',
-      'wh.disconnect': 'Отключить', 'wh.connect': 'Подключить WHOOP', 'wh.intro': 'Восстановление, сон, нагрузка и тренировки с часов приходят сюда сами — каждую минуту.',
+      'wh.disconnect': 'Отключить', 'wh.connect': 'Подключить WHOOP', 'wh.reauth': 'Связь с WHOOP прервалась — WHOOP больше не принимает доступ. Нажмите «Подключить WHOOP» и войдите заново.', 'wh.intro': 'Восстановление, сон, нагрузка и тренировки с часов приходят сюда сами — каждую минуту.',
       'wh.needServer': 'На этом устройстве нет сервера — WHOOP работает только на живом сайте', 'wh.pending': 'Получаем первые данные от WHOOP…',
     },
   });
@@ -314,7 +314,7 @@
     w.err = snap.err || null;
     w.fetchedAt = snap.fetchedAt || Date.now();
     w.snapAt = snap.updatedAt || 0;
-    w.connected = true;
+    w.connected = true; w.reauth = false;
     w.lastSync = Date.now();
     prune(w);
     const today = D.today();
@@ -360,7 +360,9 @@
       if (snap.same) return false;
       const w = W();
       if (snap.connected === false) {
-        if (w.connected) { w.connected = false; D.saveQuiet(); if (LIVE_VIEWS.has(D.current()) && quiet()) D.rerender(); }
+        // reauth: server WHOOP tokenini o'lik deb belgilagan — «qayta ulang» ko'rsatiladi
+        const ra = !!snap.reauth;
+        if (w.connected || !!w.reauth !== ra) { w.connected = false; w.reauth = ra; D.saveQuiet(); if (LIVE_VIEWS.has(D.current()) && quiet()) D.rerender(); }
         return false;
       }
       if (snap.pending) {
@@ -1191,6 +1193,7 @@
       return `<section class="card wh-intro"><span class="ico info">${D.ic('heart', 19)}</span>
         <h2 class="title">${esc(t('wh.intro.title'))}</h2><p>${esc(t('wh.intro'))}</p>
         ${D.serverEnabled() ? '' : `<div class="advice warn">${D.ic('info', 18)}<span>${esc(t('wh.needServer'))}</span></div>`}
+        ${w.reauth ? `<div class="advice warn wh-reauth">${D.ic('alert', 18)}<span>${esc(t('wh.reauth'))}</span></div>` : ''}
         <button class="btn main" data-act="hlWhoopConnect">${D.ic('link', 18)} ${esc(t('wh.connect'))}</button>
         <button class="btn ghost wh-intro-chk" data-act="hlWhoopCheck">${D.ic('refresh', 16)} ${esc(t('hl.wh.check'))}</button></section>`;
     }

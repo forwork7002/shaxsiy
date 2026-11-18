@@ -1747,23 +1747,68 @@ def whoop_callback():
     return r
 
 
+# WHOOP refresh_token bir martalik: ishlatilgach yangisi beriladi. 2026-11-13 da bitta
+# hisobning tokeni o'ldi (400 invalid_request) va server uni 5 soniyada bir qayta
+# yuborib, 5 kunda 67 mingdan ortiq xato yozdi — foydalanuvchi esa nima bo'lganini
+# bilmadi. Endi: (1) WHOOP tokenni rad etsa (400/401 invalid_request|invalid_grant)
+# (ketma-ket 3 marta) u «o'lik» deb belgilanadi va qayta yuborilmaydi — ilova «qayta ulang» deydi, yangi
+# ulanish (whoop_save) belgini o'zi o'chiradi; (2) vaqtinchalik xatoda (tarmoq, 5xx,
+# 429) WH_REFRESH_BACKOFF soniya kutiladi; (3) yangilash bitta qulf ostida va token
+# qulf ichida qayta o'qiladi — ikki jarayon bir tokenni ikki marta ishlatib, uni
+# o'ldirmasin (ikkinchisi WHOOP'dan rad oladi).
+WH_REFRESH_BACKOFF = 300
+WH_DEAD_ERRORS = ("invalid_request", "invalid_grant")
+WH_DEAD_AFTER = 3
+_wh_refresh_wait: dict = {}   # uid → keyingi urinish vaqti (vaqtinchalik xatodan keyin)
+
+
+def whoop_dead(tok) -> bool:
+    return bool(isinstance(tok, dict) and tok.get("dead"))
+
+
 def whoop_access(uid: str):
     tok = whoop_tokens(uid)
-    if not tok:
+    if not tok or whoop_dead(tok):
         return None
-    if time.time() >= float(tok.get("expires_at", 0)) and tok.get("refresh_token"):
+    if time.time() < float(tok.get("expires_at", 0)) or not tok.get("refresh_token"):
+        return tok.get("access_token")
+    if time.time() < _wh_refresh_wait.get(uid, 0):
+        return None
+    fd = os.open(DATA_DIR / "whoop.refresh.lock", os.O_RDWR | os.O_CREAT, 0o600)
+    try:
+        fcntl.flock(fd, fcntl.LOCK_EX)
+        tok = whoop_tokens(uid)   # qulfni kutayotganda boshqa jarayon yangilagan bo'lishi mumkin
+        if not tok or whoop_dead(tok):
+            return None
+        if time.time() < float(tok.get("expires_at", 0)):
+            return tok.get("access_token")
         status, new = http_json(WHOOP_TOKEN, {
             "grant_type": "refresh_token", "refresh_token": tok["refresh_token"],
             "client_id": WHOOP_ID, "client_secret": WHOOP_SECRET, "scope": "offline",
         })
-        if status == 200 and "access_token" in new:
+        if status == 200 and isinstance(new, dict) and "access_token" in new:
             new["expires_at"] = time.time() + int(new.get("expires_in", 3600)) - 60
-            tok = new
+            whoop_save(uid, new)
+            _wh_refresh_wait.pop(uid, None)
+            return new.get("access_token")
+        code = new.get("error") if isinstance(new, dict) else None
+        _wh_refresh_wait[uid] = time.time() + WH_REFRESH_BACKOFF
+        if status in (400, 401) and code in WH_DEAD_ERRORS:
+            # bir martalik rad — hali o'lim emas (WHOOP tomonida qisqa nosozlik bo'lishi mumkin);
+            # ketma-ket WH_DEAD_AFTER marta (~10 daqiqa) rad etilsa — o'lik
+            tok["rejects"] = int(tok.get("rejects") or 0) + 1
+            if tok["rejects"] >= WH_DEAD_AFTER:
+                tok["dead"] = {"at": int(time.time()), "status": status, "error": code}
+                log.warning("WHOOP %s: refresh token %s marta rad etildi (%s %s) — qayta ulash kerak, boshqa urinilmaydi",
+                            uid, tok["rejects"], status, code)
+            else:
+                log.warning("WHOOP %s: refresh rad etildi (%s %s), %s/%s", uid, status, code, tok["rejects"], WH_DEAD_AFTER)
             whoop_save(uid, tok)
         else:
-            log.warning("WHOOP refresh xato: %s", new)
-            return None
-    return tok.get("access_token")
+            log.warning("WHOOP %s: refresh xato %s %s — %s s dan keyin yana", uid, status, code or str(new)[:200], WH_REFRESH_BACKOFF)
+        return None
+    finally:
+        os.close(fd)
 
 
 @app.get("/api/whoop/status")
@@ -1771,8 +1816,10 @@ def whoop_status():
     uid, err = current_user()
     if err:
         return err
-    snap = _snap_read(uid) if whoop_tokens(uid) is not None else None
-    return jsonify({"connected": whoop_tokens(uid) is not None, "configured": bool(WHOOP_ID and WHOOP_SECRET),
+    tok = whoop_tokens(uid)
+    snap = _snap_read(uid) if tok is not None and not whoop_dead(tok) else None
+    return jsonify({"connected": tok is not None and not whoop_dead(tok), "reauth": whoop_dead(tok),
+                    "configured": bool(WHOOP_ID and WHOOP_SECRET),
                     "polling": WHOOP_POLL, "fetchedAt": (snap or {}).get("fetchedAt"), "err": (snap or {}).get("err")})
 
 
@@ -2040,6 +2087,8 @@ WH_KEYS = ("cycle", "recovery", "sleep", "workout")
 
 def _wh_tick(uid: str, now: float):
     """Bitta foydalanuvchi uchun navbatdagi tortishlar. Hech qanday so'rovni kutmay xato qaytarmaydi."""
+    if whoop_dead(whoop_tokens(uid)):
+        return   # qayta ulanmaguncha WHOOP'ga ham, diskka ham tegilmaydi
     snap = _snap_read(uid) or {"recovery": [], "sleep": [], "cycle": [], "workout": [], "body": {}, "profile": {}, "updatedAt": 0}
     st = _wh_state.get(uid)
     if st is None:
@@ -2066,9 +2115,13 @@ def _wh_tick(uid: str, now: float):
         return
     token = whoop_access(uid)
     if not token:
-        snap["err"] = "not_connected"
-        snap["fetchedAt"] = int(now * 1000)
-        _snap_write(uid, snap)
+        # navbatdagi urinish odatdagi qadamda (60/300 s) — ilgari har 5 s da qayta
+        # urinib, har safar snapshotni diskka yozardi
+        st["t_fast"] = st["t_slow"] = now
+        if snap.get("err") != "not_connected":
+            snap["err"] = "not_connected"
+            snap["fetchedAt"] = int(now * 1000)
+            _snap_write(uid, snap)
         return
     changed, err, rl = False, None, snap.get("rl")
     first = not st["backfilled"]
@@ -2270,8 +2323,10 @@ def whoop_snapshot():
     uid, err = current_user()
     if err:
         return err
-    if whoop_tokens(uid) is None:
-        return jsonify({"connected": False})
+    tok = whoop_tokens(uid)
+    if tok is None or whoop_dead(tok):
+        # reauth: WHOOP tokenni rad etgan — ilova «qayta ulang» deydi, eski ma'lumot qurilmada qoladi
+        return jsonify({"connected": False, "reauth": whoop_dead(tok)})
     snap = _snap_read(uid)
     if not snap:
         # birinchi tortish hali bo'lmagan — oqim keyingi 5 soniyada oladi
