@@ -214,3 +214,60 @@
 .wh-foot-t span { font-size: 12px; color: var(--text3); }
 .wh-foot .btn { min-height: 44px; }
 .wh-foot .btn.icon { width: 44px; height: 44px; }
+
+/* ── Qadamlar (WHOOP cycle.step_count) ─────────────────────────────────
+   Qizg'ish-to'q sariq (marjon) — qadam hisoblagichlarning odatiy rangi,
+   tiklanish (yashil), uyqu (binafsha), zo'riqish (ko'k) bilan to'qnashmaydi.
+   Maqsadga yetgan kun — yashil. */
+.stp { --stp: #FF6B4A; --stp2: #FF9A5C; --stp-text: #FF8A6B; --stp-hit: var(--z-high);
+  background: linear-gradient(180deg, color-mix(in srgb, #FF6B4A 15%, var(--card-bg)) 0%, var(--card-bg) 62%); }
+[data-theme="light"] .stp { --stp: #E5482A; --stp2: #F57F3A; --stp-text: #C73A1E;
+  background: radial-gradient(circle at 95% -10%, rgba(255,120,80,.24) 0, rgba(255,120,80,0) 46%), linear-gradient(180deg,#FFEDE6 0%,#FFF8F5 48%,#FFFFFF 100%);
+  box-shadow: 0 1px 2px rgba(17,24,39,.04), 0 16px 36px -18px rgba(190,70,30,.28) !important; }
+.stp-h { display: flex; align-items: center; gap: 10px; }
+.stp-h .title { flex: 1; min-width: 0; }
+.stp-ico { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 11px; color: var(--stp-text);
+  background: color-mix(in srgb, var(--stp) 18%, transparent); }
+.stp-big { display: flex; align-items: baseline; gap: 8px; margin-top: 14px; }
+.stp-big b { font-size: 52px; font-weight: 700; letter-spacing: -.045em; line-height: 1; color: var(--stp-text); }
+.stp-big .stp-u { font-size: 15px; font-weight: 600; color: var(--text3); }
+.stp-big.none b { color: var(--text3); }
+.stp-big.none span { font-size: 14px; color: var(--text3); }
+.stp-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; margin-top: 8px; font-size: 14px; }
+.stp-km { font-weight: 700; color: var(--text); }
+.stp-avg { display: inline-flex; align-items: center; gap: 5px; color: var(--text3); }
+.stp-avg i { font-style: normal; font-size: 10px; }
+.stp-avg.up i { color: var(--success-text); } .stp-avg.down i { color: var(--warning-text); }
+.stp-bar { height: 12px; margin-top: 14px; border-radius: 6px; background: var(--track); overflow: hidden; }
+.stp-bar i { display: block; height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--stp2), var(--stp)); transition: width .5s var(--ease-out); }
+.stp-goal { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 8px; font-size: 13px; color: var(--text3); }
+.stp-goal .ok { font-weight: 700; color: var(--success-text); }
+.stp-gbtn { display: inline-flex; align-items: center; gap: 5px; min-height: 32px; padding: 0 10px; margin-left: -10px; border: 0; border-radius: var(--r-pill);
+  background: transparent; color: var(--text3); font: inherit; cursor: pointer; }
+.stp-gbtn:hover, .stp-gbtn:focus-visible { background: var(--hover); color: var(--text); }
+/* 7 kun: raqam ustida, km ustun ichida, kun nomi ostida — Shagomer uslubi */
+.stp-w { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.stp-wh { font-size: 13px; color: var(--text3); } .stp-wh b { font-weight: 600; color: var(--text); }
+.stp-g { position: relative; display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 5px; margin-top: 10px; }
+.stp-line { position: absolute; left: 0; right: 0; height: 0; border-top: 1.5px dashed color-mix(in srgb, var(--success) 70%, transparent);
+  z-index: 1; pointer-events: none; }
+/* chiziq JS'da px bilan: pastdagi 22px — kun nomi (18) + oraliq (4), keyin 120px ustun maydoni */
+.stp-c { display: flex; flex-direction: column; align-items: stretch; gap: 4px; min-width: 0; padding: 0; border: 0; border-radius: 10px;
+  background: transparent; color: var(--text3); font: inherit; text-align: center; }
+button.stp-c { cursor: pointer; }
+.stp-v { height: 14px; font-size: 10.5px; font-weight: 700; line-height: 14px; color: var(--stp-text); white-space: nowrap; overflow: visible; letter-spacing: -.02em; }
+.stp-t { display: flex; align-items: flex-end; height: 120px; border-radius: 9px; background: var(--track); overflow: hidden; }
+.stp-t i { position: relative; display: flex; align-items: flex-end; justify-content: center; width: 100%; border-radius: 9px;
+  background: linear-gradient(180deg, var(--stp2), var(--stp)); opacity: .62; transition: height .5s var(--ease-out); }
+.stp-t i em { padding-bottom: 6px; font-style: normal; font-size: 10px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.stp-c.hit .stp-t i { background: linear-gradient(180deg, color-mix(in srgb, var(--stp-hit) 70%, #fff), var(--stp-hit)); }
+.stp-c.hit .stp-v { color: var(--success-text); }
+.stp-c.cur .stp-t i { opacity: 1; }
+.stp-c.cur .stp-t { box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 3.5px var(--stp); }
+.stp-c.cur.hit .stp-t { box-shadow: 0 0 0 2px var(--card-bg), 0 0 0 3.5px var(--stp-hit); }
+.stp-d { height: 18px; font-size: 12px; line-height: 18px; white-space: nowrap; }
+.stp-c.cur .stp-d { font-weight: 700; color: var(--text); }
+.stp-sum { margin: 12px 0 0; padding: 9px 12px; border-radius: var(--r-sm); background: color-mix(in srgb, var(--stp) 10%, transparent);
+  font-size: 13px; font-weight: 600; text-align: center; color: var(--stp-text); }
+.wh-b14-cols i.sp-hit { background: var(--z-high); } .wh-b14-cols i.sp-mid { background: #FF8A6B; }
+@media (max-width: 360px) { .stp-big b { font-size: 44px; } .stp-v { font-size: 9.5px; } .stp-g { gap: 3px; } }

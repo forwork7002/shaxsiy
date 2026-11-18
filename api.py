@@ -1912,10 +1912,17 @@ def _n_cycle(r):
     if not s or r.get("id") is None:
         return None
     kj = _num(s.get("kilojoule"))
+    # step_count — WHOOP API v2 cycle'ida 2026-09-23 dan (read:cycles, qayta ruxsat shart emas).
+    # Joriy siklda kun davomida o'sib boradi; ma'lumot yo'q bo'lsa null. Hujjatda joyi aniq
+    # ko'rsatilmagan — sikl ildizida ham, score ichida ham qidiramiz.
+    stp = _num(r.get("step_count"))
+    if stp is None:
+        stp = _num(s.get("step_count"))
     return {
         "id": r["id"], "start": r.get("start"), "end": r.get("end"), "updatedAt": r.get("updated_at"),
         "strain": _rnd(s.get("strain"), 1), "kcal": round(kj / 4.184) if kj is not None else None,
         "hrAvg": _rnd(s.get("average_heart_rate")), "hrMax": _rnd(s.get("max_heart_rate")), "state": r.get("score_state"),
+        "steps": int(stp) if stp is not None and stp >= 0 else None,
     }
 
 
@@ -2096,7 +2103,12 @@ def _wh_tick(uid: str, now: float):
 
     if do_fast:
         st["t_fast"] = now
-        pull("/cycle", _n_cycle, "cycle", "start", WH_KEEP_DAYS, limit=3 if not first else 25)
+        # qadamlar (steps) qo'shilgach bir marta 25 sikl qayta tortiladi — eski snapshotdagi
+        # sikllarda `steps` yo'q, haftalik/14 kunlik grafik bo'sh qolmasin
+        steps_fill = not first and snap.get("stepsV") != 1
+        if pull("/cycle", _n_cycle, "cycle", "start", WH_KEEP_DAYS, limit=25 if first or steps_fill else 3) and steps_fill:
+            snap["stepsV"] = 1
+            changed = True
     if do_slow and err != "rate_limited":
         st["t_slow"] = now
         ok = pull("/recovery", _n_recovery, "recovery", "ts", WH_KEEP_DAYS, limit=5 if not first else 25)

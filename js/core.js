@@ -94,7 +94,7 @@
       },
       // birthYear → yosh hisoblanadi; goal ovqat me'yorlari uchun; whoopAge/paceOfAging WHOOP ilovasidan qo'lda kiritiladi
       profile: { name: '', heightCm: null, weightKg: null, age: null, birthYear: null, sex: 'm', activity: 3, goal: 'keep',
-                 whoopAge: null, paceOfAging: null, whoopAgeAt: null },
+                 whoopAge: null, paceOfAging: null, whoopAgeAt: null, stepGoal: null },
       habits: [], logs: {}, counts: {}, notes: {}, gratitude: [],
       // Kitob va ko'rgan narsalar. Odatdan farqi: oxiri bor (jami bet/qism) va
       // holati bor. Odatga o'xshashi: har kun belgilanadi, shuning uchun

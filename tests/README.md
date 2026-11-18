@@ -85,3 +85,8 @@ Hammasini birga:
 
     for t in tests/test_*.js; do node "$t" >/dev/null 2>&1 || echo "FAIL $t"; done
 
+- `test_steps.js` — Qadamlar (WHOOP `cycle.step_count`): snapshotdan kunlarga,
+  bugun jonli sikldan, maqsad (standart 10 000), bo'ydan km, 30 kunlik
+  o'rtacha, 7 kunlik karta va uning Bugun sahifasidagi joyi (30 ta tekshiruv)
+- `test_steps.py` — server: `_n_cycle` `step_count` ni o'qishi, eski snapshotda
+  bir marta 25 sikl qayta tortilishi, keyin yana 3 tadan (11 ta tekshiruv)

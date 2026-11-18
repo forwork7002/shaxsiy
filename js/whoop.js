@@ -211,6 +211,23 @@
     'wh.sp.run': ['Yugurish', 'Югуриш', 'Бег'], 'wh.sp.walk': ['Yurish', 'Юриш', 'Ходьба'], 'wh.sp.hike': ['Piyoda sayr', 'Пиёда сайр', 'Поход'], 'wh.sp.bike': ['Velosiped', 'Велосипед', 'Велосипед'],
     'wh.sp.swim': ['Suzish', 'Сузиш', 'Плавание'], 'wh.sp.lift': ['Kuch mashqi', 'Куч машқи', 'Силовая'], 'wh.sp.fit': ['Funksional mashq', 'Функционал машқ', 'Функциональная'],
     'wh.sp.hiit': ['HIIT', 'HIIT', 'HIIT'], 'wh.sp.yoga': ['Yoga', 'Йога', 'Йога'], 'wh.sp.ball': ['Futbol', 'Футбол', 'Футбол'], 'wh.sp.box': ['Boks', 'Бокс', 'Бокс'], 'wh.sp.any': ['Faollik', 'Фаоллик', 'Активность'],
+    // qadamlar (WHOOP API v2 cycle.step_count, 2026-09-23 dan)
+    'wh.sp.title': ['Qadamlar', 'Қадамлар', 'Шаги'],
+    
+    'wh.sp.steps': ['qadam', 'қадам', 'шагов'],
+    'wh.sp.goal': ['maqsad {n}', 'мақсад {n}', 'цель {n}'],
+    'wh.sp.left': ['yana {n} qadam', 'яна {n} қадам', 'ещё {n} шагов'],
+    'wh.sp.done': ['Maqsad bajarildi!', 'Мақсад бажарилди!', 'Цель выполнена!'],
+    'wh.sp.vsAvg': ['30 kunlik o\'rtacha {n}', '30 кунлик ўртача {n}', 'среднее за 30 дн. {n}'],
+    'wh.sp.week': ['So\'nggi 7 kun', 'Сўнгги 7 кун', 'Последние 7 дней'],
+    'wh.sp.14': ['Qadamlar · 14 kun', 'Қадамлар · 14 кун', 'Шаги · 14 дней'],
+    'wh.sp.sum': ['{n} qadam · {km} km · me\'yorning {p}%', '{n} қадам · {km} км · меъёрнинг {p}%', '{n} шагов · {km} км · {p}% нормы'],
+    'wh.sp.none': ['Qadamlar hali kelmadi', 'Қадамлар ҳали келмади', 'Шагов пока нет'],
+    'wh.sp.noneSub': ['WHOOP qadamlarni sikl bilan beradi — bir-ikki daqiqada shu yerda paydo bo\'ladi.', 'WHOOP қадамларни цикл билан беради — бир-икки дақиқада шу ерда пайдо бўлади.', 'WHOOP отдаёт шаги вместе с циклом — появятся здесь через минуту-другую.'],
+    'wh.sp.note': ['WHOOP kuni uyg\'onishdan keyingi uyquga qadar sanaladi — telefondagi qadam hisoblagichdan (yarim tundan yarim tungacha) biroz farq qilishi mumkin. Masofa bo\'yingizdan taxminan.', 'WHOOP куни уйғонишдан кейинги уйқуга қадар саналади — телефондаги қадам ҳисоблагичдан (ярим тундан ярим тунгача) бироз фарқ қилиши мумкин. Масофа бўйингиздан тахминан.', 'День WHOOP считается от пробуждения до следующего сна — может немного отличаться от шагомера телефона (от полуночи до полуночи). Расстояние — примерно, по росту.'],
+    'wh.sp.legend': ['Yashil — maqsad bajarilgan kun. Uzuq chiziq — maqsad.', 'Яшил — мақсад бажарилган кун. Узуқ чизиқ — мақсад.', 'Зелёный — цель выполнена. Пунктир — цель.'],
+    'wh.sp.setGoal': ['Kunlik qadam maqsadi', 'Кунлик қадам мақсади', 'Дневная цель шагов'],
+    'wh.sp.dToday': ['Bugun', 'Бугун', 'Сег.'],
     // ulanish kartasi
     'wh.intro.title': ['WHOOP ulanmagan', 'WHOOP уланмаган', 'WHOOP не подключён'],
   };
@@ -282,8 +299,8 @@
     let live = null;
     for (const c of snap.cycle || []) {
       const k = c.start ? dayOfTs(new Date(new Date(c.start).getTime() + 12 * 3600e3)) : null; if (!k) continue;
-      merge(days, k, { strain: c.strain, kcal: c.kcal, hrAvg: c.hrAvg, hrMax: c.hrMax });
-      if (!c.end) live = { k, strain: c.strain, kcal: c.kcal, hrAvg: c.hrAvg, hrMax: c.hrMax, since: c.start, updatedAt: c.updatedAt };
+      merge(days, k, { strain: c.strain, kcal: c.kcal, hrAvg: c.hrAvg, hrMax: c.hrMax, steps: num(c.steps) });
+      if (!c.end) live = { k, strain: c.strain, kcal: c.kcal, hrAvg: c.hrAvg, hrMax: c.hrMax, steps: num(c.steps), since: c.start, updatedAt: c.updatedAt };
     }
     const byId = new Map();
     // serverdagi mashg'ulot obyekti butunicha saqlanadi: sport, strain, puls, kcal, meters, altGain/altChange, percentRecorded, zones …
@@ -306,6 +323,8 @@
     if (changed) D.whoop.fillSleep();
     return changed;
   }
+
+  D.whoop._applySnapshot = applySnapshot;   // sinovlar uchun (tests/test_steps.js)
 
   // Is it safe to redraw under the user's fingers right now?
   function quiet() {
@@ -1066,7 +1085,103 @@
     const top = strainOf(i, key).strain == null
       ? emptyCard('bolt', t(key === D.today() ? 'wh.st.none' : 'wh.st.noneDay'), t('wh.st.noneSub'))
       : safe(() => strainHero(i, key)) + safe(() => strainTiles(i, key));
-    return top + safe(() => workoutsCard(key)) + safe(() => strainHist(key));
+    return top + safe(() => D.whoop.stepsCard(key, { note: false, pick: false })) + safe(() => workoutsCard(key)) + safe(() => strainHist(key)) + safe(() => stepsHist(key));
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* QADAMLAR — WHOOP cycle.step_count. Bugun: jonli sikldan (kun        */
+  /* davomida o'sib boradi), o'tgan kun: kunning o'z yozuvidan.          */
+  /* Maqsad profil.stepGoal (standart 10 000), masofa — bo'ydan qadam    */
+  /* uzunligi (bo'y × 0,415; ayollarda 0,413), taxminiy.                 */
+  /* ------------------------------------------------------------------ */
+  const STEP_GOAL = 10000;
+  D.whoop.stepGoal = () => { const g = num((D.S.profile || {}).stepGoal); return g && g >= 500 && g <= 100000 ? Math.round(g) : STEP_GOAL; };
+  D.whoop.steps = (k) => {
+    k = k || D.today();
+    if (k === D.today()) { const l = D.whoop.live(); if (l && l.k === k && l.steps != null) return l.steps; }
+    return num((W().days[k] || {}).steps);
+  };
+  /** Qadam → km (taxminiy). */
+  D.whoop.stepsKm = (n) => {
+    const cm = bodyCm() || 170, f = (D.S.profile || {}).sex === 'f' ? 0.413 : 0.415;
+    return (+n || 0) * cm * f / 100000;
+  };
+  /** 30 kunlik o'rtacha (bugundan oldingi, qadam > 0 kunlar). */
+  D.whoop.stepsAvg = (n, end) => {
+    const vs = D.lastDays(n || 30, end || D.addDays(D.today(), -1)).map((k) => num((W().days[k] || {}).steps)).filter((v) => v != null && v > 0);
+    return vs.length >= 3 ? Math.round(D.avg(vs)) : null;
+  };
+  D.whoop.hasSteps = () => { const d = W().days; return Object.keys(d).some((k) => d[k] && d[k].steps != null); };
+  // «3,0 km» — nol tashlanmaydi (D.fmtNum uni tashlardi va ustunlarda 3 / 2,5 aralash chiqardi)
+  const fmtKm = (km) => (+km || 0).toLocaleString('ru-RU', { minimumFractionDigits: km < 100 ? 1 : 0, maximumFractionDigits: km < 100 ? 1 : 0 });
+  const stepsIco = '<svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor" aria-hidden="true"><path d="M8.2 2.6c1.6-.3 2.9 1.3 3 3.4.1 1.6-.3 3.2-.9 4.6-.5 1.1-1.9 1.4-2.9.8-1.1-.6-1.6-1.9-1.7-3.2-.2-2.6.7-5.3 2.5-5.6zM7.4 12.4l3.6.7c.2 1.4-.2 3.2-1.9 3.3-1.4.1-2-1.4-1.7-4zM15.8 7.6c1.8.3 2.7 3 2.5 5.6-.1 1.3-.6 2.6-1.7 3.2-1 .6-2.4.3-2.9-.8-.6-1.4-1-3-.9-4.6.1-2.1 1.4-3.7 3-3.4zM13 17.4l3.6-.7c.3 2.6-.3 4.1-1.7 4-1.7-.1-2.1-1.9-1.9-3.3z"/></svg>';
+
+  /** Bugun / tanlangan kun kartasi: katta raqam, km, maqsad chizig'i, 7 kunlik ustunlar. */
+  D.whoop.stepsCard = (key, opts = {}) => {
+    const w = W();
+    if (!w.connected || !D.whoop.hasSteps()) return '';
+    key = key || D.today();
+    const today = key === D.today(), goal = D.whoop.stepGoal();
+    const n = D.whoop.steps(key);
+    const avg = D.whoop.stepsAvg(30, D.addDays(key, -1));
+    const WS = t('weekdaysShort');
+    const days = D.lastDays(7, key);
+    const vals = days.map((k) => D.whoop.steps(k));
+    const max = Math.max(goal, ...vals.map((v) => v || 0)) * 1.08;
+    const gp = (goal / max) * 100;
+    const cols = days.map((k, j) => {
+      const v = vals[j], hit = v != null && v >= goal, cur = k === key;
+      const h = v == null ? 0 : Math.max(3, (v / max) * 100);
+      const tag = opts.pick === false ? 'div' : 'button';
+      return `<${tag}${tag === 'button' ? ` type="button" data-act="tdPickDay" data-key="${k}"` : ''} class="stp-c${cur ? ' cur' : ''}${hit ? ' hit' : ''}" aria-label="${esc(D.fmtDate(k, 'weekday'))}: ${v == null ? '—' : esc(D.fmtNum(v))}">
+          <span class="stp-v num">${v == null ? '—' : esc(D.fmtNum(v))}</span>
+          <span class="stp-t"><i style="height:${h.toFixed(1)}%">${v != null && h > 24 ? `<em class="num">${esc(fmtKm(D.whoop.stepsKm(v)))}</em>` : ''}</i></span>
+          <span class="stp-d">${esc(k === D.today() ? t('wh.sp.dToday') : WS[D.dowOf(k)])}</span></${tag}>`;
+    }).join('');
+    const had = vals.filter((v) => v != null);
+    const tot = D.sum(had, (v) => v);
+    const sumLine = had.length ? `<p class="stp-sum num">${esc(t('wh.sp.sum', { n: D.fmtNum(tot), km: fmtKm(D.whoop.stepsKm(tot)), p: Math.round((tot / (goal * 7)) * 100) }))}</p>` : '';
+    let big, sub = '';
+    if (n == null) {
+      big = `<div class="stp-big none"><b class="num">—</b><span>${esc(t('wh.sp.none'))}</span></div>`;
+    } else {
+      const p = Math.min(100, (n / goal) * 100), left = goal - n;
+      const trend = avg ? (n >= avg ? 'up' : 'down') : '';
+      big = `<div class="stp-big"><b class="num">${esc(D.fmtNum(n))}</b><span class="stp-u">${esc(t('wh.sp.steps'))}</span></div>
+        <div class="stp-meta num"><span class="stp-km">≈ ${esc(fmtKm(D.whoop.stepsKm(n)))} ${esc(t('wh.u.km'))}</span>${avg ? `<span class="stp-avg ${trend}"><i aria-hidden="true">${trend === 'up' ? '▲' : '▼'}</i>${esc(t('wh.sp.vsAvg', { n: D.fmtNum(avg) }))}</span>` : ''}</div>
+        <div class="stp-bar" role="progressbar" aria-valuemin="0" aria-valuemax="${goal}" aria-valuenow="${n}"><i style="width:${p.toFixed(1)}%"></i></div>
+        <div class="stp-goal num"><button type="button" class="stp-gbtn" data-act="whStepGoal">${esc(t('wh.sp.goal', { n: D.fmtNum(goal) }))} ${D.ic('edit', 12)}</button>
+          <span class="${left <= 0 ? 'ok' : ''}">${left <= 0 ? esc(t('wh.sp.done')) : esc(t('wh.sp.left', { n: D.fmtNum(left) }))}</span></div>`;
+    }
+    return `<section class="card hero hero--qadam stp${opts.cls ? ' ' + opts.cls : ''}">
+      <div class="card-head stp-h"><span class="ico stp-ico">${stepsIco}</span><h2 class="title">${esc(t('wh.sp.title'))}</h2>${today && w.live && w.live.updatedAt ? `<span class="hero-pill num">WHOOP · ${esc(hm(w.live.updatedAt))}</span>` : `<span class="hero-pill num">${esc(today ? t('wh.sp.dToday') : D.fmtDate(key))}</span>`}</div>
+      ${big}
+      <div class="stp-w"><div class="stp-wh"><b>${esc(t('wh.sp.week'))}</b></div>
+        <div class="stp-g" role="group" aria-label="${esc(t('wh.sp.week'))}"><i class="stp-line" style="bottom:${(22 + (gp / 100) * 120).toFixed(1)}px" title="${esc(t('wh.sp.goal', { n: D.fmtNum(goal) }))}"></i>${cols}</div>
+        ${sumLine}</div>
+      ${opts.note === false ? '' : `<p class="wh-fine">${esc(t('wh.sp.note'))}</p>`}
+    </section>`;
+  };
+  /** Zo'riqish sahifasi: 14 kunlik qadamlar, maqsad chizig'i bilan. */
+  function stepsHist(key) {
+    const days = D.lastDays(14, key), goal = D.whoop.stepGoal();
+    const vals = days.map((k) => D.whoop.steps(k));
+    const had = vals.filter((v) => v != null);
+    if (!had.length) return '';
+    const max = Math.max(goal, ...had) * 1.08;
+    const cols = days.map((k, j) => (vals[j] == null ? { cls: 'na', h: null, title: D.fmtDate(k) }
+      : { cls: vals[j] >= goal ? 'sp-hit' : 'sp-mid', h: (vals[j] / max) * 100, title: `${D.fmtDate(k)}: ${D.fmtNum(vals[j])}` }));
+    return `<section class="card wh-hist"><div class="card-head"><h2 class="title">${esc(t('wh.sp.14'))}</h2><span class="wh-side num">${esc(t('wh.avgOf', { n: D.fmtNum(Math.round(D.avg(had))) }))}</span></div>
+      ${bars14(days, cols, t('wh.sp.14'), { pct: (goal / max) * 100, text: D.fmtNum(goal) })}<p class="wh-fine">${esc(t('wh.sp.legend'))}</p></section>`;
+  }
+  D.act.whStepGoal = async () => {
+    const v = await D.prompt({ title: t('wh.sp.setGoal'), type: 'number', value: String(D.whoop.stepGoal()), placeholder: '10000' });
+    if (v == null) return;
+    const g = Math.round(+String(v).replace(/[^\d]/g, ''));
+    if (!g || g < 500 || g > 100000) return;
+    D.S.profile = D.S.profile || {};
+    D.S.profile.stepGoal = g;
+    D.save(); D.rerender();
   };
 
   /** Ulanish qatori: kim ulangan, qachon yangilangan, yangilash va uzish — yoki ulashga taklif. */

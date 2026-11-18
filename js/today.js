@@ -775,7 +775,9 @@
       const k = key();
       const i = dayRec(k);
       // WHOOP qismi: ma'lumot bo'lsa uch karta, bo'lmasa bitta «ulanmagan» kartasi.
-      const body = i ? safe(() => heroCard(i, k)) + safe(() => sleepCard(i, k)) + safe(() => strainCard(i, k)) : safe(() => noWhoopCard(k));
+      // Qadamlar — bosh kartadan keyin darhol (egasi 18.11: «qadamga fokus»); WHOOP qadam bermasa karta chiqmaydi
+      const steps = whoopOn() && D.whoop.stepsCard ? safe(() => D.whoop.stepsCard(k)) : '';
+      const body = i ? safe(() => heroCard(i, k)) + steps + safe(() => sleepCard(i, k)) + safe(() => strainCard(i, k)) : steps + safe(() => noWhoopCard(k));
       // Daraja faqat bugungi kunda: o'tgan kunni ochganda «bugungi ochko» yolg'on bo'lardi.
       const lv = k === td && D.levels ? safe(() => levelCard()) : '';
       return `<div class="td">${body}${lv}${safe(() => habitsCard(k))}${safe(() => tasksCard(k))}${safe(() => goalsCard(k))}${wrapRow()}</div>`;
