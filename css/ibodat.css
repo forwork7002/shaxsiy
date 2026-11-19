@@ -48,7 +48,17 @@
 .ib-dl-s b { max-width: 100%; font-size: 12px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ib-dl-s em { font-style: normal; font-size: 11px; color: var(--text3); }
 .ib-dl-s.next b, .ib-dl-s.next em { font-weight: 700; color: var(--amber-text); }
-@media (max-width: 360px) { .ib-count b { font-size: 52px; } .ib-dl-s b { font-size: 11px; } }
+@media (max-width: 360px) { .ib-count b { font-size: 50px; } .ib-count { gap: 4px; } .ib-count span { font-size: 15px; margin-right: 4px; } .ib-dl-s b { font-size: 11px; } }
+/* «2 soat 49 daqiqa»: ikki raqam-birlik juftligi, juftlik ichida yaqin, orasida keng */
+.ib-count span + b { margin-left: 10px; }
+/* joriy namoz belgilanmagan: bosh kartaning o'zida bir bosishda belgilash */
+.ib-h-ask { margin-top: 16px; padding: 14px; border-radius: 18px; background: color-mix(in srgb, var(--card-bg) 70%, transparent); border: 1px solid var(--line2); text-align: center; }
+.ib-h-askt { font-size: 15px; font-weight: 600; color: var(--text); }
+.ib-h-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.ib-h-btns .btn { min-height: 48px; justify-content: center; gap: 6px; padding: 0 10px; white-space: nowrap; font-size: 15px; }
+.ib-hero.ask .ib-h-until { color: var(--amber-text); font-weight: 600; }
+.ib-h-done { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 14px; font-size: 14px; font-weight: 600; color: var(--success-text); }
+.ib-h-done.qz { color: var(--amber-text); }
 
 /* --- qazo eslatmasi: to'q sariq chiziq --- */
 .ib-qz-remind { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; margin-bottom: 12px; padding: 8px 14px 8px 18px; border: 0; border-radius: 18px;
@@ -78,7 +88,7 @@
 .ib-st-missed { background: var(--danger-soft); color: var(--danger-text); }
 :root:not([data-theme="light"]) .ib-st-jamaat, :root:not([data-theme="light"]) .ib-st-alone { background: var(--success-soft); color: var(--success-text); }
 :root:not([data-theme="light"]) .ib-st-qaza { background: var(--warning-soft); color: var(--amber-text); }
-.ib-pr-mark { flex: none; display: inline-flex; align-items: center; min-height: 34px; padding: 0 14px; border-radius: var(--r-pill); background: var(--ctl); color: var(--on-ctl); font-size: 13px; font-weight: 600; }
+.ib-pr-mark { flex: none; display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: var(--r-pill); background: var(--accent-soft); color: var(--accent-text); border: 1.5px solid color-mix(in srgb, var(--accent-text) 45%, transparent); font-size: 13px; font-weight: 700; }
 .ib-pr-chips { padding: 2px 0 14px; }
 .ib-chip-x { color: var(--text3); }
 

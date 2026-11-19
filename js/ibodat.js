@@ -211,6 +211,7 @@
     uz: {
       'ib.h.now': 'Hozir: {p} vaqti', 'ib.h.night': 'Hozir: tun', 'ib.h.juma': 'Juma muborak', 'ib.h.until': '{p} namozigacha',
       'ib.h.min': 'daqiqa', 'ib.h.hour': 'soat', 'ib.h.at': '{t} da kiradi',
+      'ib.h.ends': '{p} vaqti tugashiga', 'ib.h.ask': "{p} namozini o'qidingizmi?", 'ib.h.done': "{p} o'qildi", 'ib.h.sun': 'Hozir: quyosh chiqqan', 'ib.h.nextAt': '{p} {t} da kiradi', 'ib.h.sunAt': 'Quyosh {t} da chiqadi',
       'ib.day.title': 'Bugungi namozlar', 'ib.day.titleOn': '{d} namozlari', 'ib.day.count': "{a} / {b} o'qildi", 'ib.day.sub': 'Vaqti kirgan namozni bosib belgilang',
       'ib.row.now': 'hozir', 'ib.row.in': '{t} keyin', 'ib.row.notYet': 'hali kirmagan', 'ib.row.mark': 'Belgilash', 'ib.row.juma': 'Juma',
       'ib.c.jamaat': 'Jamoat bilan', 'ib.c.alone': 'Yakka', 'ib.c.qaza': "Qazo bo'ldi", 'ib.c.clear': 'Olib tashlash',
@@ -236,6 +237,7 @@
     uzk: {
       'ib.h.now': 'Ҳозир: {p} вақти', 'ib.h.night': 'Ҳозир: тун', 'ib.h.juma': 'Жума муборак', 'ib.h.until': '{p} намозигача',
       'ib.h.min': 'дақиқа', 'ib.h.hour': 'соат', 'ib.h.at': '{t} да киради',
+      'ib.h.ends': '{p} вақти тугашига', 'ib.h.ask': '{p} намозини ўқидингизми?', 'ib.h.done': '{p} ўқилди', 'ib.h.sun': 'Ҳозир: қуёш чиққан', 'ib.h.nextAt': '{p} {t} да киради', 'ib.h.sunAt': 'Қуёш {t} да чиқади',
       'ib.day.title': 'Бугунги намозлар', 'ib.day.titleOn': '{d} намозлари', 'ib.day.count': '{a} / {b} ўқилди', 'ib.day.sub': 'Вақти кирган намозни босиб белгиланг',
       'ib.row.now': 'ҳозир', 'ib.row.in': '{t} кейин', 'ib.row.notYet': 'ҳали кирмаган', 'ib.row.mark': 'Белгилаш', 'ib.row.juma': 'Жума',
       'ib.c.jamaat': 'Жамоат билан', 'ib.c.alone': 'Якка', 'ib.c.qaza': 'Қазо бўлди', 'ib.c.clear': 'Олиб ташлаш',
@@ -260,7 +262,8 @@
     },
     ru: {
       'ib.h.now': 'Сейчас: время {p}', 'ib.h.night': 'Сейчас: ночь', 'ib.h.juma': 'Джума мубарак', 'ib.h.until': 'До намаза {p}',
-      'ib.h.min': 'минут', 'ib.h.hour': 'ч', 'ib.h.at': 'наступит в {t}',
+      'ib.h.min': 'мин', 'ib.h.hour': 'ч', 'ib.h.at': 'наступит в {t}',
+      'ib.h.ends': 'До конца времени {p}', 'ib.h.ask': 'Вы прочитали {p}?', 'ib.h.done': '{p} прочитан', 'ib.h.sun': 'Сейчас: солнце взошло', 'ib.h.nextAt': '{p} в {t}', 'ib.h.sunAt': 'Восход в {t}',
       'ib.day.title': 'Намазы сегодня', 'ib.day.titleOn': 'Намазы {d}', 'ib.day.count': 'прочитано {a} / {b}', 'ib.day.sub': 'Нажмите на наступивший намаз, чтобы отметить',
       'ib.row.now': 'сейчас', 'ib.row.in': 'через {t}', 'ib.row.notYet': 'ещё не наступил', 'ib.row.mark': 'Отметить', 'ib.row.juma': 'Джума',
       'ib.c.jamaat': 'С джамаатом', 'ib.c.alone': 'Один', 'ib.c.qaza': 'Стал каза', 'ib.c.clear': 'Убрать',
@@ -716,13 +719,20 @@
     const total = Math.max(1, end - start);
     const pct = D.clamp(((nowM + p.s / 60 - start) / total) * 100, 0, 100);
     const secs = Math.max(0, nx.minsLeft * 60 - p.s);
-    return { nx, secs, pct };
+    // Joriy namoz qachon TUGAYDI: odatda keyingi namoz kirganda, lekin bomdod
+    // quyosh chiqishi bilan tugaydi (peshinda emas).
+    const sunEnd = nx.current === 'bomdod' && tm.quyosh != null && tm.quyosh > nowM;
+    const endSecs = sunEnd ? Math.max(0, (tm.quyosh - nowM) * 60 - p.s) : secs;
+    const endAt = sunEnd ? { id: 'quyosh', time: D.prayer.fmt(tm.quyosh) } : { id: nx.id, time: nx.time };
+    return { nx, secs, pct, endSecs, endAt };
   }
-  /* Sanoq: bir soatgacha «35 daqiqa», undan ko'p bo'lsa «1:20 soat».
+  /* Sanoq: «35 daqiqa» yoki «2 soat 49 daqiqa». Ilgari «2:49 soat» edi —
+     uni «2,49 soat» deb ham, soat 2:49 deb ham o'qish mumkin edi.
      Daqiqada bir marta yangilanadi (tick). */
   function countHtml(mins) {
-    const m = Math.max(0, Math.ceil(mins));
-    return m > 60 ? `<b class="num">${Math.floor(m / 60)}:${D.pad2(m % 60)}</b><span>${esc(t('ib.h.hour'))}</span>` : `<b class="num">${m}</b><span>${esc(t('ib.h.min'))}</span>`;
+    const m = Math.max(0, Math.ceil(mins)), h = Math.floor(m / 60), r = m % 60;
+    const part = (n, k) => `<b class="num">${n}</b><span>${esc(t(k))}</span>`;
+    return h ? part(h, 'ib.h.hour') + (r ? part(r, 'ib.h.min') : '') : part(m, 'ib.h.min');
   }
   /* Kun chizig'i: besh namoz teng oraliqda. Chiziq bomdoddan hozirgi vaqtgacha
      to'ladi: (joriy namoz indeksi + oraliqdagi ulush) / 4. */
@@ -740,17 +750,36 @@
     }).join('');
     return `<div class="ib-dl"><span class="ib-dl-t"><i style="width:${(frac / 4 * 100).toFixed(1)}%"></i></span>${stops}</div>`;
   }
+  /* Bosh karta «o'qidingizmi?» holatidami: joriy farz shu kunniki va belgilanmagan. */
+  function heroAsk() {
+    const nx = D.prayer.next(); const k = D.today();
+    return !!(nx && PR.includes(nx.current) && nx.key === k && !stateOf(k, nx.current));
+  }
   function heroHtml() {
     const hs = heroState(), k = D.today();
     if (!hs) return `<div class="card hero hero--namoz ib-hero"><div class="ib-h-until">${esc(t('ib.next'))}</div><div class="ib-count"><b class="num">—</b></div></div>`;
     const { nx } = hs;
     const juma = D.dowOf(k) === 5;
-    const cur = nx.current && nx.current !== 'quyosh' ? t('ib.h.now', { p: t('prayer.' + nx.current) }) : nx.current === 'quyosh' ? t('prayer.quyosh') : t('ib.h.night');
-    return `<div class="card hero hero--namoz ib-hero">
-      <div class="ib-h-top"><span class="hero-pill">${D.ic(nx.current ? 'sun' : 'moon', 14)} ${esc(cur)}</span>${juma ? `<span class="ib-h-juma">${esc(t('ib.h.juma'))}</span>` : ''}</div>
-      <div class="ib-h-until">${esc(t('ib.h.until', { p: t('prayer.' + nx.id) }))}</div>
-      <div class="ib-count" id="ibCountdown">${countHtml(hs.secs / 60)}</div>
-      <div class="ib-h-at"><span class="pill warn num">${esc(t('ib.h.at', { t: nx.time }))}</span></div>
+    const cp = nx.current, isFard = PR.includes(cp);
+    const cur = isFard ? t('ib.h.now', { p: t('prayer.' + cp) }) : cp === 'quyosh' ? t('ib.h.sun') : t('ib.h.night');
+    // Joriy farz namoz shu kunniki bo'lsa (yarim tundan keyingi xufton — kechagi kun, u yerda so'ralmaydi)
+    const mine = isFard && nx.key === k;
+    const st = mine ? stateOf(k, cp) : null;
+    const ask = heroAsk();
+    const pn = (id) => t('prayer.' + id);
+    // Joriy namoz belgilanmagan bo'lsa sanoq — «vaqti tugashiga», ya'ni o'qishga qolgan vaqt.
+    const head = ask ? t('ib.h.ends', { p: pn(cp) }) : t('ib.h.until', { p: pn(nx.id) });
+    const at = ask ? t(hs.endAt.id === 'quyosh' ? 'ib.h.sunAt' : 'ib.h.nextAt', { p: pn(hs.endAt.id), t: hs.endAt.time }) : t('ib.h.at', { t: nx.time });
+    const quick = ask
+      ? `<div class="ib-h-ask"><div class="ib-h-askt">${esc(t('ib.h.ask', { p: pn(cp) }))}</div>
+          <div class="ib-h-btns">${['jamaat', 'alone'].map((v) => `<button class="btn ${v === 'jamaat' ? 'main' : 'ghost'} sm" data-act="ibSet" data-id="${cp}" data-v="${v}">${D.ic('check', 16)} ${esc(t('ib.c.' + v))}</button>`).join('')}</div></div>`
+      : mine && st ? `<div class="ib-h-done ${st === 'qaza' ? 'qz' : ''}">${D.ic(st === 'qaza' ? 'clock' : 'check', 16)}<span>${esc(t('ib.h.done', { p: pn(cp) }))} · ${esc(t('ib.p.' + st))}</span></div>` : '';
+    return `<div class="card hero hero--namoz ib-hero${ask ? ' ask' : ''}">
+      <div class="ib-h-top"><span class="hero-pill">${D.ic(cp && cp !== 'xufton' ? 'sun' : 'moon', 14)} ${esc(cur)}</span>${juma ? `<span class="ib-h-juma">${esc(t('ib.h.juma'))}</span>` : ''}</div>
+      <div class="ib-h-until">${esc(head)}</div>
+      <div class="ib-count" id="ibCountdown">${countHtml((ask ? hs.endSecs : hs.secs) / 60)}</div>
+      <div class="ib-h-at"><span class="pill warn num">${esc(at)}</span></div>
+      ${quick}
       <div id="ibDayLine">${dayLine(k, hs)}</div>
     </div>`;
   }
@@ -1221,10 +1250,12 @@
     if (lastId && hs.nx.id !== lastId) { stopTimer(); D.rerender(); return; }
     lastId = hs.nx.id;
     if (hs.secs <= 0) { stopTimer(); D.rerender(); return; }
-    const m = hs.nx.minsLeft;
+    // bomdod quyosh chiqishi bilan tugaydi — o'sha payt ham to'liq qayta chiziladi
+    if (heroAsk() && hs.endSecs <= 0) { stopTimer(); D.rerender(); return; }
+    const m = Math.ceil((heroAsk() ? hs.endSecs : hs.secs) / 60);
     if (m !== lastMin) {
       lastMin = m;
-      D.patch('ibCountdown', countHtml(hs.secs / 60));
+      D.patch('ibCountdown', countHtml((heroAsk() ? hs.endSecs : hs.secs) / 60));
       try { D.patch('ibDayLine', dayLine(D.today(), hs)); } catch (e) {}
     }
   }
