@@ -6,7 +6,7 @@ Telefonda oching → brauzer menyusidan «Ekranga qo'shish» (Add to Home Screen
 Serversiz rejimda ma'lumot faqat sizning qurilmangizda saqlanadi (`localStorage`) — hech qayerga yuborilmaydi.
 Zaxira uchun: **Sozlash → Ma'lumot → JSON eksport**. Eski `shaxsiy_*.json` faylni **Import** qilsangiz avtomatik ko'chadi.
 
-WHOOP taqqanlar uchun tez va yengil ilova: WHOOP bergan hamma narsa shu yerda, har sahifada OpenAI maslahati,
+WHOOP taqqanlar uchun tez va yengil ilova: WHOOP bergan hamma narsa shu yerda, har sahifada Claude (Anthropic) maslahati,
 ovqat jurnali (rasm → kkal / oqsil / uglevod / yog'), ibodat, vazifalar, moliya.
 Vanilla HTML/CSS/JS (build yo'q), Flask backend, PWA (offline), qorong'i/yorug' tema, uz-lotin / uz-kirill / ru.
 Telegram yo'q — brauzer (yoki ekranga qo'shilgan PWA) va Google / ism-parol bilan kirish.
@@ -104,8 +104,10 @@ Sog'liq bo'limida qo'lda kiritish yo'q: uchta bo'limcha (Tayyorlik · Uyqu · Zo
 yaxlitlanmagan holda — vaqt soat va daqiqada, masofa metrda, puls zonalari aniq davomiylikda.
 Suv Bugun sahifasida yuritiladi.
 
-## AI (OpenAI)
-`.env` ga `AI_PROVIDER=openai`, `AI_API_KEY`, `OPENAI_MODEL`. Kalit brauzerga chiqmaydi.
+## AI (Claude — Anthropic)
+`.env` ga `AI_PROVIDER=anthropic`, `AI_API_KEY` (Anthropic kaliti), `AI_MODEL` (sukut `claude-opus-5-5`),
+`AI_EFFORT` (sukut `low`) — `./deploy/set-ai.sh root@SERVER`. Kalit brauzerga chiqmaydi.
+Rad etilgan so'rovni Anthropic o'zi boshqa modelda qayta bajaradi (`fallbacks: "default"`).
 Har sahifada o'z «murabbiy» kartasi (`today, health, sleep, strain, food, finance, prayer`), Nova — chat.
 Ovqat: rasm yoki matn → `/api/food/analyze` → kkal / oqsil / uglevod / yog' → kun jurnaliga.
 

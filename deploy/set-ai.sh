@@ -2,16 +2,16 @@
 # =====================================================================
 #  AI provayderi va kaliti. Qiymat ekranda ko'rinmaydi, tarixga tushmaydi.
 #      ./deploy/set-ai.sh root@SERVER_IP
-#  OpenAI (sk-…) yoki Anthropic (sk-ant-…). Ikkalasi ham bo'lsa AI_PROVIDER hal qiladi.
+#  Anthropic (sk-ant-…, asosiy) yoki OpenAI (sk-…). Ikkalasi ham bo'lsa AI_PROVIDER hal qiladi.
 # =====================================================================
 set -euo pipefail
 HOST="${1:-}"
 [ -z "$HOST" ] && { echo "Foydalanish: $0 root@SERVER_IP"; exit 1; }
 . "$(dirname "$0")/_remote.sh"
-printf 'Provayder [openai/anthropic] (bo'"'"'sh = openai): '
+printf 'Provayder [anthropic/openai] (bo'"'"'sh = anthropic): '
 read -r PROV
-PROV="$(printf '%s' "${PROV:-openai}" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
-case "$PROV" in openai|anthropic) ;; *) echo "Faqat openai yoki anthropic."; exit 1;; esac
+PROV="$(printf '%s' "${PROV:-anthropic}" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')"
+case "$PROV" in anthropic|openai) ;; *) echo "Faqat anthropic yoki openai."; exit 1;; esac
 printf 'API kaliti (ko'"'"'rinmaydi): '
 read -rs KEY; echo
 KEY="$(printf '%s' "$KEY" | tr -d '[:space:]')"

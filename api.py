@@ -29,8 +29,9 @@ Env (start.sh):
   MA_STATIC_DIR      statik papka (default: shu fayl joylashgan papka)
   MA_DEV             "1" bo'lsa auth o'chadi va bitta 'dev' foydalanuvchi ishlatiladi (faqat lokal test!)
   WHOOP_CLIENT_ID / WHOOP_CLIENT_SECRET   WHOOP ilovasi (developer.whoop.com), redirect: https://<domen>/api/whoop/callback
-  AI_API_KEY         Anthropic API kaliti (yoki ANTHROPIC_API_KEY)
-  AI_MODEL           default: claude-opus-5
+  AI_API_KEY         Anthropic API kaliti (yoki ANTHROPIC_API_KEY) — asosiy AI (Claude)
+  AI_MODEL           default: claude-opus-5-5
+  AI_EFFORT          Claude fikrlash chuqurligi: low|medium|high|xhigh|max (default: low)
   PORT               default 8081
 """
 import base64
@@ -257,8 +258,13 @@ COOKIE = "dash_s"
 WHOOP_ID = os.environ.get("WHOOP_CLIENT_ID", "")
 WHOOP_SECRET = os.environ.get("WHOOP_CLIENT_SECRET", "")
 AI_KEY = os.environ.get("AI_API_KEY") or os.environ.get("ANTHROPIC_API_KEY") or ""
-AI_MODEL = os.environ.get("AI_MODEL", "claude-opus-5")
-# OpenAI ham bo'ladi: OPENAI_API_KEY berilsa (yoki AI_PROVIDER=openai) so'rovlar OpenAI'ga ketadi.
+AI_MODEL = os.environ.get("AI_MODEL") or "claude-opus-5-5"
+# Claude'ning fikrlash chuqurligi. Opus 5.5 da fikrlashni o'chirib bo'lmaydi va sukuti "medium" —
+# u bizning qisqa javoblarimiz («bitta raqam + bitta gap») uchun ham vaqt va token yeydi.
+AI_EFFORT = (os.environ.get("AI_EFFORT") or "low").strip().lower()
+if AI_EFFORT not in ("low", "medium", "high", "xhigh", "max"):
+    log.error("AI_EFFORT=%r tanilmadi — low ishlatiladi", AI_EFFORT); AI_EFFORT = "low"
+# OpenAI ham bo'ladi (faqat AI_PROVIDER=openai aniq yozilsa yoki Anthropic kaliti yo'q bo'lsa).
 OPENAI_KEY = os.environ.get("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-5")
 OPENAI_BASE = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/")
@@ -269,7 +275,7 @@ OPENAI_BASE = os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1").rst
 # (minimal|low|medium|high — kerak bo'lsa .env dagi OPENAI_REASONING bilan ko'tariladi).
 OPENAI_REASONING = os.environ.get("OPENAI_REASONING", "minimal").strip().lower()
 AI_MIN_TOKENS, AI_MAX_TOKENS = 800, 8000
-AI_PROVIDER = (os.environ.get("AI_PROVIDER") or ("openai" if OPENAI_KEY else "anthropic" if AI_KEY else "")).lower()
+AI_PROVIDER = (os.environ.get("AI_PROVIDER") or ("anthropic" if AI_KEY else "openai" if OPENAI_KEY else "")).strip().lower()
 if AI_PROVIDER == "openai" and not OPENAI_KEY:
     log.error("AI_PROVIDER=openai, lekin OPENAI_API_KEY bo'sh — AI o'chirilgan"); AI_PROVIDER = ""
 if AI_PROVIDER == "anthropic" and not AI_KEY:
@@ -1357,7 +1363,7 @@ def health():
            "whoop": bool(WHOOP_ID and WHOOP_SECRET), "ai": bool(AI_PROVIDER), "aiProvider": AI_PROVIDER or None,
            # qaysi model va qanday fikrlash darajasi ishlayotgani — .env ni ochmasdan tekshirish uchun
            "aiModel": (OPENAI_MODEL if AI_PROVIDER == "openai" else AI_MODEL) if AI_PROVIDER else None,
-           "aiReasoning": OPENAI_REASONING if AI_PROVIDER == "openai" else None,
+           "aiReasoning": OPENAI_REASONING if AI_PROVIDER == "openai" else AI_EFFORT if AI_PROVIDER == "anthropic" else None,
            "telegram": bool(BOT_TOKEN), "users": len(USERS), "push": True}
     _, err = current_user()
     if not err or client_ip() == "127.0.0.1":
@@ -2434,7 +2440,7 @@ def ai_quota_ok(uid: str) -> bool:
 # serverdagi umumiy kalit (.env) ishlaydi, ya'ni ilgarigidek.
 AI_KINDS = {
     #  id           sim          manzil                                                     sukut modeli
-    "anthropic":  ("anthropic", "https://api.anthropic.com",                                "claude-opus-5"),
+    "anthropic":  ("anthropic", "https://api.anthropic.com",                                "claude-opus-5-5"),
     "openai":     ("openai",    "https://api.openai.com/v1",                                "gpt-5"),
     "gemini":     ("openai",    "https://generativelanguage.googleapis.com/v1beta/openai",  "gemini-2.5-flash"),
     "openrouter": ("openai",    "https://openrouter.ai/api/v1",                             "openai/gpt-5"),
@@ -2658,21 +2664,49 @@ def _anthropic_fail(e):
     return ("ai_failed", 500)
 
 
-def ai_anthropic(cfg: dict, system: str, msgs: list, max_tokens: int, timeout: float = None):
+# Fikrlash chuqurligi (effort) faqat Claude 4.6+ va 5-avlodda bor; eskirog'iga (odam o'z kalitida
+# tanlagan bo'lishi mumkin) yuborilsa 400 qaytadi — shuning uchun faqat shularga qo'shiladi.
+_AI_EFFORT_RE = re.compile(r"^claude-(?:(?:opus|sonnet|haiku|fable|mythos)-5(?:-\d+)?|(?:opus|sonnet)-4-[6-9])$")
+# Rad etilsa (stop_reason=refusal) Anthropic shu so'rovni o'zi boshqa modelda qayta bajaradi — server
+# tomonidagi zaxira. Parametrni faqat shu modellar qabul qiladi; "default" — model ro'yxatini biz yuritmaymiz.
+_AI_FALLBACK_MODELS = ("claude-opus-5-5", "claude-opus-5", "claude-sonnet-5-5", "claude-fable-5-2", "claude-fable-5-1")
+_AI_FALLBACK_BETA = "server-side-fallback-2026-07-01"
+
+
+def _anthropic_kw(cfg: dict, system: str, msgs: list, max_tokens: int) -> dict:
+    """messages.create / messages.stream argumentlari. `betas` bo'lsa — beta yo'lidan yuboriladi."""
     kw = {"model": cfg["model"], "max_tokens": max_tokens, "messages": msgs}
     if system:
         kw["system"] = system
+    if _AI_EFFORT_RE.match(cfg["model"] or ""):
+        kw["output_config"] = {"effort": AI_EFFORT}
+    if cfg["model"] in _AI_FALLBACK_MODELS:
+        kw["betas"] = [_AI_FALLBACK_BETA]
+        kw["fallbacks"] = "default"
+    return kw
+
+
+def _anthropic_messages(client, kw: dict):
+    return client.beta.messages if "betas" in kw else client.messages
+
+
+def ai_anthropic(cfg: dict, system: str, msgs: list, max_tokens: int, timeout: float = None):
+    kw = _anthropic_kw(cfg, system, msgs, max_tokens)
     try:
         c = ai_client(cfg)
         if timeout is not None:
             c = c.with_options(timeout=float(timeout))
-        resp = c.messages.create(**kw)
+        resp = _anthropic_messages(c, kw).create(**kw)
     except ImportError:
         return None, ("pip install anthropic", 501)
     except Exception as e:  # noqa: BLE001
         return None, _anthropic_fail(e)
-    text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
-    return {"text": text.strip(), "model": resp.model, "stop": resp.stop_reason,
+    text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text").strip()
+    if resp.stop_reason == "refusal" and not text:
+        # zaxira model ham rad etdi (yoki zaxirasiz model) — bo'sh javob o'rniga tushunarli xato
+        log.warning("AI (anthropic) rad etdi: %s", getattr(getattr(resp, "stop_details", None), "category", None))
+        return None, ("ai_refused", 422)
+    return {"text": text, "model": resp.model, "stop": resp.stop_reason,
             "usage": {"in": resp.usage.input_tokens, "out": resp.usage.output_tokens}}, None
 
 
@@ -2816,19 +2850,19 @@ def _openai_pump(src):
 
 def _anthropic_pump(mgr, s):
     """Anthropic SDK oqimi → xuddi shu shakldagi generator."""
-    model, usage = None, {}
+    model, usage, stop = None, {}, None
     try:
         for d in s.text_stream:
             if d:
                 yield d
         fin = s.get_final_message()
-        model, usage = fin.model, {"in": fin.usage.input_tokens, "out": fin.usage.output_tokens}
+        model, usage, stop = fin.model, {"in": fin.usage.input_tokens, "out": fin.usage.output_tokens}, fin.stop_reason
     finally:
         try:
             mgr.__exit__(None, None, None)
         except Exception:  # noqa: BLE001
             pass
-    yield {"model": model, "usage": usage}
+    yield {"model": model, "usage": usage, "stop": stop}
 
 
 @app.post("/api/ai/stream")
@@ -2850,11 +2884,9 @@ def ai_stream():
         return jsonify({"error": bad[0]}), bad[1]
     system, clean, budget, kind = prep
     if cfg["proto"] == "anthropic":
-        kw = {"model": cfg["model"], "max_tokens": budget, "messages": clean}
-        if system:
-            kw["system"] = system
+        kw = _anthropic_kw(cfg, system, clean, budget)
         try:
-            mgr = ai_client(cfg).messages.stream(**kw)
+            mgr = _anthropic_messages(ai_client(cfg), kw).stream(**kw)
             s = mgr.__enter__()   # ulanish shu yerda ochiladi — xato hali oddiy JSON bo'lib qaytadi
         except ImportError:
             return jsonify({"error": "stream_unsupported"}), 501
@@ -2883,6 +2915,8 @@ def ai_stream():
         except Exception as e:  # noqa: BLE001
             log.warning("AI oqim uzildi (%s): %s", cfg["kind"], e)
             yield sse({"error": "ai_stream"})
+        if meta.get("stop") == "refusal" and not sent:
+            yield sse({"error": "ai_refused"})
         model, usage = meta.get("model"), meta.get("usage") or {}
         _archive(db.record_ai_call, uid, kind, model, usage.get("in"), usage.get("out"), what="arxiv ai")
         yield sse({"done": True, "model": model, "usage": usage, "len": sent})
