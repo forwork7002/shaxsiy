@@ -67,6 +67,9 @@ def handler(request):
     kind, payload = QUEUE.pop(0) if QUEUE else ("json", msg([{"type": "text", "text": "Salom"}]))
     if kind == "sse":
         return httpx2.Response(200, headers={"content-type": "text/event-stream"}, content=payload)
+    if kind == "err":   # (status, xabar) — Anthropic xato shakli
+        etype = {400: "invalid_request_error", 429: "rate_limit_error"}.get(payload[0], "api_error")
+        return httpx2.Response(payload[0], json={"type": "error", "error": {"type": etype, "message": payload[1]}})
     return httpx2.Response(200, json=payload)
 
 
@@ -177,6 +180,29 @@ r = last()
 parts = r["body"]["messages"][0]["content"]
 ok("ovqat: matn qismi, effort, fallbacks, 4000 token", isinstance(parts, list) and parts[-1]["type"] == "text" and "osh" in parts[-1]["text"]
    and r["body"].get("output_config") == {"effort": "low"} and r["body"].get("fallbacks") == "default" and r["body"]["max_tokens"] == 4000, r["body"])
+
+print("— hisobda mablag' tugashi (23.11 hodisasi: foydalanuvchi 12 soat «juda ko'p so'rov» ni ko'rdi)")
+CREDIT = "Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."
+QUEUE.append(("err", (400, CREDIT)))
+res = c.post("/api/food/analyze", json={"text": "bir kosa osh", "lang": "uz"})
+ok("ovqat: kredit tugagan → 402 ai_no_credit", res.status_code == 402 and (res.get_json() or {}).get("error") == "ai_no_credit", (res.status_code, res.get_json()))
+QUEUE.append(("err", (400, "You have reached your specified API usage limits. You will regain access on 2026-12-01 at 00:00 UTC.")))
+res = c.post("/api/ai", json={"messages": [{"role": "user", "content": "x"}]})
+ok("chat: oylik xarajat chegarasi → 402 ai_no_credit", res.status_code == 402 and res.get_json().get("error") == "ai_no_credit", (res.status_code, res.get_json()))
+QUEUE.append(("err", (400, CREDIT)))
+res = c.post("/api/ai/stream", json={"messages": [{"role": "user", "content": "x"}]})
+ok("oqim: kredit tugagan → 402 JSON (SSE emas)", res.status_code == 402 and res.get_json().get("error") == "ai_no_credit", (res.status_code, res.get_data(as_text=True)[:200]))
+QUEUE.append(("err", (429, "Number of request tokens has exceeded your per-minute rate limit")))
+res = c.post("/api/ai", json={"messages": [{"role": "user", "content": "x"}]})
+ok("haqiqiy tezlik chegarasi → 429 rate_limited", res.status_code == 429 and res.get_json().get("error") == "rate_limited", (res.status_code, res.get_json()))
+QUEUE.append(("err", (400, "model: claude-x not found")))
+res = c.post("/api/ai", json={"messages": [{"role": "user", "content": "x"}]})
+ok("boshqa 400 → api_400 (kredit deb aytilmaydi)", res.status_code == 502 and res.get_json().get("error", "").startswith("api_400"), (res.status_code, res.get_json()))
+ok("OpenAI 429 «no credits remaining» → ai_no_credit",
+   api._ai_fail(429, "You have no credits remaining. Add credits to continue using the API at https://platform.openai.com/settings/organization/billing/.") == ("ai_no_credit", 402))
+ok("OpenAI 429 insufficient_quota → ai_no_credit", api._ai_fail(429, "You exceeded your current quota, please check your plan and billing details.") == ("ai_no_credit", 402))
+ok("OpenAI oddiy tezlik chegarasi (billing havolasi bilan) → rate_limited",
+   api._ai_fail(429, "Rate limit reached for gpt-5 on tokens per min. Add a payment method at https://platform.openai.com/account/billing to increase your rate limit.") == ("rate_limited", 429))
 
 print("— /api/health")
 h = c.get("/api/health").get_json()

@@ -41,6 +41,7 @@
       'food.notConfigured': "AI ulanmagan. Sozlamalar › AI bo'limida o'z AI'ingizni ulang yoki taomni qo'lda kiriting.",
       'food.badKey': "AI kalitingiz qabul qilinmadi — Sozlamalar › AI bo'limida tekshiring.",
       'food.rate': "Juda ko'p so'rov — birozdan keyin qayta urinib ko'ring.",
+      'food.credit': "AI hisobidagi mablag' tugagan — administrator to'ldirmaguncha tahlil ishlamaydi. Hozircha taomni qo'lda kiriting.",
       'food.toSettings': 'Sozlamalar', 'food.failed': 'AI tahlil qila olmadi — taomni qo\'lda kiriting yoki qayta urinib ko\'ring.',
       'food.badImage': "Rasm o'qilmadi — boshqa rasm tanlang.", 'food.manual': "Qo'lda kiritish", 'food.retry': 'Qayta urinish',
       'food.offline': "Server yo'q — taomni qo'lda kiriting.",
@@ -93,6 +94,7 @@
       'food.notConfigured': 'AI уланмаган. Созламалар › AI бўлимида ўз AI’ингизни уланг ёки таомни қўлда киритинг.',
       'food.badKey': 'AI калитингиз қабул қилинмади — Созламалар › AI бўлимида текширинг.',
       'food.rate': 'Жуда кўп сўров — бироздан кейин қайта уриниб кўринг.',
+      'food.credit': 'AI ҳисобидаги маблағ тугаган — администратор тўлдирмагунча таҳлил ишламайди. Ҳозирча таомни қўлда киритинг.',
       'food.toSettings': 'Созламалар', 'food.failed': 'AI таҳлил қила олмади — таомни қўлда киритинг ёки қайта уриниб кўринг.',
       'food.badImage': 'Расм ўқилмади — бошқа расм танланг.', 'food.manual': 'Қўлда киритиш', 'food.retry': 'Қайта уриниш',
       'food.offline': 'Сервер йўқ — таомни қўлда киритинг.',
@@ -145,6 +147,7 @@
       'food.notConfigured': 'AI не подключён. Подключите свой AI в Настройки › AI или введите блюдо вручную.',
       'food.badKey': 'Ваш ключ AI не принят — проверьте его в Настройки › AI.',
       'food.rate': 'Слишком много запросов — попробуйте чуть позже.',
+      'food.credit': 'На счёте AI закончились средства — анализ не работает, пока администратор не пополнит счёт. Пока введите блюдо вручную.',
       'food.toSettings': 'Настройки', 'food.failed': 'AI не смог разобрать — введите блюдо вручную или попробуйте снова.',
       'food.badImage': 'Не удалось прочитать фото — выберите другое.', 'food.manual': 'Ввести вручную', 'food.retry': 'Повторить',
       'food.offline': 'Нет сервера — введите блюдо вручную.',
@@ -635,10 +638,11 @@
     const m = String((e && e.message) || e);
     return /ai_not_configured|501/.test(m) ? 'ai_not_configured'
       : /bad_image/.test(m) ? 'bad_image'
+      : /ai_no_credit|HTTP 402/.test(m) ? 'credit'
       : /api_40[13]|authenticat|api key/i.test(m) ? 'bad_key'
       : /rate_limited|429/.test(m) ? 'rate' : 'ai_failed';
   }
-  const ERR_MSG = { ai_not_configured: 'food.notConfigured', bad_image: 'food.badImage', too_big: 'food.tooBig', offline: 'food.offline', bad_key: 'food.badKey', rate: 'food.rate' };
+  const ERR_MSG = { ai_not_configured: 'food.notConfigured', bad_image: 'food.badImage', too_big: 'food.tooBig', offline: 'food.offline', bad_key: 'food.badKey', rate: 'food.rate', credit: 'food.credit' };
   const errText = (kind) => t(ERR_MSG[kind] || 'food.failed');
 
   function shapeResult(r, p) {
@@ -684,7 +688,7 @@
       busy = false;
       D.rerender();
       // tahlil bo'lmadi → matn bilan to'ldirilgan qo'lda kiritish oynasi
-      if (errorKind === 'ai_failed') openEdit(key(), null, { name: pending.text, note: pending.note, desc: pending.text, src: 'manual' });
+      if (errorKind === 'ai_failed' || errorKind === 'credit') openEdit(key(), null, { name: pending.text, note: pending.note, desc: pending.text, src: 'manual' });
     }
   }
 

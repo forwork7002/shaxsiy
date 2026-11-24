@@ -2613,7 +2613,23 @@ def _oa_errmsg(e) -> str:
     return str(msg).strip()
 
 
-def _ai_fail(code: int, msg: str):
+# Hisobda mablag' tugagan / xarajat chegarasi: OpenAI buni 429 bilan beradi («no credits remaining»,
+# insufficient_quota), Anthropic — 400 bilan («credit balance is too low», «API usage limits»).
+# 23.11 da OpenAI krediti tugaganda foydalanuvchi 12 soat «juda ko'p so'rov — keyinroq urining» ni ko'rdi;
+# endi bu alohida xato: ai_no_credit (402) va logda ERROR — kutish bilan tuzalmaydi, hisobni to'ldirish kerak.
+# Bo'sh «billing» so'zi yo'q: OpenAI'ning oddiy tezlik chegarasi xabarida ham «…/account/billing» havolasi bo'ladi.
+_AI_BILLING_RE = re.compile(r"credit balance|no credits|insufficient[_ ]quota|exceeded your current quota|"
+                            r"usage limits?|spend(?:ing)? limit|purchase credits", re.I)
+
+
+def _ai_no_credit(where: str, code, msg: str):
+    log.error("AI (%s) hisobida mablag' yo'q yoki chegaraga yetdi (%s): %s", where, code, msg[:200])
+    return ("ai_no_credit", 402)
+
+
+def _ai_fail(code: int, msg: str, where: str = "openai"):
+    if code in (400, 402, 403, 429) and _AI_BILLING_RE.search(msg or ""):
+        return _ai_no_credit(where, code, msg)
     if code == 429:
         return ("rate_limited", 429)
     return (f"api_{code}: {msg[:160]}", 502)
@@ -2654,10 +2670,16 @@ def ai_openai(cfg: dict, system: str, msgs: list, max_tokens: int, timeout: floa
 
 def _anthropic_fail(e):
     import anthropic
-    if isinstance(e, anthropic.RateLimitError):
-        return ("rate_limited", 429)
     if isinstance(e, anthropic.APIStatusError):
-        return (f"api_{e.status_code}: {str(getattr(e, 'message', '') or '')[:160]}", 502)
+        msg = str(getattr(e, "message", "") or "")
+        if e.status_code in (400, 402, 403) and _AI_BILLING_RE.search(msg):
+            return _ai_no_credit("anthropic", e.status_code, msg)
+        if isinstance(e, anthropic.RateLimitError):
+            log.warning("AI (anthropic) 429: %s", msg[:200])
+            return ("rate_limited", 429)
+        # ilgari bu xatolar logga tushmasdi — kalit/model/so'rov muammosi jim qolardi
+        log.warning("AI (anthropic) %s: %s", e.status_code, msg[:200])
+        return (f"api_{e.status_code}: {msg[:160]}", 502)
     if isinstance(e, anthropic.APIConnectionError):   # APITimeoutError ham shu
         return ("ai_connection", 502)
     log.exception("AI (anthropic) xato")

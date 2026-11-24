@@ -24,6 +24,7 @@
       'ai.hint.strain': 'Bugungi yukni tiklanish va me‘yorga qarab baholaydi — mashq qilish yoki dam olishni aytadi.',
       'ai.hint.food': 'Bugungi taomlarni me‘yor, WHOOP sarfi va tiklanishga solishtiradi — bitta aniq o‘zgarish beradi.',
       'ai.none': "AI ulanmagan — AI murabbiy bo'limida kalit kiriting yoki serverni yoqing.",
+      'ai.credit': "AI hisobidagi mablag' tugagan — administrator to'ldirmaguncha javob bo'lmaydi.",
       'ai.setup': 'Ulash', 'ai.timeout': 'Javob kelmadi — tarmoqni tekshirib, qayta urinib ko\'ring.', 'ai.err': 'Xato: {m}', 'ai.retry': 'Qayta urinish',
       'ai.autoOff': 'Ma\'lumot yetarli emas — kamida bir necha kunlik yozuv kerak.',
       'ai.langName': "o'zbek (lotin)",
@@ -41,6 +42,7 @@
       'ai.hint.strain': 'Бугунги юкни тикланиш ва меъёрга қараб баҳолайди — машқ қилиш ёки дам олишни айтади.',
       'ai.hint.food': 'Бугунги таомларни меъёр, WHOOP сарфи ва тикланишга солиштиради — битта аниқ ўзгариш беради.',
       'ai.none': 'AI уланмаган — AI мураббий бўлимида калит киритинг ёки серверни ёқинг.',
+      'ai.credit': 'AI ҳисобидаги маблағ тугаган — администратор тўлдирмагунча жавоб бўлмайди.',
       'ai.setup': 'Улаш', 'ai.timeout': 'Жавоб келмади — тармоқни текшириб, қайта уриниб кўринг.', 'ai.err': 'Хато: {m}', 'ai.retry': 'Қайта уриниш',
       'ai.autoOff': 'Маълумот етарли эмас — камида бир неча кунлик ёзув керак.',
       'ai.langName': 'ўзбек (кирилл)',
@@ -58,6 +60,7 @@
       'ai.hint.strain': 'Оценивает сегодняшнюю нагрузку относительно восстановления и нормы — тренироваться или отдыхать.',
       'ai.hint.food': 'Сравнивает сегодняшнюю еду с нормой, расходом WHOOP и восстановлением — даёт одно конкретное изменение.',
       'ai.none': 'AI не подключён — введите ключ в разделе «AI-наставник» или включите сервер.',
+      'ai.credit': 'На счёте AI закончились средства — ответов не будет, пока администратор не пополнит счёт.',
       'ai.setup': 'Подключить', 'ai.timeout': 'Ответ не пришёл — проверьте сеть и попробуйте снова.', 'ai.err': 'Ошибка: {m}', 'ai.retry': 'Повторить',
       'ai.autoOff': 'Мало данных — нужно хотя бы несколько дней записей.',
       'ai.langName': 'русский',
@@ -128,6 +131,8 @@
   // D.fetchTimed abortni 'timeout' xatosiga aylantiradi — uni ham shu yerda taniymiz,
   // aks holda foydalanuvchi tushunarli gap o'rniga quruq "Xato: timeout" ni ko'radi.
   const isAbort = (e) => !!e && (e.name === 'AbortError' || /aborted|abort|^timeout$/i.test(String(e.message || '')));
+  // «ai_no_credit» kodi foydalanuvchiga tushunarli gap bo'lib chiqsin («Xato: ai_no_credit» emas)
+  const credit = (e) => (/ai_no_credit|HTTP 402/.test(String((e && e.message) || e)) ? new Error(t('ai.credit')) : e);
   D.ai.mode = () => (D.serverEnabled() ? 'server' : hasKey() ? 'key' : 'none');
   D.ai.available = () => D.ai.mode() !== 'none';
 
@@ -169,7 +174,7 @@
         else {
           const m = String((e && e.message) || e);
           const recoverable = /ai_not_configured|501|404|Failed to fetch|NetworkError|offline/i.test(m);
-          if (!(recoverable && hasKey())) throw e;
+          if (!(recoverable && hasKey())) throw credit(e);
         }
       } finally { d.clear(); }
     }
@@ -220,7 +225,7 @@
       if (r.status === 501 || r.status === 404 || r.status === 405) { noStream = true; return plain(); }
       let msg = 'HTTP ' + r.status;
       try { const j = await r.json(); if (j && j.error) msg = j.error; } catch (e) {}
-      const err = new Error(msg); err.status = r.status; throw err;
+      const err = credit(new Error(msg)); err.status = r.status; throw err;
     }
     const reader = r.body.getReader();
     const dec = new TextDecoder();
@@ -251,7 +256,7 @@
     }
     full = full.trim();
     if (full) return full;
-    if (failed) throw new Error(failed);
+    if (failed) throw credit(new Error(failed));
     return plain();
   };
 
