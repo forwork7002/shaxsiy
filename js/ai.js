@@ -139,7 +139,8 @@
         method: 'POST',
         signal: d.signal,
         headers: { 'x-api-key': D.device.yusaKey, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true', 'content-type': 'application/json' },
-        body: JSON.stringify({ model: 'claude-opus-5', max_tokens: maxTokens || 1600, system, messages }),
+        // effort 'low': Opus 5.5 doim fikrlaydi, sukuti 'medium' — qisqa javob uchun byudjetni yeydi
+        body: JSON.stringify({ model: 'claude-opus-5-5', max_tokens: maxTokens || 1600, output_config: { effort: 'low' }, system, messages }),
       });
     } catch (e) {
       throw isAbort(e) ? new Error(t('ai.timeout')) : e;
